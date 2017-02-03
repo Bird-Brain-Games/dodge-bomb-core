@@ -489,14 +489,14 @@ std::vector<glm::vec4> ANILoader::getWeights() { return weightsOrder; }//the wei
 std::vector<glm::vec4> ANILoader::getJoints() { return jointsOrder; }//the joint for each vertex
 
 
-Holder::Holder(Node* child, ANILoader* data)
+Holder::Holder(Node* child, std::shared_ptr<ANILoader> data)
 {
 	m_pChild = child;
 
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-
+	bones = 0;
 	child->createBase(multipliedMatricies, matricies, bones);
 
 
@@ -550,7 +550,7 @@ Holder::Holder(Node* child, ANILoader* data)
 	glBindVertexArray(0);
 }
 
-void Holder::draw(Shader* s)
+void Holder::draw(std::shared_ptr<Shader> s)
 {
 	s->uniformMat4x4("BoneMatrixArray", &matricies[0], bones);
 	s->uniformInt("boneCount", bones);

@@ -5,30 +5,33 @@
 
 #include "RigidBody.h"
 
-GameObject::GameObject(LoadObject* _model, RigidBody* _body)
+GameObject::GameObject(std::shared_ptr<LoadObject> _model, RigidBody* _body, std::shared_ptr<Material> _material)
 	: tag("Undefined")
 {
 	model = _model;
 	body = _body;
 	tex = nullptr;
 	hierarchy = nullptr;
+	material = _material;
 }
 
-GameObject::GameObject(LoadObject* _model, RigidBody* _body, Texture* _tex, std::string _tag)
+GameObject::GameObject(std::shared_ptr<LoadObject> _model, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material, std::string _tag)
 	: tag(_tag)
 {
 	hierarchy = nullptr;
 	model = _model;
 	body = _body;
 	tex = _tex;
+	material = _material;
 }
 
-GameObject::GameObject(Holder* _hierarchy, RigidBody* _body, Texture* _tex)
+GameObject::GameObject(std::shared_ptr<Holder> _hierarchy, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material)
 {
 	model = nullptr;
 	hierarchy = _hierarchy;
 	body = _body;
 	tex = _tex;
+	material = _material;
 }
 
 GameObject::~GameObject()
@@ -43,24 +46,31 @@ GameObject::~GameObject()
 	body = nullptr;
 }
 
-void GameObject::draw(Shader* s)
+void GameObject::draw(Camera camera)
 {
+	glBindTexture(GL_TEXTURE_2D, 0);
+	material->shader->bind();
+
+	material->shader->uniformMat4x4("mvm", &camera.getView());
+	material->shader->uniformMat4x4("prm", &camera.getProj());
+
 	// Bind texture here if has one
 	if (tex != nullptr)
 	{
-		tex->bind(s);
+		tex->bind(material->shader);
 	}
 
 	// Compute local transformation
-	s->uniformMat4x4("localTransform", &body->getWorldTransform());
+	material->shader->uniformMat4x4("localTransform", &body->getWorldTransform());
 	if (model == nullptr && hierarchy != nullptr)
 	{
-		hierarchy->draw(s);
+		hierarchy->draw(material->shader);
 	}
 	else if (model != nullptr && hierarchy == nullptr)
 	{
 		model->draw();
 	}
+	material->shader->unbind();
 }
 
 void GameObject::update(float dt)

@@ -58,7 +58,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;DevIL.lib;ILU.lib;ILUT.lib</AdditionalDependencies>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;DevIL.lib;ILU.lib;ILUT.lib;fmod_vc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,32 +76,40 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;DevIL.lib;ILU.lib;ILUT.lib</AdditionalDependencies>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;DevIL.lib;ILU.lib;ILUT.lib;fmod_vc.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ANILoader.cpp" />
     <ClCompile Include="src\BulletDebugger.cpp" />
+    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\loadObject.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\material.cpp" />
     <ClCompile Include="src\node.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\sound engine.cpp" />
+    <ClCompile Include="src\VAO.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ANILoader.h" />
     <ClInclude Include="src\BulletDebug.h" />
+    <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\GameObject.h" />
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\JointTypes.h" />
     <ClInclude Include="src\KeyframeController.h" />
     <ClInclude Include="src\loadObject.h" />
+    <ClInclude Include="src\material.h" />
     <ClInclude Include="src\node.h" />
     <ClInclude Include="src\RigidBody.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\sound engine.h" />
+    <ClInclude Include="src\VAO.h" />
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>

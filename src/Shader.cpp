@@ -8,6 +8,15 @@ Shader::Shader(const char *vsFile, const char *fsFile) {
 	init(vsFile, fsFile);
 }
 
+Shader::Shader()
+{
+
+}
+
+void Shader::load(const char *vsFile, const char *fsFile) {
+	init(vsFile, fsFile);
+}
+
 Shader::~Shader(void) {
 	glDetachShader(programID, vertShader);
 	glDetachShader(programID, fragShader);
@@ -113,22 +122,33 @@ static char* readTextFromFile(const char *fileName) {
 	return text;
 }
 
-void Shader::uniformVector(const std::string& varName, float *data) {
+void Shader::uniformVec3(const std::string& varName, float *data) {
 	GLint loc = getUnifrom(varName);
 	glUniform3fv(loc, 1, data);
 }
 
-void Shader::uniformVector(const std::string& varName, float x, float y, float z) {
+void Shader::uniformVec3(const std::string& varName, float x, float y, float z) {
 	float temp[3] = { x, y, z };
 	GLint loc = getUnifrom(varName);
 	glUniform3fv(loc, 1, temp);
 }
 
-void Shader::uniformVector(const std::string& varName, glm::vec3* v) {
+void Shader::uniformVec3(const std::string& varName, glm::vec3* v) {
 	float temp[3] = { v->x, v->y, v->z };
 	GLint loc = getUnifrom(varName);
 	glUniform3fv(loc, 1, temp);
 }
+
+void Shader::uniformVec3(const std::string& varName, glm::vec4& vec) {
+	GLint loc = getUnifrom(varName);
+	glUniform3fv(loc, 1, &vec[0]);
+}
+
+void Shader::uniformVec4(const std::string& varName, glm::vec4& vec) {
+	GLint loc = getUnifrom(varName);
+	glUniform3fv(loc, 1, &vec[0]);
+}
+
 
 void Shader::uniformFloat(const std::string& varName, float data) {
 	GLint loc = getUnifrom(varName);
