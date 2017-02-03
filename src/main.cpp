@@ -397,9 +397,9 @@ int main(int argc, char **argv)
 	shaderInit();
 
 	// Load Textures
-	Texture* ballTex = new Texture("img//Blake.png", "img//Blake.png", 10.0f);
-	Texture* groundTex = new Texture("img//Blake.png", "img//Blake.png", 10.0f);
-	Texture* robot = new Texture("img//bombot.png", "img//bombot.png", 10.0f);
+	Texture* ballTex = new Texture("assets//img//Blake.png", "assets//img//Blake.png", 10.0f);
+	Texture* groundTex = new Texture("assets//img//Blake.png", "assets//img//Blake.png", 10.0f);
+	Texture* robot = new Texture("assets//img//bombot.png", "assets//img//bombot.png", 10.0f);
 
 	textures.push_back(ballTex);
 	textures.push_back(groundTex);
