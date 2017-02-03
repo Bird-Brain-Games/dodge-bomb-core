@@ -203,7 +203,6 @@ void Node::getMatrixStack(std::vector<glm::mat4> &temp, std::vector<glm::mat4> &
 {
 	if (jointAnimation != NULL)
 	{
-		this;
 		temp[count] = m_pLocalToWorldMatrix * origin[count];
 		count++;
 	}

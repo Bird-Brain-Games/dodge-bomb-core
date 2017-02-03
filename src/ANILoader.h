@@ -1,5 +1,5 @@
 #pragma once
-
+#include <memory>
 #include <string>
 #include "Node.h"
 #include "JointTypes.h"
@@ -111,7 +111,7 @@ protected:
 
 
 public:
-	Holder(Node* child, ANILoader* data);
-	void draw(Shader* s);
+	Holder(Node* child, std::shared_ptr<ANILoader> data);
+	void draw(std::shared_ptr<Shader> s);
 	void update(float);
 };

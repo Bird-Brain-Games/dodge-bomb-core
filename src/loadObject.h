@@ -4,23 +4,12 @@
 // - Only the most basic functionality
 
 #pragma once
-
+#include <memory>
 #include <GL\glew.h>
 #include <GLM\glm.hpp>
 #include <vector>
-
+#include "VAO.h"
 class Shader;
-
-struct Face
-{
-	Face() {}
-
-	// these are arrays of size 3 to represent 3 points of a triangle
-	// these values represent the indices of the points
-	unsigned int normals[3], 
-		vertices[3], 
-		textures[3];
-};
 
 // we're loading a Wavefront OBJ
 class LoadObject
@@ -28,22 +17,14 @@ class LoadObject
 public:
 	bool loadFromObject(char const* filename);
 	void draw();
-	~LoadObject();
 private:
-	
-	GLuint vao;
+	void createVAO();
 
-	GLuint vertbo;
-	GLuint normbo;
-	GLuint texbo;
-	GLuint colorbo;
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> normals;
+	std::vector<glm::vec2> texcoords; //note: vec2
 
-	float *verts;
-	float *norms;
-	float *texs;
-	float *colors;
-
-	unsigned int numtris; // count number of vertices for data creation
+	VAO vao;
 };
 
 // holds the information necessary to display a texture 
@@ -55,7 +36,7 @@ public:
 	Texture(GLuint _diffuseTex, GLuint _specularTex, float _shininess);
 
 	// sends the values to the shader
-	void bind(Shader* s);
+	void bind(std::shared_ptr<Shader> s);
 	void setShininess(float);
 
 private:

@@ -10,7 +10,7 @@
 // -- texture
 // -- collision bounds (radius, xMins and xMaxs for cube)
 #pragma once
-
+#include <memory>
 #include <string>
 #include <GLM\glm.hpp>
 #include "loadObject.h"
@@ -18,18 +18,20 @@
 #include <iostream>
 #include <btBulletDynamicsCommon.h>
 #include "ANILoader.h"
+#include "camera.h"
+#include "material.h"
 class RigidBody;
 
 
 class GameObject
 {
 public:
-	GameObject(LoadObject* _model, RigidBody* _body);
-	GameObject(LoadObject* _model, RigidBody* _body, Texture* _tex, std::string _tag = "Undefined");
-	GameObject(Holder* _hierarchy, RigidBody* _body, Texture* _tex);
+	GameObject(std::shared_ptr<LoadObject> _model, RigidBody* _body, std::shared_ptr<Material> _material);
+	GameObject(std::shared_ptr<LoadObject> _model, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material, std::string _tag = "Undefined");
+	GameObject(std::shared_ptr<Holder> _hierarchy, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material);
 	~GameObject();
 
-	virtual void draw(Shader *s);
+	virtual void draw(Camera);
 	virtual void update(float deltaT);
 
 	void setTransform(glm::vec3 pos, glm::vec4 orientation);
@@ -43,14 +45,16 @@ private:
 	glm::mat4x4 worldTransform;
 
 	// loaded obj file
-	LoadObject* model;
+	std::shared_ptr<LoadObject> model;
 	//holds the VBO and hierarchy data.
-	Holder* hierarchy;
+	std::shared_ptr<Holder> hierarchy;
+
+	std::shared_ptr<Material> material;
 
 	// Texture
 	Texture* tex;
 
-	// Identifier Tag
+	// Identifier Tag???
 	std::string const tag;
 
 	// Unique name
