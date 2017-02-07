@@ -6,12 +6,12 @@
 class Shader
 {
 public:
-	Shader(const char *, const char *);
+	Shader(const char *, const char *, const char * = NULL);
 	Shader();
 	~Shader(void);
-	void load(const char *, const char *);
+	void load(const char *, const char *, const char * = NULL);
 
-	void init(const char *, const char *);
+	void init(const char *, const char *, const char * = NULL);
 	
 	void bind();		// use the shader vert and frag
 	void unbind();		// stop using shader vert and frag
@@ -40,6 +40,7 @@ public:
 	//vert and fag shaders
 	unsigned int vertShader;
 	unsigned int fragShader;
+	unsigned int geomShader;
 
 
 };

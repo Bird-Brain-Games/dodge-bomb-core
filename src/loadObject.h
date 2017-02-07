@@ -31,6 +31,7 @@ public:
 
 	// sends the values to the shader
 	void bind(std::shared_ptr<Shader> s);
+	void bind(Shader* s);
 	void setShininess(float);
 
 private:
