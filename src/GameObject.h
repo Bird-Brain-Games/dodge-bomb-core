@@ -20,6 +20,7 @@
 #include "ANILoader.h"
 #include "camera.h"
 #include "material.h"
+#include "controller.h"
 class RigidBody;
 
 
@@ -36,7 +37,10 @@ public:
 
 	RigidBody* getRigidBody() { return body; };
 
+
 private:
+	//the Controllers 
+	//Controller con;
 	// Physics rigid body with Bullet
 	RigidBody* body;
 

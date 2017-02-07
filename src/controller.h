@@ -12,13 +12,13 @@ struct Coords
 	float x, y;
 };
 
-class controller
+class Controller
 {
 public:
-	~controller();
-	controller(int controllerIndex);//the constructor. controllerIndex is the controller number.
+	~Controller();
+	Controller(int ControllerIndex);//the constructor. ControllerIndex is the Controller number.
 
-	bool connected();//checks whether the controller is plugged in or not.
+	bool connected();//checks whether the Controller is plugged in or not.
 
 	Coords getLeftStick();//gets the right stick. returns a coord variable (a structure with two floats in it. x and y)
 	Coords getRightStick();//gets the left stick. returns a coord variable (a structure with two floats in it. x and y)

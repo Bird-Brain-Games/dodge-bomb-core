@@ -5,12 +5,12 @@
 
 //#magic stuff. dont touch.
 
-controller::controller(int controllerIndex)
+Controller::Controller(int ControllerIndex)
 {
-	m_ControllerHandle = controllerIndex;
+	m_ControllerHandle = ControllerIndex;
 }
 
-bool controller::connected()
+bool Controller::connected()
 {
 	ZeroMemory(&m_CurrentState, sizeof(XINPUT_STATE));
 	
@@ -25,7 +25,7 @@ bool controller::connected()
 	}
 }
 
-XINPUT_STATE controller::getState()
+XINPUT_STATE Controller::getState()
 {
 	ZeroMemory(&m_CurrentState, sizeof(XINPUT_STATE));
 
@@ -34,7 +34,7 @@ XINPUT_STATE controller::getState()
 	return m_CurrentState;
 }
 
-Coords controller::getRightStick()
+Coords Controller::getRightStick()
 {
 	ZeroMemory(&m_CurrentState, sizeof(XINPUT_STATE));
 	XInputGetState(m_ControllerHandle, &m_CurrentState);
@@ -58,7 +58,7 @@ Coords controller::getRightStick()
 	return result;
 }
 
-Coords controller::getLeftStick()
+Coords Controller::getLeftStick()
 {
 	ZeroMemory(&m_CurrentState, sizeof(XINPUT_STATE));
 	XInputGetState(m_ControllerHandle, &m_CurrentState);
@@ -79,7 +79,7 @@ Coords controller::getLeftStick()
 
 }
 
-bool controller::conButton(int button)
+bool Controller::conButton(int button)
 {
 	if (getState().Gamepad.wButtons & button)
 	{
@@ -88,19 +88,19 @@ bool controller::conButton(int button)
 	return false;
 }
 
-float controller::conRightTrigger()
+float Controller::conRightTrigger()
 {
 	float state = getState().Gamepad.bRightTrigger;
 	return state / 255;
 }
 
-float controller::conLeftTrigger()
+float Controller::conLeftTrigger()
 {
 	float state = getState().Gamepad.bLeftTrigger;
 	return state / 255;
 }
 
-controller::~controller()
+Controller::~Controller()
 {
 
 }

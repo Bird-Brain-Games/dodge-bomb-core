@@ -24,6 +24,10 @@
 #include "camera.h"
 #include "material.h"
 #include "menu.h"
+#include "sound engine.h"
+#include "controller.h"
+
+Sound theme;
 
 // create game object
 std::vector<GameObject*> objects;
@@ -117,13 +121,13 @@ void initObjects()
 	GameObject* robot = new GameObject(robotModel, rbRobot, textures[2], animation);
 	
 	// set the 
-	robot->setTransform(glm::vec3(0.f, 1.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	robot->setTransform(glm::vec3(0.f, 15.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 
 	objects.push_back(ground);
 	objects.push_back(robot);
 
 	//menu stuff
-	menu = new Menu(textures[1], 1, 1);
+	menu = new Menu(textures[1], 5, 5);
 
 	camera.setAngle(2.5f, 0.01f);
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
@@ -150,7 +154,7 @@ void DisplayCallbackFunction(void)
 	objects[1]->draw(camera);
 
 	objects[0]->draw(camera);
-	menu->draw();
+	//menu->draw();
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
@@ -234,7 +238,11 @@ void TimerCallbackFunction(int value)
 	//// force draw call next tick
 	glutPostRedisplay();
 
+	//camera update
 	camera.update();
+
+	//sound update
+	theme.systemUpdate();
 
 	//// delay timestep to maintain framerate
 	glutTimerFunc(FRAME_DELAY, TimerCallbackFunction, 0);
@@ -347,9 +355,12 @@ void InitErrorFuncCallbackFunction(const char *fmt, va_list ap)
 *  - this is the main function
 *  - does initialization and then calls glutMainLoop() to start the event handler
 */
+
+
 int main(int argc, char **argv)
 {
-
+	theme.load("assets\\media\\theme.wav");
+	theme.play();
 	// Set up FreeGLUT error callbacks
 	glutInitErrorFunc(InitErrorFuncCallbackFunction);
 
