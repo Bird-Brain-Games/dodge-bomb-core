@@ -178,8 +178,6 @@ void DisplayCallbackFunction(void)
 void KeyboardCallbackFunction(unsigned char key, int x, int y)
 {
 	KEYBOARD_INPUT->SetActive(key, true);
-	case 'b':
-		menu->incSpot();
 }
 
 /* function void KeyboardUpCallbackFunction(unsigned char, int,int)
