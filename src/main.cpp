@@ -59,11 +59,11 @@ Menu* menu;
 // separate, cleaner, draw function
 void drawObjects()
 {
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 	for (unsigned int i = 0; i < objects.size(); i++)
 	{
 		objects[i]->draw(camera);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		//glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
 
@@ -105,6 +105,9 @@ void initObjects()
 	RigidBody *rbRobot = new RigidBody();
 	rbRobot->load("assets\\bullet\\bombot.btdata");
 
+	RigidBody *table = new RigidBody();
+	table->load("assets\\bullet\\table.btdata");
+
 	// Load the box model
 	LoadObject* groundModel = world->getModel("assets\\obj\\5x5box.obj");
 
@@ -112,15 +115,20 @@ void initObjects()
 	ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
 	Holder* robotModel = new Holder(ani);
 
+	// Load the table model
+	LoadObject* tableModel = world->getModel("assets\\obj\\desk2.obj");
+
 	// Create the game objects
 	GameObject* ground = new GameObject(groundModel, box, textures[1], defaultMaterial);
 	GameObject* robot = new GameObject(robotModel, rbRobot, textures[2], animation);
+	GameObject* desk = new GameObject(tableModel, table, textures[1], defaultMaterial);
 	
 	// set the 
-	robot->setTransform(glm::vec3(0.f, 1.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 
 	objects.push_back(ground);
 	objects.push_back(robot);
+	objects.push_back(desk);
 
 	//menu stuff
 	menu = new Menu(textures[1]);
@@ -146,10 +154,10 @@ void DisplayCallbackFunction(void)
 
 
 
+	drawObjects();
+	//objects[1]->draw(camera);
 
-	objects[1]->draw(camera);
-
-	objects[0]->draw(camera);
+	//objects[0]->draw(camera);
 	//menu->draw();
 
 	// Draw the debug (if on)
@@ -166,26 +174,6 @@ void DisplayCallbackFunction(void)
 void KeyboardCallbackFunction(unsigned char key, int x, int y)
 {
 	KEYBOARD_INPUT->SetActive(key, true);
-
-	switch (key)
-	{
-	case 27: // the escape key
-		//exit(0);
-		glutLeaveMainLoop();
-		break;
-	case 'k':
-		camera.moveBackward();
-		break;
-	case 'j':
-		camera.moveRight();
-		break;
-	case 'i':
-		camera.moveForward();
-		break;
-	case 'l':
-		camera.moveLeft();
-		break;
-	}
 }
 
 /* function void KeyboardUpCallbackFunction(unsigned char, int,int)
@@ -208,10 +196,36 @@ void KeyboardUpCallbackFunction(unsigned char key, int x, int y)
 void TimerCallbackFunction(int value)
 {
 	//// process inputs
-	if (KEYBOARD_INPUT->CheckPressEvent('i') || KEYBOARD_INPUT->CheckPressEvent('I'))
+	if (KEYBOARD_INPUT->CheckPressEvent(27))
+	{
+		glutLeaveMainLoop();
+	}
+
+	// Use the E key to set the debug draw
+	if (KEYBOARD_INPUT->CheckPressEvent('e') || KEYBOARD_INPUT->CheckPressEvent('E'))
 	{
 		RigidBody::setDebugDraw(true);
 	}
+
+	// Move the camera
+	if (KEYBOARD_INPUT->CheckPressEvent('i') || KEYBOARD_INPUT->CheckPressEvent('I'))
+	{
+		camera.moveForward();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
+	{
+		camera.moveBackward();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
+	{
+		camera.moveRight();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('L'))
+	{
+		camera.moveLeft();
+	}
+
+	// Clear the keyboard input
 	KEYBOARD_INPUT->WipeEventList();
 
 
