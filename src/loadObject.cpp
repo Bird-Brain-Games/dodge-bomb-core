@@ -13,12 +13,12 @@
 
 #include "Shader.h"
 
-void LoadObject::draw()
+void LoadObject::draw(std::shared_ptr<Shader> s)
 {
 	vao.draw();
 }
 
-bool LoadObject::loadFromObject(char const* filename)
+bool LoadObject::load(char const* filename)
 {
 	std::ifstream input(filename);
 	if (!input)
@@ -64,7 +64,6 @@ bool LoadObject::loadFromObject(char const* filename)
 				&vertexIndices[1], &uvIndices[1], &normalIndices[1],
 				&vertexIndices[2], &uvIndices[2], &normalIndices[2]
 			);
-
 			vertices.push_back(temporary_vertices[vertexIndices[0] - 1]);
 			vertices.push_back(temporary_vertices[vertexIndices[1] - 1]);
 			vertices.push_back(temporary_vertices[vertexIndices[2] - 1]);

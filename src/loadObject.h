@@ -7,24 +7,18 @@
 #include <memory>
 #include <GL\glew.h>
 #include <GLM\glm.hpp>
-#include <vector>
-#include "VAO.h"
+#include "loader.h"
 class Shader;
 
 // we're loading a Wavefront OBJ
-class LoadObject
+class LoadObject: public Loader
 {
 public:
-	bool loadFromObject(char const* filename);
-	void draw();
+	bool load(char const* filename);
+	void draw(std::shared_ptr<Shader> s);
+	
 private:
 	void createVAO();
-
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> normals;
-	std::vector<glm::vec2> texcoords; //note: vec2
-
-	VAO vao;
 };
 
 // holds the information necessary to display a texture 

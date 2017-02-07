@@ -489,74 +489,68 @@ std::vector<glm::vec4> ANILoader::getWeights() { return weightsOrder; }//the wei
 std::vector<glm::vec4> ANILoader::getJoints() { return jointsOrder; }//the joint for each vertex
 
 
-Holder::Holder(Node* child, std::shared_ptr<ANILoader> data)
+Holder::Holder(ANILoader* data)
 {
-	m_pChild = child;
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	
+	m_pChild = data->getRootNode();
+
 
 	bones = 0;
-	child->createBase(multipliedMatricies, matricies, bones);
+	m_pChild->createBase(multipliedMatricies, matricies, bones);
 
 
-	data->getVertexs();
-	data->getUV();
-	data->getNormals();
-	data->getWeights();//the weights for each vertex
-	data->getJoints();//the joint for each vertex
 
-	numtris = data->getVertexs().size();
 
-	// verts tho
-	glGenBuffers(1, &vertbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vertbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*numtris, data->getVertexs().data(), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(4); // position/vertices
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	int size = data->getVertexs().size();
+	if (size > 0)
+	{
+		Attribute positionAttrib(attribLoc::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, size, "inPosition", data->getVertexs().data());
+		vao.addAttribute(positionAttrib);
 
-	// textures tho(poopybutt)
-	glGenBuffers(1, &texbo);
-	glBindBuffer(GL_ARRAY_BUFFER, texbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2)*numtris, data->getUV().data(), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(5); // texcoords/uv
-	glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 
-	// normals tho
-	glGenBuffers(1, &normbo);
-	glBindBuffer(GL_ARRAY_BUFFER, normbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*numtris, data->getNormals().data(), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(6); //  normals
-	glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	size = data->getUV().size();
+	if (size > 0)
+	{
 
-	// normals tho
-	glGenBuffers(1, &weightbo);
-	glBindBuffer(GL_ARRAY_BUFFER, weightbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4)*numtris, data->getWeights().data(), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(9); //  colors
-	glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+		Attribute UVAttrib(attribLoc::UV, GL_FLOAT, sizeof(glm::vec2), 2, size, "vertexUV", data->getUV().data());
+		vao.addAttribute(UVAttrib);
+	}
 
-	glGenBuffers(1, &bonebo);
-	glBindBuffer(GL_ARRAY_BUFFER, bonebo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4)*numtris, data->getJoints().data(), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(8); //  colors
-	glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	size = data->getNormals().size();
+	if (size > 0)
+	{
+		Attribute normalAttrib(attribLoc::NORMAL, GL_FLOAT, sizeof(glm::vec3), 3, size, "normal", data->getNormals().data());
+		vao.addAttribute(normalAttrib);
+	}
 
-	glBindVertexArray(0);
+	size = data->getJoints().size();
+	if (size > 0)
+	{
+		Attribute jointAttrib(attribLoc::BONES, GL_FLOAT, sizeof(glm::vec4), 4, size, "bones", data->getJoints().data());
+		vao.addAttribute(jointAttrib);
+	}
+
+	size = data->getWeights().size();
+	if (size > 0)
+	{
+		Attribute weightAttrib(attribLoc::WEIGHTS, GL_FLOAT, sizeof(glm::vec4), 4, size, "weights", data->getWeights().data());
+		vao.addAttribute(weightAttrib);
+	}
+	createVAO();
+}
+
+void Holder::createVAO()
+{
+	vao.createVAO();
 }
 
 void Holder::draw(std::shared_ptr<Shader> s)
 {
 	s->uniformMat4x4("BoneMatrixArray", &matricies[0], bones);
 	s->uniformInt("boneCount", bones);
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, numtris);
-	glBindVertexArray(0);
+	vao.draw();
 }
 
 void Holder::update(float dt)

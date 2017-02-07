@@ -11,7 +11,9 @@ enum attribLoc
 {
 	VERTEX = 4,
 	UV,
-	NORMAL
+	NORMAL,
+	BONES = 8,
+	WEIGHTS
 };
 
 // Contatins all the data needed to send our attributes to the shader

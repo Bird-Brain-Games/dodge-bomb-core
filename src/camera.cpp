@@ -81,7 +81,7 @@ void Camera::setProperties(float _FOV, float _windowRatio, float _minRange, floa
 
 void Camera::setPosition(glm::vec3 _pos)
 {
-
+	pos = _pos;
 }
 
 void Camera::update()

@@ -13,10 +13,10 @@
 #include <memory>
 #include <string>
 #include <GLM\glm.hpp>
+#include <btBulletDynamicsCommon.h>
+#include <iostream>
 #include "loadObject.h"
 #include "Shader.h"
-#include <iostream>
-#include <btBulletDynamicsCommon.h>
 #include "ANILoader.h"
 #include "camera.h"
 #include "material.h"
@@ -26,9 +26,7 @@ class RigidBody;
 class GameObject
 {
 public:
-	GameObject(std::shared_ptr<LoadObject> _model, RigidBody* _body, std::shared_ptr<Material> _material);
-	GameObject(std::shared_ptr<LoadObject> _model, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material, std::string _tag = "Undefined");
-	GameObject(std::shared_ptr<Holder> _hierarchy, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material);
+	GameObject(Loader* _model, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material, std::string _tag = "Undefined");
 	~GameObject();
 
 	virtual void draw(Camera);
@@ -45,9 +43,7 @@ private:
 	glm::mat4x4 worldTransform;
 
 	// loaded obj file
-	std::shared_ptr<LoadObject> model;
-	//holds the VBO and hierarchy data.
-	std::shared_ptr<Holder> hierarchy;
+	std::shared_ptr<Loader> model;
 
 	std::shared_ptr<Material> material;
 
