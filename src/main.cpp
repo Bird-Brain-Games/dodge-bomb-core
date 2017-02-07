@@ -110,7 +110,7 @@ void initObjects()
 
 	// Load the player animation
 	ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
-	Loader* robotModel = new Holder(ani);
+	Holder* robotModel = new Holder(ani);
 
 	// Create the game objects
 	GameObject* ground = new GameObject(groundModel, box, textures[1], defaultMaterial);
@@ -125,7 +125,6 @@ void initObjects()
 	//menu stuff
 	menu = new Menu(textures[1]);
 
-	camera.setPosition(glm::vec3(-4.5f, -1.0f, 12.0f));
 	camera.setAngle(2.5f, 0.01f);
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
 }
@@ -151,7 +150,7 @@ void DisplayCallbackFunction(void)
 	objects[1]->draw(camera);
 
 	objects[0]->draw(camera);
-	menu->draw();
+	//menu->draw();
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())

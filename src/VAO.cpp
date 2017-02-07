@@ -29,6 +29,7 @@ int  VAO::addAttribute(Attribute attrib)
 	attributes.push_back(attrib);
 	return 1;
 }
+
 void VAO::createVAO()
 {
 	if (vaoHandle) destroy();

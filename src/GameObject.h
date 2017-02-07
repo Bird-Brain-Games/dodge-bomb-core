@@ -40,6 +40,7 @@ private:
 	// Physics rigid body with Bullet
 	RigidBody* body;
 
+	// Used for non rigid body things.
 	glm::mat4x4 worldTransform;
 
 	// loaded obj file
