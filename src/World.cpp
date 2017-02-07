@@ -16,7 +16,7 @@ LoadObject* GameWorld::getModel(std::string fileName)
 	auto& it = modelMap.find(fileName);
 
 	// If model isn't in map, create it.
-	if (it != modelMap.end() || modelMap.size() == 0)
+	if (it == modelMap.end())
 	{
 		LoadObject* obj = new LoadObject();
 
