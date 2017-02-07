@@ -127,14 +127,17 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 		return false;
 	}
 
-	// Rigidbody components
+	// Collider properties
+	float length, radius;
 	btCollisionShape* shape = nullptr;
+	float extents[3];
+
+	// Rigidbody properties
 	int	bodyType;		// Static, dynamic, or kinematic
 	float friction;
 	float restitution;	// bounciness
 	float mass;
 	std::string tag;
-	glm::mat4x4 inWorldMatrix;
 
 
 	// Parse through the file, gathering the necessary information
@@ -156,17 +159,18 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 		{
 			tag = line;
 		}
-		else if (key == "inWorldMatrix")
+		else if (key == "extents")
 		{
 			std::stringstream sstream(line);
-			for (unsigned int i = 0; i < 4; i++)
+			for (unsigned int i = 0; i < 3; i++)
 			{
-				for (unsigned int j = 0; j < 4; j++)
-				{
-					sstream >> inWorldMatrix[i][j];
-				}
+				sstream >> extents[i];
 			}
 		}
+		else if (key == "length")
+			length = std::stof(line);
+		else if (key == "radius")
+			radius = std::stof(line);
 		else if (key == "collisionShape")
 		{
 			int shapeType = std::stoi(line);
@@ -175,11 +179,7 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 			{
 			case 1:
 				// Box model
-				shapeExtents = btVector3(
-					(btScalar)inWorldMatrix[0][0],
-					(btScalar)inWorldMatrix[1][1],
-					(btScalar)inWorldMatrix[2][2]
-				);
+				shapeExtents = btVector3(extents[0], extents[1], extents[2]);
 				shape = new btBoxShape((shapeExtents / 2.0f));
 				break;
 			case 2:
@@ -201,8 +201,7 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 			mass = std::stof(line);
 	}
 
-	// Form the rigid body CI
-
+	////////////////////////////////////////////////	Form the rigid body CI
 	// Calculate local inertia if dynamic
 	btVector3 inertia(0, 0, 0);
 	if (bodyType == 2)
@@ -211,7 +210,6 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 		mass = 0.0f;
 
 	// construct the CI
-	// POSSIBLE MEMORY LEAK WITH CREATION OF MOTIONSTATE
 	btRigidBody::btRigidBodyConstructionInfo CI(mass, nullptr, shape, inertia);
 	CI.m_restitution = restitution;
 	CI.m_friction = friction;
