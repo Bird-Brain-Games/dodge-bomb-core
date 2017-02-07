@@ -123,7 +123,7 @@ void initObjects()
 	objects.push_back(robot);
 
 	//menu stuff
-	menu = new Menu(textures[1]);
+	menu = new Menu(textures[1], 1, 1);
 
 	camera.setAngle(2.5f, 0.01f);
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
@@ -150,7 +150,7 @@ void DisplayCallbackFunction(void)
 	objects[1]->draw(camera);
 
 	objects[0]->draw(camera);
-	//menu->draw();
+	menu->draw();
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
@@ -185,6 +185,8 @@ void KeyboardCallbackFunction(unsigned char key, int x, int y)
 	case 'l':
 		camera.moveLeft();
 		break;
+	case 'b':
+		menu->incSpot();
 	}
 }
 
@@ -251,7 +253,7 @@ void WindowReshapeCallbackFunction(int w, int h)
 	glLoadIdentity();
 	gluPerspective(45.0f, (float)w / h, 0.1f, 10000.0f);
 	camera.setProperties(45.0f, float(w / h), 0.1f, 10000.0f, 0.1f);
-	//glViewport(0, 0, windowWidth, windowHeight);
+	glViewport(0, 0, w, h);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }

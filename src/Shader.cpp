@@ -148,6 +148,7 @@ static char* readTextFromFile(const char *fileName) {
 	return text;
 }
 
+
 void Shader::uniformVec3(const std::string& varName, float *data) {
 	GLint loc = getUnifrom(varName);
 	glUniform3fv(loc, 1, data);
@@ -163,6 +164,11 @@ void Shader::uniformVec3(const std::string& varName, glm::vec3* v) {
 	float temp[3] = { v->x, v->y, v->z };
 	GLint loc = getUnifrom(varName);
 	glUniform3fv(loc, 1, temp);
+}
+
+void Shader::uniformVec2(const std::string& varName, glm::vec2& vec) {
+	GLint loc = getUnifrom(varName);
+	glUniform2fv(loc, 1, &vec[0]);
 }
 
 void Shader::uniformVec3(const std::string& varName, glm::vec4& vec) {

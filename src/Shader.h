@@ -28,7 +28,8 @@ public:
 	void uniformFloat(const std::string&, float );
 	void uniformTex(const std::string&, GLuint , unsigned short);
 	void uniformMat4x4(const std::string&, glm::mat4x4*, unsigned int size = 1);
-	void Shader::uniformInt(const std::string& varName, int data);
+	void uniformInt(const std::string& varName, int data);
+	void uniformVec2(const std::string& varName, glm::vec2& v);
 
 	int getUnifrom(const std::string&);
 	//------------------------------------------------------------------------
