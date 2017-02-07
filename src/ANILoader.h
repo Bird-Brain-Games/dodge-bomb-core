@@ -99,6 +99,14 @@ protected:
 	std::vector<glm::mat4> matricies;
 	std::vector<glm::mat4> multipliedMatricies;
 	void createVAO();
+
+	GLuint vao2;
+
+	GLuint vertbo;
+	GLuint texbo;
+	GLuint normbo;
+	GLuint weightbo;
+	GLuint bonebo;
 public:
 	Holder(ANILoader* data);
 	void draw(std::shared_ptr<Shader> s);
