@@ -104,25 +104,25 @@ void initObjects()
 	rbRobot->load("assets\\bullet\\bombot.btdata");
 
 	// Load the box model
-	std::shared_ptr<LoadObject> groundModel = world->getModel("assets\\obj\\5x5box.obj");
+	LoadObject* groundModel = world->getModel("assets\\obj\\5x5box.obj");
 
 	// Load the player animation
-	std::shared_ptr<ANILoader> ani = world->getAniModel("assets\\htr\\finalBombot.htr");
-	std::shared_ptr<Holder> robotModel = std::make_shared<Holder>(ani->getRootNode(), ani);
+	ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
+	Loader* robotModel = new Holder(ani);
 
 	// Create the game objects
 	GameObject* ground = new GameObject(groundModel, box, textures[1], defaultMaterial);
 	GameObject* robot = new GameObject(robotModel, rbRobot, textures[2], animation);
 	
 	// set the 
-	robot->setTransform(glm::vec3(0.f, 80.f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	robot->setTransform(glm::vec3(0.f, 10.f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 
 	objects.push_back(ground);
 	objects.push_back(robot);
 
-	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
+	camera.setPosition(glm::vec3(-4.5f, -1.0f, 12.0f));
 	camera.setAngle(2.5f, 0.01f);
-	camera.setPosition(glm::vec3(-8.5f, -1.0f, 12.0f));
+	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
 }
 
 /* function DisplayCallbackFunction(void)
@@ -168,6 +168,18 @@ void KeyboardCallbackFunction(unsigned char key, int x, int y)
 	case 27: // the escape key
 		//exit(0);
 		glutLeaveMainLoop();
+		break;
+	case 'k':
+		camera.moveBackward();
+		break;
+	case 'j':
+		camera.moveRight();
+		break;
+	case 'i':
+		camera.moveForward();
+		break;
+	case 'l':
+		camera.moveLeft();
 		break;
 	}
 }

@@ -10,7 +10,7 @@ GameWorld::~GameWorld()
 	//Look into share pointer deconstruction 
 }
 
-std::shared_ptr<LoadObject> GameWorld::getModel(std::string fileName)
+LoadObject* GameWorld::getModel(std::string fileName)
 {
 	// Check if the model is in the map.
 	auto& it = modelMap.find(fileName);
@@ -18,8 +18,9 @@ std::shared_ptr<LoadObject> GameWorld::getModel(std::string fileName)
 	// If model isn't in map, create it.
 	if (it != modelMap.end() || modelMap.size() == 0)
 	{
-		std::shared_ptr<LoadObject> obj = std::make_shared<LoadObject>();
-		bool result = obj->loadFromObject(fileName.c_str());
+		LoadObject* obj = new LoadObject();
+
+		bool result = obj->load(fileName.c_str());
 
 		// If loading fails, delete and return nullptr.
 		if (!result)
@@ -36,7 +37,7 @@ std::shared_ptr<LoadObject> GameWorld::getModel(std::string fileName)
 	return it->second;
 }
 
-std::shared_ptr<ANILoader> GameWorld::getAniModel(std::string fileName)
+ANILoader* GameWorld::getAniModel(std::string fileName)
 {
 	// Check if the animated model is in the map.
 	auto& it = aniModelMap.find(fileName);
@@ -44,7 +45,7 @@ std::shared_ptr<ANILoader> GameWorld::getAniModel(std::string fileName)
 	// If animated model isn't in map, create it.
 	if (it != aniModelMap.end() || aniModelMap.size() == 0)
 	{
-		std::shared_ptr<ANILoader> ani = std::make_shared<ANILoader>();
+		ANILoader* ani = new ANILoader();
 		bool result = ani->loadHTR(fileName);
 		
 		// If loading fails, delete and return nullptr.

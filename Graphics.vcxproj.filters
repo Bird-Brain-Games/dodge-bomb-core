@@ -4,56 +4,159 @@
     <ClCompile Include="src\Shader.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="src\InputManager.cpp" />
-    <ClCompile Include="src\loadObject.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\GameObject.cpp" />
-    <ClCompile Include="src\BulletDebugger.cpp" />
-    <ClCompile Include="src\node.cpp" />
-    <ClCompile Include="src\RigidBody.cpp" />
-    <ClCompile Include="src\ANILoader.cpp" />
-    <ClCompile Include="src\World.cpp" />
-    <ClCompile Include="src\camera.cpp" />
-    <ClCompile Include="src\material.cpp" />
-    <ClCompile Include="src\sound engine.cpp" />
-    <ClCompile Include="src\VAO.cpp" />
+    <ClCompile Include="src\BulletDebugger.cpp">
+      <Filter>bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="src\camera.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameObject.cpp">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputManager.cpp">
+      <Filter>input manager</Filter>
+    </ClCompile>
+    <ClCompile Include="src\material.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RigidBody.cpp">
+      <Filter>bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sound engine.cpp">
+      <Filter>sound</Filter>
+    </ClCompile>
+    <ClCompile Include="src\World.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VAO.cpp">
+      <Filter>object\VAO</Filter>
+    </ClCompile>
+    <ClCompile Include="src\controller.cpp">
+      <Filter>controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loadObject.cpp">
+      <Filter>object\loaders\obj</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANILoader.cpp">
+      <Filter>object\loaders\htr</Filter>
+    </ClCompile>
+    <ClCompile Include="src\node.cpp">
+      <Filter>object\loaders\htr</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h">
       <Filter>Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="src\GameObject.h" />
-    <ClInclude Include="src\InputManager.h" />
-    <ClInclude Include="src\loadObject.h" />
-    <ClInclude Include="src\KeyframeController.h" />
-    <ClInclude Include="src\BulletDebug.h" />
-    <ClInclude Include="src\JointTypes.h" />
-    <ClInclude Include="src\RigidBody.h" />
-    <ClInclude Include="src\node.h" />
-    <ClInclude Include="src\ANILoader.h" />
-    <ClInclude Include="src\World.h" />
-    <ClInclude Include="src\camera.h" />
-    <ClInclude Include="src\material.h" />
-    <ClInclude Include="src\sound engine.h" />
-    <ClInclude Include="src\VAO.h" />
+    <ClInclude Include="src\BulletDebug.h">
+      <Filter>bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="src\camera.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameObject.h">
+      <Filter>object</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputManager.h">
+      <Filter>input manager</Filter>
+    </ClInclude>
+    <ClInclude Include="src\KeyframeController.h">
+      <Filter>input manager</Filter>
+    </ClInclude>
+    <ClInclude Include="src\material.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RigidBody.h">
+      <Filter>bullet</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sound engine.h">
+      <Filter>sound</Filter>
+    </ClInclude>
+    <ClInclude Include="src\World.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VAO.h">
+      <Filter>object\VAO</Filter>
+    </ClInclude>
+    <ClInclude Include="src\controller.h">
+      <Filter>controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\loadObject.h">
+      <Filter>object\loaders\obj</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANILoader.h">
+      <Filter>object\loaders\htr</Filter>
+    </ClInclude>
+    <ClInclude Include="src\JointTypes.h">
+      <Filter>object\loaders\htr</Filter>
+    </ClInclude>
+    <ClInclude Include="src\node.h">
+      <Filter>object\loaders\htr</Filter>
+    </ClInclude>
+    <ClInclude Include="src\loader.h">
+      <Filter>object\loaders\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
       <UniqueIdentifier>{6dd1b492-b02a-4209-8394-3e1d31214d5d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\files">
+      <UniqueIdentifier>{b459cd04-6b1e-4ebe-8879-a27a435793cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bullet">
+      <UniqueIdentifier>{2e0570fa-04c3-46aa-aa6c-ace361ff7409}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="camera">
+      <UniqueIdentifier>{e939c61e-9bd7-48fc-80a3-6a762ea79987}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="object">
+      <UniqueIdentifier>{947fef1a-7381-4ac2-b16b-1add2bfdbcea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="object\loaders">
+      <UniqueIdentifier>{d69a3d49-5962-4bf3-94f2-015c29562d70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="input manager">
+      <UniqueIdentifier>{69282ba5-d7dc-44b6-b65e-c157deae682f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="material">
+      <UniqueIdentifier>{46dcf58c-4194-464d-a449-ed454e544d9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sound">
+      <UniqueIdentifier>{cf204864-307b-42a0-8f58-5a46dcb74f7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="world">
+      <UniqueIdentifier>{68f78a76-0887-458c-8c26-48b68a9e1113}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="controllers">
+      <UniqueIdentifier>{39a192f8-da34-4299-9884-895fb45f526f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="object\VAO">
+      <UniqueIdentifier>{78d08ab3-5740-443c-88e2-06a29c1f9ed7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="object\loaders\obj">
+      <UniqueIdentifier>{3c22d637-5da1-4ad4-8398-4f415bd2f6df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="object\loaders\htr">
+      <UniqueIdentifier>{eb8b7bab-5892-45d7-a1a4-95099afd9197}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="object\loaders\base">
+      <UniqueIdentifier>{9a87bb0f-6998-4611-a1b2-9a2522c072c5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\passThru_v.glsl">
+      <Filter>Shaders\files</Filter>
+    </None>
     <None Include="shaders\blinnphong_f.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\files</Filter>
     </None>
     <None Include="shaders\blinnphong_v.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\files</Filter>
     </None>
     <None Include="shaders\passThru_f.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\passThru_v.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\files</Filter>
     </None>
   </ItemGroup>
 </Project>

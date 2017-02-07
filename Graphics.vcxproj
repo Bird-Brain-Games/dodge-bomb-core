@@ -58,7 +58,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;DevIL.lib;ILU.lib;ILUT.lib;fmod_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;DevIL.lib;ILU.lib;ILUT.lib;fmod_vc.lib;Xinput.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,13 +76,14 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;DevIL.lib;ILU.lib;ILUT.lib;fmod_vc.lib</AdditionalDependencies>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;DevIL.lib;ILU.lib;ILUT.lib;fmod_vc.lib;Xinput.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ANILoader.cpp" />
     <ClCompile Include="src\BulletDebugger.cpp" />
     <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\controller.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\loadObject.cpp" />
@@ -99,10 +100,12 @@
     <ClInclude Include="src\ANILoader.h" />
     <ClInclude Include="src\BulletDebug.h" />
     <ClInclude Include="src\camera.h" />
+    <ClInclude Include="src\controller.h" />
     <ClInclude Include="src\GameObject.h" />
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\JointTypes.h" />
     <ClInclude Include="src\KeyframeController.h" />
+    <ClInclude Include="src\loader.h" />
     <ClInclude Include="src\loadObject.h" />
     <ClInclude Include="src\material.h" />
     <ClInclude Include="src\node.h" />

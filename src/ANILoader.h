@@ -3,7 +3,7 @@
 #include <string>
 #include "Node.h"
 #include "JointTypes.h"
-
+#include "loader.h"
 class ANILoader
 {
 public:
@@ -88,30 +88,19 @@ private:
 	Node* rootNode;
 };
 
-class Holder
+class Holder : public Loader
 {
 protected:
 	Node* m_pChild;
-	GLuint vao;
-
-	GLuint vertbo;
-	GLuint normbo;
-	GLuint texbo;
-	GLuint bonebo;
-	GLuint weightbo;
-
-
 
 	unsigned int numtris; // count number of vertices for data creation
 	int bones;
 
 	std::vector<glm::mat4> matricies;
 	std::vector<glm::mat4> multipliedMatricies;
-
-
-
+	void createVAO();
 public:
-	Holder(Node* child, std::shared_ptr<ANILoader> data);
+	Holder(ANILoader* data);
 	void draw(std::shared_ptr<Shader> s);
 	void update(float);
 };
