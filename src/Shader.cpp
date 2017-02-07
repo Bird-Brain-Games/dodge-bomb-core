@@ -4,8 +4,8 @@
 // Forward definition of a utility function
 static char* readTextFromFile(const char *fileName);
 
-Shader::Shader(const char *vsFile, const char *fsFile) {
-	init(vsFile, fsFile);
+Shader::Shader(const char *vsFile, const char *fsFile, const char* gsFile) {
+	init(vsFile, fsFile, gsFile);
 }
 
 Shader::Shader()
@@ -13,20 +13,25 @@ Shader::Shader()
 
 }
 
-void Shader::load(const char *vsFile, const char *fsFile) {
-	init(vsFile, fsFile);
+void Shader::load(const char *vsFile, const char *fsFile, const char* gsFile) {
+	init(vsFile, fsFile, gsFile);
 }
 
 Shader::~Shader(void) {
 	glDetachShader(programID, vertShader);
 	glDetachShader(programID, fragShader);
+	if (geomShader != -1)
+	{
+		glDetachShader(programID, geomShader);
+		glDeleteShader(geomShader);
+	}
 
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
 	glDeleteProgram(programID);
 }
 
-void Shader::init(const char *vsFile, const char *fsFile) {
+void Shader::init(const char *vsFile, const char *fsFile, const char* gsFile) {
 
 	GLint result = 0;
 	GLchar error[1024] = { 0 };
@@ -55,11 +60,30 @@ void Shader::init(const char *vsFile, const char *fsFile) {
 	}
 	else printf("Compiled!\n");
 
-	programID = glCreateProgram();
+	if (gsFile != NULL)
+	{
+		geomShader = glCreateShader(GL_GEOMETRY_SHADER);
+		const char *fsText = readTextFromFile(gsFile);
+		glShaderSource(geomShader, 1, &fsText, 0);
+		glCompileShader(geomShader);
+		glGetShaderiv(geomShader, GL_COMPILE_STATUS, &result);
+		if (result == GL_FALSE)
+		{
+			glGetShaderInfoLog(geomShader, sizeof(error), NULL, error);
+			std::cerr << "Error Compiling Shader: " << error << std::endl;
+		}
+		else printf("Compiled!\n");
 
+	}
+	else
+		geomShader = -1;
+
+	programID = glCreateProgram();
 	// attaching the vertex and fragment shaders to the program id
 	glAttachShader(programID, vertShader);
 	glAttachShader(programID, fragShader);
+	if (geomShader != -1)
+		glAttachShader(programID, geomShader);
 
 	// linking the programs
 	glLinkProgram(programID);
@@ -72,11 +96,13 @@ void Shader::init(const char *vsFile, const char *fsFile) {
 		std::cout << "Shader linked successfully" << std::endl;
 		return;
 	}
+	char infoLog[512];
 
-	int logLength;
-	glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &logLength);
-	std::string log(logLength, ' ');
-	glGetProgramInfoLog(programID, logLength, &logLength, &log[0]);
+	GLint infoLen;
+	glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLen);
+	glGetProgramInfoLog(programID, sizeof(char) * 512, &infoLen, &infoLog[0]); 
+	std::cout << infoLog << "\n";
+
 	std::cout << "Shader program failed to link: handle not set" << std::endl;
 
 }

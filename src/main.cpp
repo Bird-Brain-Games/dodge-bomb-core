@@ -23,6 +23,7 @@
 #include "RigidBody.h"
 #include "camera.h"
 #include "material.h"
+#include "menu.h"
 
 // create game object
 std::vector<GameObject*> objects;
@@ -53,6 +54,7 @@ const float radToDeg = 180.0f / 3.14159f;
 
 int keyDown[255];
 
+Menu* menu;
 
 // separate, cleaner, draw function
 void drawObjects()
@@ -115,10 +117,13 @@ void initObjects()
 	GameObject* robot = new GameObject(robotModel, rbRobot, textures[2], animation);
 	
 	// set the 
-	robot->setTransform(glm::vec3(0.f, 10.f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	robot->setTransform(glm::vec3(0.f, 1.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 
 	objects.push_back(ground);
 	objects.push_back(robot);
+
+	//menu stuff
+	menu = new Menu(textures[1]);
 
 	camera.setPosition(glm::vec3(-4.5f, -1.0f, 12.0f));
 	camera.setAngle(2.5f, 0.01f);
@@ -146,7 +151,7 @@ void DisplayCallbackFunction(void)
 	objects[1]->draw(camera);
 
 	objects[0]->draw(camera);
-
+	menu->draw();
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())

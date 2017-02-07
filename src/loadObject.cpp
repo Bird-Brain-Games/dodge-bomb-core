@@ -138,6 +138,13 @@ void Texture::bind(std::shared_ptr<Shader> s)
 	s->uniformFloat("shininess", 25.0f);
 }
 
+void Texture::bind(Shader* s)
+{
+	s->uniformTex("diffuseTex", diffuseTex, 0);
+	s->uniformTex("specularTex", specularTex, 1);
+	s->uniformFloat("shininess", 25.0f);
+}
+
 void Texture::setShininess(float shine)
 {
 	shininess = shine;
