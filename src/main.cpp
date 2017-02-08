@@ -131,7 +131,7 @@ void initObjects()
 
 	// set the 
 	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-
+	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1000, 0));
 	objects.push_back(ground);
 	objects.push_back(robot);
 	objects.push_back(desk);
@@ -139,6 +139,7 @@ void initObjects()
 	//menu stuff
 	menu = new Menu(textures[1], 5, 5);
 
+	camera.setPosition(glm::vec3(0, 50, 100));
 	camera.setAngle(2.5f, 0.01f);
 	camera.setPosition(glm::vec3(0.0f, 20.0f, 70.0f));
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
