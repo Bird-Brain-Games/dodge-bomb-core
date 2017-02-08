@@ -62,6 +62,10 @@ public:
 	void setWorldTransform(glm::vec3 pos);
 	void setWorldTransform(glm::vec3 pos, glm::vec4 quat);
 
+	//void applyImpulse()
+
+	btRigidBody* getBody() { return body; }
+
 public:
 	static void systemUpdate(float deltaTasSeconds, int maxStep);
 	static void drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 const& projectionMatrix);
