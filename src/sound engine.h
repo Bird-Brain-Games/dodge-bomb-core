@@ -59,7 +59,8 @@ public:
 	void systemUpdate();
 	//changes what method of rollof is being used.
 	void setRollOff(FMOD_MODE);
-
+	//pauses the sound
+	void pause();
 	//sound variables
 	FMOD::Sound   *sound = NULL;
 	FMOD::Channel *channel = NULL;

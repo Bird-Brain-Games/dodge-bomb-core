@@ -55,6 +55,8 @@ bool mouseMovement = true;
 const float degToRad = 3.14159f / 180.0f;
 const float radToDeg = 180.0f / 3.14159f;
 
+Controller *con;
+void controls(GameObject* player, Controller* con, float dt);
 
 int keyDown[255];
 
@@ -99,7 +101,7 @@ void shaderInit()
 
 void initObjects()
 {
-	
+
 	// World class manages memory
 	world = new GameWorld();
 
@@ -124,9 +126,9 @@ void initObjects()
 
 	// Create the game objects
 	GameObject* ground = new GameObject(groundModel, box, textures[1], defaultMaterial);
-	GameObject* robot = new GameObject(robotModel, rbRobot, textures[2], animation);
+	GameObject* robot = new GameObject(groundModel, rbRobot, textures[2], defaultMaterial);
 	GameObject* desk = new GameObject(tableModel, table, textures[1], defaultMaterial);
-	
+
 	// set the 
 	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 
@@ -138,7 +140,10 @@ void initObjects()
 	menu = new Menu(textures[1], 5, 5);
 
 	camera.setAngle(2.5f, 0.01f);
+	camera.setPosition(glm::vec3(0.0f, 20.0f, 70.0f));
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
+
+	con = new Controller(0);
 }
 
 /* function DisplayCallbackFunction(void)
@@ -244,6 +249,8 @@ void TimerCallbackFunction(int value)
 
 	objects[1]->update(deltaTasSeconds);
 
+	controls(objects[1], con, deltaTasSeconds);
+
 	// Bullet step through world simulation
 	RigidBody::systemUpdate(deltaTasSeconds, 10);
 
@@ -329,7 +336,7 @@ void MousePassiveMotionCallbackFunction(int x, int y)
 */
 void CloseCallbackFunction()
 {
-	
+
 	KEYBOARD_INPUT->Destroy();
 
 	delete world;
@@ -373,6 +380,7 @@ int main(int argc, char **argv)
 {
 	theme.load("assets\\media\\theme.wav");
 	theme.play();
+	theme.pause();
 	// Set up FreeGLUT error callbacks
 	glutInitErrorFunc(InitErrorFuncCallbackFunction);
 
@@ -456,4 +464,30 @@ int main(int argc, char **argv)
 	glutMainLoop();
 
 	return 0;
+}
+
+void controls(GameObject* player, Controller* con, float dt)
+{
+	Coords stick = con->getLeftStick();
+	glm::vec3 pos = glm::vec3(0.0f);
+	bool motion = false;
+	if (stick.x < -0.1 || stick.x > 0.1)
+	{
+		pos.x = stick.x;
+		motion = true;
+	}
+	if (stick.y < -0.1 || stick.y > 0.1)
+	{
+		pos.z = stick.y;
+		motion = true;
+	}
+	if (motion == true)
+	{
+		RigidBody * temp = player->getRigidBody();
+		glm::mat4 transform = temp->getWorldTransform();
+		glm::mat4 translate = glm::translate(pos);
+		transform += translate;
+		player->setTransform(transform[3]);
+	}
+	
 }

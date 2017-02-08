@@ -142,6 +142,11 @@ void Sound::play()
 	sys.result = channel->setPaused(false); checkResult(sys.result);
 }
 
+void Sound::pause()
+{
+	sys.result = channel->setPaused(true); checkResult(sys.result);
+}
+
 //changes how the sound rolloff works
 void Sound::setRollOff(FMOD_MODE mode)
 {

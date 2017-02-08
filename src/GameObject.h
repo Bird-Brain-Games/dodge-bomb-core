@@ -33,7 +33,7 @@ public:
 	virtual void draw(Camera);
 	virtual void update(float deltaT);
 
-	void setTransform(glm::vec3 pos, glm::vec4 orientation);
+	void setTransform(glm::vec3 pos, glm::vec4 orientation = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	RigidBody* getRigidBody() { return body; };
 
@@ -46,6 +46,8 @@ private:
 
 	// Used for non rigid body things.
 	glm::mat4x4 worldTransform;
+	//
+
 
 	// loaded obj file
 	std::shared_ptr<Loader> model;

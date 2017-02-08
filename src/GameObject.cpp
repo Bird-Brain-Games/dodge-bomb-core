@@ -52,9 +52,11 @@ void GameObject::draw(Camera camera)
 void GameObject::update(float dt)
 {
 	model->update(dt);
+
 }
 
-void GameObject::setTransform(glm::vec3 pos, glm::vec4 orientation)
+void GameObject::setTransform(glm::vec3 _pos, glm::vec4 _orientation)
 {
-	getRigidBody()->setWorldTransform(pos, orientation);
+	getRigidBody()->setWorldTransform(_pos, _orientation);
 }
+
