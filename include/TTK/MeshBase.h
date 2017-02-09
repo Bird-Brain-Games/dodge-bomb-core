@@ -14,6 +14,7 @@
 
 #include <vector>
 #include "GLM/glm.hpp"
+#include "VertexBufferObject.h"
 
 namespace TTK
 {
@@ -29,17 +30,25 @@ namespace TTK
 		// Description:
 		// Very simple draw function which binds all three buffers
 		// Yes, it uses OpenGL 1.0 draw calls... for now.
+		void draw_1_0();
+
+		// The modern draw function which uses vertex buffer objects!
 		void draw();
 
 		// Description:
 		// Sets all per-vertex colours to the specified colour
 		void setAllColours(glm::vec4 colour);
+		
+		void createVBO();
 
 		std::vector<glm::vec3> vertices;
+		std::vector<glm::vec3> normals;
 		std::vector<glm::vec2> textureCoordinates;
 		std::vector<glm::vec4> colours;
 
 		PrimitiveType primitiveType;
+
+		VertexBufferObject vbo;
 	};
 }
 

@@ -33,6 +33,7 @@ void GameObject::draw(Camera camera)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	material->shader->bind();
 
+	// REPLACE WITH MATERIAL CODE
 	material->shader->uniformMat4x4("mvm", &camera.getView());
 	material->shader->uniformMat4x4("prm", &camera.getProj());
 
