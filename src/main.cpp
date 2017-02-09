@@ -144,7 +144,7 @@ void initObjects()
 
 	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
-
+	robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
 
 
 	objects.push_back(desk);
@@ -161,6 +161,7 @@ void initObjects()
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
 
 	con = new Controller(0);
+	RigidBody::setDebugDraw(true);
 }
 
 /* function DisplayCallbackFunction(void)
@@ -493,19 +494,21 @@ void controls(GameObject* player, Controller* con, float dt)
 	bool motion = false;
 	if (stick.x < -0.1 || stick.x > 0.1)
 	{
-		pos.x = -stick.x;
+		pos.x = stick.x;
 		motion = true;
 	}
 	if (stick.y < -0.1 || stick.y > 0.1)
 	{
-		pos.z = stick.y;
+		pos.z = -stick.y;
 		motion = true;
 	}
 	stick = con->getRightStick();
 	angle = atan2(-stick.y, stick.x);
 
+	static glm::vec3 oldTemp(0, 0, 0);
 	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
 	std::cout << "x: " << temp.x << " y: " << temp.y << " z: " << temp.z << std::endl;
+
 	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
 	if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1) {}
 	else
@@ -518,8 +521,8 @@ void controls(GameObject* player, Controller* con, float dt)
 		glm::mat4 transform = temp->getWorldTransform();
 		glm::mat4 translate = glm::translate(pos);
 		transform += translate;
-		//player->setTransform(transform[3]);
-		player->getRigidBody()->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
+		player->setTransform(transform[3]);
+		//player->getRigidBody()->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
 
 	}
 
