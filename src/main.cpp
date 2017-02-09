@@ -156,7 +156,7 @@ void initObjects()
 	//	objects.push_back(ground);
 
 		//menu stuff
-	menu = new Menu(textures[0], 5, 5);
+	menu = new Menu(textures[4], 2, 2);
 
 	camera.setPosition(glm::vec3(0, 50, 100));
 	camera.setAngle(3.14159012f, 5.98318052f);
@@ -165,7 +165,7 @@ void initObjects()
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
 
 	con = new Controller(0);
-	RigidBody::setDebugDraw(true);
+//	RigidBody::setDebugDraw(true);
 }
 
 /* function DisplayCallbackFunction(void)
@@ -242,7 +242,7 @@ void TimerCallbackFunction(int value)
 	// Use the E key to set the debug draw
 	if (KEYBOARD_INPUT->CheckPressEvent('e') || KEYBOARD_INPUT->CheckPressEvent('E'))
 	{
-		RigidBody::setDebugDraw(true);
+		RigidBody::setDebugDraw(!RigidBody::isDrawingDebug());
 	}
 
 	// Move the camera
@@ -273,6 +273,10 @@ void TimerCallbackFunction(int value)
 	if (KEYBOARD_INPUT->CheckPressEvent('z') || KEYBOARD_INPUT->CheckPressEvent('Z'))
 	{
 		atlas = !atlas;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('x') || KEYBOARD_INPUT->CheckPressEvent('X'))
+	{
+		menu->incSpot();
 	}
 	
 	// Clear the keyboard input
@@ -494,11 +498,13 @@ int main(int argc, char **argv)
 	Texture* groundTex = new Texture("assets//img//desk (diffuse).png", "assets//img//desk (diffuse).png", 10.0f);
 	Texture* robot = new Texture("assets//img//bombot.png", "assets//img//bombot.png", 10.0f);
 	Texture* bomb = new Texture("assets//img//redTex.png", "assets//img//redTex.png", 10.0f);
+	Texture* atlas = new Texture("assets//img//atlas.png", "assets//img//atlas.png", 10.0f);
 
 	textures.push_back(ballTex);
 	textures.push_back(groundTex);
 	textures.push_back(robot);
 	textures.push_back(bomb);
+	textures.push_back(atlas);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
