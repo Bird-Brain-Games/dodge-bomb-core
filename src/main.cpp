@@ -62,6 +62,9 @@ int keyDown[255];
 
 Menu* menu;
 
+bool atlas = false;
+
+
 // separate, cleaner, draw function
 void drawObjects()
 {
@@ -153,7 +156,7 @@ void initObjects()
 	//	objects.push_back(ground);
 
 		//menu stuff
-	menu = new Menu(textures[1], 5, 5);
+	menu = new Menu(textures[0], 5, 5);
 
 	camera.setPosition(glm::vec3(0, 50, 100));
 	camera.setAngle(3.14159012f, 5.98318052f);
@@ -186,7 +189,10 @@ void DisplayCallbackFunction(void)
 	//objects[1]->draw(camera);
 
 	//objects[0]->draw(camera);
-	//menu->draw();
+	if (atlas == true)
+	{
+	menu->draw();
+	}
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
@@ -263,6 +269,10 @@ void TimerCallbackFunction(int value)
 	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
 	{
 		rotation -= 1;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('z') || KEYBOARD_INPUT->CheckPressEvent('Z'))
+	{
+		atlas = !atlas;
 	}
 	
 	// Clear the keyboard input
@@ -523,9 +533,10 @@ void controls(GameObject* player, Controller* con, float dt)
 	angle = atan2(-stick.y, stick.x);
 	
 	static glm::vec3 oldTemp(0, 0, 0);
+	std::cout << angle << std::endl;
 	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
 	
-
+	
 	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
 	if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1) {}
 	else
@@ -559,7 +570,7 @@ void controls(GameObject* player, Controller* con, float dt)
 		temp.z += normalized.y * 10;
 
 		objects[2]->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
-		//std::cout << angle << std::endl;
+		
 		std::cout << "x: " << normalized.x << "y: " << normalized.y << std::endl;
 		objects[2]->getRigidBody()->getBody()->applyCentralImpulse(btVector3(normalized.x * 50, 25.0f, normalized.y * 50));
 
