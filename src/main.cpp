@@ -130,16 +130,16 @@ void initObjects()
 	GameObject* desk = new GameObject(tableModel, table, textures[1], defaultMaterial);
 	// set the 
 
-	RigidBody *bombRigid = new RigidBody();
-	bombRigid->load("assets\\bullet\\box5x5.btdata");
+	RigidBody *bombBody = new RigidBody();
+	bombBody->load("assets\\bullet\\smolBotTemp.btdata");
 
 	// Load the box model
 	LoadObject* bombModel = new LoadObject();
-	bombModel->load("assets\\obj\\smolBot.obj");
+	bombModel->load("assets\\obj\\bomb.obj");
 
 	// Create the game objects
-	GameObject* bomb = new GameObject(bombModel, bombRigid, textures[2], defaultMaterial);
-	bomb->setTransform(glm::vec3(0.f, 15.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
+	
 
 
 	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
@@ -157,6 +157,7 @@ void initObjects()
 
 	camera.setPosition(glm::vec3(0, 50, 100));
 	camera.setAngle(3.14159012f, 5.98318052f);
+	//camera.setAngle(-1.57, 1.57); // show from bottom so better see bomb throw
 	camera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
 
@@ -220,8 +221,12 @@ void KeyboardUpCallbackFunction(unsigned char key, int x, int y)
 *  - changes the frame number and calls for a redisplay
 *  - FRAME_DELAY is the number of milliseconds to wait before calling the timer again
 */
+float rotation = 0;
 void TimerCallbackFunction(int value)
 {
+
+	
+	//std::cout << rotation << std::endl;
 	//// process inputs
 	if (KEYBOARD_INPUT->CheckPressEvent(27))
 	{
@@ -251,6 +256,15 @@ void TimerCallbackFunction(int value)
 	{
 		camera.moveLeft();
 	}
+	if (KEYBOARD_INPUT->CheckPressEvent('y') || KEYBOARD_INPUT->CheckPressEvent('Y'))
+	{
+		rotation += 1;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
+	{
+		rotation -= 1;
+	}
+	
 	// Clear the keyboard input
 	KEYBOARD_INPUT->WipeEventList();
 
@@ -283,6 +297,7 @@ void TimerCallbackFunction(int value)
 	theme.systemUpdate();
 
 	//// delay timestep to maintain framerate
+	
 	glutTimerFunc(FRAME_DELAY, TimerCallbackFunction, 0);
 }
 
@@ -466,12 +481,14 @@ int main(int argc, char **argv)
 
 	// Load Textures
 	Texture* ballTex = new Texture("assets//img//Blake.png", "assets//img//Blake.png", 10.0f);
-	Texture* groundTex = new Texture("assets//img//Blake.png", "assets//img//Blake.png", 10.0f);
+	Texture* groundTex = new Texture("assets//img//desk (diffuse).png", "assets//img//desk (diffuse).png", 10.0f);
 	Texture* robot = new Texture("assets//img//bombot.png", "assets//img//bombot.png", 10.0f);
+	Texture* bomb = new Texture("assets//img//redTex.png", "assets//img//redTex.png", 10.0f);
 
 	textures.push_back(ballTex);
 	textures.push_back(groundTex);
 	textures.push_back(robot);
+	textures.push_back(bomb);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -494,20 +511,20 @@ void controls(GameObject* player, Controller* con, float dt)
 	bool motion = false;
 	if (stick.x < -0.1 || stick.x > 0.1)
 	{
-		pos.x = stick.x;
+		pos.x = stick.x/2;
 		motion = true;
 	}
 	if (stick.y < -0.1 || stick.y > 0.1)
 	{
-		pos.z = -stick.y;
+		pos.z = -stick.y/2;
 		motion = true;
 	}
 	stick = con->getRightStick();
 	angle = atan2(-stick.y, stick.x);
-
+	
 	static glm::vec3 oldTemp(0, 0, 0);
 	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
-	std::cout << "x: " << temp.x << " y: " << temp.y << " z: " << temp.z << std::endl;
+	
 
 	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
 	if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1) {}
@@ -529,22 +546,24 @@ void controls(GameObject* player, Controller* con, float dt)
 	if (con->conButton(XINPUT_GAMEPAD_A))
 	{
 
+		objects[2]->getRigidBody()->getBody()->clearForces();//clears force not impulse?
 
-		RigidBody *box = new RigidBody();
-		box->load("assets\\bullet\\smolBotTemp.btdata");
-
-		// Load the box model
-		LoadObject* groundModel = new LoadObject();
-		groundModel->load("assets\\obj\\smolBot.obj");
-
-		// Create the game objects
-		GameObject* ground = new GameObject(groundModel, box, textures[2], defaultMaterial);
 		glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
-		ground->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
+		
+		glm::vec2 normalized = glm::vec2(0);
 
-		ground->getRigidBody()->getBody()->applyCentralImpulse(btVector3(-stick.y * 10, 25.0f, -stick.x * 10));
+		if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1)
+			normalized = glm::normalize(glm::vec2(stick.x, stick.y));
 
-		objects.push_back(ground);
+		temp.x += normalized.x * 10;
+		temp.z += normalized.y * 10;
+
+		objects[2]->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
+		//std::cout << angle << std::endl;
+		std::cout << "x: " << normalized.x << "y: " << normalized.y << std::endl;
+		objects[2]->getRigidBody()->getBody()->applyCentralImpulse(btVector3(normalized.x * 50, 25.0f, normalized.y * 50));
+
+		
 	}
 	if (con->conButton(XINPUT_GAMEPAD_B))
 	{
