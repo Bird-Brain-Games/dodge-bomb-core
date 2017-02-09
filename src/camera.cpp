@@ -63,7 +63,6 @@ void Camera::setProperties(float _FOV, float _windowRatio, float _minRange, floa
 
 
 	//camera variables
-	angle = glm::vec2(3.14159f, 6.28318f);
 
 	direction = glm::vec3(
 		cos(angle.y) * sin(angle.x),

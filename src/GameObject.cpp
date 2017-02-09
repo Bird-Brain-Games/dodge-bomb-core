@@ -23,7 +23,6 @@ GameObject::~GameObject()
 	{
 		delete body;
 	}
-	
 
 	model = nullptr;
 	body = nullptr;

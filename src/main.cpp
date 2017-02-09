@@ -106,7 +106,7 @@ void initObjects()
 	world = new GameWorld();
 
 	RigidBody *box = new RigidBody();
-	box->load("assets\\bullet\\box5x5.btdata");
+	//box->load("assets\\bullet\\box5x5.btdata");
 
 	RigidBody *rbRobot = new RigidBody();
 	rbRobot->load("assets\\bullet\\bombot.btdata");
@@ -126,22 +126,38 @@ void initObjects()
 
 	// Create the game objects
 	GameObject* ground = new GameObject(groundModel, box, textures[1], defaultMaterial);
-	GameObject* robot = new GameObject(groundModel, rbRobot, textures[2], defaultMaterial);
+	GameObject* robot = new GameObject(robotModel, rbRobot, textures[2], animation);
 	GameObject* desk = new GameObject(tableModel, table, textures[1], defaultMaterial);
-
 	// set the 
-	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1000, 0));
-	objects.push_back(ground);
-	objects.push_back(robot);
-	objects.push_back(desk);
 
-	//menu stuff
+	RigidBody *bombRigid = new RigidBody();
+	bombRigid->load("assets\\bullet\\box5x5.btdata");
+
+	// Load the box model
+	LoadObject* bombModel = new LoadObject();
+	bombModel->load("assets\\obj\\smolBot.obj");
+
+	// Create the game objects
+	GameObject* bomb = new GameObject(bombModel, bombRigid, textures[2], defaultMaterial);
+	bomb->setTransform(glm::vec3(0.f, 15.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+
+
+	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
+
+
+
+	objects.push_back(desk);
+	objects.push_back(robot);
+	objects.push_back(bomb);
+	//	objects.push_back(ground);
+
+		//menu stuff
 	menu = new Menu(textures[1], 5, 5);
 
 	camera.setPosition(glm::vec3(0, 50, 100));
-	camera.setAngle(2.5f, 0.01f);
-	camera.setPosition(glm::vec3(0.0f, 20.0f, 70.0f));
+	camera.setAngle(3.14159012f, 5.98318052f);
+	camera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
 
 	con = new Controller(0);
@@ -234,7 +250,6 @@ void TimerCallbackFunction(int value)
 	{
 		camera.moveLeft();
 	}
-
 	// Clear the keyboard input
 	KEYBOARD_INPUT->WipeEventList();
 
@@ -250,10 +265,12 @@ void TimerCallbackFunction(int value)
 
 	objects[1]->update(deltaTasSeconds);
 
-	controls(objects[1], con, deltaTasSeconds);
 
 	// Bullet step through world simulation
 	RigidBody::systemUpdate(deltaTasSeconds, 10);
+
+
+	controls(objects[1], con, deltaTasSeconds);
 
 	//// force draw call next tick
 	glutPostRedisplay();
@@ -467,6 +484,8 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+float angle;
+
 void controls(GameObject* player, Controller* con, float dt)
 {
 	Coords stick = con->getLeftStick();
@@ -474,7 +493,7 @@ void controls(GameObject* player, Controller* con, float dt)
 	bool motion = false;
 	if (stick.x < -0.1 || stick.x > 0.1)
 	{
-		pos.x = stick.x;
+		pos.x = -stick.x;
 		motion = true;
 	}
 	if (stick.y < -0.1 || stick.y > 0.1)
@@ -482,13 +501,50 @@ void controls(GameObject* player, Controller* con, float dt)
 		pos.z = stick.y;
 		motion = true;
 	}
+	stick = con->getRightStick();
+	angle = atan2(-stick.y, stick.x);
+
+	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
+	std::cout << "x: " << temp.x << " y: " << temp.y << " z: " << temp.z << std::endl;
+	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
+	if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1) {}
+	else
+	{
+
+	}
 	if (motion == true)
 	{
 		RigidBody * temp = player->getRigidBody();
 		glm::mat4 transform = temp->getWorldTransform();
 		glm::mat4 translate = glm::translate(pos);
 		transform += translate;
-		player->setTransform(transform[3]);
+		//player->setTransform(transform[3]);
+		player->getRigidBody()->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
+
 	}
-	
+
+	if (con->conButton(XINPUT_GAMEPAD_A))
+	{
+
+
+		RigidBody *box = new RigidBody();
+		box->load("assets\\bullet\\smolBotTemp.btdata");
+
+		// Load the box model
+		LoadObject* groundModel = new LoadObject();
+		groundModel->load("assets\\obj\\smolBot.obj");
+
+		// Create the game objects
+		GameObject* ground = new GameObject(groundModel, box, textures[2], defaultMaterial);
+		glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
+		ground->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
+
+		ground->getRigidBody()->getBody()->applyCentralImpulse(btVector3(-stick.y * 10, 25.0f, -stick.x * 10));
+
+		objects.push_back(ground);
+	}
+	if (con->conButton(XINPUT_GAMEPAD_B))
+	{
+
+	}
 }
