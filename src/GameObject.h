@@ -34,7 +34,7 @@ public:
 	virtual void update(float deltaT);
 
 	void setTransform(glm::vec3 pos, glm::vec4 orientation = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-
+	void setTransform(glm::mat4x4 transform);
 	RigidBody* getRigidBody() { return body; };
 
 

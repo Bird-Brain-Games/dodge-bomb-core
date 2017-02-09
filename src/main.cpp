@@ -521,7 +521,7 @@ void controls(GameObject* player, Controller* con, float dt)
 		glm::mat4 transform = temp->getWorldTransform();
 		glm::mat4 translate = glm::translate(pos);
 		transform += translate;
-		player->setTransform(transform[3]);
+		player->setTransform(transform);
 		//player->getRigidBody()->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
 
 	}

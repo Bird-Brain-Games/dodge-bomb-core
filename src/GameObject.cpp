@@ -57,5 +57,10 @@ void GameObject::update(float dt)
 void GameObject::setTransform(glm::vec3 _pos, glm::vec4 _orientation)
 {
 	getRigidBody()->setWorldTransform(_pos, _orientation);
+
 }
 
+void GameObject::setTransform(glm::mat4x4 transform)
+{
+	getRigidBody()->setWorldTransform(transform);
+}

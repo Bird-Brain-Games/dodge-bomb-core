@@ -289,3 +289,8 @@ void RigidBody::setWorldTransform(glm::vec3 pos)
 	btTransform newTran = btTransform(body->getWorldTransform().getRotation(), btVector3(pos.x, pos.y, pos.z));
 	body->setWorldTransform(newTran);
 }
+
+void RigidBody::setWorldTransform(glm::mat4x4 transform)
+{
+	setWorldTransform(transform[3]);
+}

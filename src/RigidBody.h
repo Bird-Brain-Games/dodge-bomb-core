@@ -61,6 +61,7 @@ public:
 	glm::mat4x4 getWorldTransform();
 	void setWorldTransform(glm::vec3 pos);
 	void setWorldTransform(glm::vec3 pos, glm::vec4 quat);
+	void setWorldTransform(glm::mat4x4 transform);
 
 	//void applyImpulse()
 
