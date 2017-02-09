@@ -47,6 +47,7 @@
     <ClCompile Include="src\menu.cpp">
       <Filter>object</Filter>
     </ClCompile>
+    <ClCompile Include="src\FrameBufferObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h">
@@ -103,6 +104,7 @@
     <ClInclude Include="src\menu.h">
       <Filter>object</Filter>
     </ClInclude>
+    <ClInclude Include="src\FrameBufferObject.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -162,6 +164,15 @@
       <Filter>Shaders\files</Filter>
     </None>
     <None Include="shaders\passThru_f.glsl">
+      <Filter>Shaders\files</Filter>
+    </None>
+    <None Include="shaders\sobel_f.glsl">
+      <Filter>Shaders\files</Filter>
+    </None>
+    <None Include="shaders\unlitTexture_f.glsl">
+      <Filter>Shaders\files</Filter>
+    </None>
+    <None Include="shaders\passThru2_v.glsl">
       <Filter>Shaders\files</Filter>
     </None>
   </ItemGroup>

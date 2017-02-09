@@ -13,8 +13,9 @@ public:
 	//our materials shader
 	std::shared_ptr<Shader> shader;
 	// the unifrom data
-	std::map<std::string, glm::vec4, int> vec4Uniforms;
-	std::map<std::string, glm::mat4, int> mat4Uniforms;
+	std::map<std::string, glm::vec4> vec4Uniforms;
+	std::map<std::string, glm::mat4> mat4Uniforms;
+	std::map<std::string, int> intUniforms;
 
 	Material();
 	//sends the uniform data to our shader

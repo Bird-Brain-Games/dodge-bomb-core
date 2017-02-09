@@ -84,6 +84,7 @@
     <ClCompile Include="src\BulletDebugger.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\controller.cpp" />
+    <ClCompile Include="src\FrameBufferObject.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\loadObject.cpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="src\BulletDebug.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\controller.h" />
+    <ClInclude Include="src\FrameBufferObject.h" />
     <ClInclude Include="src\GameObject.h" />
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\JointTypes.h" />
@@ -120,8 +122,11 @@
   <ItemGroup>
     <None Include="shaders\blinnphong_f.glsl" />
     <None Include="shaders\blinnphong_v.glsl" />
+    <None Include="shaders\passThru2_v.glsl" />
     <None Include="shaders\passThru_f.glsl" />
     <None Include="shaders\passThru_v.glsl" />
+    <None Include="shaders\sobel_f.glsl" />
+    <None Include="shaders\unlitTexture_f.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="bullet\src\BulletCollision\BulletCollision.vcxproj">

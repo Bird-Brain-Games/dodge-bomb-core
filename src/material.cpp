@@ -15,5 +15,7 @@ void Material::sendUniforms()
 		shader->uniformVec3(itr->first, itr->second);
 
 	// Send mat4 uniforms
+	for (auto itr : mat4Uniforms)
+		shader->uniformMat4x4(itr.first, &itr.second);
 	//fix
 };

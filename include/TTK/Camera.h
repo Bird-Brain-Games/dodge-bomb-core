@@ -22,12 +22,14 @@ namespace TTK
 	{
 	public:
 		Camera()
-			: cameraPosition(10.0f),
+			: cameraPosition(15.0f),
 			forwardVector(-10.0f),
 			movementScalar(0.5f),
 			upVector(0.0f, 1.0f, 0.0f),
 			yaw(0.0f),
-			pitch(0.0f)
+			pitch(0.0f),
+			winWidth(1280.0f),
+			winHeight(720.0f)
 		{
 			processMouseMotion(0.0f, 0.0f, 1.0f, 1.0f, 0.03f);
 		}
@@ -35,9 +37,10 @@ namespace TTK
 		// Applies view matrix to OpenGL
 		void update()
 		{
-			auto m = glm::lookAt(cameraPosition, cameraPosition + forwardVector, upVector);
-			glMatrixMode(GL_MODELVIEW);
-			glLoadMatrixf(&m[0][0]);
+			viewMatrix = glm::lookAt(cameraPosition, cameraPosition + forwardVector, upVector);
+			projMatrix = glm::perspective(glm::radians(60.0f), winWidth / winHeight, 0.01f, 100.0f);
+
+			viewProjMatrix = projMatrix * viewMatrix;
 		}
 
 		void processMouseMotion(int newX, int newY, int prevX, int prevY, float dt)
@@ -107,5 +110,12 @@ namespace TTK
 		glm::vec3 upVector;
 		float movementScalar;
 		float yaw, pitch;
+
+		glm::mat4 viewMatrix;
+		glm::mat4 projMatrix;
+		glm::mat4 viewProjMatrix;
+
+		float winWidth;
+		float winHeight;
 	};
 }

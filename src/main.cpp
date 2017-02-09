@@ -26,6 +26,7 @@
 #include "menu.h"
 #include "sound engine.h"
 #include "controller.h"
+#include "FrameBufferObject.h"
 
 Sound theme;
 
@@ -35,6 +36,10 @@ std::vector<Texture*> textures;
 GameWorld *world;
 std::shared_ptr<Material> defaultMaterial;
 std::shared_ptr<Material> animation;
+std::shared_ptr<Material> sobel;
+std::shared_ptr<Material> unlitTexture;
+
+std::shared_ptr<LoadObject> quad;
 
 // Create Shader
 glm::vec3 lightPosition(0.0, 0.0, 10.0);
@@ -49,6 +54,11 @@ float mousepositionX;
 float mousepositionY;
 float lastMousepositionX;
 float lastMousepositionY;
+
+int windowWidth = 1080;
+int windowHeight = 720;
+
+FrameBufferObject fbo;
 
 bool mouseMovement = true;
 // A few conversions to know
@@ -75,28 +85,17 @@ void drawObjects()
 
 void shaderInit()
 {
-	//fix the shade so we dont have to do two steps. or maybe not?
 	defaultMaterial = std::make_shared<Material>();
 	defaultMaterial->shader->load("shaders//blinnphong_v.glsl", "shaders//blinnphong_f.glsl");
+
 	animation = std::make_shared<Material>();
 	animation->shader->load("shaders//skinning.vert", "shaders//shader_texture.frag");
-	/* Initialize Shader */
 
+	unlitTexture = std::make_shared<Material>();
+	unlitTexture->shader->load("shaders//passthru_v2.glsl", "shaders//unlitTexture_f.glsl");
 
-	defaultMaterial->shader->bind();
-	glEnableVertexAttribArray(4);	glBindAttribLocation(defaultMaterial->shader->getID(), 4, "vPos");
-	glEnableVertexAttribArray(5);	glBindAttribLocation(defaultMaterial->shader->getID(), 5, "texture");
-	glEnableVertexAttribArray(6);	glBindAttribLocation(defaultMaterial->shader->getID(), 6, "normal");
-	glEnableVertexAttribArray(7);	glBindAttribLocation(defaultMaterial->shader->getID(), 7, "color");
-	defaultMaterial->shader->unbind();
-
-	animation->shader->bind();
-	glBindAttribLocation(animation->shader->getID(), 4, "inPosition");
-	glBindAttribLocation(animation->shader->getID(), 5, "vertexUV");
-	glBindAttribLocation(animation->shader->getID(), 6, "normal");
-	glBindAttribLocation(animation->shader->getID(), 8, "bones");
-	glBindAttribLocation(animation->shader->getID(), 9, "weights");
-	animation->shader->unbind();
+	sobel = std::make_shared<Material>();
+	sobel->shader->load("shaders//passthru_v.glsl", "shaders//sobel_f.glsl");
 }
 
 void initObjects()
@@ -113,6 +112,10 @@ void initObjects()
 
 	RigidBody *table = new RigidBody();
 	table->load("assets\\bullet\\table.btdata");
+
+	// Load the quad for FBO
+	quad = std::make_shared<LoadObject>();
+	quad->load("assets\\obj\\quad90.obj");
 
 	// Load the box model
 	LoadObject* groundModel = world->getModel("assets\\obj\\5x5box.obj");
@@ -158,10 +161,15 @@ void initObjects()
 	camera.setPosition(glm::vec3(0, 50, 100));
 	camera.setAngle(3.14159012f, 5.98318052f);
 	camera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
-	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
+	camera.setProperties(44.00002, windowWidth / windowHeight, 0.1f, 10000.0f, 0.1f);
 
 	con = new Controller(0);
 	RigidBody::setDebugDraw(true);
+}
+
+void initializeFrameBuffers()
+{
+	fbo.createFrameBuffer(windowWidth, windowHeight, 2, true);
 }
 
 /* function DisplayCallbackFunction(void)
@@ -179,17 +187,42 @@ void DisplayCallbackFunction(void)
 
 	////////////////////////////////////////////////////////////////// Draw Our Scene
 
+	// Draw geometry to frame buffer object
+	fbo.bindFrameBufferForDrawing();
+	fbo.clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
 
+	// Set material properties
+	//materials["default"]->vec4Uniforms["u_lightPos"] = playerCamera.viewMatrix * lightPos;
 
 	drawObjects();
-	//objects[1]->draw(camera);
-
-	//objects[0]->draw(camera);
 	//menu->draw();
 
 	// Draw the debug (if on)
-	if (RigidBody::isDrawingDebug())
-		RigidBody::drawDebug(camera.getView(), camera.getProj());
+	//if (RigidBody::isDrawingDebug())
+	//	RigidBody::drawDebug(camera.getView(), camera.getProj());
+
+	// bind back buffer
+	fbo.unbindFrameBuffer(windowWidth, windowHeight);
+	fbo.clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
+
+	// DEFAULT OUTPUT
+	// Bind FBO texture to texture unit zero
+	fbo.bindTextureForSampling(0, GL_TEXTURE0);
+
+	// Tell opengl which shader we want it to use
+	unlitTexture->shader->bind();
+
+	// Tell the sampler2d named "u_rgb" to look at texture unit 0
+	unlitTexture->shader->uniformInt("u_rgb", 0);
+	unlitTexture->shader->uniformMat4x4("u_mvp", &glm::mat4());
+	//unlitTexture->mat4Uniforms["u_mvp"] = glm::mat4();
+
+	// Send uniform varibles to GPU
+	unlitTexture->sendUniforms();
+
+	quad->draw(unlitTexture->shader);
+
+	// Draw fullscreen quad
 
 	glutSwapBuffers();
 }
@@ -231,7 +264,7 @@ void TimerCallbackFunction(int value)
 	// Use the E key to set the debug draw
 	if (KEYBOARD_INPUT->CheckPressEvent('e') || KEYBOARD_INPUT->CheckPressEvent('E'))
 	{
-		RigidBody::setDebugDraw(true);
+		RigidBody::setDebugDraw(!RigidBody::isDrawingDebug());
 	}
 
 	// Move the camera
@@ -405,7 +438,7 @@ int main(int argc, char **argv)
 
 	// initialize the window and OpenGL properly
 	glutInit(&argc, argv);
-	glutInitWindowSize(1080, 720);
+	glutInitWindowSize(windowWidth, windowHeight);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutCreateWindow("Dodge Bomb");
 
@@ -463,6 +496,7 @@ int main(int argc, char **argv)
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	shaderInit();
+	initializeFrameBuffers();
 
 	// Load Textures
 	Texture* ballTex = new Texture("assets//img//Blake.png", "assets//img//Blake.png", 10.0f);
