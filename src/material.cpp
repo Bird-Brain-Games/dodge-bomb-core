@@ -17,3 +17,4 @@ void Material::sendUniforms()
 	// Send mat4 uniforms
 	//fix
 };
+ 
