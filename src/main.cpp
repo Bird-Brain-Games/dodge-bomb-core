@@ -123,7 +123,7 @@ void initObjects()
 	LoadObject* groundModel = world->getModel("assets\\obj\\5x5box.obj");
 
 	// Load the player animation
-	ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
+	ANILoader* ani = world->getAniModel("assets\\htr\\walk.htr");
 	Holder* robotModel = new Holder(ani);
 
 	// Load the table model
@@ -149,7 +149,7 @@ void initObjects()
 
 	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
-	robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
+	//robot->getRigidBody()->setKinematic();	// Rigidbody no longer deactivates (must do for each player)
 
 
 	objects.push_back(desk);
@@ -538,13 +538,12 @@ void controls(GameObject* player, Controller* con, float dt)
 		motion = true;
 	}
 	stick = con->getRightStick();
-	angle = atan2(-stick.y, stick.x);
+	angle = atan2(-stick.y, stick.x) + 270 * degToRad;
 	
 	static glm::vec3 oldTemp(0, 0, 0);
 	std::cout << angle << std::endl;
 	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
 
-	player->worldTransform = glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f));
 	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
 	if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1) {}
 	else
@@ -555,9 +554,10 @@ void controls(GameObject* player, Controller* con, float dt)
 	{
 		RigidBody * temp = player->getRigidBody();
 		glm::mat4 transform = temp->getWorldTransform();
-		glm::mat4 translate = glm::translate(pos);
-		transform += translate;
-		player->setTransform(transform);
+		glm::vec3 graham = glm::vec3(transform[3]);
+		pos += graham;
+		player->setTransform(pos);
+		std::cout << player->getRigidBody()->getBody()->isKinematicObject();
 		//player->getRigidBody()->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
 
 	}
@@ -588,6 +588,4 @@ void controls(GameObject* player, Controller* con, float dt)
 	{
 
 	}
-
-
 }
