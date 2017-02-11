@@ -69,11 +69,13 @@ bool atlas = false;
 void drawObjects()
 {
 	//glBindTexture(GL_TEXTURE_2D, 0);
-	for (unsigned int i = 0; i < objects.size(); i++)
-	{
-		objects[i]->draw(camera);
+	//for (unsigned int i = 0; i < objects.size(); i++)
+	//{
+	objects[0]->draw(camera);
+	objects[1]->draw(camera);
+	objects[2]->draw(camera);
 		//glBindTexture(GL_TEXTURE_2D, 0);
-	}
+	//}
 }
 
 void shaderInit()
@@ -498,7 +500,7 @@ int main(int argc, char **argv)
 	Texture* groundTex = new Texture("assets//img//desk (diffuse).png", "assets//img//desk (diffuse).png", 10.0f);
 	Texture* robot = new Texture("assets//img//bombot.png", "assets//img//bombot.png", 10.0f);
 	Texture* bomb = new Texture("assets//img//redTex.png", "assets//img//redTex.png", 10.0f);
-	Texture* atlas = new Texture("assets//img//atlas.png", "assets//img//atlas.png", 10.0f);
+	Texture* atlas = new Texture("assets//img//menu_atlas.png", "assets//img//menu_atlas.png", 10.0f);
 
 	textures.push_back(ballTex);
 	textures.push_back(groundTex);
@@ -541,8 +543,8 @@ void controls(GameObject* player, Controller* con, float dt)
 	static glm::vec3 oldTemp(0, 0, 0);
 	std::cout << angle << std::endl;
 	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
-	
-	
+
+	player->worldTransform = glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f));
 	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
 	if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1) {}
 	else
@@ -586,4 +588,6 @@ void controls(GameObject* player, Controller* con, float dt)
 	{
 
 	}
+
+
 }
