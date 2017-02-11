@@ -48,6 +48,26 @@ void GameObject::draw(Camera camera)
 	material->shader->unbind();
 }
 
+void GameObject::draw(Camera camera, bool test)
+{
+	glBindTexture(GL_TEXTURE_2D, 0);
+	material->shader->bind();
+
+	material->shader->uniformMat4x4("mvm", &camera.getView());
+	material->shader->uniformMat4x4("prm", &camera.getProj());
+
+	// Bind texture here if has one
+	if (tex != nullptr)
+	{
+		tex->bind(material->shader);
+	}
+
+	// Compute local transformation
+	material->shader->uniformMat4x4("localTransform", &worldTransform);
+	model->draw(material->shader);
+	material->shader->unbind();
+}
+
 void GameObject::update(float dt)
 {
 	model->update(dt);
