@@ -263,6 +263,13 @@ void RigidBody::systemUpdate(float deltaTasSeconds, int maxStep)
 	Sys.update(deltaTasSeconds, maxStep);
 }
 
+void RigidBody::setKinematic()
+{
+	body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+	body->setActivationState(DISABLE_DEACTIVATION);
+	std::cout << body->isKinematicObject() << std::endl;
+}
+
 void RigidBody::drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 const& projectionMatrix)
 {
 	Sys.drawDebug(modelViewMatrix, projectionMatrix);
@@ -279,15 +286,27 @@ glm::mat4x4 RigidBody::getWorldTransform()
 	return glm::make_mat4x4((float*)m);
 }
 
-void RigidBody::setWorldTransform(glm::vec3 pos, glm::vec4 quat)
+void RigidBody::setWorldTransform(glm::vec3 pos, glm::vec3 rot)
 {
-	btTransform newTran(btQuaternion(quat.x, quat.y, quat.z, quat.w), btVector3(pos.x, pos.y, pos.z));
+	glm::mat3 x = glm::rotate(rot.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat3 y = glm::rotate(rot.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat3 z = glm::rotate(rot.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat3 rotations = z * y * x;
+	btMatrix3x3 bullet(rotations[0].x, rotations[0].y, rotations[0].z,
+		rotations[1].x, rotations[1].y, rotations[1].z,
+		rotations[2].x, rotations[2].y, rotations[2].z);
+	btTransform newTran(bullet, btVector3(pos.x, pos.y, pos.z));
 	body->setWorldTransform(newTran);
 }
 
 void RigidBody::setWorldTransform(glm::vec3 pos)
 {
 	btTransform newTran = btTransform(body->getWorldTransform().getRotation(), btVector3(pos.x, pos.y, pos.z));
+	if (body->isKinematicObject())
+	{
+		body->getMotionState()->setWorldTransform(newTran);
+		return;
+	}
 	body->setWorldTransform(newTran);
 }
 

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <GLM\mat4x4.hpp>
+#include <GLM\gtx\transform.hpp>
 #include "BulletDebug.h"
 #include <btBulletDynamicsCommon.h>
 
@@ -60,18 +61,19 @@ public:
 	bool load(std::string fileName);
 	glm::mat4x4 getWorldTransform();
 	void setWorldTransform(glm::vec3 pos);
-	void setWorldTransform(glm::vec3 pos, glm::vec4 quat);
+	void setWorldTransform(glm::vec3 pos, glm::vec3 quat);
 	void setWorldTransform(glm::mat4x4 transform);
-
+	
 	//void applyImpulse()
 
 	btRigidBody* getBody() { return body; }
-
+	
 public:
 	static void systemUpdate(float deltaTasSeconds, int maxStep);
 	static void drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 const& projectionMatrix);
 	static void setDebugDraw(bool isDrawing) { Sys.setDebugDraw(isDrawing); }
 	static bool isDrawingDebug() { return Sys.isDrawingDebug(); }
+	void setKinematic();
 protected:
 	static PhysicsEngine Sys;
 
