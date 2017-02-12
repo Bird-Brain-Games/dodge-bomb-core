@@ -47,6 +47,9 @@
     <ClCompile Include="src\menu.cpp">
       <Filter>object</Filter>
     </ClCompile>
+    <ClCompile Include="src\Player.cpp">
+      <Filter>object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h">
@@ -101,6 +104,9 @@
       <Filter>object\loaders\base</Filter>
     </ClInclude>
     <ClInclude Include="src\menu.h">
+      <Filter>object</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Player.h">
       <Filter>object</Filter>
     </ClInclude>
   </ItemGroup>

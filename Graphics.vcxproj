@@ -91,6 +91,7 @@
     <ClCompile Include="src\material.cpp" />
     <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\node.cpp" />
+    <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\sound engine.cpp" />
@@ -111,6 +112,7 @@
     <ClInclude Include="src\material.h" />
     <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\node.h" />
+    <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\RigidBody.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\sound engine.h" />

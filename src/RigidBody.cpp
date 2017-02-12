@@ -103,6 +103,11 @@ void PhysicsEngine::addRigidBody(btRigidBody* rb)
 	dynamicsWorld->addRigidBody(rb);
 }
 
+void PhysicsEngine::addRigidBody(btRigidBody* rb, short group, short mask)
+{
+	dynamicsWorld->addRigidBody(rb, group, mask);
+}
+
 void PhysicsEngine::removeRigidBody(btRigidBody* rb)
 {
 	dynamicsWorld->removeRigidBody(rb);
@@ -227,6 +232,15 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 RigidBody::RigidBody()
 {
 	body = nullptr;
+	group = -1;
+	mask = -1;
+}
+
+RigidBody::RigidBody(short _group, short _mask)
+{
+	body = nullptr;
+	group = _group;
+	mask = _mask;
 }
 
 RigidBody::~RigidBody()
@@ -245,7 +259,10 @@ bool RigidBody::load(std::string fileName)
 		btRigidBody::btRigidBodyConstructionInfo* rigidCI = Sys.getRigidBodyCI(fileName);
 		body = new btRigidBody(*rigidCI);
 		body->setMotionState(new btDefaultMotionState());
-		Sys.addRigidBody(body);
+		if (mask >= 0 && group >= 0)
+			Sys.addRigidBody(body, group, mask);
+		else
+			Sys.addRigidBody(body);
 		return true;
 
 	}

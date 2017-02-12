@@ -8,7 +8,6 @@
 #include "BulletDebug.h"
 #include <btBulletDynamicsCommon.h>
 
-
 // Class to manage physics operations and memory
 class PhysicsEngine
 {
@@ -23,6 +22,7 @@ public:
 
 	btRigidBody::btRigidBodyConstructionInfo* getRigidBodyCI(std::string fileName);
 	void addRigidBody(btRigidBody* rb);
+	void addRigidBody(btRigidBody* rb, short group, short mask);
 	void removeRigidBody(btRigidBody* rb);
 
 	void setDebugDraw(bool isDrawing);
@@ -55,6 +55,7 @@ class RigidBody
 {
 public:
 	RigidBody();
+	RigidBody(short _group, short _mask);
 	~RigidBody();
 
 	bool load(std::string fileName);
@@ -77,4 +78,6 @@ protected:
 
 private:
 	btRigidBody *body;
+
+	short group, mask;
 };

@@ -113,7 +113,7 @@ void initObjects()
 	RigidBody *box = new RigidBody();
 	//box->load("assets\\bullet\\box5x5.btdata");
 
-	RigidBody *rbRobot = new RigidBody();
+	RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
 	rbRobot->load("assets\\bullet\\bombot.btdata");
 
 	RigidBody *table = new RigidBody();
@@ -149,6 +149,8 @@ void initObjects()
 
 	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
+	//robot->getRigidBody()->getBody()->getMotionState()->setWorldTransform()
+	//std::cout << robot->getRigidBody()->getBody()->isKinematicObject();
 	robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
 
 
@@ -541,7 +543,7 @@ void controls(GameObject* player, Controller* con, float dt)
 	angle = atan2(-stick.y, stick.x);
 	
 	static glm::vec3 oldTemp(0, 0, 0);
-	std::cout << angle << std::endl;
+	//std::cout << angle << std::endl;
 	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
 
 	player->worldTransform = glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f));
