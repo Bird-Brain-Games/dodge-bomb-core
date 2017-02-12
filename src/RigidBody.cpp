@@ -266,8 +266,13 @@ void RigidBody::systemUpdate(float deltaTasSeconds, int maxStep)
 void RigidBody::setKinematic()
 {
 	body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-	body->setActivationState(DISABLE_DEACTIVATION);
+	setDeactive();
 	std::cout << body->isKinematicObject() << std::endl;
+}
+
+void RigidBody::setDeactive()
+{
+	body->setActivationState(DISABLE_DEACTIVATION);
 }
 
 void RigidBody::drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 const& projectionMatrix)

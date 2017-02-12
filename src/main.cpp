@@ -29,6 +29,9 @@
 
 Sound theme;
 
+bool motion = false;
+bool mouseClick = false;
+
 // create game object
 std::vector<GameObject*> objects;
 std::vector<Texture*> textures;
@@ -149,8 +152,7 @@ void initObjects()
 
 	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
-	//robot->getRigidBody()->setKinematic();	// Rigidbody no longer deactivates (must do for each player)
-
+	robot->getRigidBody()->setDeactive();	// Rigidbody no longer deactivates (must do for each player)
 
 	objects.push_back(desk);
 	objects.push_back(robot);
@@ -164,7 +166,7 @@ void initObjects()
 	camera.setAngle(3.14159012f, 5.98318052f);
 	//camera.setAngle(-1.57, 1.57); // show from bottom so better see bomb throw
 	camera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
-	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
+	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.001f);
 
 	con = new Controller(0);
 //	RigidBody::setDebugDraw(true);
@@ -313,6 +315,17 @@ void TimerCallbackFunction(int value)
 	theme.systemUpdate();
 
 	//// delay timestep to maintain framerate
+	//camera rotation
+	if (mouseClick == true)
+	{
+		camera.mouseMotion(mousepositionX, mousepositionY, lastMousepositionX, lastMousepositionY);
+	}
+	if (motion == false)
+	{
+		lastMousepositionX = mousepositionX;
+		lastMousepositionY = mousepositionY;
+	}
+	motion = false;
 	
 	glutTimerFunc(FRAME_DELAY, TimerCallbackFunction, 0);
 }
@@ -329,7 +342,7 @@ void WindowReshapeCallbackFunction(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0f, (float)w / h, 0.1f, 10000.0f);
-	camera.setProperties(45.0f, float(w / h), 0.1f, 10000.0f, 0.1f);
+	camera.setProperties(45.0f, float(w / h), 0.1f, 10000.0f, 0.01f);
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -337,20 +350,20 @@ void WindowReshapeCallbackFunction(int w, int h)
 
 void MouseClickCallbackFunction(int button, int state, int x, int y)
 {
-	// Handle mouse clicks
-	// Handle mouse clicks
-	//cameraLock = true;
-	//if (state == GLUT_DOWN)
-	//{
-	//	if (button == 0)
-	//	{
-	//		cameraLock = false;
-	//	}
-	//	else
-	//	{
-	//		cameraLock = true;
-	//	}
-	//}
+	
+	if (state == GLUT_DOWN)
+	{
+		mouseClick = true;
+	}
+	else
+	{
+		mouseClick = false;
+	}
+
+	lastMousepositionX = mousepositionX;
+	lastMousepositionY = mousepositionY;
+	mousepositionX = x;
+	mousepositionY = y;
 }
 
 
@@ -360,6 +373,7 @@ void MouseClickCallbackFunction(int button, int state, int x, int y)
 */
 void MouseMotionCallbackFunction(int x, int y)
 {
+	motion = true;
 	lastMousepositionX = mousepositionX;
 	lastMousepositionY = mousepositionY;
 	mousepositionX = x;
@@ -372,7 +386,7 @@ void MouseMotionCallbackFunction(int x, int y)
 */
 void MousePassiveMotionCallbackFunction(int x, int y)
 {
-
+	motion = true;
 	lastMousepositionX = mousepositionX;
 	lastMousepositionY = mousepositionY;
 	mousepositionX = x;
@@ -543,13 +557,11 @@ void controls(GameObject* player, Controller* con, float dt)
 	static glm::vec3 oldTemp(0, 0, 0);
 	std::cout << angle << std::endl;
 	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
-
+	temp += pos;
 	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
-	if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1) {}
-	else
-	{
 
-	}
+
+
 	if (motion == true)
 	{
 		RigidBody * temp = player->getRigidBody();
@@ -565,23 +577,25 @@ void controls(GameObject* player, Controller* con, float dt)
 	if (con->conButton(XINPUT_GAMEPAD_A))
 	{
 
-		objects[2]->getRigidBody()->getBody()->clearForces();//clears force not impulse?
-
-		glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
-		
-		glm::vec2 normalized = glm::vec2(0);
-
 		if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1)
-			normalized = glm::normalize(glm::vec2(stick.x, stick.y));
+		{
+			objects[2]->setTransform(temp, glm::vec3(0.0f, 0.0f, 0.0f));
 
-		temp.x += normalized.x * 10;
-		temp.z += normalized.y * 10;
+			objects[2]->getRigidBody()->getBody()->clearForces();//clears force not impulse?
 
-		objects[2]->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
+			glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
+
+
+			glm::vec3 dir = glm::vec3(-stick.y, 0.0f, -stick.x);
+
+			dir = glm::normalize(dir);
+
+			objects[2]->getRigidBody()->getBody()->applyCentralImpulse(btVector3(dir.x * 50, 25.0f, dir.y * 50));
+
+		}
+
+	
 		
-		std::cout << "x: " << normalized.x << "y: " << normalized.y << std::endl;
-		objects[2]->getRigidBody()->getBody()->applyCentralImpulse(btVector3(normalized.x * 50, 25.0f, normalized.y * 50));
-
 		
 	}
 	if (con->conButton(XINPUT_GAMEPAD_B))

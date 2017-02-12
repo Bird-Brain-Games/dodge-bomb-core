@@ -74,6 +74,7 @@ public:
 	static void setDebugDraw(bool isDrawing) { Sys.setDebugDraw(isDrawing); }
 	static bool isDrawingDebug() { return Sys.isDrawingDebug(); }
 	void setKinematic();
+	void setDeactive();
 protected:
 	static PhysicsEngine Sys;
 
