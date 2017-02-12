@@ -19,7 +19,7 @@ Menu::Menu(Texture* _tex, int _width, int _height)
 	glBindVertexArray(vaoD);
 	glGenBuffers(1, &vboD);
 	dim = glm::vec2(_width, _height);
-	spot = glm::vec2(0);
+	spot = glm::vec2(0, 1);
 }
 
 void Menu::setSpot(glm::vec2 _spot)

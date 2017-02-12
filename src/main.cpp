@@ -65,7 +65,7 @@ int keyDown[255];
 
 Menu* menu;
 
-bool atlas = false;
+bool atlas = true;
 
 
 // separate, cleaner, draw function
@@ -442,7 +442,7 @@ void InitErrorFuncCallbackFunction(const char *fmt, va_list ap)
 
 int main(int argc, char **argv)
 {
-	theme.load("assets\\media\\theme.wav");
+	theme.load("assets\\media\\MenuTheme.wav");
 	theme.play();
 	theme.pause();
 	// Set up FreeGLUT error callbacks
