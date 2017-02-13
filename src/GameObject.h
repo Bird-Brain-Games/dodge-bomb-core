@@ -81,6 +81,11 @@ public:
 	void update(float deltaT);
 	void draw(Camera _camera);
 private:
+	// how long the bomb has been thrown for and how long it lasts
+	float timer;
+	float duration;
+	bool thrown;
+
 	GameObject* bomb;
 	Controller con;
 	float angle;

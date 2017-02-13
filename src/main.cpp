@@ -28,6 +28,8 @@
 
 Sound theme;
 
+Controller menus(0);
+
 bool motion = false;
 bool mouseClick = false;
 
@@ -76,6 +78,7 @@ void drawObjects()
 	for (unsigned int i = 0; i < objects.size(); i++)
 	{
 	objects[i]->draw(camera);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
@@ -145,7 +148,7 @@ void initObjects()
 		LoadObject* bombModel = new LoadObject();
 		bombModel->load("assets\\obj\\bomb.obj");
 		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
-		Player* robot = new Player(bomb, 0, robotModel, rbRobot, textures[2], animation);
+		Player* robot = new Player(bomb, 1, robotModel, rbRobot, textures[2], animation);
 		robot->setTransform(glm::vec3(5.f, 45.0f, 5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
 		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
@@ -162,7 +165,7 @@ void initObjects()
 		LoadObject* bombModel = new LoadObject();
 		bombModel->load("assets\\obj\\bomb.obj");
 		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
-		Player* robot = new Player(bomb, 1, robotModel, rbRobot, textures[2], animation);
+		Player* robot = new Player(bomb, 0, robotModel, rbRobot, textures[2], animation);
 		robot->setTransform(glm::vec3(5.f, 45.0f, -5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
 		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
@@ -199,7 +202,7 @@ void initObjects()
 		Player* robot = new Player(bomb, 3, robotModel, rbRobot, textures[2], animation);
 		robot->setTransform(glm::vec3(-5.f, 45.0f, -5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
-	robot->getRigidBody()->setDeactive();	// Rigidbody no longer deactivates (must do for each player)
+		robot->getRigidBody()->setDeactive();	// Rigidbody no longer deactivates (must do for each player)
 		objects.push_back(robot);
 	}
 	
@@ -323,9 +326,9 @@ void TimerCallbackFunction(int value)
 	{
 		rotation -= 1;
 	}
-	if (KEYBOARD_INPUT->CheckPressEvent('z') || KEYBOARD_INPUT->CheckPressEvent('Z'))
+	if (menus.conButton(XINPUT_GAMEPAD_A))
 	{
-		atlas = !atlas;
+		atlas = false;
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('x') || KEYBOARD_INPUT->CheckPressEvent('X'))
 	{
@@ -494,9 +497,9 @@ void InitErrorFuncCallbackFunction(const char *fmt, va_list ap)
 
 int main(int argc, char **argv)
 {
-	theme.load("assets\\media\\MenuTheme.wav");
+	theme.load("assets\\media\\themes.wav");
 	theme.play();
-	theme.pause();
+	//theme.pause();
 	// Set up FreeGLUT error callbacks
 	glutInitErrorFunc(InitErrorFuncCallbackFunction);
 
@@ -585,14 +588,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-
-
-		std::cout << player->getRigidBody()->getBody()->isKinematicObject();
-
-
-		{
-			objects[2]->setTransform(temp, glm::vec3(0.0f, 0.0f, 0.0f));
-
-			objects[2]->getRigidBody()->getBody()->applyCentralImpulse(btVector3(dir.x * 50, 25.0f, dir.y * 50));
-
-		}
