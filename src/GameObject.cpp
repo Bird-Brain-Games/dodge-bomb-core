@@ -96,6 +96,11 @@ Player::Player(GameObject* _bomb, int _index, Loader* _model, RigidBody* _body, 
 	:GameObject(_model, _body, _tex, _material, _tag), con(_index)
 {
 		bomb = _bomb;
+		bomb->setTransform(glm::vec3(0.0, -15.0, 0.0));
+
+		timer = 0;
+		duration = 3;
+		thrown = false;
 }
 
 Player::~Player()
@@ -107,14 +112,28 @@ void Player::draw(Camera _camera)
 {
 	bomb->draw(_camera);
 	GameObject::draw(_camera);
+	this->getRigidBody()->getBody()->setAngularFactor(btVector3(0, 1, 0));
 }
 
 void Player::update(float _dt)
 {
+	
+	if (thrown == true)
+	{
+		timer += _dt;
+		if (timer > duration)
+		{
+			timer = 0;
+			thrown = false;
+			bomb->setTransform(glm::vec3(0.0f, -50.0f, 0.0f));
+		}
+	}
+
 	controls();
 	GameObject::update(_dt);
 }
 
+const float degToRad = 3.14159f / 180.0f;
 void Player::controls()
 {
 	GameObject* player = this;
@@ -135,12 +154,11 @@ void Player::controls()
 		motion = true;
 	}
 	stick = con.getRightStick();
-	angle = atan2(-stick.y, stick.x);
+	angle = atan2(-stick.y, stick.x) + 270 * degToRad;
 
 	
 	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
 
-	player->worldTransform = glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f));
 	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
 
 	if (motion == true)
@@ -154,9 +172,9 @@ void Player::controls()
 
 	}
 
-	if (con.conButton(XINPUT_GAMEPAD_A))
+	if (con.conButton(XINPUT_GAMEPAD_RIGHT_SHOULDER) && thrown == false)
 	{
-
+		bomb->getRigidBody()->getBody()->setLinearVelocity(btVector3(0, 0, 0));
 		bomb->getRigidBody()->getBody()->clearForces();//clears force not impulse?
 
 		glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
@@ -166,21 +184,15 @@ void Player::controls()
 		if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1)
 			normalized = glm::normalize(glm::vec2(stick.x, stick.y));
 
-		temp.x += normalized.x * 10;
-		temp.z += normalized.y * 10;
 
-		bomb->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
+		bomb->setTransform(temp, glm::vec4(0.0f, 0.0, 0.0f, 1.f));
 
 		std::cout << "x: " << normalized.x << "y: " << normalized.y << std::endl;
-		bomb->getRigidBody()->getBody()->applyCentralImpulse(btVector3(normalized.x * 50, 25.0f, normalized.y * 50));
 
+		bomb->getRigidBody()->getBody()->applyCentralImpulse(btVector3(normalized.x * 150, 75.0f, normalized.y * 150));
 
-	}
-	if (con.conButton(XINPUT_GAMEPAD_B))
-	{
+		thrown = true;
 
 	}
-
-
 
 }
