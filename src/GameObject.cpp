@@ -74,8 +74,13 @@ void GameObject::update(float dt)
 
 }
 
-void GameObject::setTransform(glm::vec3 _pos, glm::vec4 _orientation)
+void GameObject::setTransform(glm::vec3 _pos, glm::vec3 _orientation)
 {
+	if (_orientation == glm::vec3(0.0f))
+	{
+		getRigidBody()->setWorldTransform(_pos);
+		return;
+	}
 	getRigidBody()->setWorldTransform(_pos, _orientation);
 
 }

@@ -28,6 +28,9 @@
 
 Sound theme;
 
+bool motion = false;
+bool mouseClick = false;
+
 // create game object
 std::vector<GameObject*> objects;
 std::vector<Player*> players;
@@ -63,7 +66,7 @@ int keyDown[255];
 
 Menu* menu;
 
-bool atlas = false;
+bool atlas = true;
 
 
 // separate, cleaner, draw function
@@ -196,11 +199,10 @@ void initObjects()
 		Player* robot = new Player(bomb, 3, robotModel, rbRobot, textures[2], animation);
 		robot->setTransform(glm::vec3(-5.f, 45.0f, -5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
-		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
+	robot->getRigidBody()->setDeactive();	// Rigidbody no longer deactivates (must do for each player)
 		objects.push_back(robot);
 	}
 	
-
 
 	objects.push_back(desk);
 	//	objects.push_back(ground);
@@ -212,7 +214,7 @@ void initObjects()
 	camera.setAngle(3.14159012f, 5.98318052f);
 	//camera.setAngle(-1.57, 1.57); // show from bottom so better see bomb throw
 	camera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
-	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
+	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.001f);
 
 	// initializes the positions of all the starting objects
 	RigidBody::systemUpdate(1, 10);
@@ -365,6 +367,17 @@ void TimerCallbackFunction(int value)
 	theme.systemUpdate();
 
 	//// delay timestep to maintain framerate
+	//camera rotation
+	if (mouseClick == true)
+	{
+		camera.mouseMotion(mousepositionX, mousepositionY, lastMousepositionX, lastMousepositionY);
+	}
+	if (motion == false)
+	{
+		lastMousepositionX = mousepositionX;
+		lastMousepositionY = mousepositionY;
+	}
+	motion = false;
 	
 	glutTimerFunc(FRAME_DELAY, TimerCallbackFunction, 0);
 }
@@ -381,7 +394,7 @@ void WindowReshapeCallbackFunction(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0f, (float)w / h, 0.1f, 10000.0f);
-	camera.setProperties(45.0f, float(w / h), 0.1f, 10000.0f, 0.1f);
+	camera.setProperties(45.0f, float(w / h), 0.1f, 10000.0f, 0.01f);
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -389,20 +402,20 @@ void WindowReshapeCallbackFunction(int w, int h)
 
 void MouseClickCallbackFunction(int button, int state, int x, int y)
 {
-	// Handle mouse clicks
-	// Handle mouse clicks
-	//cameraLock = true;
-	//if (state == GLUT_DOWN)
-	//{
-	//	if (button == 0)
-	//	{
-	//		cameraLock = false;
-	//	}
-	//	else
-	//	{
-	//		cameraLock = true;
-	//	}
-	//}
+	
+	if (state == GLUT_DOWN)
+	{
+		mouseClick = true;
+	}
+	else
+	{
+		mouseClick = false;
+	}
+
+	lastMousepositionX = mousepositionX;
+	lastMousepositionY = mousepositionY;
+	mousepositionX = x;
+	mousepositionY = y;
 }
 
 
@@ -412,6 +425,7 @@ void MouseClickCallbackFunction(int button, int state, int x, int y)
 */
 void MouseMotionCallbackFunction(int x, int y)
 {
+	motion = true;
 	lastMousepositionX = mousepositionX;
 	lastMousepositionY = mousepositionY;
 	mousepositionX = x;
@@ -424,7 +438,7 @@ void MouseMotionCallbackFunction(int x, int y)
 */
 void MousePassiveMotionCallbackFunction(int x, int y)
 {
-
+	motion = true;
 	lastMousepositionX = mousepositionX;
 	lastMousepositionY = mousepositionY;
 	mousepositionX = x;
@@ -480,7 +494,7 @@ void InitErrorFuncCallbackFunction(const char *fmt, va_list ap)
 
 int main(int argc, char **argv)
 {
-	theme.load("assets\\media\\theme.wav");
+	theme.load("assets\\media\\MenuTheme.wav");
 	theme.play();
 	theme.pause();
 	// Set up FreeGLUT error callbacks
@@ -573,3 +587,12 @@ int main(int argc, char **argv)
 }
 
 
+		std::cout << player->getRigidBody()->getBody()->isKinematicObject();
+
+
+		{
+			objects[2]->setTransform(temp, glm::vec3(0.0f, 0.0f, 0.0f));
+
+			objects[2]->getRigidBody()->getBody()->applyCentralImpulse(btVector3(dir.x * 50, 25.0f, dir.y * 50));
+
+		}
