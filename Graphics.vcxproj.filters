@@ -156,6 +156,9 @@
     <Filter Include="object\loaders\base">
       <UniqueIdentifier>{9a87bb0f-6998-4611-a1b2-9a2522c072c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="FBO">
+      <UniqueIdentifier>{ebc8541a-25d3-422f-bba2-bd215314cfd8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\passThru_v.glsl">
