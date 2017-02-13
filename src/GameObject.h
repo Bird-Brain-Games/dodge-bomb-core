@@ -67,3 +67,23 @@ private:
 	// Unique name
 	std::string name;
 };
+
+// Player class takes in player input and performs movement
+// It also handles collision between players and bombs.
+
+
+class Player : public GameObject
+{
+public:
+	Player(GameObject* _bomb, int _index, Loader* _model, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material, std::string _tag = "Undefined");
+	~Player();
+	void controls();
+	void update(float deltaT);
+	void draw(Camera _camera);
+private:
+	GameObject* bomb;
+	Controller con;
+	float angle;
+	
+	//btBroadphaseProxy::
+};
