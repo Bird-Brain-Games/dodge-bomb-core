@@ -25,12 +25,13 @@
 #include "material.h"
 #include "menu.h"
 #include "sound engine.h"
-#include "controller.h"
 
 Sound theme;
 
 // create game object
 std::vector<GameObject*> objects;
+std::vector<Player*> players;
+
 std::vector<Texture*> textures;
 GameWorld *world;
 std::shared_ptr<Material> defaultMaterial;
@@ -56,7 +57,7 @@ const float degToRad = 3.14159f / 180.0f;
 const float radToDeg = 180.0f / 3.14159f;
 
 Controller *con;
-void controls(GameObject* player, Controller* con, float dt);
+
 
 int keyDown[255];
 
@@ -68,14 +69,12 @@ bool atlas = false;
 // separate, cleaner, draw function
 void drawObjects()
 {
-	//glBindTexture(GL_TEXTURE_2D, 0);
-	//for (unsigned int i = 0; i < objects.size(); i++)
-	//{
-	objects[0]->draw(camera);
-	objects[1]->draw(camera);
-	objects[2]->draw(camera);
-		//glBindTexture(GL_TEXTURE_2D, 0);
-	//}
+	glBindTexture(GL_TEXTURE_2D, 0);
+	for (unsigned int i = 0; i < objects.size(); i++)
+	{
+	objects[i]->draw(camera);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 void shaderInit()
@@ -113,8 +112,7 @@ void initObjects()
 	RigidBody *box = new RigidBody();
 	//box->load("assets\\bullet\\box5x5.btdata");
 
-	RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
-	rbRobot->load("assets\\bullet\\bombot.btdata");
+
 
 	RigidBody *table = new RigidBody();
 	table->load("assets\\bullet\\table.btdata");
@@ -123,40 +121,88 @@ void initObjects()
 	LoadObject* groundModel = world->getModel("assets\\obj\\5x5box.obj");
 
 	// Load the player animation
-	ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
-	Holder* robotModel = new Holder(ani);
+
 
 	// Load the table model
 	LoadObject* tableModel = world->getModel("assets\\obj\\desk2.obj");
 
 	// Create the game objects
 	GameObject* ground = new GameObject(groundModel, box, textures[1], defaultMaterial);
-	GameObject* robot = new GameObject(robotModel, rbRobot, textures[2], animation);
+	
 	GameObject* desk = new GameObject(tableModel, table, textures[1], defaultMaterial);
-	// set the 
 
-	RigidBody *bombBody = new RigidBody();
-	bombBody->load("assets\\bullet\\smolBotTemp.btdata");
+	// all loading for player
+	{
+		ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
+		Holder* robotModel = new Holder(ani);
+		RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
+		rbRobot->load("assets\\bullet\\bombot.btdata");
+		RigidBody *bombBody = new RigidBody();
+		bombBody->load("assets\\bullet\\smolBotTemp.btdata");
+		LoadObject* bombModel = new LoadObject();
+		bombModel->load("assets\\obj\\bomb.obj");
+		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
+		Player* robot = new Player(bomb, 0, robotModel, rbRobot, textures[2], animation);
+		robot->setTransform(glm::vec3(5.f, 45.0f, 5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
+		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
+		objects.push_back(robot);
+	}
 
-	// Load the box model
-	LoadObject* bombModel = new LoadObject();
-	bombModel->load("assets\\obj\\bomb.obj");
+	{
+		ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
+		Holder* robotModel = new Holder(ani);
+		RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
+		rbRobot->load("assets\\bullet\\bombot.btdata");
+		RigidBody *bombBody = new RigidBody();
+		bombBody->load("assets\\bullet\\smolBotTemp.btdata");
+		LoadObject* bombModel = new LoadObject();
+		bombModel->load("assets\\obj\\bomb.obj");
+		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
+		Player* robot = new Player(bomb, 1, robotModel, rbRobot, textures[2], animation);
+		robot->setTransform(glm::vec3(5.f, 45.0f, -5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
+		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
+		objects.push_back(robot);
+	}
 
-	// Create the game objects
-	GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
+	{
+		ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
+		Holder* robotModel = new Holder(ani);
+		RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
+		rbRobot->load("assets\\bullet\\bombot.btdata");
+		RigidBody *bombBody = new RigidBody();
+		bombBody->load("assets\\bullet\\smolBotTemp.btdata");
+		LoadObject* bombModel = new LoadObject();
+		bombModel->load("assets\\obj\\bomb.obj");
+		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
+		Player* robot = new Player(bomb, 2, robotModel, rbRobot, textures[2], animation);
+		robot->setTransform(glm::vec3(-5.f, 45.0f, 5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
+		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
+		objects.push_back(robot);
+	}
+
+	{
+		ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
+		Holder* robotModel = new Holder(ani);
+		RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
+		rbRobot->load("assets\\bullet\\bombot.btdata");
+		RigidBody *bombBody = new RigidBody();
+		bombBody->load("assets\\bullet\\smolBotTemp.btdata");
+		LoadObject* bombModel = new LoadObject();
+		bombModel->load("assets\\obj\\bomb.obj");
+		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
+		Player* robot = new Player(bomb, 3, robotModel, rbRobot, textures[2], animation);
+		robot->setTransform(glm::vec3(-5.f, 45.0f, -5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
+		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
+		objects.push_back(robot);
+	}
 	
 
 
-	robot->setTransform(glm::vec3(0.f, 45.0f, 0.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
-	//robot->getRigidBody()->getBody()->getMotionState()->setWorldTransform()
-	//std::cout << robot->getRigidBody()->getBody()->isKinematicObject();
-	robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
-
-
 	objects.push_back(desk);
-	objects.push_back(robot);
-	objects.push_back(bomb);
 	//	objects.push_back(ground);
 
 		//menu stuff
@@ -168,8 +214,9 @@ void initObjects()
 	camera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
 	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.1f);
 
-	con = new Controller(0);
-//	RigidBody::setDebugDraw(true);
+	// initializes the positions of all the starting objects
+	RigidBody::systemUpdate(1, 10);
+	//RigidBody::setDebugDraw(true);
 }
 
 /* function DisplayCallbackFunction(void)
@@ -301,9 +348,12 @@ void TimerCallbackFunction(int value)
 
 	// Bullet step through world simulation
 	RigidBody::systemUpdate(deltaTasSeconds, 10);
+	
 
-
-	controls(objects[1], con, deltaTasSeconds);
+	for (unsigned int i = 0; i < objects.size(); i++)
+	{
+	objects[i]->update(deltaTasSeconds);
+	}
 
 	//// force draw call next tick
 	glutPostRedisplay();
@@ -522,74 +572,4 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-float angle;
 
-void controls(GameObject* player, Controller* con, float dt)
-{
-	Coords stick = con->getLeftStick();
-	glm::vec3 pos = glm::vec3(0.0f);
-	bool motion = false;
-	if (stick.x < -0.1 || stick.x > 0.1)
-	{
-		pos.x = stick.x/2;
-		motion = true;
-	}
-	if (stick.y < -0.1 || stick.y > 0.1)
-	{
-		pos.z = -stick.y/2;
-		motion = true;
-	}
-	stick = con->getRightStick();
-	angle = atan2(-stick.y, stick.x);
-	
-	static glm::vec3 oldTemp(0, 0, 0);
-	//std::cout << angle << std::endl;
-	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
-
-	player->worldTransform = glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f));
-	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
-	if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1) {}
-	else
-	{
-
-	}
-	if (motion == true)
-	{
-		RigidBody * temp = player->getRigidBody();
-		glm::mat4 transform = temp->getWorldTransform();
-		glm::mat4 translate = glm::translate(pos);
-		transform += translate;
-		player->setTransform(transform);
-		//player->getRigidBody()->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
-
-	}
-
-	if (con->conButton(XINPUT_GAMEPAD_A))
-	{
-
-		objects[2]->getRigidBody()->getBody()->clearForces();//clears force not impulse?
-
-		glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
-		
-		glm::vec2 normalized = glm::vec2(0);
-
-		if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1)
-			normalized = glm::normalize(glm::vec2(stick.x, stick.y));
-
-		temp.x += normalized.x * 10;
-		temp.z += normalized.y * 10;
-
-		objects[2]->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
-		
-		std::cout << "x: " << normalized.x << "y: " << normalized.y << std::endl;
-		objects[2]->getRigidBody()->getBody()->applyCentralImpulse(btVector3(normalized.x * 50, 25.0f, normalized.y * 50));
-
-		
-	}
-	if (con->conButton(XINPUT_GAMEPAD_B))
-	{
-
-	}
-
-
-}
