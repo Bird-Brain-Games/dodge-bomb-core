@@ -52,11 +52,13 @@ void Camera::setAngle(float x, float y)
 	angle = glm::vec2(x, y);
 }
 
-void Camera::setProperties(float _FOV, float _windowRatio, float _minRange, float _maxRange, float _speed)
+void Camera::setProperties(float _FOV, float h, float w, float _minRange, float _maxRange, float _speed)
 {
 	//projection variables
 	FOV = _FOV;
-	windowRatio = _windowRatio;
+	width = w;
+	height = h;
+	windowRatio = w/h;
 	minRange = _minRange;
 	maxRange = _maxRange;
 	speed = _speed;
@@ -86,7 +88,9 @@ void Camera::setPosition(glm::vec3 _pos)
 void Camera::update()
 {
 	viewMatrix = glm::lookAt(pos, pos + direction, up);
-	projectionMatrix = glm::perspective(FOV, windowRatio, minRange, maxRange);
+//	projectionMatrix = glm::ortho(0.0f , width, 0.0f, height);
+
+	glm::perspective(FOV, windowRatio, minRange, maxRange);
 }
 
 void Camera::mouseMotion(int x, int y, int preX, int preY)
