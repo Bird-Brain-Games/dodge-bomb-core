@@ -213,11 +213,11 @@ void initObjects()
 		//menu stuff
 	menu = new Menu(textures[4], 2, 2);
 
-	camera.setPosition(glm::vec3(0, 50, 100));
-	camera.setAngle(3.14159012f, 5.98318052f);
+
 	//camera.setAngle(-1.57, 1.57); // show from bottom so better see bomb throw
-	camera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
-	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.001f);
+	camera.setPosition(glm::vec3(2.67483306, 58.8221130, 33.0502548));
+	camera.setAngle(3.12159014, 5.44317770);
+	camera.setProperties(44.00002, 1080, 720, 0.1f, 10000.0f, 0.001f);
 
 	// initializes the positions of all the starting objects
 	RigidBody::systemUpdate(1, 10);
@@ -245,14 +245,16 @@ void DisplayCallbackFunction(void)
 	//objects[1]->draw(camera);
 
 	//objects[0]->draw(camera);
-	if (atlas == true)
-	{
-	menu->draw();
-	}
+
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
 		RigidBody::drawDebug(camera.getView(), camera.getProj());
+
+	if (atlas == true)
+	{
+		menu->draw();
+	}
 
 	glutSwapBuffers();
 }
@@ -348,9 +350,6 @@ void TimerCallbackFunction(int value)
 
 	float deltaTasSeconds = float(deltaT) / 1000.0f;
 
-	objects[1]->update(deltaTasSeconds);
-
-
 	// Bullet step through world simulation
 	RigidBody::systemUpdate(deltaTasSeconds, 10);
 	
@@ -396,8 +395,8 @@ void WindowReshapeCallbackFunction(int w, int h)
 	// switch to projection because we're changing projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0f, (float)w / h, 0.1f, 10000.0f);
-	camera.setProperties(45.0f, float(w / h), 0.1f, 10000.0f, 0.01f);
+	//gluOrtho2D(-(float)w / h, (float)w / h, -1.0, 1.0);
+	camera.setProperties(45.0f, w, h, 0.1f, 10000.0f, 0.01f);
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -505,9 +504,10 @@ int main(int argc, char **argv)
 
 	// initialize the window and OpenGL properly
 	glutInit(&argc, argv);
-	glutInitWindowSize(1080, 720);
+	glutInitWindowSize(1920, 1080);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutCreateWindow("Dodge Bomb");
+	glutFullScreen();
 
 	// Initialize OpenGL Extention Wrangler
 	GLenum res = glewInit();
@@ -564,7 +564,7 @@ int main(int argc, char **argv)
 
 	shaderInit();
 
-	// Load Textures
+	//Load Textures
 	Texture* ballTex = new Texture("assets//img//Blake.png", "assets//img//Blake.png", 10.0f);
 	Texture* groundTex = new Texture("assets//img//desk (diffuse).png", "assets//img//desk (diffuse).png", 10.0f);
 	Texture* robot = new Texture("assets//img//bombot.png", "assets//img//bombot.png", 10.0f);
