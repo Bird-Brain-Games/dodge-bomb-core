@@ -60,6 +60,7 @@ public:
 	~RigidBody();
 
 	bool load(std::string fileName);
+	bool load(std::string fileName, btCollisionObject::CollisionFlags flags);
 	glm::mat4x4 getWorldTransform();
 	void setWorldTransform(glm::vec3 pos);
 	void setWorldTransform(glm::vec3 pos, glm::vec3 quat);
@@ -74,6 +75,7 @@ public:
 	static void drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 const& projectionMatrix);
 	static void setDebugDraw(bool isDrawing) { Sys.setDebugDraw(isDrawing); }
 	static bool isDrawingDebug() { return Sys.isDrawingDebug(); }
+	static btDispatcher* getDispatcher() { return Sys.dynamicsWorld->getDispatcher(); }
 	void setKinematic();
 	void setDeactive();
 protected:

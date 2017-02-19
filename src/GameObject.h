@@ -80,6 +80,8 @@ public:
 	void controls();
 	void update(float deltaT);
 	void draw(Camera _camera);
+	void checkCollisionWith(GameObject* other);
+
 private:
 	// how long the bomb has been thrown for and how long it lasts
 	float timer;

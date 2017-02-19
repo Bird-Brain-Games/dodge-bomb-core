@@ -258,8 +258,40 @@ bool RigidBody::load(std::string fileName)
 	{
 		btRigidBody::btRigidBodyConstructionInfo* rigidCI = Sys.getRigidBodyCI(fileName);
 		body = new btRigidBody(*rigidCI);
+		
+		body->getCollisionShape()->setUserPointer(this);
 		body->setMotionState(new btDefaultMotionState());
+
 		if (mask >= 0 && group >= 0)
+			Sys.addRigidBody(body, group, mask);
+		else
+			Sys.addRigidBody(body);
+		return true;
+
+	}
+	catch (char const* e)
+	{
+		std::cerr << e << std::endl;
+		return false;
+	}
+
+
+}
+
+bool RigidBody::load(std::string fileName, btCollisionObject::CollisionFlags flags)
+{
+	if (!Sys.init()) return false;
+
+	try
+	{
+		btRigidBody::btRigidBodyConstructionInfo* rigidCI = Sys.getRigidBodyCI(fileName);
+		body = new btRigidBody(*rigidCI);
+
+		body->setCollisionFlags(body->getCollisionFlags() | flags);
+		body->getCollisionShape()->setUserPointer(this);
+		body->setMotionState(new btDefaultMotionState());
+
+		if (group >= 0)
 			Sys.addRigidBody(body, group, mask);
 		else
 			Sys.addRigidBody(body);
