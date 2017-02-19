@@ -144,16 +144,12 @@ void initObjects()
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	RigidBody *box = new RigidBody();
-	//box->load("assets\\bullet\\box5x5.btdata");
 
 
-
-	RigidBody *table = new RigidBody();
-	table->load("assets\\bullet\\table.btdata");
+	RigidBody *table = new RigidBody(btBroadphaseProxy::StaticFilter, btBroadphaseProxy::AllFilter);
+	table->load("assets\\bullet\\table.btdata", btCollisionObject::CF_STATIC_OBJECT);
 
 	// Load the box model
-	LoadObject* groundModel = world->getModel("assets\\obj\\5x5box.obj");
 
 	// Load the player animation
 
@@ -162,7 +158,6 @@ void initObjects()
 	LoadObject* tableModel = world->getModel("assets\\obj\\desk2.obj");
 
 	// Create the game objects
-	GameObject* ground = new GameObject(groundModel, box, textures[1], defaultMaterial);
 	
 	GameObject* desk = new GameObject(tableModel, table, textures[1], defaultMaterial);
 
@@ -172,7 +167,7 @@ void initObjects()
 		Holder* robotModel = new Holder(ani);
 		RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
 		rbRobot->load("assets\\bullet\\bombot.btdata");
-		RigidBody *bombBody = new RigidBody();
+		RigidBody *bombBody = new RigidBody(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::AllFilter);
 		bombBody->load("assets\\bullet\\smolBotTemp.btdata");
 		LoadObject* bombModel = new LoadObject();
 		bombModel->load("assets\\obj\\bomb.obj");
@@ -182,6 +177,7 @@ void initObjects()
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
 		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
 		objects.push_back(robot);
+		players.push_back(robot);
 	}
 
 	{
@@ -189,7 +185,7 @@ void initObjects()
 		Holder* robotModel = new Holder(ani);
 		RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
 		rbRobot->load("assets\\bullet\\bombot.btdata");
-		RigidBody *bombBody = new RigidBody();
+		RigidBody *bombBody = new RigidBody(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::AllFilter);
 		bombBody->load("assets\\bullet\\smolBotTemp.btdata");
 		LoadObject* bombModel = new LoadObject();
 		bombModel->load("assets\\obj\\bomb.obj");
@@ -199,46 +195,46 @@ void initObjects()
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
 		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
 		objects.push_back(robot);
+		players.push_back(robot);
 	}
 
-	{
-		ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
-		Holder* robotModel = new Holder(ani);
-		RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
-		rbRobot->load("assets\\bullet\\bombot.btdata");
-		RigidBody *bombBody = new RigidBody();
-		bombBody->load("assets\\bullet\\smolBotTemp.btdata");
-		LoadObject* bombModel = new LoadObject();
-		bombModel->load("assets\\obj\\bomb.obj");
-		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
-		Player* robot = new Player(bomb, 2, robotModel, rbRobot, textures[2], animation);
-		robot->setTransform(player3Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
-		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
-		objects.push_back(robot);
-	}
+	//{
+	//	ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
+	//	Holder* robotModel = new Holder(ani);
+	//	RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
+	//	rbRobot->load("assets\\bullet\\bombot.btdata");
+	//	RigidBody *bombBody = new RigidBody();
+	//	bombBody->load("assets\\bullet\\smolBotTemp.btdata");
+	//	LoadObject* bombModel = new LoadObject();
+	//	bombModel->load("assets\\obj\\bomb.obj");
+	//	GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
+	//	Player* robot = new Player(bomb, 2, robotModel, rbRobot, textures[2], animation);
+	//	robot->setTransform(player3Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	//	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
+	//	robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
+	//	objects.push_back(robot);
+	//}
 
-	{
-		ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
-		Holder* robotModel = new Holder(ani);
-		RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
-		rbRobot->load("assets\\bullet\\bombot.btdata");
-		RigidBody *bombBody = new RigidBody();
-		bombBody->load("assets\\bullet\\smolBotTemp.btdata");
-		LoadObject* bombModel = new LoadObject();
-		bombModel->load("assets\\obj\\bomb.obj");
-		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
-		Player* robot = new Player(bomb, 3, robotModel, rbRobot, textures[2], animation);
-		robot->setTransform(player4Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
-		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
-		//robot->getRigidBody()->setDeactive();	// Rigidbody no longer deactivates (must do for each player)
-		objects.push_back(robot);
-	}
+	//{
+	//	ANILoader* ani = world->getAniModel("assets\\htr\\finalBombot.htr");
+	//	Holder* robotModel = new Holder(ani);
+	//	RigidBody *rbRobot = new RigidBody(btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::AllFilter);
+	//	rbRobot->load("assets\\bullet\\bombot.btdata");
+	//	RigidBody *bombBody = new RigidBody();
+	//	bombBody->load("assets\\bullet\\smolBotTemp.btdata");
+	//	LoadObject* bombModel = new LoadObject();
+	//	bombModel->load("assets\\obj\\bomb.obj");
+	//	GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
+	//	Player* robot = new Player(bomb, 3, robotModel, rbRobot, textures[2], animation);
+	//	robot->setTransform(player4Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	//	robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
+	//	robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
+	//	//robot->getRigidBody()->setDeactive();	// Rigidbody no longer deactivates (must do for each player)
+	//	objects.push_back(robot);
+	//}
 	
 
 	objects.push_back(desk);
-	//	objects.push_back(ground);
 
 		//menu stuff
 	menu = new Menu(textures[4], 2, 2);
@@ -303,6 +299,49 @@ void KeyboardCallbackFunction(unsigned char key, int x, int y)
 void KeyboardUpCallbackFunction(unsigned char key, int x, int y)
 {
 	KEYBOARD_INPUT->SetActive(key, false);
+}
+
+void calculateCollisions()
+{
+	// Basis taken from 
+	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Collision_Callbacks_and_Triggers
+	btDispatcher* dispatcher = RigidBody::getDispatcher();
+	int numManifolds = dispatcher->getNumManifolds();
+
+	short objAGroup, objBGroup;
+
+	for (int i = 0; i < numManifolds; i++)
+	{
+		//std::cout << numManifolds << std::endl;
+		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
+		const btCollisionObject* objA = contactManifold->getBody0();
+		const btCollisionObject* objB = contactManifold->getBody1();
+
+		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
+		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
+		
+		if (objAGroup != objBGroup &&
+			!objA->isStaticObject() &&
+			!objB->isStaticObject())
+		{
+			// Check if one is a sensor, the other is a player, 
+			// and they don't both belong to the same player.
+			if (objAGroup == btBroadphaseProxy::SensorTrigger &&
+				objBGroup == btBroadphaseProxy::CharacterFilter)
+			{
+				Player* p = (Player*)objB->getUserPointer();
+				GameObject* b = (GameObject*)objA->getUserPointer();
+				p->checkCollisionWith(b);
+			}
+			else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
+					 objAGroup == btBroadphaseProxy::CharacterFilter)
+			{
+				Player* p = (Player*)objA->getUserPointer();
+				GameObject* b = (GameObject*)objB->getUserPointer();
+				p->checkCollisionWith(b);
+			}
+		}
+	}
 }
 
 /* function TimerCallbackFunction(int value)
@@ -386,16 +425,14 @@ void TimerCallbackFunction(int value)
 
 	float deltaTasSeconds = float(deltaT) / 1000.0f;
 
-	objects[1]->update(deltaTasSeconds);
-
 
 	// Bullet step through world simulation
 	RigidBody::systemUpdate(deltaTasSeconds, 10);
-	
+	calculateCollisions();
 
-	for (unsigned int i = 0; i < objects.size(); i++)
+	for (unsigned int i = 0; i < players.size(); i++)
 	{
-	objects[i]->update(deltaTasSeconds);
+		players[i]->update(deltaTasSeconds);
 	}
 
 	//// force draw call next tick

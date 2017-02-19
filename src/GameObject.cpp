@@ -196,3 +196,8 @@ void Player::controls()
 	}
 
 }
+
+void Player::checkCollisionWith(GameObject* other)
+{
+	std::cout << "bomb collided with player" << std::endl;
+}
