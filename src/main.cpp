@@ -78,11 +78,11 @@ glm::vec3 player4Start = glm::vec3(-5.f, 45.0f, -5.f);
 
 void newGame()
 {
-	objects[0]->setTransform(player1Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-	objects[1]->setTransform(player2Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-	objects[2]->setTransform(player3Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-	objects[3]->setTransform(player4Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-	atlas = true;
+	objects[3]->setTransform(player1Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	objects[4]->setTransform(player2Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	//objects[2]->setTransform(player3Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	//objects[3]->setTransform(player4Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	//atlas = true;
 }
 
 // separate, cleaner, draw function
@@ -133,33 +133,50 @@ void initObjects()
 	Texture* ballTex = new Texture("assets//img//Blake.png", "assets//img//Blake.png", 10.0f);
 	Texture* groundTex = new Texture("assets//img//desk (diffuse).png", "assets//img//desk (diffuse).png", 10.0f);
 	Texture* robot = new Texture("assets//img//bombot.png", "assets//img//bombot.png", 10.0f);
-	Texture* bomb = new Texture("assets//img//redTex.png", "assets//img//redTex.png", 10.0f);
+	Texture* bomb = new Texture("assets//img//bomb(diffuse).jpg", "assets//img//bomb(diffuse).jpg", 10.0f);
 	Texture* atlas = new Texture("assets//img//menu_atlas.png", "assets//img//menu_atlas.png", 10.0f);
+	Texture* barrelTex = new Texture("assets//img//barrel(diffuse).jpg", "assets//img//barrel(diffuse).jpg", 10.0f);
+	Texture* cannonTex = new Texture("assets//img//Cannon(diffuse).jpg", "assets//img//Cannon(diffuse).jpg", 10.0f);
 
 	textures.push_back(ballTex);
 	textures.push_back(groundTex);
 	textures.push_back(robot);
 	textures.push_back(bomb);
 	textures.push_back(atlas);
+	textures.push_back(barrelTex);
+	textures.push_back(cannonTex);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 
+	// Load rigid bodies
 
 	RigidBody *table = new RigidBody(btBroadphaseProxy::StaticFilter, btBroadphaseProxy::AllFilter);
-	table->load("assets\\bullet\\table.btdata", btCollisionObject::CF_STATIC_OBJECT);
+	table->load("assets\\bullet\\desk002.btdata", btCollisionObject::CF_STATIC_OBJECT);
 
-	// Load the box model
+	RigidBody *barrel = new RigidBody(btBroadphaseProxy::StaticFilter, btBroadphaseProxy::AllFilter);
+	barrel->load("assets\\bullet\\barrel.btdata", btCollisionObject::CF_STATIC_OBJECT);
 
-	// Load the player animation
+	RigidBody *cannon = new RigidBody(btBroadphaseProxy::StaticFilter, btBroadphaseProxy::AllFilter);
+	cannon->load("assets\\bullet\\cannon.btdata", btCollisionObject::CF_STATIC_OBJECT);
 
-
-	// Load the table model
+	// Load models
 	LoadObject* tableModel = world->getModel("assets\\obj\\desk2.obj");
+	LoadObject* barrelModel = world->getModel("assets\\obj\\barrel.obj");
+	LoadObject* cannonModel = world->getModel("assets\\obj\\Cannon.obj");
 
 	// Create the game objects
 	
 	GameObject* desk = new GameObject(tableModel, table, textures[1], defaultMaterial);
+	GameObject* barrelObject = new GameObject(barrelModel, barrel, textures[5], defaultMaterial);
+	GameObject* cannonObject = new GameObject(cannonModel, cannon, textures[6], defaultMaterial);
+
+	objects.push_back(desk);
+	objects.push_back(barrelObject);
+	objects.push_back(cannonObject);
+
+	objects[2]->setTransform(glm::vec3(-5.f, 45.0f, -5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	objects[1]->setTransform(glm::vec3(-5.f, 45.0f, -5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 
 	// all loading for player
 	{
@@ -234,7 +251,7 @@ void initObjects()
 	//}
 	
 
-	objects.push_back(desk);
+
 
 		//menu stuff
 	menu = new Menu(textures[4], 2, 2);
