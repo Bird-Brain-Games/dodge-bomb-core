@@ -4,7 +4,7 @@ january 2017
 
 #include "VAO.h"
 
-Attribute::Attribute(attribLoc _attribLocation, GLenum _element, unsigned int _dataSize, unsigned int _EPA, unsigned int _numElements, std::string _name, void* _data)
+Attribute::Attribute(AttributeLocations _attribLocation, GLenum _element, unsigned int _dataSize, unsigned int _EPA, unsigned int _numElements, std::string _name, void* _data)
 {
 	attribLocation = _attribLocation;
 	element = _element;
@@ -76,7 +76,7 @@ void VAO::destroy()
 	attributes.clear();
 }
 
-attribLoc		Attribute::getAttribLocation() { return attribLocation; }
+AttributeLocations		Attribute::getAttribLocation() { return attribLocation; }
 GLenum			Attribute::getElement() { return element; }
 unsigned int	Attribute::getDataSize() { return dataSize; }
 unsigned int	Attribute::getElementsPerAttrib() { return elementsPerAttrib; }

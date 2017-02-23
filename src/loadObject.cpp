@@ -13,9 +13,14 @@
 
 #include "Shader.h"
 
-void LoadObject::draw(std::shared_ptr<Shader> s)
+void LoadObject::draw(std::shared_ptr<ShaderProgram> s)
 {
 	vao.draw();
+}
+
+bool LoadObject::load(std::string filename)
+{
+	return load(filename.c_str());
 }
 
 bool LoadObject::load(char const* filename)
@@ -92,7 +97,7 @@ void LoadObject::createVAO()
 
 	if (vertices.size() > 0)
 	{
-		Attribute positionAttrib(attribLoc::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, size, "vPos", vertices.data());
+		Attribute positionAttrib(AttributeLocations::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, size, "vPos", vertices.data());
 		vao.addAttribute(positionAttrib);
 
 	}
@@ -101,51 +106,18 @@ void LoadObject::createVAO()
 	if (texcoords.size() > 0)
 	{
 
-		Attribute UVAttrib(attribLoc::UV, GL_FLOAT, sizeof(glm::vec2), 2, size, "texture", texcoords.data());
+		Attribute UVAttrib(AttributeLocations::TEX_COORD, GL_FLOAT, sizeof(glm::vec2), 2, size, "texture", texcoords.data());
 		vao.addAttribute(UVAttrib);
 	}
 
 	// Set up normal attribute
 	if (normals.size() > 0)
 	{
-		Attribute normalAttrib(attribLoc::NORMAL, GL_FLOAT, sizeof(glm::vec3), 3, size, "normal", normals.data());
+		Attribute normalAttrib(AttributeLocations::NORMAL, GL_FLOAT, sizeof(glm::vec3), 3, size, "normal", normals.data());
 		vao.addAttribute(normalAttrib);
 	}
 
 	// set up other attributes...
 
 	vao.createVAO();
-}
-
-Texture::Texture(char* _diffuseTex, char* _specularTex, float _shininess)
-{
-	diffuseTex = ilutGLLoadImage(_diffuseTex);
-	specularTex = ilutGLLoadImage(_specularTex);
-	shininess = _shininess;
-}
-
-Texture::Texture(GLuint _diffuseTex, GLuint _specularTex, float _shininess)
-{
-	diffuseTex = _diffuseTex;
-	specularTex = _specularTex;
-	shininess = _shininess;
-}
-
-void Texture::bind(std::shared_ptr<Shader> s)
-{
-	s->uniformTex("diffuseTex", diffuseTex, 0);
-	s->uniformTex("specularTex", specularTex, 1);
-	s->uniformFloat("shininess", 25.0f);
-}
-
-void Texture::bind(Shader* s)
-{
-	s->uniformTex("diffuseTex", diffuseTex, 0);
-	s->uniformTex("specularTex", specularTex, 1);
-	s->uniformFloat("shininess", 25.0f);
-}
-
-void Texture::setShininess(float shine)
-{
-	shininess = shine;
 }

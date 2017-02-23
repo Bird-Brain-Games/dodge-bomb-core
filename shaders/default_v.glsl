@@ -25,6 +25,9 @@ out VertexData
 void main() 
 {
 	vOut.texCoord = vIn_uv;
-	vOut.normal = vIn_normal;
+	vOut.colour = u_colour;
+	vOut.normal = (u_mv * vec4(vIn_normal, 0.0)).xyz;
+	vOut.posEye = (u_mv * vec4(vIn_vertex, 1.0)).xyz;
+
 	gl_Position = u_mvp * vec4(vIn_vertex, 1.0);
 }

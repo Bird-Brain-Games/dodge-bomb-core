@@ -80,50 +80,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\ANILoader.cpp" />
     <ClCompile Include="src\BulletDebugger.cpp" />
     <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\Character.cpp" />
     <ClCompile Include="src\controller.cpp" />
+    <ClCompile Include="src\FrameBufferObject.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\loadObject.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\material.cpp" />
-    <ClCompile Include="src\menu.cpp" />
-    <ClCompile Include="src\node.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\ShaderProgram.cpp" />
     <ClCompile Include="src\sound engine.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\VAO.cpp" />
-    <ClCompile Include="src\World.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\ANILoader.h" />
-    <ClInclude Include="src\BulletDebug.h" />
-    <ClInclude Include="src\camera.h" />
-    <ClInclude Include="src\controller.h" />
-    <ClInclude Include="src\GameObject.h" />
-    <ClInclude Include="src\InputManager.h" />
-    <ClInclude Include="src\JointTypes.h" />
-    <ClInclude Include="src\KeyframeController.h" />
-    <ClInclude Include="src\loader.h" />
-    <ClInclude Include="src\loadObject.h" />
-    <ClInclude Include="src\material.h" />
-    <ClInclude Include="src\menu.h" />
-    <ClInclude Include="src\node.h" />
-    <ClInclude Include="src\Player.h" />
-    <ClInclude Include="src\RigidBody.h" />
-    <ClInclude Include="src\Shader.h" />
-    <ClInclude Include="src\sound engine.h" />
-    <ClInclude Include="src\VAO.h" />
-    <ClInclude Include="src\World.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\blinnphong_f.glsl" />
-    <None Include="shaders\blinnphong_v.glsl" />
-    <None Include="shaders\passThru_f.glsl" />
-    <None Include="shaders\passThru_v.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="bullet\src\BulletCollision\BulletCollision.vcxproj">
@@ -135,6 +107,25 @@
     <ProjectReference Include="bullet\src\LinearMath\LinearMath.vcxproj">
       <Project>{729f25ac-e3b9-38ea-9238-41ab53d633d3}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\BulletDebug.h" />
+    <ClInclude Include="src\camera.h" />
+    <ClInclude Include="src\Character.h" />
+    <ClInclude Include="src\controller.h" />
+    <ClInclude Include="src\FrameBufferObject.h" />
+    <ClInclude Include="src\GameObject.h" />
+    <ClInclude Include="src\InputManager.h" />
+    <ClInclude Include="src\loader.h" />
+    <ClInclude Include="src\loadObject.h" />
+    <ClInclude Include="src\material.h" />
+    <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\RigidBody.h" />
+    <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\ShaderProgram.h" />
+    <ClInclude Include="src\sound engine.h" />
+    <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\VAO.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
