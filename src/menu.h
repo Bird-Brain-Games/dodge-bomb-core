@@ -1,18 +1,22 @@
 #pragma once
 #include "GL\glew.h"
-#include "Shader.h"
-#include "loadObject.h"
+#include "Texture.h"
+#include "material.h"
+#include <memory>
+
 class Menu
 {
 public:
 	// the texture we are displaying
-	Menu(Texture*);
-	Menu(Texture* _tex, int _width, int _height);
-	void updateTex(Texture*);
+	Menu(std::shared_ptr<Texture>);
+	Menu(std::shared_ptr<Texture> _tex, int _width, int _height);
+	void updateTex(std::shared_ptr<Texture>);
 	//sets the spot to the given value.
 	void setSpot(glm::vec2);
 	//Incriments the row spot and if it goes past the row size it resets row to zero and increments coloumn
 	void incSpot();
+
+	void setMaterial(std::shared_ptr<Material> newMaterial) { menuMaterial = newMaterial; }
 
 	void draw();
 
@@ -24,10 +28,8 @@ private:
 	glm::vec2 spot;
 
 	// our shader. we use this to draw our texture to the screen.
-	Shader menu;
+	std::shared_ptr<Material> menuMaterial;
 	GLuint vaoD;
 	GLuint vboD;
-	Texture* tex;
-
-	
+	std::shared_ptr<Texture> tex;
 };
