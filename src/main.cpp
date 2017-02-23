@@ -176,8 +176,12 @@ void initializeScene()
 	char diffuseTex[] = "Assets/img/Blake.png";
 	std::shared_ptr<Texture> defaultTex = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
 
+	char bombotTex[] = "Assets/img/bombot(diffuse).png";
+	std::shared_ptr<Texture> bombotTexMap = std::make_shared<Texture>(bombotTex, bombotTex, 1.0f);
+
 	//Add textures to the map
 	textures["default"] = defaultTex;
+	textures["bombot"] = bombotTexMap;
 
 	// Create objects
 	auto defaultMaterial = materials["default"];
@@ -195,14 +199,32 @@ void initializeScene()
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["bombot1"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap);/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);*/
 	
+	// Create rigidbody paths
+	std::string tableBodyPath = "assets\\bullet\\table.btdata";
+	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
+
+	// Create rigidbodies
+	std::unique_ptr<RigidBody> tableBody;
+	std::unique_ptr<RigidBody> bombot1Body;
+
+	tableBody = std::make_unique<RigidBody>();
+	bombot1Body = std::make_unique<RigidBody>();
+
+	// Load rigidbodies
+	tableBody->load(tableBodyPath);
+	bombot1Body->load(bombotBodyPath);
+
+	// Attach rigidbodies
+	gameobjects["table"]->attachRigidBody(tableBody);
+
 	// Set object properties
 
 	// Set menu properties
@@ -338,7 +360,7 @@ void blurBrightPass()
 // This is where we draw stuff
 void DisplayCallbackFunction(void)
 {
-	glm::vec4 clearColor = glm::vec4(0.0);
+	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
 
 	// bind scene FBO
 	fboUnlit.bindFrameBufferForDrawing();
@@ -356,6 +378,10 @@ void DisplayCallbackFunction(void)
 		drawScene(playerCamera);
 	else
 		mainMenu->draw();
+
+	// Draw the debug (if on)
+	if (RigidBody::isDrawingDebug())
+		RigidBody::drawDebug(playerCamera.getView(), playerCamera.getProj());
 
 	// Unbind scene FBO
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
@@ -483,7 +509,7 @@ void handleKeyboardInput()
 	// Use the E key to set the debug draw
 	if (KEYBOARD_INPUT->CheckPressEvent('e') || KEYBOARD_INPUT->CheckPressEvent('E'))
 	{
-		//RigidBody::setDebugDraw(!RigidBody::isDrawingDebug());
+		RigidBody::setDebugDraw(!RigidBody::isDrawingDebug());
 	}
 
 	// Move the camera
@@ -502,6 +528,11 @@ void handleKeyboardInput()
 	if (KEYBOARD_INPUT->CheckPressEvent('a') || KEYBOARD_INPUT->CheckPressEvent('A'))
 	{
 		playerCamera.moveLeft();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
+	{
+		gameobjects["table"]->setPosition(
+			gameobjects["table"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
 	}
 
 	// Switch video modes
@@ -548,6 +579,7 @@ void TimerCallbackFunction(int value)
 	handleKeyboardInput();
 
 	// Step through world simulation with Bullet
+	RigidBody::systemUpdate(deltaTime, 10);
 	
 	// Update the camera's position
 	playerCamera.update();
