@@ -22,9 +22,8 @@ public:
 	GameObject(glm::vec3 position, 
 		std::shared_ptr<Loader> _mesh, 
 		std::shared_ptr<Material> _material, 
-		std::shared_ptr<Texture> _texture,
-		std::unique_ptr<RigidBody> _rb = nullptr);	
-		// Using unique_ptr as objects shouldn't share rigidBodies
+		std::shared_ptr<Texture> _texture);	
+
 	~GameObject();
 
 	void setTexture(std::shared_ptr<Texture> _texture) { texture = _texture; }
@@ -49,11 +48,16 @@ public:
 
 	bool isRoot();
 	bool hasRigidBody() { return (rigidBody != nullptr); }
+	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 
 	void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
 
 	// Other Properties
 	std::string name;
+
+private:
+	void updateLocalTransform();
+	bool needsUpdating;
 
 protected:
 	float m_pRotX, m_pRotY, m_pRotZ; // local rotation angles
@@ -74,5 +78,6 @@ protected:
 	std::shared_ptr<Material> material;
 
 	// Rigid body for rigidbody dynamics
+	// Using unique_ptr as objects shouldn't share rigidBodies
 	std::unique_ptr<RigidBody> rigidBody;
 };
