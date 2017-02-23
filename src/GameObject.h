@@ -13,29 +13,18 @@
 #include "Texture.h"
 #include "Material.h"
 #include "loadObject.h"
+#include "RigidBody.h"
 
 class GameObject
 {
-protected:
-	float m_pScale;
-
-	float m_pRotX, m_pRotY, m_pRotZ; // local rotation angles
-
-	glm::vec3 m_pLocalPosition;
-	glm::mat4 m_pLocalRotation;
-
-	glm::mat4 m_pLocalTransformMatrix;
-	glm::mat4 m_pLocalToWorldMatrix;
-
-	// Forward Kinematics
-	GameObject* m_pParent;
-	std::vector<GameObject*> m_pChildren;
-
 public:
 	GameObject();
 	GameObject(glm::vec3 position, 
 		std::shared_ptr<Loader> _mesh, 
-		std::shared_ptr<Material> _material);
+		std::shared_ptr<Material> _material, 
+		std::shared_ptr<Texture> _texture,
+		std::unique_ptr<RigidBody> _rb = nullptr);	
+		// Using unique_ptr as objects shouldn't share rigidBodies
 	~GameObject();
 
 	void setTexture(std::shared_ptr<Texture> _texture) { texture = _texture; }
@@ -44,7 +33,6 @@ public:
 	void setRotationAngleX(float newAngle);
 	void setRotationAngleY(float newAngle);
 	void setRotationAngleZ(float newAngle);
-	void setScale(float newScale);
 
 	glm::mat4 getLocalToWorldMatrix();
 
@@ -58,13 +46,33 @@ public:
 	void removeChild(GameObject* rip);
 	glm::vec3 getWorldPosition();
 	glm::mat4 getWorldRotation();
+
 	bool isRoot();
+	bool hasRigidBody() { return (rigidBody != nullptr); }
+
+	void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
 
 	// Other Properties
 	std::string name;
-	glm::vec4 colour; 
-	std::shared_ptr<Texture> texture;
 
+protected:
+	float m_pRotX, m_pRotY, m_pRotZ; // local rotation angles
+
+	glm::vec3 m_pLocalPosition;
+	glm::mat4 m_pLocalRotation;
+
+	glm::mat4 m_pLocalTransformMatrix;
+	glm::mat4 m_pLocalToWorldMatrix;
+
+	// Forward Kinematics
+	GameObject* m_pParent;
+	std::vector<GameObject*> m_pChildren;
+
+	// Graphics components
+	std::shared_ptr<Texture> texture;
 	std::shared_ptr<Loader> mesh;
 	std::shared_ptr<Material> material;
+
+	// Rigid body for rigidbody dynamics
+	std::unique_ptr<RigidBody> rigidBody;
 };

@@ -183,28 +183,25 @@ void initializeScene()
 	auto defaultMaterial = materials["default"];
 
 	gameobjects["table"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial);
+		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, defaultTex);
 
 	gameobjects["barrel"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 45.0f, -5.f), barrelMesh, defaultMaterial);
+		glm::vec3(-5.f, 45.0f, -5.f), barrelMesh, defaultMaterial, nullptr);
 
 	gameobjects["cannon"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial);
+		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial, nullptr);
 
 	gameobjects["sphere"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial);
+		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["bombot1"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial);
-
-	// set object textures
-	gameobjects["table"]->setTexture(defaultTex);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
 	
 	// Set object properties
 
@@ -270,7 +267,7 @@ void setMaterialForAllGameObjects(std::string materialName)
 	auto mat = materials[materialName];
 	for (auto itr = gameobjects.begin(); itr != gameobjects.end(); ++itr)
 	{
-		itr->second->material = mat;
+		itr->second->setMaterial(mat);
 	}
 }
 

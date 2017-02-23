@@ -1,16 +1,22 @@
 #include "GameObject.h"
 #include <iostream>
 
-GameObject::GameObject(glm::vec3 position, std::shared_ptr<Loader> _mesh, std::shared_ptr<Material> _material)
-	: m_pScale(1.0f),
-	colour(glm::vec4(0.0f)),
-	m_pLocalPosition(position),
-	mesh(_mesh),
-	material(_material),
+GameObject::GameObject(
+	glm::vec3 position,
+	std::shared_ptr<Loader> _mesh,
+	std::shared_ptr<Material> _material,
+	std::shared_ptr<Texture> _texture,
+	std::unique_ptr<RigidBody> _rb)
+
+	:m_pLocalPosition(position),
 	m_pParent(nullptr),
 	m_pRotX(0.0f), m_pRotY(0.0f), m_pRotZ(0.0f),
-	texture(nullptr)
+	mesh(_mesh),
+	material(_material),
+	texture(_texture)
 {
+	if (_rb != nullptr)
+		rigidBody = std::move(_rb);
 }
 
 GameObject::~GameObject() {}
@@ -35,11 +41,6 @@ void GameObject::setRotationAngleZ(float newAngle)
 	m_pRotZ = newAngle;
 }
 
-void GameObject::setScale(float newScale)
-{
-	m_pScale = newScale;
-}
-
 glm::mat4 GameObject::getLocalToWorldMatrix()
 {
 	return m_pLocalToWorldMatrix;
@@ -59,15 +60,12 @@ void GameObject::update(float dt)
 
 	// Create translation matrix
 	glm::mat4 tran = glm::translate(m_pLocalPosition);
-
-	// Create scale matrix
-	glm::mat4 scal = glm::scale(glm::vec3(m_pScale, m_pScale, m_pScale));
-
+	
 	// Combine all above transforms into a single matrix
 	// This is the local transformation matrix, ie. where is this game object relative to it's parent
 	// If a game object has no parent (it is a root node) then its local transform is also it's global transform
 	// If a game object has a parent, then we must apply the parent's transform
-	m_pLocalTransformMatrix = tran * m_pLocalRotation * scal;
+	m_pLocalTransformMatrix = tran * m_pLocalRotation;
 
 	if (m_pParent)
 		m_pLocalToWorldMatrix = m_pParent->getLocalToWorldMatrix() * m_pLocalTransformMatrix;
@@ -84,7 +82,6 @@ void GameObject::draw(Camera &camera)
 	material->shader->bind();
 	material->mat4Uniforms["u_mvp"] = camera.getViewProj() * m_pLocalToWorldMatrix;
 	material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
-	material->vec4Uniforms["u_colour"] = colour;
 
 	// Bind the texture
 	if (texture != nullptr)
