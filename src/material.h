@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ShaderProgram.h"
+#include <map>
 
 class Material
 {

@@ -26,6 +26,7 @@
 #include "GameObject.h"
 #include "FrameBufferObject.h"
 #include "InputManager.h"
+#include "menu.h"
 
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
@@ -58,6 +59,10 @@ std::map<std::string, std::shared_ptr<Texture>> textures;
 // Materials
 std::map<std::string, std::shared_ptr<Material>> materials;
 
+// Controls
+bool inMenu = false;
+std::unique_ptr<Menu> mainMenu;
+
 // Framebuffer objects
 FrameBufferObject fboUnlit;
 FrameBufferObject fboBright;
@@ -80,21 +85,24 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru;
+	Shader v_default, v_passThru, v_null;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
+	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
-	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur;
+	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
 	f_composite.loadShaderFromFile(shaderPath + "bloomComposite_f.glsl", GL_FRAGMENT_SHADER);
 	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER);
+	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);
 
 	// Geometry Shaders
-	Shader g_quad;
+	Shader g_quad, g_menu;
 	g_quad.loadShaderFromFile(shaderPath + "quad.geom", GL_GEOMETRY_SHADER);
+	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
 
 	// Default material that all objects use
 	materials["default"] = std::make_shared<Material>();
@@ -102,32 +110,39 @@ void initializeShaders()
 	materials["default"]->shader->attachShader(f_default);
 	materials["default"]->shader->linkProgram();
 
+	// Material used for menu full screen drawing
+	materials["menu"] = std::make_shared<Material>();
+	materials["menu"]->shader->attachShader(v_null);
+	materials["menu"]->shader->attachShader(f_texColor);
+	materials["menu"]->shader->attachShader(g_menu);
+	materials["menu"]->shader->linkProgram();
+
 	// Unlit texture material
 	materials["unlitTexture"] = std::make_shared<Material>();
 	materials["unlitTexture"]->shader->attachShader(v_passThru);
-	materials["unlitTexture"]->shader->attachShader(g_quad);
 	materials["unlitTexture"]->shader->attachShader(f_unlitTex);
+	materials["unlitTexture"]->shader->attachShader(g_quad);
 	materials["unlitTexture"]->shader->linkProgram();
 
 	// Invert filter material
 	materials["bright"] = std::make_shared<Material>();
 	materials["bright"]->shader->attachShader(v_passThru);
-	materials["bright"]->shader->attachShader(g_quad);
 	materials["bright"]->shader->attachShader(f_bright);
+	materials["bright"]->shader->attachShader(g_quad);
 	materials["bright"]->shader->linkProgram();
 
 	// Sobel filter material
 	materials["bloom"] = std::make_shared<Material>();
 	materials["bloom"]->shader->attachShader(v_passThru);
-	materials["bloom"]->shader->attachShader(g_quad);
 	materials["bloom"]->shader->attachShader(f_composite);
+	materials["bloom"]->shader->attachShader(g_quad);
 	materials["bloom"]->shader->linkProgram();
 
 	// Box blur filter
 	materials["blur"] = std::make_shared<Material>();
 	materials["blur"]->shader->attachShader(v_passThru);
-	materials["blur"]->shader->attachShader(g_quad);
 	materials["blur"]->shader->attachShader(f_blur);
+	materials["blur"]->shader->attachShader(g_quad);
 	materials["blur"]->shader->linkProgram();
 }
 
@@ -157,6 +172,7 @@ void initializeScene()
 	meshes["bombot"] = bombotMesh;
 
 	// Load textures (WIP)
+	// Has to take char* due to ILUT
 	char diffuseTex[] = "Assets/img/Blake.png";
 	std::shared_ptr<Texture> defaultTex = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
 
@@ -191,6 +207,10 @@ void initializeScene()
 	gameobjects["table"]->setTexture(defaultTex);
 	
 	// Set object properties
+
+	// Set menu properties
+	mainMenu = std::make_unique<Menu>(defaultTex);
+	mainMenu->setMaterial(materials["menu"]);
 
 	// Set default camera properties (WIP)
 	playerCamera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
@@ -335,7 +355,10 @@ void DisplayCallbackFunction(void)
 	//material->vec4Uniforms["u_shininess"] =
 
 	// draw the scene to the fbo
-	drawScene(playerCamera);
+	if (!inMenu)
+		drawScene(playerCamera);
+	else
+		mainMenu->draw();
 
 	// Unbind scene FBO
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
@@ -607,6 +630,7 @@ void InitErrorFuncCallbackFunction(const char *fmt, va_list ap)
 void CloseCallbackFunction()
 {
 	KEYBOARD_INPUT->Destroy();
+
 }
 
 /* function main()

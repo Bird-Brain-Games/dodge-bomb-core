@@ -1,9 +1,9 @@
 #include "menu.h"
 
-Menu::Menu(Texture* _tex)
+Menu::Menu(std::shared_ptr<Texture> _tex)
 {
 	tex = _tex;
-	menu.load("shaders//null.vert", "shaders//shader_texture.frag", "shaders//menu.geom");
+	menuMaterial = nullptr;
 	glGenVertexArrays(1, &vaoD);
 	glBindVertexArray(vaoD);
 	glGenBuffers(1, &vboD);
@@ -11,10 +11,10 @@ Menu::Menu(Texture* _tex)
 	spot = glm::vec2(0);
 }
 
-Menu::Menu(Texture* _tex, int _width, int _height)
+Menu::Menu(std::shared_ptr<Texture> _tex, int _width, int _height)
 {
 	tex = _tex;
-	menu.load("shaders//null.vert", "shaders//shader_texture.frag", "shaders//menu.geom");
+	menuMaterial = nullptr;
 	glGenVertexArrays(1, &vaoD);
 	glBindVertexArray(vaoD);
 	glGenBuffers(1, &vboD);
@@ -49,16 +49,20 @@ void Menu::incSpot()
 void Menu::draw()
 {
 	glBindVertexArray(vaoD);
-	menu.bind();
-	tex->bind(&menu);
-	menu.uniformVec2("_dim", dim);
-	menu.uniformVec2("_spot", spot);
+
+	menuMaterial->shader->bind();
+
+	tex->bind(GL_TEXTURE29, GL_TEXTURE28);
+
+	//menuMaterial->
+	//menu.uniformVec2("_dim", dim);
+	//menu.uniformVec2("_spot", spot);
 	glDrawArrays(GL_POINTS, 0, 1);
-	menu.unbind();
+	//menu.unbind();
 	glBindVertexArray(0);
 }
 
-void Menu::updateTex(Texture* _tex)
+void Menu::updateTex(std::shared_ptr<Texture> _tex)
 {
 	tex = _tex;
 }

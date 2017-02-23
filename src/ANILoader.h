@@ -109,6 +109,6 @@ protected:
 	GLuint bonebo;
 public:
 	Holder(ANILoader* data);
-	void draw(std::shared_ptr<Shader> s);
+	void draw(std::shared_ptr<ShaderProgram> s);
 	void update(float);
 };

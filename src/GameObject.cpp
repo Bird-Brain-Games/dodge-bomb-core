@@ -82,7 +82,6 @@ void GameObject::update(float dt)
 void GameObject::draw(Camera &camera)
 {
 	material->shader->bind();
-
 	material->mat4Uniforms["u_mvp"] = camera.getViewProj() * m_pLocalToWorldMatrix;
 	material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
 	material->vec4Uniforms["u_colour"] = colour;
