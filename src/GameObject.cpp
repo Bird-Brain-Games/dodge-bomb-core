@@ -1,203 +1,160 @@
 #include "GameObject.h"
-
 #include <iostream>
-#include <fstream>
 
-#include "RigidBody.h"
-
-
-
-GameObject::GameObject(Loader* _model, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material, std::string _tag)
-	: tag(_tag)
+GameObject::GameObject(glm::vec3 position, std::shared_ptr<Loader> _mesh, std::shared_ptr<Material> _material)
+	: m_pScale(1.0f),
+	colour(glm::vec4(0.0f)),
+	m_pLocalPosition(position),
+	mesh(_mesh),
+	material(_material),
+	m_pParent(nullptr),
+	m_pRotX(0.0f), m_pRotY(0.0f), m_pRotZ(0.0f),
+	texture(nullptr)
 {
-	model.reset(_model);
-	body = _body;
-	tex = _tex;
-	material = _material;
 }
 
+GameObject::~GameObject() {}
 
-GameObject::~GameObject()
+void GameObject::setPosition(glm::vec3 newPosition)
 {
-	if (body)
-	{
-		delete body;
-	}
-
-	model = nullptr;
-	body = nullptr;
+	m_pLocalPosition = newPosition;
 }
 
-void GameObject::draw(Camera camera)
+void GameObject::setRotationAngleX(float newAngle)
 {
-	glBindTexture(GL_TEXTURE_2D, 0);
-	material->shader->bind();
-
-	material->shader->uniformMat4x4("mvm", &camera.getView());
-	material->shader->uniformMat4x4("prm", &camera.getProj());
-
-	// Bind texture here if has one
-	if (tex != nullptr)
-	{
-		tex->bind(material->shader);
-	}
-
-	// Compute local transformation
-	material->shader->uniformMat4x4("localTransform", &body->getWorldTransform());
-	model->draw(material->shader);
-	material->shader->unbind();
+	m_pRotX = newAngle;
 }
 
-void GameObject::draw(Camera camera, bool test)
+void GameObject::setRotationAngleY(float newAngle)
 {
-	glBindTexture(GL_TEXTURE_2D, 0);
-	material->shader->bind();
+	m_pRotY = newAngle;
+}
 
-	material->shader->uniformMat4x4("mvm", &camera.getView());
-	material->shader->uniformMat4x4("prm", &camera.getProj());
+void GameObject::setRotationAngleZ(float newAngle)
+{
+	m_pRotZ = newAngle;
+}
 
-	// Bind texture here if has one
-	if (tex != nullptr)
-	{
-		tex->bind(material->shader);
-	}
+void GameObject::setScale(float newScale)
+{
+	m_pScale = newScale;
+}
 
-	// Compute local transformation
-	material->shader->uniformMat4x4("localTransform", &worldTransform);
-	model->draw(material->shader);
-	material->shader->unbind();
+glm::mat4 GameObject::getLocalToWorldMatrix()
+{
+	return m_pLocalToWorldMatrix;
 }
 
 void GameObject::update(float dt)
 {
-	model->update(dt);
+	// Create 4x4 transformation matrix
 
+	// Create rotation matrix
+	glm::mat4 rx = glm::rotate(glm::radians(m_pRotX), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 ry = glm::rotate(glm::radians(m_pRotY), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 rz = glm::rotate(glm::radians(m_pRotZ), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	// Note: pay attention to rotation order, ZYX is not the same as XYZ
+	m_pLocalRotation = rz * ry * rx;
+
+	// Create translation matrix
+	glm::mat4 tran = glm::translate(m_pLocalPosition);
+
+	// Create scale matrix
+	glm::mat4 scal = glm::scale(glm::vec3(m_pScale, m_pScale, m_pScale));
+
+	// Combine all above transforms into a single matrix
+	// This is the local transformation matrix, ie. where is this game object relative to it's parent
+	// If a game object has no parent (it is a root node) then its local transform is also it's global transform
+	// If a game object has a parent, then we must apply the parent's transform
+	m_pLocalTransformMatrix = tran * m_pLocalRotation * scal;
+
+	if (m_pParent)
+		m_pLocalToWorldMatrix = m_pParent->getLocalToWorldMatrix() * m_pLocalTransformMatrix;
+	else
+		m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
+
+	// Update children
+	for (int i = 0; i < m_pChildren.size(); i++)
+		m_pChildren[i]->update(dt);
 }
 
-void GameObject::setTransform(glm::vec3 _pos, glm::vec3 _orientation)
+void GameObject::draw(Camera &camera)
 {
-	if (_orientation == glm::vec3(0.0f))
+	material->shader->bind();
+
+	material->mat4Uniforms["u_mvp"] = camera.getViewProj() * m_pLocalToWorldMatrix;
+	material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
+	material->vec4Uniforms["u_colour"] = colour;
+
+	// Bind the texture
+	if (texture != nullptr)
 	{
-		getRigidBody()->setWorldTransform(_pos);
-		return;
+		texture->bind(GL_TEXTURE31, GL_TEXTURE30);
 	}
-	getRigidBody()->setWorldTransform(_pos, _orientation);
 
-}
+	material->sendUniforms();
 
-void GameObject::setTransform(glm::mat4x4 transform)
-{
-	getRigidBody()->setWorldTransform(transform);
-}
+	mesh->draw(material->shader);
 
-
-
-Player::Player(GameObject* _bomb, int _index, Loader* _model, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material, std::string _tag)
-	:GameObject(_model, _body, _tex, _material, _tag), con(_index)
-{
-		bomb = _bomb;
-		bomb->setTransform(glm::vec3(0.0, -15.0, 0.0));
-
-		timer = 0;
-		duration = 3;
-		thrown = false;
-}
-
-Player::~Player()
-{
-
-}
-
-void Player::draw(Camera _camera)
-{
-	bomb->draw(_camera);
-	GameObject::draw(_camera);
-	this->getRigidBody()->getBody()->setAngularFactor(btVector3(0, 1, 0));
-}
-
-void Player::update(float _dt)
-{
-	
-	if (thrown == true)
+	// Unbind the texture
+	if (texture != nullptr)
 	{
-		timer += _dt;
-		if (timer > duration)
+		texture->unbind(GL_TEXTURE31, GL_TEXTURE30);
+	}
+
+	// Draw children
+	for (int i = 0; i < m_pChildren.size(); ++i)
+		m_pChildren[i]->draw(camera);
+}
+
+void GameObject::setParent(GameObject* newParent)
+{
+	m_pParent = newParent;
+}
+
+void GameObject::addChild(GameObject* newChild)
+{
+	if (newChild)
+	{
+		m_pChildren.push_back(newChild);
+		newChild->setParent(this); // tell new child that this game object is its parent
+	}
+}
+
+void GameObject::removeChild(GameObject* rip)
+{
+	for (int i = 0; i < m_pChildren.size(); ++i)
+	{
+		if (m_pChildren[i] == rip) // compare memory locations (pointers)
 		{
-			timer = 0;
-			thrown = false;
-			bomb->setTransform(glm::vec3(0.0f, -50.0f, 0.0f));
+			std::cout << "Removing child: " + rip->name << " from object: " << this->name;
+			m_pChildren.erase(m_pChildren.begin() + i);
 		}
 	}
-
-	controls();
-	GameObject::update(_dt);
 }
 
-const float degToRad = 3.14159f / 180.0f;
-void Player::controls()
+glm::vec3 GameObject::getWorldPosition()
 {
-	GameObject* player = this;
-	RigidBody * rigid = player->getRigidBody();
-
-	Coords stick = con.getLeftStick();
-	glm::vec3 pos = glm::vec3(0.0f);
-	//std::cout << stick.x << " y: " << stick.y << std::endl;
-	bool motion = false;
-	if (stick.x < -0.1 || stick.x > 0.1)
-	{
-		pos.x = stick.x / 2;
-		motion = true;
-	}
-	if (stick.y < -0.1 || stick.y > 0.1)
-	{
-		pos.z = -stick.y / 2;
-		motion = true;
-	}
-	stick = con.getRightStick();
-	angle = atan2(-stick.y, stick.x) + 270 * degToRad;
-
-	
-	glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
-
-	player->setTransform(temp, glm::vec4(0.0f, angle, 0.0f, 1.f));
-
-	if (motion == true)
-	{
-
-		glm::mat4 transform = rigid->getWorldTransform();
-		glm::mat4 translate = glm::translate(pos);
-		transform += translate;
-		player->setTransform(transform);
-		//player->getRigidBody()->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
-
-	}
-
-	if (con.conButton(XINPUT_GAMEPAD_RIGHT_SHOULDER) && thrown == false)
-	{
-		bomb->getRigidBody()->getBody()->setLinearVelocity(btVector3(0, 0, 0));
-		bomb->getRigidBody()->getBody()->clearForces();//clears force not impulse?
-
-		glm::vec3 temp = player->getRigidBody()->getWorldTransform()[3];
-
-		glm::vec2 normalized = glm::vec2(0);
-
-		if (stick.y > 0.1 || stick.y < -0.1 || stick.x > 0.1 || stick.x < -0.1)
-			normalized = glm::normalize(glm::vec2(stick.x, stick.y));
-
-
-		bomb->setTransform(temp, glm::vec4(0.0f, 0.0, 0.0f, 1.f));
-
-		std::cout << "x: " << normalized.x << "y: " << normalized.y << std::endl;
-
-		bomb->getRigidBody()->getBody()->applyCentralImpulse(btVector3(normalized.x * 150, 75.0f, normalized.y * 150));
-
-		thrown = true;
-
-	}
-
+	if (m_pParent)
+		return m_pParent->getLocalToWorldMatrix() * glm::vec4(m_pLocalPosition, 1.0f);
+	else
+		return m_pLocalPosition;
 }
 
-void Player::checkCollisionWith(GameObject* other)
+glm::mat4 GameObject::getWorldRotation()
 {
-	std::cout << "bomb collided with player" << std::endl;
+	if (m_pParent)
+		return m_pParent->getWorldRotation() * m_pLocalRotation;
+	else
+		return m_pLocalRotation;
 }
+
+bool GameObject::isRoot()
+{
+	if (m_pParent)
+		return false;
+	else
+		return true;
+}
+

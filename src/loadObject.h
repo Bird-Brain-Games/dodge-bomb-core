@@ -5,6 +5,7 @@
 
 #pragma once
 #include <memory>
+#include <string>
 #include <GL\glew.h>
 #include <GLM\glm.hpp>
 #include "loader.h"
@@ -15,27 +16,9 @@ class LoadObject: public Loader
 {
 public:
 	bool load(char const* filename);
-	void draw(std::shared_ptr<Shader> s);
+	bool load(std::string filename);
+	void draw(std::shared_ptr<ShaderProgram> s);
 	
 private:
 	void createVAO();
-};
-
-// holds the information necessary to display a texture 
-// using blinn-phong shading
-class Texture
-{
-public:
-	Texture(char* _diffuseTex, char* _specularTex, float _shininess);
-	Texture(GLuint _diffuseTex, GLuint _specularTex, float _shininess);
-
-	// sends the values to the shader
-	void bind(std::shared_ptr<Shader> s);
-	void bind(Shader* s);
-	void setShininess(float);
-
-private:
-	GLuint diffuseTex;
-	GLuint specularTex;
-	float shininess;
 };

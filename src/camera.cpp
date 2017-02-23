@@ -4,6 +4,7 @@ january 2017
 
 #include "camera.h"
 #include <iostream>
+
 glm::mat4x4 Camera::getView()
 {
 	return viewMatrix;
@@ -16,33 +17,11 @@ glm::mat4x4 Camera::getProj()
 //sets camera at origin looking into z axis.
 Camera::Camera()
 {
+	setPosition(glm::vec3(15.0f));
+	setAngle(0.0f, 0.0f);
 
-
-	pos = glm::vec3(0.35f, 2.7f, 16.6f);
-
-	angle = glm::vec2(3.14159f, 6.0f);
-
-	direction = glm::vec3(
-		cos(angle.y) * sin(angle.x),
-		sin(angle.y),
-		cos(angle.y) * cos(angle.x)
-	);
-	//1.57f is pi/2
-	right = glm::vec3(
-		sin(angle.x - 1.57f),
-		0,
-		cos(angle.x - 1.57f)
-	);
-	up = glm::cross(right, direction);
-
-	//1080 by 720
-	windowRatio = 1.5;
-
-	FOV = 45;
-	minRange = 0.1f;
-	maxRange = 10000;
-	speed = 0.001f;
-
+	setProperties(45, 1080.0f / 720.0f, 0.1f, 10000.0f, 0.5f);
+	forward = glm::vec3(0.0f, -10.0f, -10.0f);
 
 	update();
 }
@@ -64,7 +43,7 @@ void Camera::setProperties(float _FOV, float _windowRatio, float _minRange, floa
 
 	//camera variables
 
-	direction = glm::vec3(
+	forward = glm::vec3(
 		cos(angle.y) * sin(angle.x),
 		sin(angle.y),
 		cos(angle.y) * cos(angle.x)
@@ -75,7 +54,7 @@ void Camera::setProperties(float _FOV, float _windowRatio, float _minRange, floa
 		0,
 		cos(angle.x - 1.57f)
 	);
-	up = glm::cross(right, direction);
+	up = glm::cross(right, forward);
 }
 
 void Camera::setPosition(glm::vec3 _pos)
@@ -85,8 +64,9 @@ void Camera::setPosition(glm::vec3 _pos)
 
 void Camera::update()
 {
-	viewMatrix = glm::lookAt(pos, pos + direction, up);
+	viewMatrix = glm::lookAt(pos, pos + forward, up);
 	projectionMatrix = glm::perspective(FOV, windowRatio, minRange, maxRange);
+	viewProjMatrix = projectionMatrix * viewMatrix;
 }
 
 void Camera::mouseMotion(int x, int y, int preX, int preY)
@@ -100,7 +80,7 @@ void Camera::mouseMotion(int x, int y, int preX, int preY)
 	angle.y += yDif * speed;
 	angle.x += xDif * speed;
 
-	direction = glm::vec3(
+	forward = glm::vec3(
 		cos(angle.y) * sin(angle.x),
 		sin(angle.y),
 		cos(angle.y) * cos(angle.x)
@@ -111,30 +91,30 @@ void Camera::mouseMotion(int x, int y, int preX, int preY)
 		0,
 		cos(angle.x - 1.57f)
 	);
-	up = glm::cross(right, direction);
+	up = glm::cross(right, forward);
 }
 
 void Camera::moveUp()
 {
-	pos += up *  (speed * 100);
+	pos += up *  (speed);
 }
 void Camera::moveDown()
 {
-	pos += up *  (speed * 100);
+	pos += up *  (speed);
 }
 void Camera::moveForward()
 {
-	pos += direction *  (speed * 100);
+	pos += forward *  (speed);
 }
 void Camera::moveBackward()
 {
-	pos -= direction *  (speed * 100);
+	pos -= forward *  (speed);
 }
 void Camera::moveLeft()
 {
-	pos += right * (speed * 100);
+	pos += right * (speed);
 }
 void Camera::moveRight()
 {
-	pos -= right *  (speed * 100);
+	pos -= right *  (speed);
 }
