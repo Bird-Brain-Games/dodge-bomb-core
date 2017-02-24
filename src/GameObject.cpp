@@ -1,6 +1,18 @@
 #include "GameObject.h"
 #include <iostream>
 
+GameObject::GameObject()
+	: m_pLocalPosition(glm::vec3(0.0f)),
+	m_pParent(nullptr),
+	m_pRotX(0.0f), m_pRotY(0.0f), m_pRotZ(0.0f),
+	mesh(nullptr),
+	material(nullptr),
+	texture(nullptr),
+	rigidBody(nullptr)
+{
+
+}
+
 GameObject::GameObject(
 	glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -99,12 +111,20 @@ void GameObject::update(float dt)
 		// Root node
 		m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
 
-		// If the gameobject has updated, set the world transform
-		if (hasRigidBody() && needsUpdating)
+		// If the gameobject has updated, and is static or kinematic, 
+		// set the world transform of the body to the gameobject.
+		if (hasRigidBody() && 
+			rigidBody->getBody()->isStaticOrKinematicObject() && 
+			needsUpdating)
+		{
 			rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
-		// If there is a rigidbody, use it's world transform
-		else if (hasRigidBody())
+		}
+
+		// If the gameobject has updated, set the world transform
+		if (hasRigidBody() && !rigidBody->getBody()->isStaticOrKinematicObject())
+		{
 			m_pLocalToWorldMatrix = rigidBody->getWorldTransform();
+		}
 	}
 
 	// Update children

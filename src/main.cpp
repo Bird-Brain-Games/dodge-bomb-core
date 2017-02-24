@@ -24,6 +24,7 @@
 #include "ShaderProgram.h"
 #include "loadObject.h"
 #include "GameObject.h"
+#include "Player.h"
 #include "FrameBufferObject.h"
 #include "InputManager.h"
 #include "menu.h"
@@ -198,8 +199,9 @@ void initializeScene()
 	gameobjects["sphere"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
-	gameobjects["bombot1"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap);/*
+	gameobjects["bombot1"] = std::make_shared<Player>(
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
+	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
@@ -224,8 +226,11 @@ void initializeScene()
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
+	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
 
 	// Set object properties
+	//gameobjects["bombot1"]->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	
+	// Rigidbody no longer deactivates (must do for each player)
 
 	// Set menu properties
 	mainMenu = std::make_unique<Menu>(defaultTex);
