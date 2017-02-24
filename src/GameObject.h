@@ -33,8 +33,6 @@ public:
 	void setRotationAngleY(float newAngle);
 	void setRotationAngleZ(float newAngle);
 
-	glm::mat4 getLocalToWorldMatrix();
-
 	virtual void update(float dt);	
 	virtual void draw(Camera &camera);
 
@@ -43,12 +41,13 @@ public:
 	void setParent(GameObject* newParent);
 	void addChild(GameObject* newChild);
 	void removeChild(GameObject* rip);
+	glm::mat4 getLocalToWorldMatrix();
 	glm::vec3 getWorldPosition();
 	glm::mat4 getWorldRotation();
 
 	bool isRoot();
 	bool hasRigidBody() { return (rigidBody != nullptr); }
-	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
+	virtual void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 
 	void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
 
@@ -57,7 +56,6 @@ public:
 
 private:
 	void updateLocalTransform();
-	bool needsUpdating;
 
 protected:
 	float m_pRotX, m_pRotY, m_pRotZ; // local rotation angles
@@ -80,4 +78,6 @@ protected:
 	// Rigid body for rigidbody dynamics
 	// Using unique_ptr as objects shouldn't share rigidBodies
 	std::unique_ptr<RigidBody> rigidBody;
+
+	bool needsUpdating;
 };
