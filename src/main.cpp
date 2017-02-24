@@ -149,6 +149,8 @@ void initializeShaders()
 
 void initializeScene()
 {
+	///////////////////////////////////////////////////////////////////////////
+	////////////////////////////	MESHES		///////////////////////////////
 	std::string meshPath = "Assets/obj/";
 	
 	// Initialize all meshes
@@ -172,6 +174,8 @@ void initializeScene()
 	meshes["sphere"] = sphereMesh;
 	meshes["bombot"] = bombotMesh;
 
+	///////////////////////////////////////////////////////////////////////////
+	////////////////////////////	TEXTURES	///////////////////////////////
 	// Load textures (WIP)
 	// Has to take char* due to ILUT
 	char diffuseTex[] = "Assets/img/Blake.png";
@@ -184,7 +188,8 @@ void initializeScene()
 	textures["default"] = defaultTex;
 	textures["bombot"] = bombotTexMap;
 
-	// Create objects
+	///////////////////////////////////////////////////////////////////////////
+	////////////////////////	GAME OBJECTS	///////////////////////////////
 	auto defaultMaterial = materials["default"];
 
 	gameobjects["table"] = std::make_shared<GameObject>(
@@ -209,6 +214,9 @@ void initializeScene()
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);*/
 	
+	///////////////////////////////////////////////////////////////////////////
+	////////////////////////	RIGID BODIES	///////////////////////////////
+	
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
 	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
@@ -228,9 +236,11 @@ void initializeScene()
 	gameobjects["table"]->attachRigidBody(tableBody);
 	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
 
+
+	///////////////////////////////////////////////////////////////////////////
+	////////////////////////	PROPERTIES		///////////////////////////////
+	
 	// Set object properties
-	//gameobjects["bombot1"]->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	
-	// Rigidbody no longer deactivates (must do for each player)
 
 	// Set menu properties
 	mainMenu = std::make_unique<Menu>(defaultTex);

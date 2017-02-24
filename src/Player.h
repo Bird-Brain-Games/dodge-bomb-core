@@ -7,6 +7,13 @@
 class Bomb : public GameObject
 {
 public:
+	Bomb(glm::vec3 position,
+		std::shared_ptr<Loader> _mesh,
+		std::shared_ptr<Material> _material,
+		std::shared_ptr<Texture> _texture,
+		int playerNum);
+	~Bomb();
+
 
 private:
 	float timer;
@@ -27,10 +34,11 @@ public:
 		int playerNum);
 	~Player();
 
-	void controls();
+	void handleInput();
 
 	void update(float deltaT);
 	void draw(Camera _camera);
+	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 
 	void checkCollisionWith(GameObject* other);
 

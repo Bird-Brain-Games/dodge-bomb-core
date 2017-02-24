@@ -211,3 +211,8 @@ bool GameObject::isRoot()
 		return true;
 }
 
+void GameObject::checkCollisionWith(std::shared_ptr<GameObject> other)
+{
+
+}
+
