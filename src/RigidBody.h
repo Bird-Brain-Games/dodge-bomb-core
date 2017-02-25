@@ -56,7 +56,7 @@ class RigidBody
 {
 public:
 	RigidBody();
-	RigidBody(short _group, short _mask);
+	RigidBody(short _group, short _mask = -1);
 	~RigidBody();
 
 	bool load(std::string fileName);
@@ -77,7 +77,7 @@ public:
 	static bool isDrawingDebug() { return Sys.isDrawingDebug(); }
 	static btDispatcher* getDispatcher() { return Sys.dynamicsWorld->getDispatcher(); }
 	void setKinematic();
-	void setDeactive();
+	void setDeactivationMode(int mode);
 protected:
 	static PhysicsEngine Sys;
 

@@ -189,7 +189,7 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 				break;
 			case 2:
 				// Sphere model
-				shape = nullptr;
+				shape = new btSphereShape(radius);
 				break;
 			default:
 				shape = nullptr;
@@ -258,11 +258,16 @@ bool RigidBody::load(std::string fileName)
 	{
 		btRigidBody::btRigidBodyConstructionInfo* rigidCI = Sys.getRigidBodyCI(fileName);
 		body = new btRigidBody(*rigidCI);
-		
+
+		if (rigidCI->m_mass <= 0.0)
+		{
+			body->setCollisionFlags(btCollisionObject::CollisionFlags::CF_STATIC_OBJECT);
+		}
+
 		body->getCollisionShape()->setUserPointer(this);
 		body->setMotionState(new btDefaultMotionState());
 
-		if (mask >= 0 && group >= 0)
+		if (group >= 0)
 			Sys.addRigidBody(body, group, mask);
 		else
 			Sys.addRigidBody(body);
@@ -315,13 +320,13 @@ void RigidBody::systemUpdate(float deltaTasSeconds, int maxStep)
 void RigidBody::setKinematic()
 {
 	body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-	setDeactive();
+	setDeactivationMode(DISABLE_DEACTIVATION);
 	std::cout << body->isKinematicObject() << std::endl;
 }
 
-void RigidBody::setDeactive()
+void RigidBody::setDeactivationMode(int mode)
 {
-	body->setActivationState(DISABLE_DEACTIVATION);
+	body->setActivationState(mode);
 }
 
 void RigidBody::drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 const& projectionMatrix)
