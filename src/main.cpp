@@ -205,14 +205,15 @@ void initializeScene()
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 2);
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);*/
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 3);
+	*/
 	
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	RIGID BODIES	///////////////////////////////
@@ -220,21 +221,26 @@ void initializeScene()
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
 	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
+	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
 	std::unique_ptr<RigidBody> bombot1Body;
+	std::unique_ptr<RigidBody> sphereBody;
 
 	tableBody = std::make_unique<RigidBody>();
-	bombot1Body = std::make_unique<RigidBody>();
+	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	sphereBody = std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
 	bombot1Body->load(bombotBodyPath);
+	sphereBody->load(sphereBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
 	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
+	gameobjects["sphere"]->attachRigidBody(sphereBody);
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -572,6 +578,49 @@ void handleKeyboardInput()
 	KEYBOARD_INPUT->WipeEventList();
 }
 
+void calculateCollisions()
+{
+	// Basis taken from 
+	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Collision_Callbacks_and_Triggers
+	btDispatcher* dispatcher = RigidBody::getDispatcher();
+	int numManifolds = dispatcher->getNumManifolds();
+
+	short objAGroup, objBGroup;
+
+	for (int i = 0; i < numManifolds; i++)
+	{
+		//std::cout << numManifolds << std::endl;
+		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
+		const btCollisionObject* objA = contactManifold->getBody0();
+		const btCollisionObject* objB = contactManifold->getBody1();
+
+		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
+		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
+
+		if (objAGroup != objBGroup &&
+			!objA->isStaticObject() &&
+			!objB->isStaticObject())
+		{
+			// Check if one is a sensor, the other is a player, 
+			// and they don't both belong to the same player.
+			if (objAGroup == btBroadphaseProxy::SensorTrigger &&
+				objBGroup == btBroadphaseProxy::CharacterFilter)
+			{
+				Player* p = (Player*)objB->getUserPointer();
+				Bomb* b = (Bomb*)objA->getUserPointer();
+				p->checkCollisionWith(b);
+			}
+			else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
+				objAGroup == btBroadphaseProxy::CharacterFilter)
+			{
+				Player* p = (Player*)objA->getUserPointer();
+				Bomb* b = (Bomb*)objB->getUserPointer();
+				p->checkCollisionWith(b);
+			}
+		}
+	}
+}
+
 /* function TimerCallbackFunction(int value)
 * Description:
 *  - this is called many times per second
@@ -595,6 +644,7 @@ void TimerCallbackFunction(int value)
 
 	// Step through world simulation with Bullet
 	RigidBody::systemUpdate(deltaTime, 10);
+	calculateCollisions();
 	
 	// Update the camera's position
 	playerCamera.update();

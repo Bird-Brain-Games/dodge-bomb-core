@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <iostream>
 
 const float degToRad = 3.14159f / 180.0f;
 
@@ -44,13 +45,20 @@ void Player::update(float _dt)
 		}
 	}
 
-	handleInput();*/
+	*/
+	handleInput();
 	GameObject::update(_dt);
 	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
 }
 
 void Player::handleInput()
 {
+	if (!con.connected())
+	{
+		std::cerr << "Error: Controller disconnected" << std::endl;
+		return;
+	}
+
 	// Check if the player has moved the left stick
 	Coords LStick = con.getLeftStick();
 	glm::vec3 trans = glm::vec3(0.0f);
@@ -107,13 +115,13 @@ void Player::handleInput()
 
 void Player::checkCollisionWith(GameObject* other)
 {
-	//std::cout << "bomb collided with player" << std::endl;
+	std::cout << "bomb collided with player" << std::endl;
 }
 
 void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 {
 	GameObject::attachRigidBody(_rb);
-	rigidBody->getBody()->setActivationState(DISABLE_DEACTIVATION);
+	rigidBody->setDeactivationMode(DISABLE_DEACTIVATION);
 }
 
 
