@@ -189,7 +189,7 @@ void Player::controls()
 
 		std::cout << "x: " << normalized.x << "y: " << normalized.y << std::endl;
 
-		bomb->getRigidBody()->getBody()->applyCentralImpulse(btVector3(normalized.x * 150, 75.0f, normalized.y * 150));
+		bomb->getRigidBody()->getBody()->applyCentralImpulse(btVector3(normalized.x * 150, 75.0f, -normalized.y * 150));
 
 		thrown = true;
 
