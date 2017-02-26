@@ -70,6 +70,20 @@ Menu* menu;
 
 bool atlas = true;
 
+// Player Starting Positions
+glm::vec3 player1Start = glm::vec3(5.f, 45.0f, 5.f);
+glm::vec3 player2Start = glm::vec3(5.f, 45.0f, -5.f);
+glm::vec3 player3Start = glm::vec3(-5.f, 45.0f, 5.f);
+glm::vec3 player4Start = glm::vec3(-5.f, 45.0f, -5.f);
+
+void newGame()
+{
+	objects[0]->setTransform(player1Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	objects[1]->setTransform(player2Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	objects[2]->setTransform(player3Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	objects[3]->setTransform(player4Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+	atlas = true;
+}
 
 // separate, cleaner, draw function
 void drawObjects()
@@ -115,6 +129,21 @@ void initObjects()
 	// World class manages memory
 	world = new GameWorld();
 
+	// Load Textures
+	Texture* ballTex = new Texture("assets//img//Blake.png", "assets//img//Blake.png", 10.0f);
+	Texture* groundTex = new Texture("assets//img//desk (diffuse).png", "assets//img//desk (diffuse).png", 10.0f);
+	Texture* robot = new Texture("assets//img//bombot.png", "assets//img//bombot.png", 10.0f);
+	Texture* bomb = new Texture("assets//img//redTex.png", "assets//img//redTex.png", 10.0f);
+	Texture* atlas = new Texture("assets//img//menu_atlas.png", "assets//img//menu_atlas.png", 10.0f);
+
+	textures.push_back(ballTex);
+	textures.push_back(groundTex);
+	textures.push_back(robot);
+	textures.push_back(bomb);
+	textures.push_back(atlas);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	RigidBody *box = new RigidBody();
 	//box->load("assets\\bullet\\box5x5.btdata");
 
@@ -149,7 +178,7 @@ void initObjects()
 		bombModel->load("assets\\obj\\bomb.obj");
 		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
 		Player* robot = new Player(bomb, 1, robotModel, rbRobot, textures[2], animation);
-		robot->setTransform(glm::vec3(5.f, 45.0f, 5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+		robot->setTransform(player1Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
 		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
 		objects.push_back(robot);
@@ -166,7 +195,7 @@ void initObjects()
 		bombModel->load("assets\\obj\\bomb.obj");
 		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
 		Player* robot = new Player(bomb, 0, robotModel, rbRobot, textures[2], animation);
-		robot->setTransform(glm::vec3(5.f, 45.0f, -5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+		robot->setTransform(player2Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
 		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
 		objects.push_back(robot);
@@ -183,7 +212,7 @@ void initObjects()
 		bombModel->load("assets\\obj\\bomb.obj");
 		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
 		Player* robot = new Player(bomb, 2, robotModel, rbRobot, textures[2], animation);
-		robot->setTransform(glm::vec3(-5.f, 45.0f, 5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+		robot->setTransform(player3Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
 		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
 		objects.push_back(robot);
@@ -200,9 +229,10 @@ void initObjects()
 		bombModel->load("assets\\obj\\bomb.obj");
 		GameObject* bomb = new GameObject(bombModel, bombBody, textures[3], defaultMaterial);
 		Player* robot = new Player(bomb, 3, robotModel, rbRobot, textures[2], animation);
-		robot->setTransform(glm::vec3(-5.f, 45.0f, -5.f), glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
+		robot->setTransform(player4Start, glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
 		robot->getRigidBody()->getBody()->applyCentralImpulse(btVector3(0, 1, 0));
-		robot->getRigidBody()->setDeactive();	// Rigidbody no longer deactivates (must do for each player)
+		robot->getRigidBody()->getBody()->setActivationState(DISABLE_DEACTIVATION);	// Rigidbody no longer deactivates (must do for each player)
+		//robot->getRigidBody()->setDeactive();	// Rigidbody no longer deactivates (must do for each player)
 		objects.push_back(robot);
 	}
 	
@@ -213,11 +243,11 @@ void initObjects()
 		//menu stuff
 	menu = new Menu(textures[4], 2, 2);
 
-
+	camera.setPosition(glm::vec3(0, 50, 100));
+	camera.setAngle(3.14159012f, 5.98318052f);
 	//camera.setAngle(-1.57, 1.57); // show from bottom so better see bomb throw
-	camera.setPosition(glm::vec3(2.67483306, 58.8221130, 33.0502548));
-	camera.setAngle(3.12159014, 5.44317770);
-	camera.setProperties(44.00002, 1080, 720, 0.1f, 10000.0f, 0.001f);
+	camera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
+	camera.setProperties(44.00002, 1080 / 720, 0.1f, 10000.0f, 0.001f);
 
 	// initializes the positions of all the starting objects
 	RigidBody::systemUpdate(1, 10);
@@ -245,16 +275,14 @@ void DisplayCallbackFunction(void)
 	//objects[1]->draw(camera);
 
 	//objects[0]->draw(camera);
-
+	if (atlas == true)
+	{
+	menu->draw();
+	}
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
 		RigidBody::drawDebug(camera.getView(), camera.getProj());
-
-	if (atlas == true)
-	{
-		menu->draw();
-	}
 
 	glutSwapBuffers();
 }
@@ -328,6 +356,10 @@ void TimerCallbackFunction(int value)
 	{
 		rotation -= 1;
 	}
+	if (KEYBOARD_INPUT->CheckPressEvent('z') || KEYBOARD_INPUT->CheckPressEvent('Z'))
+	{
+		atlas = !atlas;
+	}
 	if (menus.conButton(XINPUT_GAMEPAD_A))
 	{
 		atlas = false;
@@ -335,6 +367,10 @@ void TimerCallbackFunction(int value)
 	if (KEYBOARD_INPUT->CheckPressEvent('x') || KEYBOARD_INPUT->CheckPressEvent('X'))
 	{
 		menu->incSpot();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('n') || KEYBOARD_INPUT->CheckPressEvent('N'))
+	{
+		newGame();
 	}
 	
 	// Clear the keyboard input
@@ -349,6 +385,9 @@ void TimerCallbackFunction(int value)
 	oldTimeSinceStart = timeSinceStart;
 
 	float deltaTasSeconds = float(deltaT) / 1000.0f;
+
+	objects[1]->update(deltaTasSeconds);
+
 
 	// Bullet step through world simulation
 	RigidBody::systemUpdate(deltaTasSeconds, 10);
@@ -395,8 +434,8 @@ void WindowReshapeCallbackFunction(int w, int h)
 	// switch to projection because we're changing projection
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//gluOrtho2D(-(float)w / h, (float)w / h, -1.0, 1.0);
-	camera.setProperties(45.0f, w, h, 0.1f, 10000.0f, 0.01f);
+	gluPerspective(45.0f, (float)w / h, 0.1f, 10000.0f);
+	camera.setProperties(45.0f, float(w / h), 0.1f, 10000.0f, 0.01f);
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -504,10 +543,9 @@ int main(int argc, char **argv)
 
 	// initialize the window and OpenGL properly
 	glutInit(&argc, argv);
-	glutInitWindowSize(1920, 1080);
+	glutInitWindowSize(1080, 720);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutCreateWindow("Dodge Bomb");
-	glutFullScreen();
 
 	// Initialize OpenGL Extention Wrangler
 	GLenum res = glewInit();
@@ -563,21 +601,6 @@ int main(int argc, char **argv)
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	shaderInit();
-
-	//Load Textures
-	Texture* ballTex = new Texture("assets//img//Blake.png", "assets//img//Blake.png", 10.0f);
-	Texture* groundTex = new Texture("assets//img//desk (diffuse).png", "assets//img//desk (diffuse).png", 10.0f);
-	Texture* robot = new Texture("assets//img//bombot.png", "assets//img//bombot.png", 10.0f);
-	Texture* bomb = new Texture("assets//img//redTex.png", "assets//img//redTex.png", 10.0f);
-	Texture* atlas = new Texture("assets//img//menu_atlas.png", "assets//img//menu_atlas.png", 10.0f);
-
-	textures.push_back(ballTex);
-	textures.push_back(groundTex);
-	textures.push_back(robot);
-	textures.push_back(bomb);
-	textures.push_back(atlas);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Load objects
 	initObjects();
