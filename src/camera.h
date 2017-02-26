@@ -13,7 +13,7 @@ class Camera
 {
 public:
 	Camera();
-	void setProperties(float fov, float h, float w, float _minRange, float _maxRange, float _speed);
+	void setProperties(float _FOV, float _ratio, float _minRange, float _maxRange, float _speed);
 
 	//sets the camera's position
 	void setPosition(glm::vec3 _pos);
@@ -58,8 +58,6 @@ private:
 	//The camera's variables. used to setup the projection matricies 
 	float windowRatio;
 	float FOV;
-	float height;
-	float width;
 	float minRange;
 	float maxRange;
 	float speed;
