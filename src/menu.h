@@ -17,10 +17,10 @@ public:
 	void draw();
 
 private:
-	//How many textures are in the width of the texture atlas
+	//How many textures are in the width and height of the texture atlas
 	glm::vec2 dim;
 
-	//where we are on the texture
+	//where we are on the texture in x and y
 	glm::vec2 spot;
 
 	// our shader. we use this to draw our texture to the screen.
