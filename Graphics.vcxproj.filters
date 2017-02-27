@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\controller.cpp" />
+    <ClCompile Include="src\GameObject.cpp" />
+    <ClCompile Include="src\Texture.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VAO.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FrameBufferObject.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loadObject.cpp">
+      <Filter>Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RigidBody.cpp">
+      <Filter>External engines</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sound engine.cpp">
+      <Filter>External engines</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BulletDebugger.cpp">
+      <Filter>External engines</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputManager.cpp">
+      <Filter>External engines</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ANILoader.cpp">
+      <Filter>Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\node.cpp">
+      <Filter>Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shader.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ShaderProgram.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\menu.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\camera.h" />
+    <ClInclude Include="src\controller.h" />
+    <ClInclude Include="src\GameObject.h" />
+    <ClInclude Include="src\Texture.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VAO.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\material.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FrameBufferObject.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\loadObject.h">
+      <Filter>Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\loader.h">
+      <Filter>Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RigidBody.h">
+      <Filter>External engines</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sound engine.h">
+      <Filter>External engines</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BulletDebug.h">
+      <Filter>External engines</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputManager.h">
+      <Filter>External engines</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ANILoader.h">
+      <Filter>Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\node.h">
+      <Filter>Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\JointTypes.h">
+      <Filter>Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ShaderProgram.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Shader.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\menu.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{d75ab4ca-6714-4384-b2e5-b0b64e56357d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Loaders">
+      <UniqueIdentifier>{76bb69e1-e359-4019-8dcf-5cc57fda6d27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External engines">
+      <UniqueIdentifier>{a1e78617-6688-4917-b059-85eb099e8ed9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Shaders">
+      <UniqueIdentifier>{a7b2ea0f-19fc-40db-9be6-db5d0b683e51}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\blinnphong_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\blinnphong_v.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\bloomComposite_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\bright_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\default_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\default_v.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\gaussianBlur_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\menu.geom">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\null.vert">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\passThru_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\passThru_v.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\quad.geom">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\shader_texture.frag">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\skinning.vert">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\toon_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\unlitTexture_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
