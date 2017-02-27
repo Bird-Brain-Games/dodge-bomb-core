@@ -12,7 +12,7 @@ public:
 	void addGameState(std::string a_string, GameState* a_state);//adds a game state to the list of game states
 	void removeGameState(std::string a_string);//removes the specified game state from the list
 	GameState* getGameState(std::string a_string);//returns a pointer to the gamestate that we specifiy
-	void update();//calls the update functions for the game states
+	void update(float dt);//calls the update functions for the game states
 	void draw();
 
 
@@ -26,7 +26,7 @@ class GameState
 {
 public:
 
-	virtual void update() = 0;//this is a function that doesnt exsist in this class but can be defined by those that it is inherited from.
+	virtual void update(float dt) = 0;//this is a function that doesnt exsist in this class but can be defined by those that it is inherited from.
 	virtual void draw() = 0;//this is a function that doesnt exsist in this class but can be defined by those that it is inherited from.
 	void setPaused(bool a_paused);//this controls whether a game state is paused or not. When paused it doesnt update
 	bool m_isPaused = false;//the variable that controls whether the game state is paused. it starts unpaused

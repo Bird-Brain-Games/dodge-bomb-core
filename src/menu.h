@@ -11,6 +11,7 @@ public:
 	void updateTex(Texture*);
 	//sets the spot to the given value.
 	void setSpot(glm::vec2);
+	void setSpot(int, int);
 	//Incriments the row spot and if it goes past the row size it resets row to zero and increments coloumn
 	void incSpot();
 

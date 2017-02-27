@@ -17,7 +17,7 @@
 
 // user headers
 #include "World.h"
-#include "InputManager.h"
+
 #include "GameObject.h"
 #include "Shader.h"
 #include "RigidBody.h"
@@ -25,8 +25,15 @@
 #include "material.h"
 #include "menu.h"
 #include "sound engine.h"
-
+#include "states.h"
 Sound theme;
+
+GameStateManager manager;
+MainMenu* mainMenu;
+Pause* pause;
+Game* game;
+Score* score;
+Debug* debug;
 
 int width, height;
 float oWidth, oHeight;
@@ -77,16 +84,9 @@ bool atlas = false;
 
 
 // separate, cleaner, draw function
-void drawObjects()
-{
-	glBindTexture(GL_TEXTURE_2D, 0);
-	for (unsigned int i = 0; i < objects.size(); i++)
-	{
-	objects[i]->draw(*camera);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
-	}
-}
+
+
 
 void shaderInit()
 {
@@ -235,7 +235,6 @@ void initObjects()
 	width = 1024;
 	height = 720;
 	camera->setProperties(44.00002, width, height, 0.1f, 10000.0f, 0.001f);
-
 	// initializes the positions of all the starting objects
 	RigidBody::systemUpdate(1, 10);
 	//RigidBody::setDebugDraw(true);
@@ -249,6 +248,43 @@ void initObjects()
 void DisplayCallbackFunction(void)
 {
 
+	// Use the E key to set the debug draw
+
+
+	// Move the camera
+	if (KEYBOARD_INPUT->CheckPressEvent('i') || KEYBOARD_INPUT->CheckPressEvent('I'))
+	{
+		camera->moveForward();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
+	{
+		camera->moveBackward();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
+	{
+		camera->moveRight();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('L'))
+	{
+		camera->moveLeft();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('u') || KEYBOARD_INPUT->CheckPressEvent('U'))
+	{
+		camera->moveUp();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('o') || KEYBOARD_INPUT->CheckPressEvent('O'))
+	{
+		camera->moveDown();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('m') || KEYBOARD_INPUT->CheckPressEvent('M'))
+	{
+		if (camera == &projection)
+		{
+			camera = &ortho;
+		}
+		else
+			camera = &projection;
+	}
 
 	////////////////////////////////////////////////////////////////// Clear our screen
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -256,22 +292,16 @@ void DisplayCallbackFunction(void)
 
 	////////////////////////////////////////////////////////////////// Draw Our Scene
 
+	manager.draw();
 
 
-	drawObjects();
 	//objects[1]->draw(camera);
 
 	//objects[0]->draw(camera);
 
 
 	// Draw the debug (if on)
-	if (RigidBody::isDrawingDebug())
-		RigidBody::drawDebug(camera->getView(), camera->getProj());
 
-	if (atlas == true)
-	{
-		menu->draw();
-	}
 
 	glutSwapBuffers();
 }
@@ -313,58 +343,12 @@ void TimerCallbackFunction(int value)
 		glutLeaveMainLoop();
 	}
 
-	// Use the E key to set the debug draw
-	if (KEYBOARD_INPUT->CheckPressEvent('e') || KEYBOARD_INPUT->CheckPressEvent('E'))
-	{
-		RigidBody::setDebugDraw(!RigidBody::isDrawingDebug());
-	}
 
-	// Move the camera
-	if (KEYBOARD_INPUT->CheckPressEvent('i') || KEYBOARD_INPUT->CheckPressEvent('I'))
-	{
-		camera->moveForward();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
-	{
-		camera->moveBackward();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
-	{
-		camera->moveRight();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('L'))
-	{
-		camera->moveLeft();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('u') || KEYBOARD_INPUT->CheckPressEvent('U'))
-	{
-		camera->moveUp();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('o') || KEYBOARD_INPUT->CheckPressEvent('O'))
-	{
-		camera->moveDown();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('z'))
-	{
-		atlas = false;
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('x') || KEYBOARD_INPUT->CheckPressEvent('X'))
-	{
-		menu->incSpot();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('m') || KEYBOARD_INPUT->CheckPressEvent('M'))
-	{
-		if (camera == &projection)
-		{
-			camera = &ortho;
-		}
-		else
-			camera = &projection;
-	}
 
 
 	// Clear the keyboard input
 	KEYBOARD_INPUT->WipeEventList();
+
 
 
 
@@ -379,11 +363,8 @@ void TimerCallbackFunction(int value)
 	// Bullet step through world simulation
 	RigidBody::systemUpdate(deltaTasSeconds, 10);
 	
+	manager.update(deltaTasSeconds);
 
-	for (unsigned int i = 0; i < objects.size(); i++)
-	{
-	objects[i]->update(deltaTasSeconds);
-	}
 
 	//// force draw call next tick
 	glutPostRedisplay();
@@ -616,11 +597,40 @@ int main(int argc, char **argv)
 	textures.push_back(bomb);
 	textures.push_back(atlas);
 
+	
+
+	
+
+
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Load objects
 	initObjects();
 	//initWorld();
+
+	mainMenu = new MainMenu(menu);
+	mainMenu->setPaused(false);
+
+	pause = new Pause(menu);
+	pause->setPaused(true);
+
+	score = new Score(menu);
+	score->setPaused(true);
+
+	game = new Game(&objects, pause, score, &camera);
+	game->setPaused(true);
+
+	debug = new Debug(camera);
+	debug->setPaused(false);
+
+
+	manager.addGameState("main menu", mainMenu);
+	manager.addGameState("pause", pause);
+	manager.addGameState("game", game);
+	manager.addGameState("score", score);
+	manager.addGameState("debug", debug);
+
 
 	/* start the event handler */
 	glutMainLoop();
