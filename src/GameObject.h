@@ -56,7 +56,10 @@ public:
 	std::string name;
 
 private:
+	// Updates the local transform based on the updated variables
 	void updateLocalTransform();
+	// Sets the local variables based on the rigidbody (dynamic bodies)
+	void setLocalTransformToBody();
 
 protected:
 	float m_pRotX, m_pRotY, m_pRotZ; // local rotation angles

@@ -46,6 +46,13 @@ void GameObject::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 	}
 }
 
+void GameObject::setLocalTransformToBody()
+{
+	m_pLocalPosition = m_pLocalToWorldMatrix[3];
+	// ROTATION NEEDED TO BE ADDED
+	//m_pRotX = m_pLocalToWorldMatrix[]
+}
+
 void GameObject::updateLocalTransform()
 {
 	// Create rotation matrix
@@ -70,7 +77,6 @@ void GameObject::setPosition(glm::vec3 newPosition)
 {
 	m_pLocalPosition = newPosition;
 	needsUpdating = true;
-
 }
 
 void GameObject::setRotationAngleX(float newAngle)
@@ -111,19 +117,22 @@ void GameObject::update(float dt)
 		// Root node
 		m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
 
-		// If the gameobject has updated, and is static or kinematic, 
-		// set the world transform of the body to the gameobject.
-		if (hasRigidBody() && 
-			rigidBody->getBody()->isStaticOrKinematicObject() && 
-			needsUpdating)
+		if (hasRigidBody())
 		{
-			rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
-		}
+			// If the gameobject has updated
+			// set the world transform of the body to the gameobject.
+			if (needsUpdating)
+			{
+				rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
+			}
 
-		// If the gameobject has updated, set the world transform
-		if (hasRigidBody() && !rigidBody->getBody()->isStaticOrKinematicObject())
-		{
-			m_pLocalToWorldMatrix = rigidBody->getWorldTransform();
+			// If the gameobject has updated, set the world transform
+			if (!rigidBody->getBody()->isStaticOrKinematicObject())
+			{
+				m_pLocalToWorldMatrix = rigidBody->getWorldTransform();
+				// update local variables to have the properties
+				setLocalTransformToBody();
+			}
 		}
 	}
 
