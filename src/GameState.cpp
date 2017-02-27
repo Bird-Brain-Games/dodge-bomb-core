@@ -9,13 +9,13 @@ void GameStateManager::removeGameState(std::string a_string)//removes the game s
 {
 	m_states[a_string] = nullptr;//replaces the gamestate with a null value
 }
-void GameStateManager::update()
+void GameStateManager::update(float dt)
 {
 	for (auto itr = m_states.begin(), itrEnd = m_states.end(); itr != itrEnd; itr++)//magic. dont quite get it myself.
 	{//essentially it goes throught the gamestatemanager  until all of the the game states have been checked
 		if (itr->second != nullptr && itr->second->m_isPaused != true)//checks if the spot is either a nullprt or if its paused
 		{
-			itr->second->update();//updates whats is active in the manager
+			itr->second->update(dt);//updates whats is active in the manager
 		}
 			//first is the name of it
 			//second is the value

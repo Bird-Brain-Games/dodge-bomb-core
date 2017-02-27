@@ -19,12 +19,21 @@ Menu::Menu(Texture* _tex, int _width, int _height)
 	glBindVertexArray(vaoD);
 	glGenBuffers(1, &vboD);
 	dim = glm::vec2(_width, _height);
-	spot = glm::vec2(0, 1);
+	spot = glm::vec2(0, 0);
 }
 
 void Menu::setSpot(glm::vec2 _spot)
 {
 	spot = _spot;
+	if (spot.x >= dim.x)
+		spot.x = dim.x - 1;
+	if (spot.y >= dim.y)
+		spot.y = dim.y - 1;
+}
+
+void Menu::setSpot(int x, int y)
+{
+	spot = glm::vec2(x, y);
 	if (spot.x >= dim.x)
 		spot.x = dim.x - 1;
 	if (spot.y >= dim.y)
@@ -52,7 +61,7 @@ void Menu::draw()
 	menu.bind();
 	tex->bind(&menu);
 	menu.uniformVec2("_dim", dim);
-	menu.uniformVec2("_spot", spot);
+	menu.uniformVec2("_spot", glm::vec2(spot.x, dim.y - 1 - spot.y));
 	glDrawArrays(GL_POINTS, 0, 1);
 	menu.unbind();
 	glBindVertexArray(0);

@@ -1,5 +1,6 @@
 #pragma once
-
+//Code by Campbell Hamilton
+//Made jointly in a computer programming club taught by david
 #define WIN32_LEAN_AND_MEAN
 
 #include <Windows.h>

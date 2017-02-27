@@ -50,6 +50,12 @@
     <ClCompile Include="src\Player.cpp">
       <Filter>object</Filter>
     </ClCompile>
+    <ClCompile Include="src\states.cpp">
+      <Filter>game State</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameState.cpp">
+      <Filter>game State</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h">
@@ -109,6 +115,12 @@
     <ClInclude Include="src\Player.h">
       <Filter>object</Filter>
     </ClInclude>
+    <ClInclude Include="src\states.h">
+      <Filter>game State</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameState.h">
+      <Filter>game State</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -158,6 +170,9 @@
     </Filter>
     <Filter Include="FBO">
       <UniqueIdentifier>{ebc8541a-25d3-422f-bba2-bd215314cfd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game State">
+      <UniqueIdentifier>{57053a71-e0c9-469a-be73-d0b56a9023c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

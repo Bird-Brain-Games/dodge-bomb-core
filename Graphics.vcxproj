@@ -85,6 +85,7 @@
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\controller.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
+    <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\loadObject.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -95,6 +96,7 @@
     <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\sound engine.cpp" />
+    <ClCompile Include="src\states.cpp" />
     <ClCompile Include="src\VAO.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
@@ -104,6 +106,7 @@
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\controller.h" />
     <ClInclude Include="src\GameObject.h" />
+    <ClInclude Include="src\GameState.h" />
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\JointTypes.h" />
     <ClInclude Include="src\KeyframeController.h" />
@@ -116,6 +119,7 @@
     <ClInclude Include="src\RigidBody.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\sound engine.h" />
+    <ClInclude Include="src\states.h" />
     <ClInclude Include="src\VAO.h" />
     <ClInclude Include="src\World.h" />
   </ItemGroup>
