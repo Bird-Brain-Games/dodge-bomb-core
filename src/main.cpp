@@ -159,13 +159,17 @@ void initializeScene()
 	std::shared_ptr<LoadObject> cannonMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> sphereMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> bombotMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> corkboardMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> roomMesh = std::make_shared<LoadObject>();
 
 	// Load all meshes
-	tableMesh->load(meshPath + "table.obj");
+	tableMesh->load(meshPath + "translatedtable.obj");
 	barrelMesh->load(meshPath + "barrel.obj");
 	cannonMesh->load(meshPath + "cannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
 	bombotMesh->load(meshPath + "smolbot.obj");
+	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
+	roomMesh->load(meshPath + "scaledroom.obj");
 
 	// Add all meshes to map
 	meshes["table"] = tableMesh;
@@ -173,6 +177,8 @@ void initializeScene()
 	meshes["cannon"] = cannonMesh;
 	meshes["sphere"] = sphereMesh;
 	meshes["bombot"] = bombotMesh;
+	meshes["corkboard"] = corkboardMesh;
+	meshes["room"] = roomMesh;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
@@ -184,9 +190,17 @@ void initializeScene()
 	char bombotTex[] = "Assets/img/bombot(diffuse).png";
 	std::shared_ptr<Texture> bombotTexMap = std::make_shared<Texture>(bombotTex, bombotTex, 1.0f);
 
+	char corkboardTex[] = "Assets/img/corkboard(diffuse).png";
+	std::shared_ptr<Texture> corkboardTexMap = std::make_shared<Texture>(corkboardTex, corkboardTex, 1.0f);
+
+	char roomTex[] = "Assets/img/room(diffuse).png";
+	std::shared_ptr<Texture> roomTexMap = std::make_shared<Texture>(roomTex, roomTex, 1.0f);
+
 	//Add textures to the map
 	textures["default"] = defaultTex;
 	textures["bombot"] = bombotTexMap;
+	textures["corkboard"] = corkboardTexMap;
+	textures["room"] = roomTexMap;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
@@ -203,6 +217,12 @@ void initializeScene()
 
 	gameobjects["sphere"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
+
+	gameobjects["corkboard"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 5.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
+
+	gameobjects["room"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 5.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
 
 	gameobjects["bombot1"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
