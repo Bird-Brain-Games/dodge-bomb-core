@@ -20,6 +20,13 @@ Player::Player(glm::vec3 position,
 	//thrown = false;
 }
 
+Player::Player(Player& other)
+	: GameObject(other),
+	con(other.con.getPlayerNum()+1)
+{
+
+}
+
 Player::~Player()
 {
 
@@ -122,15 +129,4 @@ void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 {
 	GameObject::attachRigidBody(_rb);
 	rigidBody->setDeactivationMode(DISABLE_DEACTIVATION);
-}
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// BOMB
-
-Bomb::~Bomb()
-{
-
 }

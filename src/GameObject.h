@@ -24,6 +24,7 @@ public:
 		std::shared_ptr<Material> _material, 
 		std::shared_ptr<Texture> _texture);	
 
+	GameObject(GameObject&);
 	~GameObject();
 
 	void setTexture(std::shared_ptr<Texture> _texture) { texture = _texture; }
