@@ -141,6 +141,7 @@
     <None Include="shaders\default_v.glsl" />
     <None Include="shaders\gaussianBlur_f.glsl" />
     <None Include="shaders\menu.geom" />
+    <None Include="shaders\noLighting_f.glsl" />
     <None Include="shaders\null.vert" />
     <None Include="shaders\passThru_f.glsl" />
     <None Include="shaders\passThru_v.glsl" />
