@@ -618,7 +618,7 @@ void handleKeyboardInput()
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
 	{
-		gameobjects["table"]->setScale(gameobjects["table"]->getScale() + 0.1f);
+		gameobjects["bombot1"]->setScale(gameobjects["bombot1"]->getScale() + 0.1f);
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('L'))
 	{
