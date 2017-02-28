@@ -616,6 +616,14 @@ void handleKeyboardInput()
 		gameobjects["bombot1"]->setPosition(
 			gameobjects["bombot1"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
 	}
+	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
+	{
+		gameobjects["table"]->setScale(gameobjects["table"]->getScale() + 0.1f);
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('L'))
+	{
+		gameobjects["table"]->setScale(gameobjects["table"]->getScale() - 0.1f);
+	}
 
 	// Switch Lighting Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('1'))

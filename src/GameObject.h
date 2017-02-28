@@ -33,6 +33,7 @@ public:
 	void setRotationAngleX(float newAngle);
 	void setRotationAngleY(float newAngle);
 	void setRotationAngleZ(float newAngle);
+	void setScale(glm::vec3 newScale);
 
 	virtual void update(float dt);	
 	virtual void draw(Camera &camera);
@@ -45,6 +46,7 @@ public:
 	glm::mat4 getLocalToWorldMatrix();
 	glm::vec3 getWorldPosition();
 	glm::mat4 getWorldRotation();
+	glm::vec3 getScale() { return m_pScale; }
 
 	bool isRoot();
 	bool hasRigidBody() { return (rigidBody != nullptr); }
@@ -64,6 +66,7 @@ private:
 
 protected:
 	float m_pRotX, m_pRotY, m_pRotZ; // local rotation angles
+	glm::vec3 m_pScale;
 
 	glm::vec3 m_pLocalPosition;
 	glm::mat4 m_pLocalRotation;

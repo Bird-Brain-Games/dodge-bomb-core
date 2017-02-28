@@ -5,12 +5,13 @@ GameObject::GameObject()
 	: m_pLocalPosition(glm::vec3(0.0f)),
 	m_pParent(nullptr),
 	m_pRotX(0.0f), m_pRotY(0.0f), m_pRotZ(0.0f),
+	m_pScale(1.0f),
 	mesh(nullptr),
 	material(nullptr),
 	texture(nullptr),
 	rigidBody(nullptr)
 {
-
+	
 }
 
 GameObject::GameObject(
@@ -22,6 +23,7 @@ GameObject::GameObject(
 	:m_pLocalPosition(position),
 	m_pParent(nullptr),
 	m_pRotX(0.0f), m_pRotY(0.0f), m_pRotZ(0.0f),
+	m_pScale(1.0f),
 	mesh(_mesh),
 	material(_material),
 	texture(_texture),
@@ -63,6 +65,7 @@ void GameObject::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 void GameObject::setLocalTransformToBody()
 {
 	m_pLocalPosition = m_pLocalToWorldMatrix[3];
+	m_pScale = rigidBody->getScale();
 	// ROTATION NEEDED TO BE ADDED
 	//m_pRotX = m_pLocalToWorldMatrix[]
 }
@@ -80,17 +83,31 @@ void GameObject::updateLocalTransform()
 	// Create translation matrix
 	glm::mat4 tran = glm::translate(m_pLocalPosition);
 
+	// Create scale matrix
+	glm::mat4 scal = glm::scale(m_pScale);
+
 	// Combine all above transforms into a single matrix
 	// This is the local transformation matrix, ie. where is this game object relative to it's parent
 	// If a game object has no parent (it is a root node) then its local transform is also it's global transform
 	// If a game object has a parent, then we must apply the parent's transform
-	m_pLocalTransformMatrix = tran * m_pLocalRotation;
+	m_pLocalTransformMatrix = tran * m_pLocalRotation * scal;
 }
 
 void GameObject::setPosition(glm::vec3 newPosition)
 {
 	m_pLocalPosition = newPosition;
 	needsUpdating = true;
+}
+
+void GameObject::setScale(glm::vec3 newScale)
+{
+	if (newScale.x > 0.0f &&
+		newScale.y > 0.0f &&
+		newScale.z > 0.0f)
+	{
+		m_pScale = newScale;
+		needsUpdating = true;
+	}
 }
 
 void GameObject::setRotationAngleX(float newAngle)
@@ -138,6 +155,7 @@ void GameObject::update(float dt)
 			if (needsUpdating)
 			{
 				rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
+				rigidBody->setScale(m_pScale);
 			}
 
 			// If the gameobject has updated, set the world transform
