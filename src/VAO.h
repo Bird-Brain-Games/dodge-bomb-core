@@ -56,6 +56,7 @@ public:
 	int addAttribute(Attribute attrib);
 	void createVAO();
 	void draw();
+	void drawLines();
 	void destroy();
 
 private:

@@ -278,7 +278,7 @@ void updateScene()
 	lightPos.z = sin(ang) * 10.0f;
 	lightPos.w = 1.0f;
 
-	//gameobjects["sphere"]->setPosition(lightPos);
+	gameobjects["sphere"]->setPosition(lightPos);
 
 	// Update all game objects
 	for (auto itr = gameobjects.begin(); itr != gameobjects.end(); ++itr)

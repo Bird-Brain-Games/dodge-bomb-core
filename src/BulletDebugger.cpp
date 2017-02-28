@@ -18,30 +18,10 @@ void BulletDebugger::SetMatrices(glm::mat4 pViewMatrix, glm::mat4 pProjectionMat
 
 void BulletDebugger::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
 {
-	//glDisable(GL_DEPTH_TEST);
-	////glPolygonOffset(1, 1);
-	//glColor3f(color.x(), color.y(), color.z());
-	//glBegin(GL_LINES);
-	//	glVertex3f(from.x(), from.y(), from.z());
-	//	glVertex3f(to.x(), to.y(), to.z());
-	//glEnd();
-	//glEnable(GL_DEPTH_TEST);
-	////glPolygonOffset(0, 1);
-
-	float tmp[6] = { from.getX(), from.getY(), from.getZ(),
-					to.getX(), to.getY(), to.getZ() };
-
-	glPushMatrix();
-	{
-		glColor4f(color.getX(), color.getY(), color.getZ(), 1.0f);
-
-		glVertexPointer(3, GL_FLOAT, 0, &tmp);
-
-		glPointSize(5.0f);
-		glDrawArrays(GL_POINTS, 0, 3);
-		glDrawArrays(GL_LINES, 0, 3);
-	}
-	glPopMatrix();
+	temp_vertices.push_back(glm::vec3(from.getX(), from.getY(), from.getZ()));
+	temp_vertices.push_back(glm::vec3(to.getX(), to.getY(), to.getZ()));
+	temp_colours.push_back(glm::vec3(color.getX(), color.getY(), color.getZ()));
+	temp_colours.push_back(glm::vec3(color.getX(), color.getY(), color.getZ()));
 }
 
 void BulletDebugger::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
@@ -62,4 +42,42 @@ void BulletDebugger::draw3dText(const btVector3& location, const char* textStrin
 void BulletDebugger::setDebugMode(int _debugMode)
 {
 	debugMode = (DebugDrawModes)_debugMode;
+}
+
+void BulletDebugger::drawVAO()
+{
+	vao.destroy();
+
+	// how many pieces of data do we have.
+	int size = temp_vertices.size();
+	// times by 3 because each vertex data has 3 floats worth of data.
+
+	if (temp_vertices.size() > 0)
+	{
+		Attribute positionAttrib(AttributeLocations::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, size, "vPos", temp_vertices.data());
+		vao.addAttribute(positionAttrib);
+	}
+
+	// set up other attributes...
+	if (temp_colours.size() > 0)
+	{
+		Attribute positionAttrib(AttributeLocations::COLOUR, GL_FLOAT, sizeof(glm::vec3), 3, size, "colour", temp_colours.data());
+		vao.addAttribute(positionAttrib);
+	}
+
+	
+	vao.createVAO();
+	vao.draw();
+
+	//if (vaoHandle)
+	//{
+	//	glBindVertexArray(vaoHandle);
+
+	//	glDrawArrays(GL_TRIANGLES, 0, attributes[0].getNumElements());
+
+	//	glBindVertexArray(0);
+	//}
+
+	temp_vertices.clear();
+	temp_colours.clear();
 }
