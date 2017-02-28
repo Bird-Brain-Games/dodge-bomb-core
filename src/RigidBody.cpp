@@ -76,7 +76,7 @@ void PhysicsEngine::drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 co
 {
 	debugger->SetMatrices(modelViewMatrix, projectionMatrix);
 	dynamicsWorld->debugDrawWorld();
-	debugger->drawVAO();
+	//debugger->drawVAO();
 }
 
 btRigidBody::btRigidBodyConstructionInfo* PhysicsEngine::getRigidBodyCI(std::string fileName)

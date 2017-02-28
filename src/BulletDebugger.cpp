@@ -18,10 +18,17 @@ void BulletDebugger::SetMatrices(glm::mat4 pViewMatrix, glm::mat4 pProjectionMat
 
 void BulletDebugger::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
 {
-	temp_vertices.push_back(glm::vec3(from.getX(), from.getY(), from.getZ()));
+	glBegin(GL_LINES);
+	glColor3f(color.getX(), color.getY(), color.getZ());
+	glVertex3d(from.getX(), from.getY(), from.getZ());
+	glColor3f(color.getX(), color.getY(), color.getZ());
+	glVertex3d(to.getX(), to.getY(), to.getZ());
+	glEnd();
+
+	/*temp_vertices.push_back(glm::vec3(from.getX(), from.getY(), from.getZ()));
 	temp_vertices.push_back(glm::vec3(to.getX(), to.getY(), to.getZ()));
 	temp_colours.push_back(glm::vec3(color.getX(), color.getY(), color.getZ()));
-	temp_colours.push_back(glm::vec3(color.getX(), color.getY(), color.getZ()));
+	temp_colours.push_back(glm::vec3(color.getX(), color.getY(), color.getZ()));*/
 }
 
 void BulletDebugger::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
