@@ -64,12 +64,26 @@ void VAO::draw()
 		glBindVertexArray(0);
 	}
 }
+
+void VAO::drawLines()
+{
+	if (vaoHandle)
+	{
+		glBindVertexArray(vaoHandle);
+
+		glDrawArrays(GL_LINES, 0, attributes[0].getNumElements());
+
+		glBindVertexArray(0);
+	}
+}
+
 void VAO::destroy()
 {
 	if (vaoHandle)
 	{
 		glDeleteVertexArrays(1, &vaoHandle);
 		glDeleteBuffers(vboHandles.size(), &vboHandles[0]);
+		vaoHandle = 0;
 	}
 
 	vboHandles.clear();

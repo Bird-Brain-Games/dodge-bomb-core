@@ -3,6 +3,9 @@
 
 #include <LinearMath\btIDebugDraw.h>
 #include <GLM\glm.hpp>
+#include <vector>
+
+#include "VAO.h"
 
 class BulletDebugger : public btIDebugDraw
 {
@@ -22,7 +25,12 @@ public:
 
 	virtual int		getDebugMode() const { return (int)debugMode; }
 
+	void			drawVAO();
+
 private:
 	DebugDrawModes debugMode;
+	VAO vao;
+	std::vector<glm::vec3> temp_vertices;
+	std::vector<glm::vec3> temp_colours;
 };
 
