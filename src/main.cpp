@@ -236,20 +236,20 @@ void initializeScene()
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
-	auto currentMaterial = materials["default"];
+	auto defaultMaterial = materials["default"];
 
 
 	gameobjects["table"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, currentMaterial, deskTex);
+		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTex);
 
 	gameobjects["barrel"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 20.0f, -5.f), barrelMesh, currentMaterial, nullptr);
+		glm::vec3(-5.f, 20.0f, -5.f), barrelMesh, defaultMaterial, nullptr);
 
 	gameobjects["cannon"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, currentMaterial, nullptr);
+		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial, nullptr);
 
 	gameobjects["sphere"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, currentMaterial, nullptr);
+		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["corkboard"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
@@ -258,7 +258,7 @@ void initializeScene()
 		glm::vec3(0.0f, 5.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
 
 	gameobjects["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, currentMaterial, bombotTexMap, 0);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
