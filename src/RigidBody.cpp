@@ -384,3 +384,18 @@ void RigidBody::setWorldTransform(glm::mat4x4 transform)
 {
 	setWorldTransform(transform[3]);
 }
+
+void RigidBody::setScale(glm::vec3 newScale)
+{
+	body->getCollisionShape()->setLocalScaling(btVector3(
+		newScale.x,
+		newScale.y,
+		newScale.z
+	));
+}
+
+glm::vec3 RigidBody::getScale()
+{
+	btVector3 ls = body->getCollisionShape()->getLocalScaling();
+	return glm::vec3(ls.getX(), ls.getY(), ls.getZ());
+}
