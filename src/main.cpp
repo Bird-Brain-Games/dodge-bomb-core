@@ -33,8 +33,8 @@
 #define FRAMES_PER_SECOND 60
 const int FRAME_DELAY = 1000 / FRAMES_PER_SECOND; // Milliseconds per frame
 
-int windowWidth = 800;
-int windowHeight = 600;
+int windowWidth = 1280;
+int windowHeight = 720;
 
 glm::vec3 mousePosition; // x,y,0
 glm::vec3 mousePositionFlipped; // x, height - y, 0
@@ -195,7 +195,7 @@ void initializeScene()
 	std::shared_ptr<LoadObject> roomMesh = std::make_shared<LoadObject>();
 
 	// Load all meshes
-	tableMesh->load(meshPath + "translatedtable.obj");
+	tableMesh->load(meshPath + "table.obj");
 	barrelMesh->load(meshPath + "barrel.obj");
 	cannonMesh->load(meshPath + "cannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
@@ -300,6 +300,7 @@ void initializeScene()
 	////////////////////////	PROPERTIES		///////////////////////////////
 	
 	// Set object properties
+	//gameobjects["bombot2"] = std::make_shared<GameObject>(*gameobjects["bombot1"]);
 
 	// Set menu properties
 	mainMenu = std::make_unique<Menu>(deskTex);

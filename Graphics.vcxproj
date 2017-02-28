@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ANILoader.cpp" />
+    <ClCompile Include="src\Bomb.cpp" />
     <ClCompile Include="src\BulletDebugger.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\controller.cpp" />
@@ -112,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ANILoader.h" />
+    <ClInclude Include="src\Bomb.h" />
     <ClInclude Include="src\BulletDebug.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\controller.h" />

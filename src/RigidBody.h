@@ -57,6 +57,7 @@ class RigidBody
 public:
 	RigidBody();
 	RigidBody(short _group, short _mask = -1);
+	RigidBody(RigidBody&);
 	~RigidBody();
 
 	bool load(std::string fileName);
@@ -69,6 +70,7 @@ public:
 	//void applyImpulse()
 
 	btRigidBody* getBody() { return body; }
+	std::string getFileName() { return u_fileName; }
 	
 public:
 	static void systemUpdate(float deltaTasSeconds, int maxStep);
@@ -83,6 +85,6 @@ protected:
 
 private:
 	btRigidBody *body;
-
+	std::string u_fileName;
 	short group, mask;
 };

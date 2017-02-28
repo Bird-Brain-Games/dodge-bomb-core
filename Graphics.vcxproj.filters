@@ -43,6 +43,7 @@
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\menu.cpp" />
+    <ClCompile Include="src\Bomb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />
@@ -95,6 +96,7 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\menu.h" />
+    <ClInclude Include="src\Bomb.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Graphics">

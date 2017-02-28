@@ -244,6 +244,14 @@ RigidBody::RigidBody(short _group, short _mask)
 	mask = _mask;
 }
 
+RigidBody::RigidBody(RigidBody& other)
+	:body(nullptr),
+	group(other.group),
+	mask(other.mask)
+{
+	
+}
+
 RigidBody::~RigidBody()
 {
 	Sys.removeRigidBody(body);
@@ -272,6 +280,8 @@ bool RigidBody::load(std::string fileName)
 			Sys.addRigidBody(body, group, mask);
 		else
 			Sys.addRigidBody(body);
+
+		u_fileName = fileName;
 		return true;
 
 	}
@@ -301,6 +311,8 @@ bool RigidBody::load(std::string fileName, btCollisionObject::CollisionFlags fla
 			Sys.addRigidBody(body, group, mask);
 		else
 			Sys.addRigidBody(body);
+
+		u_fileName = fileName;
 		return true;
 
 	}

@@ -30,6 +30,20 @@ GameObject::GameObject(
 
 }
 
+GameObject::GameObject(GameObject& other)
+	: m_pLocalPosition(other.m_pLocalPosition),
+	m_pParent(nullptr),
+	m_pRotX(other.m_pRotX), m_pRotY(other.m_pRotY), m_pRotZ(other.m_pRotZ),
+	mesh(other.mesh),
+	material(other.material),
+	texture(other.texture),
+	rigidBody(nullptr)
+{
+	rigidBody = std::make_unique<RigidBody>(*other.rigidBody);
+	rigidBody->load(other.rigidBody->getFileName(), 
+		(btCollisionObject::CollisionFlags)other.rigidBody->getBody()->getCollisionFlags());
+}
+
 GameObject::~GameObject() 
 {
 
