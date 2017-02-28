@@ -66,6 +66,7 @@ void GameObject::setLocalTransformToBody()
 {
 	m_pLocalPosition = m_pLocalToWorldMatrix[3];
 	m_pScale = rigidBody->getScale();
+	m_pLocalToWorldMatrix = m_pLocalToWorldMatrix * glm::scale(m_pScale);
 	// ROTATION NEEDED TO BE ADDED
 	//m_pRotX = m_pLocalToWorldMatrix[]
 }
