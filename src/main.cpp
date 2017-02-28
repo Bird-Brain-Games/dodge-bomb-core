@@ -50,6 +50,7 @@ glm::vec4 lightPos;
 
 // Cameras
 Camera playerCamera; // the camera you move around with wasd
+Camera shadowCamera; // Camera for the shadow map
 
 // Asset databases
 std::map<std::string, std::shared_ptr<LoadObject>> meshes;
@@ -68,15 +69,32 @@ FrameBufferObject fboUnlit;
 FrameBufferObject fboBright;
 FrameBufferObject fboBlurA, fboBlurB;
 
-enum FBOMode
+enum LightingMode
 {
 	DEFAULT,
-	BRIGHT_PASS,
-	BLURRED_BRIGHT_PASS,
-	BLOOM
+	NOLIGHT,
+	TOON
 };
+LightingMode currentLightingMode = DEFAULT;
 
-FBOMode currentMode = DEFAULT;
+enum FBOMode
+{
+	NONE,
+	BLOOM,
+};
+FBOMode currentFBOMode = NONE;
+
+// Lighting Controls
+float ka = 0.1f; // Ambient Lighting
+float kd = 1.0f; // Diffuse Lighting
+float ks = 0.5f; // Specular Lighting
+float n  = 1.0f; // Shinniness
+float kr = 1.0f; // Rim Lighting Constant
+
+// Shadow Map Variables
+
+GLuint shadowDepth;
+
 
 void initializeShaders()
 {
@@ -91,24 +109,38 @@ void initializeShaders()
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
-	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor;
+	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, f_noLighting, f_toon;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
 	f_composite.loadShaderFromFile(shaderPath + "bloomComposite_f.glsl", GL_FRAGMENT_SHADER);
 	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER);
 	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);
+	f_noLighting.loadShaderFromFile(shaderPath + "noLighting_f.glsl", GL_FRAGMENT_SHADER);
+	f_toon.loadShaderFromFile(shaderPath + "toon_f.glsl", GL_FRAGMENT_SHADER);
 
 	// Geometry Shaders
 	Shader g_quad, g_menu;
 	g_quad.loadShaderFromFile(shaderPath + "quad.geom", GL_GEOMETRY_SHADER);
 	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
 
+	// No Lighting material
+	materials["noLighting"] = std::make_shared<Material>();
+	materials["noLighting"]->shader->attachShader(v_default);
+	materials["noLighting"]->shader->attachShader(f_noLighting);
+	materials["noLighting"]->shader->linkProgram();
+	
 	// Default material that all objects use
 	materials["default"] = std::make_shared<Material>();
 	materials["default"]->shader->attachShader(v_default);
 	materials["default"]->shader->attachShader(f_default);
 	materials["default"]->shader->linkProgram();
+
+	// Default material that all objects use
+	materials["toon"] = std::make_shared<Material>();
+	materials["toon"]->shader->attachShader(v_default);
+	materials["toon"]->shader->attachShader(f_toon);
+	materials["toon"]->shader->linkProgram();
 
 	// Material used for menu full screen drawing
 	materials["menu"] = std::make_shared<Material>();
@@ -173,39 +205,34 @@ void initializeScene()
 
 	// Load textures (WIP)
 	// Has to take char* due to ILUT
-	char diffuseTex[] = "Assets/img/Blake.png";
-	std::shared_ptr<Texture> defaultTex = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
+	char diffuseTex[] = "Assets/img/desk (diffuse).png";
+	std::shared_ptr<Texture> deskTex = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
 
 	char bombotTex[] = "Assets/img/bombot(diffuse).png";
 	std::shared_ptr<Texture> bombotTexMap = std::make_shared<Texture>(bombotTex, bombotTex, 1.0f);
 
 	//Add textures to the map
-	textures["default"] = defaultTex;
+	textures["default"] = deskTex;
 	textures["bombot"] = bombotTexMap;
 
 	// Create objects
-	auto defaultMaterial = materials["default"];
+	auto currentMaterial = materials["default"];
+
 
 	gameobjects["table"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, defaultTex);
+		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, currentMaterial, deskTex);
 
 	gameobjects["barrel"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 45.0f, -5.f), barrelMesh, defaultMaterial, nullptr);
+		glm::vec3(-5.f, 20.0f, -5.f), barrelMesh, currentMaterial, nullptr);
 
 	gameobjects["cannon"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial, nullptr);
+		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, currentMaterial, nullptr);
 
 	gameobjects["sphere"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
+		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, currentMaterial, nullptr);
 
 	gameobjects["bombot1"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap);/*
-	gameobjects["bombot2"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
-	gameobjects["bombot3"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);
-	gameobjects["bombot4"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, nullptr);*/
+		glm::vec3(0.0f, 0.0f, 0.0f), bombotMesh, currentMaterial, bombotTexMap);
 	
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
@@ -228,7 +255,7 @@ void initializeScene()
 	// Set object properties
 
 	// Set menu properties
-	mainMenu = std::make_unique<Menu>(defaultTex);
+	mainMenu = std::make_unique<Menu>(deskTex);
 	mainMenu->setMaterial(materials["menu"]);
 
 	// Set default camera properties (WIP)
@@ -236,6 +263,11 @@ void initializeScene()
 	playerCamera.setAngle(3.14159012f, 5.98318052f);
 	//playerCamera.setProperties(44.00002, (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f, 0.001f);
 	playerCamera.update();
+
+	shadowCamera.setPosition(glm::vec3(0.0f, 50.0f, 0.0f));
+	shadowCamera.setAngle(1.57f, 1.57f);
+	shadowCamera.update();
+	
 }
 
 void initializeFrameBuffers()
@@ -244,6 +276,7 @@ void initializeFrameBuffers()
 	fboBright.createFrameBuffer(80, 60, 1, false);
 	fboBlurA.createFrameBuffer(80, 60, 1, false);
 	fboBlurB.createFrameBuffer(80, 60, 1, false);
+
 }
 
 void updateScene()
@@ -252,9 +285,9 @@ void updateScene()
 	static float ang = 1.0f;
 
 	ang += deltaTime; // comment out to pause light
-	lightPos.x = cos(ang) * 10.0f;
-	lightPos.y = cos(ang*4.0f) * 2.0f + 10.0f;
-	lightPos.z = sin(ang) * 10.0f;
+	lightPos.x = 0.0f;
+	lightPos.y = 50.0f;
+	lightPos.z = 0.0f;
 	lightPos.w = 1.0f;
 
 	gameobjects["sphere"]->setPosition(lightPos);
@@ -361,98 +394,99 @@ void blurBrightPass()
 void DisplayCallbackFunction(void)
 {
 	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
-
 	// bind scene FBO
 	fboUnlit.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(clearColor);
+		switch (currentLightingMode)
+		{
+			// No fancy shit
+			case DEFAULT:
+			{
+				setMaterialForAllGameObjects("default");
+				
+				materials["default"]->shader->bind();
+				
+				// Set material properties
+				materials["default"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
 
-	// Set material properties
-	materials["default"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+				materials["default"]->intUniforms["u_diffuseTex"] = 31;
+				materials["default"]->intUniforms["u_specularTex"] = 30;
 
-	materials["default"]->intUniforms["u_diffuseTex"] = 31;
-	materials["default"]->intUniforms["u_specularTex"] = 30;
-	//material->vec4Uniforms["u_shininess"] =
+				materials["default"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+				materials["default"]->vec4Uniforms["u_shine"] = glm::vec4(n);
+		
 
-	// draw the scene to the fbo
-	if (!inMenu)
-		drawScene(playerCamera);
-	else
-		mainMenu->draw();
+				materials["default"]->sendUniforms();
+			}
+			break;
+			case NOLIGHT:
+			{
+				setMaterialForAllGameObjects("noLighting");
 
-	// Draw the debug (if on)
-	if (RigidBody::isDrawingDebug())
-		RigidBody::drawDebug(playerCamera.getView(), playerCamera.getProj());
+				// Set material properties
+				materials["noLighting"]->shader->bind();
 
-	// Unbind scene FBO
-	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
-	FrameBufferObject::clearFrameBuffer(clearColor);
+				materials["noLighting"]->intUniforms["u_diffuseTex"] = 31;
+				materials["noLighting"]->intUniforms["u_specularTex"] = 30;
 
-	static auto unlitMaterial = materials["unlitTexture"];
+				materials["noLighting"]->sendUniforms();
+			}
+			break;
+			case TOON:
+			{
+				setMaterialForAllGameObjects("toon");
+
+				// Set material properties
+				materials["toon"]->shader->bind();
+
+				materials["toon"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+				materials["toon"]->intUniforms["u_diffuseTex"] = 31;
+				materials["toon"]->intUniforms["u_specularTex"] = 30;
+
+				materials["toon"]->sendUniforms();
+			}
+			break;
+		}
+
+		// draw the scene to the fbo
+		if (!inMenu)
+			drawScene(playerCamera);
+		else
+			mainMenu->draw();
+
+		// Draw the debug (if on)
+		if (RigidBody::isDrawingDebug())
+			RigidBody::drawDebug(playerCamera.getView(), playerCamera.getProj());
+
+		// Unbind scene FBO
+		fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
+		FrameBufferObject::clearFrameBuffer(clearColor);
+
+		static auto unlitMaterial = materials["unlitTexture"];
 
 	// Apply a post process filter
-	switch (currentMode)
+	switch (currentFBOMode)
 	{
-		// No filter
-		case DEFAULT: // press 1
-		{
-			fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
+			case NONE:
+			{
+				// Bind FBO
+				fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
+				
+				// Tell opengl which shader we want it to use
+				materials["unlitTexture"]->shader->bind();
+
+				// Tell the sampler2d named "u_tex" to look at texture unit 0
+				materials["unlitTexture"]->shader->sendUniformInt("u_tex", 0);
+				materials["unlitTexture"]->mat4Uniforms["u_mvp"] = glm::mat4();
+
+				// Send uniform varibles to GPU
+				materials["unlitTexture"]->sendUniforms();
 			
-			// Tell opengl which shader we want it to use
-			unlitMaterial->shader->bind();
-
-			// Tell the sampler2d named "u_tex" to look at texture unit 0
-			unlitMaterial->shader->sendUniformInt("u_tex", 0);
-			unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-
-			// Send uniform varibles to GPU
-			unlitMaterial->sendUniforms();
-
-			// Draw fullscreen quad using the geometry shader
-			glDrawArrays(GL_POINTS, 0, 1);
-		}
-		break;
-
-		// Extract highlights
-		case BRIGHT_PASS: // press 2
-		{
-			brightPass();
-
-			fboBright.bindTextureForSampling(0, GL_TEXTURE0);
-			
-			FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-			FrameBufferObject::clearFrameBuffer(glm::vec4(1,0,0,1));
-			unlitMaterial->shader->bind();
-			unlitMaterial->shader->sendUniformInt("u_tex", 0);
-			unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-			unlitMaterial->sendUniforms();
-
-			// Draw a full screen quad using the geometry shader
-			glDrawArrays(GL_POINTS, 0, 1);
-		}
-		break;
-
-		// Blur highlights
-		case BLURRED_BRIGHT_PASS: // press 3
-		{
-			brightPass();
-			blurBrightPass();
-
-			fboBlurA.bindTextureForSampling(0, GL_TEXTURE0);
-			
-			FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-			FrameBufferObject::clearFrameBuffer(clearColor);
-			unlitMaterial->shader->bind();
-			unlitMaterial->shader->sendUniformInt("u_tex", 0);
-			unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-			unlitMaterial->sendUniforms();
-
-			// Draw a full screen quad using the geometry shader
-			glDrawArrays(GL_POINTS, 0, 1);
-		}
-		break;
-
-		// Composite the bloom effect
-		case BLOOM: // press 4
+				// Draw a full screen quad using the geometry shader
+				glDrawArrays(GL_POINTS, 0, 1);
+			}
+			break;
+		case BLOOM:
 		{
 			brightPass();
 			blurBrightPass();
@@ -535,22 +569,29 @@ void handleKeyboardInput()
 			gameobjects["table"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
 	}
 
-	// Switch video modes
+	// Switch Lighting Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('1'))
 	{
-		currentMode = DEFAULT;
+		currentLightingMode = DEFAULT;
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('2'))
 	{
-		currentMode = BRIGHT_PASS;
+		currentLightingMode = NOLIGHT;
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('3'))
 	{
-		currentMode = BLURRED_BRIGHT_PASS;
+		currentLightingMode = TOON;
 	}
+	
+	
+	// Changes Filter Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('4'))
 	{
-		currentMode = BLOOM;
+		currentFBOMode = NONE;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('5'))
+	{
+		currentFBOMode = BLOOM;
 	}
 
 	// Clear the keyboard input
