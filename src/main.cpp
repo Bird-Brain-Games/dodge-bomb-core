@@ -238,7 +238,7 @@ void initializeScene()
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, currentMaterial, nullptr);
 
 	gameobjects["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, currentMaterial, bombotTexMap, 0);
 	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
