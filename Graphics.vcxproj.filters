@@ -159,5 +159,8 @@
     <None Include="shaders\unlitTexture_f.glsl">
       <Filter>Graphics\Shaders</Filter>
     </None>
+    <None Include="shaders\noLighting_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
