@@ -18,6 +18,8 @@ void BulletDebugger::SetMatrices(glm::mat4 pViewMatrix, glm::mat4 pProjectionMat
 
 void BulletDebugger::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
 {
+	// test code taken from 
+	// https://stackoverflow.com/questions/14008295/how-to-implement-the-btidebugdraw-interface-of-bullet-in-opengl-4-0
 	glBegin(GL_LINES);
 	glColor3f(color.getX(), color.getY(), color.getZ());
 	glVertex3d(from.getX(), from.getY(), from.getZ());
