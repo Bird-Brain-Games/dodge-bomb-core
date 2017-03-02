@@ -13,7 +13,7 @@ public:
 		std::shared_ptr<Loader> _mesh,
 		std::shared_ptr<Material> _material,
 		std::shared_ptr<Texture> _texture, 
-		int playerNum);
+		int _playerNum);
 	Player(Player&);
 	~Player();
 
@@ -24,9 +24,15 @@ public:
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 
 	void checkCollisionWith(GameObject* other);
+	int getPlayerNum();
+	static BombManager bombManager;
 
 private:
 	Controller con;
-	float angle;
-	std::unique_ptr<Bomb> bomb;
+	int playerNum;
+
+	float bombCooldown;		// The value the cooldown gets set to when thrown
+	float currentCooldown;	// The current cooldown on the bomb throw
+
+	
 };

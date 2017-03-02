@@ -193,6 +193,7 @@ void initializeScene()
 	std::shared_ptr<LoadObject> bombotMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> corkboardMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> roomMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> bombMesh = std::make_shared<LoadObject>();
 
 	// Load all meshes
 	tableMesh->load(meshPath + "table.obj");
@@ -202,6 +203,8 @@ void initializeScene()
 	bombotMesh->load(meshPath + "smolbot.obj");
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
+	bombMesh->load(meshPath + "bomb.obj");
+
 
 	// Add all meshes to map
 	meshes["table"] = tableMesh;
@@ -211,6 +214,7 @@ void initializeScene()
 	meshes["bombot"] = bombotMesh;
 	meshes["corkboard"] = corkboardMesh;
 	meshes["room"] = roomMesh;
+	meshes["bomb"] = bombMesh;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
@@ -228,11 +232,15 @@ void initializeScene()
 	char roomTex[] = "Assets/img/room(diffuse).png";
 	std::shared_ptr<Texture> roomTexMap = std::make_shared<Texture>(roomTex, roomTex, 1.0f);
 
+	char bombTex[] = "Assets/img/bomb(diffuse).jpg";
+	std::shared_ptr<Texture> bombTexMap = std::make_shared<Texture>(bombTex, bombTex, 1.0f);
+
 	//Add textures to the map
 	textures["default"] = deskTex;
 	textures["bombot"] = bombotTexMap;
 	textures["corkboard"] = corkboardTexMap;
 	textures["room"] = roomTexMap;
+	textures["bomb1"] = bombTexMap;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
@@ -275,6 +283,7 @@ void initializeScene()
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
 	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
 	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
+	std::string bombBodyPath = """assets\\bullet\\bomb.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
@@ -301,6 +310,13 @@ void initializeScene()
 	
 	// Set object properties
 	//gameobjects["bombot2"] = std::make_shared<GameObject>(*gameobjects["bombot1"]);
+	Player::bombManager.init(bombMesh,
+		bombTexMap,		// Player1 bomb texture
+		bombTexMap,		// Player2 bomb texture
+		bombTexMap,		// Player3 bomb texture
+		bombTexMap,		// Player4 bomb texture
+		defaultMaterial,
+		bombBodyPath);
 
 	// Set menu properties
 	mainMenu = std::make_unique<Menu>(deskTex);
