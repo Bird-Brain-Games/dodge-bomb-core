@@ -36,6 +36,7 @@ GameObject::GameObject(GameObject& other)
 	: m_pLocalPosition(other.m_pLocalPosition),
 	m_pParent(nullptr),
 	m_pRotX(other.m_pRotX), m_pRotY(other.m_pRotY), m_pRotZ(other.m_pRotZ),
+	m_pScale(other.m_pScale),
 	mesh(other.mesh),
 	material(other.material),
 	texture(other.texture),

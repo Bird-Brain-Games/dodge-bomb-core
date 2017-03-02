@@ -20,15 +20,15 @@ public:
 	Bomb(Bomb&);
 	~Bomb();
 
-	void attachPlayerPtr(std::shared_ptr<Player> _playerPtr);
-	void throwBomb(glm::vec3 direction, float force);
+	void attachPlayerPtr(Player* _playerPtr);
+	void throwBomb(glm::vec2 direction, glm::vec3 force);
 	void draw(Camera& camera);
 	void update(float dt);
 
 private:
 	float duration;
 	int playerNum;
-	std::shared_ptr<Player> playerPtr;
+	Player* playerPtr;
 };
 
 /*
@@ -54,7 +54,7 @@ public:
 
 	// Create the new bomb, add it to the active list,
 	// and tell it to throw in the given direction.
-	void throwBomb(std::shared_ptr<Player>, glm::vec2 direction, float force);
+	void throwBomb(Player*, glm::vec2 direction, glm::vec3 force);
 
 private:
 	std::shared_ptr<Loader> mesh;

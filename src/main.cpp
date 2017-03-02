@@ -56,6 +56,7 @@ Camera shadowCamera; // Camera for the shadow map
 // Asset databases
 std::map<std::string, std::shared_ptr<LoadObject>> meshes;
 std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
+std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
 
 // Materials
@@ -64,6 +65,7 @@ std::map<std::string, std::shared_ptr<Material>> materials;
 // Controls
 bool inMenu = false;
 std::unique_ptr<Menu> mainMenu;
+std::shared_ptr<BombManager> bombManager;
 
 // Framebuffer objects
 FrameBufferObject fboUnlit;
@@ -265,8 +267,9 @@ void initializeScene()
 	gameobjects["room"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
 
-	gameobjects["bombot1"] = std::make_shared<Player>(
+	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+	gameobjects["bombot1"] = players["bombot1"];
 	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
@@ -310,13 +313,16 @@ void initializeScene()
 	
 	// Set object properties
 	//gameobjects["bombot2"] = std::make_shared<GameObject>(*gameobjects["bombot1"]);
-	Player::bombManager.init(bombMesh,
+	bombManager = std::make_shared<BombManager>();
+	bombManager->init(bombMesh,
 		bombTexMap,		// Player1 bomb texture
 		bombTexMap,		// Player2 bomb texture
 		bombTexMap,		// Player3 bomb texture
 		bombTexMap,		// Player4 bomb texture
 		defaultMaterial,
 		bombBodyPath);
+
+	players["bombot1"]->attachBombManager(bombManager);
 
 	// Set menu properties
 	mainMenu = std::make_unique<Menu>(deskTex);
@@ -367,6 +373,8 @@ void updateScene()
 		if (gameobject->isRoot())
 			gameobject->update(deltaTime);
 	}
+
+	bombManager->update(deltaTime);
 }
 
 
@@ -379,6 +387,8 @@ void drawScene(Camera& cam)
 		if (gameobject->isRoot())
 			gameobject->draw(cam);
 	}
+
+	bombManager->draw(cam);
 }
 
 void setMaterialForAllGameObjects(std::string materialName)
@@ -514,7 +524,9 @@ void DisplayCallbackFunction(void)
 
 		// draw the scene to the fbo
 		if (!inMenu)
+		{
 			drawScene(playerCamera);
+		}
 		else
 			mainMenu->draw();
 

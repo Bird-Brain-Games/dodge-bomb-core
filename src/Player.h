@@ -22,10 +22,10 @@ public:
 	void update(float deltaT);
 	void draw(Camera _camera);
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
+	void attachBombManager(std::shared_ptr<BombManager> _manager);
 
 	void checkCollisionWith(GameObject* other);
 	int getPlayerNum();
-	static BombManager bombManager;
 
 private:
 	Controller con;
@@ -33,6 +33,6 @@ private:
 
 	float bombCooldown;		// The value the cooldown gets set to when thrown
 	float currentCooldown;	// The current cooldown on the bomb throw
-
+	std::shared_ptr<BombManager> bombManager;
 	
 };
