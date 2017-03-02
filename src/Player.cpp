@@ -2,7 +2,6 @@
 #include <iostream>
 
 const float degToRad = 3.14159f / 180.0f;
-BombManager Player::bombManager;
 
 Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -97,7 +96,8 @@ void Player::handleInput()
 		if (RStick.y > 0.1 || RStick.y < -0.1 || RStick.x > 0.1 || RStick.x < -0.1)
 			normalized = glm::normalize(glm::vec2(RStick.x, RStick.y));
 
-		bombManager.throwBomb(std::make_shared<Player>(*this), normalized, 150.0f);
+		glm::vec3 force(50.0f);
+		bombManager->throwBomb(this, normalized, force);
 
 		currentCooldown += bombCooldown;
 	}
@@ -118,4 +118,9 @@ void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 int Player::getPlayerNum()
 {
 	return playerNum;
+}
+
+void Player::attachBombManager(std::shared_ptr<BombManager> manager)
+{
+	bombManager = manager;
 }
