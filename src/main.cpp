@@ -98,6 +98,8 @@ float kr = 1.0f; // Rim Lighting Constant
 
 GLuint shadowDepth;
 
+void bulletNearCallback(btBroadphasePair& collisionPair,
+	btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo);
 
 void initializeShaders()
 {
@@ -310,9 +312,8 @@ void initializeScene()
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
-	
-	// Set object properties
-	//gameobjects["bombot2"] = std::make_shared<GameObject>(*gameobjects["bombot1"]);
+
+	// Set up the bomb manager
 	bombManager = std::make_shared<BombManager>();
 	bombManager->init(bombMesh,
 		bombTexMap,		// Player1 bomb texture
@@ -324,12 +325,15 @@ void initializeScene()
 
 	players["bombot1"]->attachBombManager(bombManager);
 
+	// Set up the bullet callbacks
+	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
+
 	// Set menu properties
 	mainMenu = std::make_unique<Menu>(deskTex);
 	mainMenu->setMaterial(materials["menu"]);
 
 	// Set default camera properties (WIP)
-	playerCamera.setPosition(glm::vec3(0.0f, 25.0f, 70.0f));
+	playerCamera.setPosition(glm::vec3(0.0f, 125.0f, 170.0f));
 	playerCamera.setAngle(3.14159012f, 5.98318052f);
 	//playerCamera.setProperties(44.00002, (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f, 0.001f);
 	playerCamera.update();
@@ -338,6 +342,70 @@ void initializeScene()
 	shadowCamera.setAngle(1.57f, 1.57f);
 	shadowCamera.update();
 	
+}
+
+void bulletNearCallback(btBroadphasePair& collisionPair,
+	btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo)
+{
+	// Do your collision logic here
+	// Only dispatch the Bullet collision information if you want the physics to continue
+	// From Bullet user manual
+	
+	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger ||
+		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
+		return;*/
+
+	// Tell the dispatcher to do the collision information
+	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
+}
+
+void calculateCollisions()
+{
+	// Basis taken from 
+	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Collision_Callbacks_and_Triggers
+	btDispatcher* dispatcher = RigidBody::getDispatcher();
+	int numManifolds = dispatcher->getNumManifolds();
+
+	short objAGroup, objBGroup;
+
+	for (int i = 0; i < numManifolds; i++)
+	{
+		//std::cout << numManifolds << std::endl;
+		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
+		const btCollisionObject* objA = contactManifold->getBody0();
+		const btCollisionObject* objB = contactManifold->getBody1();
+
+		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
+		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
+
+		// Check if the bombs collide with geometry
+		if (objAGroup == btBroadphaseProxy::SensorTrigger ||
+			objBGroup == btBroadphaseProxy::SensorTrigger)
+		{
+			// Check if the bomb collides with a player
+			if (objAGroup != objBGroup &&
+				!objA->isStaticObject() &&
+				!objB->isStaticObject())
+			{
+				// Check if one is a sensor, the other is a player, 
+				// and they don't both belong to the same player.
+				if (objAGroup == btBroadphaseProxy::SensorTrigger &&
+					objBGroup == btBroadphaseProxy::CharacterFilter)
+				{
+					Player* p = (Player*)objB->getUserPointer();
+					Bomb* b = (Bomb*)objA->getUserPointer();
+					p->checkCollisionWith(b);
+				}
+				else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
+					objAGroup == btBroadphaseProxy::CharacterFilter)
+				{
+					Player* p = (Player*)objA->getUserPointer();
+					Bomb* b = (Bomb*)objB->getUserPointer();
+					p->checkCollisionWith(b);
+				}
+			}
+		}
+	}
 }
 
 void initializeFrameBuffers()
@@ -680,49 +748,6 @@ void handleKeyboardInput()
 
 	// Clear the keyboard input
 	KEYBOARD_INPUT->WipeEventList();
-}
-
-void calculateCollisions()
-{
-	// Basis taken from 
-	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Collision_Callbacks_and_Triggers
-	btDispatcher* dispatcher = RigidBody::getDispatcher();
-	int numManifolds = dispatcher->getNumManifolds();
-
-	short objAGroup, objBGroup;
-
-	for (int i = 0; i < numManifolds; i++)
-	{
-		//std::cout << numManifolds << std::endl;
-		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
-		const btCollisionObject* objA = contactManifold->getBody0();
-		const btCollisionObject* objB = contactManifold->getBody1();
-
-		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
-		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
-
-		if (objAGroup != objBGroup &&
-			!objA->isStaticObject() &&
-			!objB->isStaticObject())
-		{
-			// Check if one is a sensor, the other is a player, 
-			// and they don't both belong to the same player.
-			if (objAGroup == btBroadphaseProxy::SensorTrigger &&
-				objBGroup == btBroadphaseProxy::CharacterFilter)
-			{
-				Player* p = (Player*)objB->getUserPointer();
-				Bomb* b = (Bomb*)objA->getUserPointer();
-				p->checkCollisionWith(b);
-			}
-			else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
-				objAGroup == btBroadphaseProxy::CharacterFilter)
-			{
-				Player* p = (Player*)objA->getUserPointer();
-				Bomb* b = (Bomb*)objB->getUserPointer();
-				p->checkCollisionWith(b);
-			}
-		}
-	}
 }
 
 /* function TimerCallbackFunction(int value)
