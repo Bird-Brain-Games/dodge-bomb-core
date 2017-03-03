@@ -45,6 +45,7 @@ GameObject::GameObject(GameObject& other)
 	rigidBody = std::make_unique<RigidBody>(*other.rigidBody);
 	rigidBody->load(other.rigidBody->getFileName(), 
 		(btCollisionObject::CollisionFlags)other.rigidBody->getBody()->getCollisionFlags());
+	rigidBody->setUserPointer(this);
 }
 
 GameObject::~GameObject() 
@@ -60,6 +61,7 @@ void GameObject::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 		updateLocalTransform();
 		m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
 		rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
+		rigidBody->setUserPointer(this);
 	}
 }
 
@@ -254,7 +256,7 @@ bool GameObject::isRoot()
 		return true;
 }
 
-void GameObject::checkCollisionWith(std::shared_ptr<GameObject> other)
+void GameObject::checkCollisionWith(GameObject* other)
 {
 
 }

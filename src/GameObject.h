@@ -51,7 +51,7 @@ public:
 	bool isRoot();
 	bool hasRigidBody() { return (rigidBody != nullptr); }
 	virtual void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
-	virtual void checkCollisionWith(std::shared_ptr<GameObject> other);
+	virtual void checkCollisionWith(GameObject* other);
 
 	void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
 

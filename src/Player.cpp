@@ -96,7 +96,7 @@ void Player::handleInput()
 		if (RStick.y > 0.1 || RStick.y < -0.1 || RStick.x > 0.1 || RStick.x < -0.1)
 			normalized = glm::normalize(glm::vec2(RStick.x, RStick.y));
 
-		glm::vec3 force(50.0f);
+		glm::vec3 force(20.0f);
 		bombManager->throwBomb(this, normalized, force);
 
 		currentCooldown += bombCooldown;
@@ -106,7 +106,16 @@ void Player::handleInput()
 
 void Player::checkCollisionWith(GameObject* other)
 {
-	std::cout << "bomb collided with player" << std::endl;
+	std::cout << "GameObject collided with player" << std::endl;
+}
+
+void Player::checkCollisionWith(Bomb* other)
+{
+	if (other->getPlayerNum() == playerNum)
+	{
+		//std::cout << "Bomb collided with the player who threw it" << std::endl;
+	}
+	std::cout << "bomb collided with player " << playerNum << std::endl;
 }
 
 void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)

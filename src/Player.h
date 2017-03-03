@@ -25,6 +25,7 @@ public:
 	void attachBombManager(std::shared_ptr<BombManager> _manager);
 
 	void checkCollisionWith(GameObject* other);
+	void checkCollisionWith(Bomb* other);
 	int getPlayerNum();
 
 private:
