@@ -4,6 +4,7 @@
 #include "Node.h"
 #include "JointTypes.h"
 #include "loader.h"
+#include <map>
 class ANILoader
 {
 public:
@@ -31,6 +32,8 @@ public:
 	std::vector<glm::vec3> getNormals();
 	std::vector<glm::vec4> getWeights();//the weights for each vertex
 	std::vector<glm::vec4> getJoints();//the joint for each vertex
+
+	int getSegments();
 
 private:
 
@@ -91,24 +94,23 @@ private:
 class Holder : public Loader
 {
 protected:
-	Node* m_pChild;
-
+	Node* basePose;
+	std::map<std::string, Node*> animations;
+	Node* current;
 	unsigned int numtris; // count number of vertices for data creation
 	int bones;
 
+	// the base pose matricies
 	std::vector<glm::mat4> matricies;
+	// the current transformation matrix
 	std::vector<glm::mat4> multipliedMatricies;
 	void createVAO();
 
-	GLuint vao2;
-
-	GLuint vertbo;
-	GLuint texbo;
-	GLuint normbo;
-	GLuint weightbo;
-	GLuint bonebo;
 public:
-	Holder(ANILoader* data);
+	//
+	void setCurrent(std::string);
+	bool baseLoad(std::string);
+	bool AniLoad(std::string, std::string);
 	void draw(std::shared_ptr<ShaderProgram> s);
 	void update(float);
 };

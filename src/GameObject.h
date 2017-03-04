@@ -43,6 +43,7 @@ public:
 	void setParent(GameObject* newParent);
 	void addChild(GameObject* newChild);
 	void removeChild(GameObject* rip);
+
 	glm::mat4 getLocalToWorldMatrix();
 	glm::vec3 getWorldPosition();
 	glm::mat4 getWorldRotation();

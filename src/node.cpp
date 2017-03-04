@@ -6,15 +6,23 @@ Node::Node()
 	m_pCurrentFrame(0),
 	jointAnimation(nullptr)
 {
-	
+
 
 }
 
 Node::~Node() {}
 
+void Node::setFrame(int _pos)
+{
+	if (_pos < jointAnimation->numFrames - 1 && _pos >= 0)
+		m_pCurrentFrame = _pos;
+	else
+		std::cout << "Error: frame limit is  " << frame << " given value is greaten then this limit";
+}
+
 void Node::init()
 {
-	
+
 }
 
 void Node::setPosition(glm::vec3 newPosition)
@@ -109,7 +117,7 @@ void Node::update(float dt)
 
 void Node::update()
 {
-	
+
 	// Create translation matrix
 	glm::mat4 tran = glm::translate(m_pLocalPosition);
 

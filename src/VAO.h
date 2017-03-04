@@ -14,7 +14,7 @@ enum AttributeLocations
 	NORMAL,
 	TEX_COORD,
 	COLOUR,
-	BONES = 8,
+	JOINTS = 8,
 	WEIGHTS
 };
 

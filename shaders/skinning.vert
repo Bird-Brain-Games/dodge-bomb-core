@@ -1,25 +1,41 @@
+
 #version 330
 
-layout (location = 4) in vec3 inPosition;//our objects position
-layout (location = 5) in vec2 vertexUV;
-layout (location = 6) in vec3 normal;
+layout (location = 0) in vec3 vIn_vertex;//our objects position
+layout (location = 1) in vec3 vIn_normal;
+layout (location = 2) in vec3 vIn_uv;
 layout (location = 8) in vec4 bones;//The bones that are affecting this vertex
 layout (location = 9) in vec4 weights; //The weights for the bones we are using.
 
-uniform mat4 mvm; // modelview matrix
-uniform mat4 prm; // projection matrix
+uniform mat4 u_mvp; // model view projection matrix
+uniform mat4 u_mv; // model view matrix
 
-uniform mat4 localTransform;
+
 
 uniform int boneCount;
 uniform highp mat4 BoneMatrixArray[28];
 
+
+out VertexData
+{
+	vec3 normal;
+	vec3 texCoord;
+	vec4 colour;
+	vec3 posEye;
+} vOut;
+
+
 //out vec3 colour;
-out vec3 normal0;
-out vec2 UV;
+
 
 void main()
 {
+
+	vOut.texCoord = vIn_uv;
+	vOut.colour = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	
+
 	mediump ivec4 boneIndex = ivec4(bones);
 	mediump vec4 boneWeights = weights;
 	vec4 normalM = vec4(0.0, 0.0, 0.0, 0.0);
@@ -33,16 +49,17 @@ void main()
 			{
 				highp mat4 boneMatrix = BoneMatrixArray[boneIndex.x];
 				
-				position += boneMatrix * vec4(inPosition, 1.0) * boneWeights.x;
-				normalM += boneMatrix * vec4(normal, 0.0) * boneWeights.x;
+				position += boneMatrix * vec4(vIn_vertex, 1.0) * boneWeights.x;
+				normalM += boneMatrix * vec4(vIn_normal, 0.0) * boneWeights.x;
 			}
 		}
 		boneIndex = boneIndex.yzwx;
 		boneWeights = boneWeights.yzwx;
 	}
-	normal0 = normalize(normal0).xyz;
-	UV = vertexUV;
 	
-	gl_Position = prm * mvm * (localTransform * position);
+	vOut.normal = (u_mv* normalM).xyz;
+	vOut.posEye = (u_mv* position).xyz;
+	
+	gl_Position = (u_mvp * position);
 	//colour = vec3(0.0, 0.0, 1.0);
 }

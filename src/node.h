@@ -34,10 +34,10 @@ protected:
 	GLuint VBO;
 	GLuint VAO;
 
-
 public:
 	glm::vec3 m_pLocalPosition;
 
+	void setFrame(int);
 	Node();
 	Node(std::string _name, glm::vec3 position);
 	~Node();

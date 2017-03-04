@@ -49,7 +49,9 @@ void Player::update(float dt)
 
 	handleInput();
 	GameObject::update(dt);
-	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
+	mesh->update(dt);
+	//was crashing have no idea why. needs fixing
+//	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
 }
 
 void Player::handleInput()
