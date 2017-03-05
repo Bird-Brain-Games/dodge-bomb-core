@@ -13,7 +13,8 @@ Player::Player(glm::vec3 position,
 	con(_playerNum),
 	currentCooldown(0.0f),
 	bombCooldown(1.0f),
-	currentAngle(0.0f)
+	currentAngle(0.0f),
+	throwingForce(5.0f)
 {
 	playerNum = _playerNum;
 }
@@ -23,7 +24,8 @@ Player::Player(Player& other)
 	con(other.con.getPlayerNum()+1),
 	currentCooldown(0.0f),
 	bombCooldown(1.0f),
-	currentAngle(0.0f)
+	currentAngle(0.0f),
+	throwingForce(other.throwingForce)
 {
 
 }
@@ -51,11 +53,6 @@ void Player::update(float dt)
 
 	handleInput();
 	GameObject::update(dt);
-	std::cout <<
-		//"X: " << getWorldPosition().x << " " << std::endl;
-		"Y: " << getWorldPosition().y << " " << std::endl;
-		//"Z: " << getWorldPosition().z << " " << std::endl;
-
 	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
 }
 
@@ -113,8 +110,8 @@ void Player::handleInput()
 		if (con.rightStickMoved())
 			normalized = glm::normalize(glm::vec2(RStick.x, RStick.y));
 
-		glm::vec3 force(5.0f);
-		bombManager->throwBomb(this, normalized, force);
+		
+		bombManager->throwBomb(this, normalized, throwingForce);
 
 		currentCooldown += bombCooldown;
 	}

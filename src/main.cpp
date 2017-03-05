@@ -418,7 +418,7 @@ void initializeScene()
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
-	bombot1Body->load(bombotBodyPath);//, btCollisionObject::CF_KINEMATIC_OBJECT);
+	bombot1Body->load(bombotBodyPath);
 	sphereBody->load(sphereBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 
 	// Attach rigidbodies
