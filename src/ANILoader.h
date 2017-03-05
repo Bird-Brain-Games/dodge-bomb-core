@@ -27,11 +27,19 @@ public:
 	// Returns root node (usually the hip if a humanoid skeleton)
 	Node* getRootNode();
 
+	//used to get some values.
 	std::vector<glm::vec3> getVertexs();
 	std::vector<glm::vec2> getUV();
 	std::vector<glm::vec3> getNormals();
 	std::vector<glm::vec4> getWeights();//the weights for each vertex
 	std::vector<glm::vec4> getJoints();//the joint for each vertex
+
+	//used to get data.
+	glm::vec3* ANILoader::getVertexsData();
+	glm::vec2* ANILoader::getUVData();
+	glm::vec3* ANILoader::getNormalsData();
+	glm::vec4* ANILoader::getWeightsData();
+	glm::vec4* ANILoader::getJointsData();
 
 	int getSegments();
 
@@ -44,7 +52,7 @@ private:
 	bool processBasePositionSection(FILE* fp, char* loc);
 	bool processAnimationSection(FILE* fp, char* loc);
 	bool processVBO(FILE* fp, char* loc);
-	
+
 	// Increments the file pointer to the next line in the file
 	// and copies it into buffer
 	void goToNextValidLineInFile(FILE* fp, char* buffer);
@@ -57,7 +65,7 @@ private:
 	std::string fileType;		// File extension
 	std::string dataType;		// What kind of data is stored in file. 
 								// Ie. HTRS means Hierarchical translations followed by rotations and scale
-	
+
 	int			fileVersion;	// Useful if you are generating binary object files on load, can check the version of an existing binary file, 
 								// check version of text, if text version > binary version then reparse, otherwise just use binary
 
@@ -108,7 +116,7 @@ protected:
 
 public:
 	//
-	void setCurrent(std::string);
+	void setAnim(std::string);
 	bool baseLoad(std::string);
 	bool AniLoad(std::string, std::string);
 	void draw(std::shared_ptr<ShaderProgram> s);

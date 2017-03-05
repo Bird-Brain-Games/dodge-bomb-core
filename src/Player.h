@@ -27,7 +27,10 @@ public:
 	void checkCollisionWith(GameObject* other);
 	int getPlayerNum();
 
+	void setAnim(std::string);
+
 private:
+
 	Controller con;
 	int playerNum;
 

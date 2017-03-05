@@ -105,7 +105,6 @@ void LoadObject::createVAO()
 	// Set up UV attribute
 	if (texcoords.size() > 0)
 	{
-
 		Attribute UVAttrib(AttributeLocations::TEX_COORD, GL_FLOAT, sizeof(glm::vec2), 2, size, "texture", texcoords.data());
 		vao.addAttribute(UVAttrib);
 	}

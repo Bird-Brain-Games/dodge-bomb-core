@@ -216,7 +216,7 @@ void initializeScene()
 	bombotMesh->AniLoad("Assets/htr/idle" , "idle");
 	bombotMesh->AniLoad("Assets/htr/throw", "throw");
 	bombotMesh->AniLoad("Assets/htr/walk" , "walk");
-	bombotMesh->setCurrent("idle");
+	bombotMesh->setAnim("walk");
 
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
@@ -301,7 +301,7 @@ void initializeScene()
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
 	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
 	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
-	std::string bombBodyPath = """assets\\bullet\\bomb.btdata";
+	std::string bombBodyPath = "assets\\bullet\\bomb.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
@@ -590,7 +590,6 @@ void DisplayCallbackFunction(void)
 
 				// Tell the sampler2d named "u_tex" to look at texture unit 0
 				materials["unlitTexture"]->shader->sendUniformInt("u_tex", 0);
-				materials["unlitTexture"]->mat4Uniforms["u_mvp"] = glm::mat4();
 
 				// Send uniform varibles to GPU
 				materials["unlitTexture"]->sendUniforms();
@@ -689,6 +688,20 @@ void handleKeyboardInput()
 	{
 		gameobjects["table"]->setScale(gameobjects["table"]->getScale() - 0.1f);
 	}
+
+	if (KEYBOARD_INPUT->CheckPressEvent('b') || KEYBOARD_INPUT->CheckPressEvent('B'))
+	{
+		players["bombot1"]->setAnim("walk");
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('n') || KEYBOARD_INPUT->CheckPressEvent('N'))
+	{
+		players["bombot1"]->setAnim("idle");
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('m') || KEYBOARD_INPUT->CheckPressEvent('M'))
+	{
+		players["bombot1"]->setAnim("throw");
+	}
+
 
 	// Switch Lighting Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('1'))

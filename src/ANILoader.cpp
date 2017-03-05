@@ -486,6 +486,13 @@ std::vector<glm::vec2> ANILoader::getUV() { return UVOrder; }
 std::vector<glm::vec3> ANILoader::getNormals() { return normalsOrder; }
 std::vector<glm::vec4> ANILoader::getWeights() { return weightsOrder; }//the weights for each vertex
 std::vector<glm::vec4> ANILoader::getJoints() { return jointsOrder; }//the joint for each vertex
+
+glm::vec3* ANILoader::getVertexsData() { return vertexsOrder.data(); }
+glm::vec2* ANILoader::getUVData() { return UVOrder.data(); }
+glm::vec3* ANILoader::getNormalsData() { return normalsOrder.data(); }
+glm::vec4* ANILoader::getWeightsData() { return weightsOrder.data(); }//the weights for each vertex
+glm::vec4* ANILoader::getJointsData() { return jointsOrder.data(); }//the joint for each vertex
+
 int ANILoader::getSegments() { return numSegments; }
 
 bool Holder::baseLoad(std::string _path)
@@ -496,19 +503,24 @@ bool Holder::baseLoad(std::string _path)
 	temp->createNodes();
 	int size = temp->getVertexs().size();
 	basePose = temp->getRootNode();
-	Attribute position(AttributeLocations::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_vertex", temp->getVertexs().data());
+
+	glm::vec3 *test;
+	glm::vec2 *help;
+	glm::vec4 *lost;
+
+	Attribute position(AttributeLocations::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_vertex", temp->getVertexsData());
 	vao.addAttribute(position);
 
-	Attribute UV(AttributeLocations::TEX_COORD, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_uv", temp->getUV().data());
+	Attribute UV(AttributeLocations::TEX_COORD, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_uv", temp->getUVData());
 	vao.addAttribute(UV);
 
-	Attribute normal(AttributeLocations::NORMAL, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_normal", temp->getNormals().data());
+	Attribute normal(AttributeLocations::NORMAL, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_normal", temp->getNormalsData());
 	vao.addAttribute(normal);
 
-	Attribute joints(AttributeLocations::JOINTS, GL_FLOAT, sizeof(glm::vec4), 4, size, "bones", temp->getJoints().data());
+	Attribute joints(AttributeLocations::JOINTS, GL_FLOAT, sizeof(glm::vec4), 4, size, "bones", temp->getJointsData());
 	vao.addAttribute(joints);
 
-	Attribute weights(AttributeLocations::WEIGHTS, GL_FLOAT, sizeof(glm::vec4), 4, size, "weights", temp->getWeights().data());
+	Attribute weights(AttributeLocations::WEIGHTS, GL_FLOAT, sizeof(glm::vec4), 4, size, "weights", temp->getWeightsData());
 	vao.addAttribute(weights);
 	createVAO();
 	bones = 0;
@@ -633,7 +645,7 @@ void Holder::createVAO()
 
 void Holder::draw(std::shared_ptr<ShaderProgram> s)
 {
-	s->sendUniformMat4("BoneMatrixArray", matricies[0], bones);
+	s->sendUniformMat4("BoneMatrixArray", multipliedMatricies[0], bones);
 	s->sendUniformInt("boneCount", bones);
 
 	//glBindVertexArray(vao2);
@@ -651,11 +663,12 @@ void Holder::update(float dt)
 	//m_pChild->update(dt);
 	//m_pChild->getMatrixStack(matricies, multipliedMatricies, count);
 }
-void Holder::setCurrent(std::string _name)
+void Holder::setAnim(std::string _name)
 {
 
 	if (animations.count(_name) == 1)
 	{
+		std::cout << "the animation was set to " + _name << std::endl;
 		current = animations[_name];
 		current->setFrame(0);
 	}

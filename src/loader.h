@@ -10,7 +10,7 @@ public:
 	virtual void draw(std::shared_ptr<ShaderProgram> s) = 0;
 	virtual void createVAO() = 0;
 	virtual void update(float dt) {};
-
+	virtual void setAnim(std::string) {};
 protected:
 
 	std::vector<glm::vec3> vertices;

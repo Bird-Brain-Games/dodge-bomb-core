@@ -126,3 +126,8 @@ void Player::attachBombManager(std::shared_ptr<BombManager> manager)
 {
 	bombManager = manager;
 }
+
+void Player::setAnim(std::string _name)
+{
+	mesh->setAnim(_name);
+}
