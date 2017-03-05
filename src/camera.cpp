@@ -23,6 +23,8 @@ Camera::Camera()
 	setProperties(45, 1080.0f / 720.0f, 0.1f, 10000.0f, 0.5f);
 	forward = glm::vec3(0.0f, -10.0f, -10.0f);
 
+	shakeRadius = 0.0f;
+	shakeDegrade = 0.05f;
 	update();
 }
 
@@ -64,7 +66,21 @@ void Camera::setPosition(glm::vec3 _pos)
 
 void Camera::update()
 {
-	viewMatrix = glm::lookAt(pos, pos + forward, up);
+	if (shakeRadius > 0.0f)
+	{
+		distribution = std::uniform_real_distribution<float>(-shakeRadius, shakeRadius);
+		float offsetX = distribution(generator);
+		float offsetY = distribution(generator);
+		shakeOffset = glm::vec3(offsetX, offsetY, 0.0f);
+
+		shakeRadius -= shakeDegrade;
+		if (shakeRadius < 0.0f)
+			shakeRadius = 0.0f;
+	}
+	else
+		shakeOffset = glm::vec3(0.0f);
+
+	viewMatrix = glm::lookAt(pos, pos + forward, up) * glm::translate(shakeOffset);
 	projectionMatrix = glm::perspective(FOV, windowRatio, minRange, maxRange);
 	viewProjMatrix = projectionMatrix * viewMatrix;
 }
@@ -117,4 +133,9 @@ void Camera::moveLeft()
 void Camera::moveRight()
 {
 	pos -= right *  (speed);
+}
+
+void Camera::shakeScreen()
+{
+	shakeRadius = 0.5f;
 }
