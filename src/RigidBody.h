@@ -9,6 +9,9 @@
 #include "BulletDebug.h"
 #include <btBulletDynamicsCommon.h>
 
+// Temp class
+class GameObject;
+
 // Class to manage physics operations and memory
 class PhysicsEngine
 {
@@ -25,6 +28,7 @@ public:
 	void addRigidBody(btRigidBody* rb);
 	void addRigidBody(btRigidBody* rb, short group, short mask);
 	void removeRigidBody(btRigidBody* rb);
+	btCollisionDispatcher* getDispatcher() { return dispatcher; }
 
 	void setDebugDraw(bool isDrawing);
 
@@ -73,15 +77,18 @@ public:
 
 	btRigidBody* getBody() { return body; }
 	std::string getFileName() { return u_fileName; }
+
+	void setKinematic();
+	void setDeactivationMode(int mode);
+	void setUserPointer(GameObject* gameObject);
 	
 public:
 	static void systemUpdate(float deltaTasSeconds, int maxStep);
 	static void drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 const& projectionMatrix);
 	static void setDebugDraw(bool isDrawing) { Sys.setDebugDraw(isDrawing); }
 	static bool isDrawingDebug() { return Sys.isDrawingDebug(); }
-	static btDispatcher* getDispatcher() { return Sys.dynamicsWorld->getDispatcher(); }
-	void setKinematic();
-	void setDeactivationMode(int mode);
+	static btCollisionDispatcher* getDispatcher() { return Sys.getDispatcher(); }
+
 protected:
 	static PhysicsEngine Sys;
 
@@ -89,4 +96,5 @@ private:
 	btRigidBody *body;
 	std::string u_fileName;
 	short group, mask;
+	GameObject* userPointer;
 };

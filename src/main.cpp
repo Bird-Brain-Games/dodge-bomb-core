@@ -131,6 +131,8 @@ float kr = rim; // Rim Lighting
 
 
 
+void bulletNearCallback(btBroadphasePair& collisionPair,
+	btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo);
 
 void initializeShaders()
 {
@@ -244,6 +246,12 @@ void initializeScene()
 	std::shared_ptr<LoadObject> corkboardMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> roomMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> bombMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> boatMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> booksMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> boulderMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> crateMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> palmtreeMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> lampcupMesh = std::make_shared<LoadObject>();
 
 	// Load all meshes
 	tableMesh->load(meshPath + "table.obj");
@@ -254,7 +262,12 @@ void initializeScene()
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
 	bombMesh->load(meshPath + "bomb.obj");
-
+	boatMesh->load(meshPath + "boat.obj");
+	booksMesh->load(meshPath + "books.obj");
+	boulderMesh->load(meshPath + "boulder.obj");
+	crateMesh->load(meshPath + "crate.obj");
+	palmtreeMesh->load(meshPath + "palmtree.obj");
+	lampcupMesh->load(meshPath + "lampcup.obj");
 
 	// Add all meshes to map
 	meshes["table"] = tableMesh;
@@ -265,13 +278,19 @@ void initializeScene()
 	meshes["corkboard"] = corkboardMesh;
 	meshes["room"] = roomMesh;
 	meshes["bomb"] = bombMesh;
+	meshes["boat"] = boatMesh;
+	meshes["books"] = booksMesh;
+	meshes["boulder"] = boulderMesh;
+	meshes["crate"] = crateMesh;
+	meshes["palmtree"] = palmtreeMesh;
+	meshes["lampcup"] = lampcupMesh;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
 	// Load textures (WIP)
 	// Has to take char* due to ILUT
 	char diffuseTex[] = "Assets/img/desk (diffuse).png";
-	std::shared_ptr<Texture> deskTex = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
+	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
 
 	char bombotTex[] = "Assets/img/bombot(diffuse)2-dash.png";
 	char bombotSpec[] = "Assets/img/bombot_specular.png";
@@ -286,12 +305,45 @@ void initializeScene()
 	char bombTex[] = "Assets/img/bomb(diffuse).jpg";
 	std::shared_ptr<Texture> bombTexMap = std::make_shared<Texture>(bombTex, bombTex, 1.0f);
 
+	char barrelTex[] = "Assets/img/barrel(diffuse).jpg";
+	std::shared_ptr<Texture> barrelTexMap = std::make_shared<Texture>(barrelTex, barrelTex, 1.0f);
+
+	char cannonTex[] = "Assets/img/cannon(diffuse).jpg";
+	std::shared_ptr<Texture> cannonTexMap = std::make_shared<Texture>(cannonTex, cannonTex, 1.0f);
+
+	char boatTex[] = "Assets/img/boat(diffuse).png";
+	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
+
+	char booksTex[] = "Assets/img/books(diffuse).png";
+	std::shared_ptr<Texture> booksTexMap = std::make_shared<Texture>(booksTex, booksTex, 1.0f);
+
+	char boulderTex[] = "Assets/img/boulder(diffuse).png";
+	std::shared_ptr<Texture> boulderTexMap = std::make_shared<Texture>(boulderTex, boulderTex, 1.0f);
+
+	char crateTex[] = "Assets/img/crate(diffuse).png";
+	std::shared_ptr<Texture> crateTexMap = std::make_shared<Texture>(crateTex, crateTex, 1.0f);
+
+	char palmtreeTex[] = "Assets/img/palmtree(diffuse).png";
+	std::shared_ptr<Texture> palmtreeTexMap = std::make_shared<Texture>(palmtreeTex, palmtreeTex, 1.0f);
+
+	char lampcupTex[] = "Assets/img/lampcup(diffuse).png";
+	std::shared_ptr<Texture> lampcupTexMap = std::make_shared<Texture>(lampcupTex, lampcupTex, 1.0f);
+
+
 	//Add textures to the map
-	textures["default"] = deskTex;
+	textures["default"] = deskTexMap;
 	textures["bombot"] = bombotTexMap;
 	textures["corkboard"] = corkboardTexMap;
 	textures["room"] = roomTexMap;
 	textures["bomb1"] = bombTexMap;
+	textures["barrel"] = barrelTexMap;
+	textures["cannon"] = cannonTexMap;
+	textures["boat"] = boatTexMap;
+	textures["books"] = booksTexMap;
+	textures["boulder"] = boulderTexMap;
+	textures["crate"] = crateTexMap;
+	textures["palmtree"] = palmtreeTexMap;
+	textures["lampcup"] = lampcupTexMap;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
@@ -299,13 +351,13 @@ void initializeScene()
 
 
 	gameobjects["table"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTex);
+		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
 
 	gameobjects["barrel"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 20.0f, -5.f), barrelMesh, defaultMaterial, nullptr);
+		glm::vec3(-15.f, 45.0f, -5.f), barrelMesh, defaultMaterial, barrelTexMap);
 
 	gameobjects["cannon"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial, nullptr);
+		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial, cannonTexMap);
 
 	gameobjects["sphere"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
@@ -316,8 +368,26 @@ void initializeScene()
 	gameobjects["room"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
 
+	gameobjects["boat"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), boatMesh, defaultMaterial, boatTexMap);
+
+	gameobjects["books"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), booksMesh, defaultMaterial, booksTexMap);
+
+	gameobjects["boulder"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), boulderMesh, defaultMaterial, boulderTexMap);
+
+	gameobjects["crate"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), crateMesh, defaultMaterial, crateTexMap);
+
+	gameobjects["palmtree"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
+
+	gameobjects["lampcup"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
+
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+		glm::vec3(0.0f, 43.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
 	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
@@ -333,7 +403,7 @@ void initializeScene()
 	
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
-	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
+	std::string bombotBodyPath = "assets\\bullet\\smolbot.btdata";
 	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
 	std::string bombBodyPath = """assets\\bullet\\bomb.btdata";
 
@@ -348,7 +418,7 @@ void initializeScene()
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
-	bombot1Body->load(bombotBodyPath);
+	bombot1Body->load(bombotBodyPath);//, btCollisionObject::CF_KINEMATIC_OBJECT);
 	sphereBody->load(sphereBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 
 	// Attach rigidbodies
@@ -359,9 +429,8 @@ void initializeScene()
 	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
-	
-	// Set object properties
-	//gameobjects["bombot2"] = std::make_shared<GameObject>(*gameobjects["bombot1"]);
+
+	// Set up the bomb manager
 	bombManager = std::make_shared<BombManager>();
 	bombManager->init(bombMesh,
 		bombTexMap,		// Player1 bomb texture
@@ -373,18 +442,85 @@ void initializeScene()
 
 	players["bombot1"]->attachBombManager(bombManager);
 
+	// Set up the bullet callbacks
+	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
+
 	// Set menu properties
-	mainMenu = std::make_unique<Menu>(deskTex);
+	mainMenu = std::make_unique<Menu>(deskTexMap);
 	mainMenu->setMaterial(materials["menu"]);
 
 	// Set default camera properties (WIP)
-	playerCamera.setPosition(glm::vec3(0.0f, 47.0f, 2.5f));
+	playerCamera.setPosition(glm::vec3(0.0f, 47.0f, 15.0f));
 	playerCamera.setAngle(3.14159012f, 75.98318052f);
 	//playerCamera.setProperties(44.00002, (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f, 0.001f);
 	playerCamera.update();
 
 	
 	
+}
+
+void bulletNearCallback(btBroadphasePair& collisionPair,
+	btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo)
+{
+	// Do your collision logic here
+	// Only dispatch the Bullet collision information if you want the physics to continue
+	// From Bullet user manual
+	
+	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger ||
+		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
+		return;*/
+
+	// Tell the dispatcher to do the collision information
+	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
+}
+
+void calculateCollisions()
+{
+	// Basis taken from 
+	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Collision_Callbacks_and_Triggers
+	btDispatcher* dispatcher = RigidBody::getDispatcher();
+	int numManifolds = dispatcher->getNumManifolds();
+
+	short objAGroup, objBGroup;
+
+	for (int i = 0; i < numManifolds; i++)
+	{
+		//std::cout << numManifolds << std::endl;
+		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
+		const btCollisionObject* objA = contactManifold->getBody0();
+		const btCollisionObject* objB = contactManifold->getBody1();
+
+		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
+		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
+
+		// Check if the bombs collide with geometry
+		if (objAGroup == btBroadphaseProxy::SensorTrigger ||
+			objBGroup == btBroadphaseProxy::SensorTrigger)
+		{
+			// Check if the bomb collides with a player
+			if (objAGroup != objBGroup &&
+				!objA->isStaticObject() &&
+				!objB->isStaticObject())
+			{
+				// Check if one is a sensor, the other is a player, 
+				// and they don't both belong to the same player.
+				if (objAGroup == btBroadphaseProxy::SensorTrigger &&
+					objBGroup == btBroadphaseProxy::CharacterFilter)
+				{
+					Player* p = (Player*)objB->getUserPointer();
+					Bomb* b = (Bomb*)objA->getUserPointer();
+					p->checkCollisionWith(b);
+				}
+				else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
+					objAGroup == btBroadphaseProxy::CharacterFilter)
+				{
+					Player* p = (Player*)objA->getUserPointer();
+					Bomb* b = (Bomb*)objB->getUserPointer();
+					p->checkCollisionWith(b);
+				}
+			}
+		}
+	}
 }
 
 void initializeFrameBuffers()
@@ -417,7 +553,6 @@ void updateScene()
 
 	//playerCamera.shadowCam();
 
-	gameobjects["sphere"]->setPosition(lightPos);
 
 	// Update all game objects
 	for (auto itr = gameobjects.begin(); itr != gameobjects.end(); ++itr)
@@ -753,6 +888,10 @@ void handleKeyboardInput()
 	{
 		gameobjects["table"]->setScale(gameobjects["table"]->getScale() - 0.1f);
 	}
+	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
+	{
+		playerCamera.shakeScreen();
+	}
 
 	// Switch Lighting Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('1'))
@@ -863,49 +1002,6 @@ void handleKeyboardInput()
 
 	// Clear the keyboard input
 	KEYBOARD_INPUT->WipeEventList();
-}
-
-void calculateCollisions()
-{
-	// Basis taken from 
-	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Collision_Callbacks_and_Triggers
-	btDispatcher* dispatcher = RigidBody::getDispatcher();
-	int numManifolds = dispatcher->getNumManifolds();
-
-	short objAGroup, objBGroup;
-
-	for (int i = 0; i < numManifolds; i++)
-	{
-		//std::cout << numManifolds << std::endl;
-		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
-		const btCollisionObject* objA = contactManifold->getBody0();
-		const btCollisionObject* objB = contactManifold->getBody1();
-
-		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
-		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
-
-		if (objAGroup != objBGroup &&
-			!objA->isStaticObject() &&
-			!objB->isStaticObject())
-		{
-			// Check if one is a sensor, the other is a player, 
-			// and they don't both belong to the same player.
-			if (objAGroup == btBroadphaseProxy::SensorTrigger &&
-				objBGroup == btBroadphaseProxy::CharacterFilter)
-			{
-				Player* p = (Player*)objB->getUserPointer();
-				Bomb* b = (Bomb*)objA->getUserPointer();
-				p->checkCollisionWith(b);
-			}
-			else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
-				objAGroup == btBroadphaseProxy::CharacterFilter)
-			{
-				Player* p = (Player*)objA->getUserPointer();
-				Bomb* b = (Bomb*)objB->getUserPointer();
-				p->checkCollisionWith(b);
-			}
-		}
-	}
 }
 
 /* function TimerCallbackFunction(int value)
