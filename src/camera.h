@@ -8,6 +8,8 @@ january 2017
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtx/rotate_vector.hpp>
 
+#include <random>
+
 // our camera
 class Camera
 {
@@ -47,6 +49,8 @@ public:
 	void moveLeft();
 	void moveRight();
 
+	void shakeScreen();
+
 private:
 
 	//the camera's matricies 
@@ -70,4 +74,10 @@ private:
 	float maxRange;
 	float speed;
 
+	// Variables used for screen shake
+	float shakeRadius;
+	float shakeDegrade;
+	glm::vec3 shakeOffset;
+	std::default_random_engine generator;
+	std::uniform_real_distribution<float> distribution;
 };

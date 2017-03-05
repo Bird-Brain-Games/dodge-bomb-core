@@ -338,7 +338,7 @@ void initializeScene()
 		glm::vec3(0.0f, 45.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+		glm::vec3(0.0f, 50.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
 	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
@@ -354,7 +354,7 @@ void initializeScene()
 	
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
-	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
+	std::string bombotBodyPath = "assets\\bullet\\smolbot.btdata";
 	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
 	std::string bombBodyPath = """assets\\bullet\\bomb.btdata";
 
@@ -401,8 +401,8 @@ void initializeScene()
 	mainMenu->setMaterial(materials["menu"]);
 
 	// Set default camera properties (WIP)
-	playerCamera.setPosition(glm::vec3(0.0f, 125.0f, 170.0f));
-	playerCamera.setAngle(3.14159012f, 5.98318052f);
+	playerCamera.setPosition(glm::vec3(0.0f, 47.0f, 15.0f));
+	playerCamera.setAngle(3.14159012f, 75.98318052f);
 	//playerCamera.setProperties(44.00002, (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f, 0.001f);
 	playerCamera.update();
 
@@ -496,7 +496,7 @@ void updateScene()
 	lightPos.z = 0.0f;
 	lightPos.w = 1.0f;
 
-	gameobjects["sphere"]->setPosition(lightPos);
+	//gameobjects["sphere"]->setPosition(lightPos);
 
 	// Update all game objects
 	for (auto itr = gameobjects.begin(); itr != gameobjects.end(); ++itr)
@@ -787,6 +787,10 @@ void handleKeyboardInput()
 	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('L'))
 	{
 		gameobjects["table"]->setScale(gameobjects["table"]->getScale() - 0.1f);
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
+	{
+		playerCamera.shakeScreen();
 	}
 
 	// Switch Lighting Mode
