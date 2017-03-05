@@ -338,7 +338,7 @@ void initializeScene()
 		glm::vec3(0.0f, 45.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 50.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+		glm::vec3(0.0f, 43.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
 	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
@@ -369,7 +369,7 @@ void initializeScene()
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
-	bombot1Body->load(bombotBodyPath);
+	bombot1Body->load(bombotBodyPath);//, btCollisionObject::CF_KINEMATIC_OBJECT);
 	sphereBody->load(sphereBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 
 	// Attach rigidbodies
