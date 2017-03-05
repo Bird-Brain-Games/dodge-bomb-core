@@ -252,9 +252,12 @@ void initializeScene()
 	std::shared_ptr<LoadObject> crateMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> palmtreeMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> lampcupMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> organizerMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> mapMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
 
 	// Load all meshes
-	tableMesh->load(meshPath + "table.obj");
+	tableMesh->load(meshPath + "translatedtable.obj");
 	barrelMesh->load(meshPath + "barrel.obj");
 	cannonMesh->load(meshPath + "cannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
@@ -268,6 +271,9 @@ void initializeScene()
 	crateMesh->load(meshPath + "crate.obj");
 	palmtreeMesh->load(meshPath + "palmtree.obj");
 	lampcupMesh->load(meshPath + "lampcup.obj");
+	organizerMesh->load(meshPath + "scaledorganizer.obj");
+	mapMesh->load(meshPath + "scaledmap.obj");
+	markerMesh->load(meshPath + "scaledmarker.obj");
 
 	// Add all meshes to map
 	meshes["table"] = tableMesh;
@@ -284,38 +290,42 @@ void initializeScene()
 	meshes["crate"] = crateMesh;
 	meshes["palmtree"] = palmtreeMesh;
 	meshes["lampcup"] = lampcupMesh;
+	meshes["organizer"] = organizerMesh;
+	meshes["map"] = mapMesh;
+	meshes["marker"] = markerMesh;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
 	// Load textures (WIP)
 	// Has to take char* due to ILUT
-	char diffuseTex[] = "Assets/img/desk (diffuse).png";
-	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
 
 	char bombotTex[] = "Assets/img/bombot(diffuse)2-dash.png";
 	char bombotSpec[] = "Assets/img/bombot_specular.png";
 	std::shared_ptr<Texture> bombotTexMap = std::make_shared<Texture>(bombotTex, bombotSpec, 1.0f);
 
+	char bombTex[] = "Assets/img/bomb(diffuse).jpg";
+	std::shared_ptr<Texture> bombTexMap = std::make_shared<Texture>(bombTex, bombTex, 1.0f);
+
+	char diffuseTex[] = "Assets/img/desk (diffuse).png";
+	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
+
 	char corkboardTex[] = "Assets/img/corkboard(diffuse).png";
 	std::shared_ptr<Texture> corkboardTexMap = std::make_shared<Texture>(corkboardTex, corkboardTex, 1.0f);
+
+	char organizerTex[] = "Assets/img/organizer(diffuse).png";
+	std::shared_ptr<Texture> organizerTexMap = std::make_shared<Texture>(organizerTex, organizerTex, 1.0f);
 
 	char roomTex[] = "Assets/img/room(diffuse).png";
 	std::shared_ptr<Texture> roomTexMap = std::make_shared<Texture>(roomTex, roomTex, 1.0f);
 
-	char bombTex[] = "Assets/img/bomb(diffuse).jpg";
-	std::shared_ptr<Texture> bombTexMap = std::make_shared<Texture>(bombTex, bombTex, 1.0f);
-
-	char barrelTex[] = "Assets/img/barrel(diffuse).jpg";
-	std::shared_ptr<Texture> barrelTexMap = std::make_shared<Texture>(barrelTex, barrelTex, 1.0f);
-
-	char cannonTex[] = "Assets/img/cannon(diffuse).jpg";
-	std::shared_ptr<Texture> cannonTexMap = std::make_shared<Texture>(cannonTex, cannonTex, 1.0f);
-
-	char boatTex[] = "Assets/img/boat(diffuse).png";
-	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
-
 	char booksTex[] = "Assets/img/books(diffuse).png";
 	std::shared_ptr<Texture> booksTexMap = std::make_shared<Texture>(booksTex, booksTex, 1.0f);
+
+	char mapTex[] = "Assets/img/map(diffuse).png";
+	std::shared_ptr<Texture> mapTexMap = std::make_shared<Texture>(mapTex, mapTex, 1.0f);
+
+	char markerTex[] = "Assets/img/blake.png";
+	std::shared_ptr<Texture> markerTexMap = std::make_shared<Texture>(markerTex, markerTex, 1.0f);
 
 	char boulderTex[] = "Assets/img/boulder(diffuse).png";
 	std::shared_ptr<Texture> boulderTexMap = std::make_shared<Texture>(boulderTex, boulderTex, 1.0f);
@@ -329,6 +339,14 @@ void initializeScene()
 	char lampcupTex[] = "Assets/img/lampcup(diffuse).png";
 	std::shared_ptr<Texture> lampcupTexMap = std::make_shared<Texture>(lampcupTex, lampcupTex, 1.0f);
 
+	char barrelTex[] = "Assets/img/barrel(diffuse).jpg";
+	std::shared_ptr<Texture> barrelTexMap = std::make_shared<Texture>(barrelTex, barrelTex, 1.0f);
+
+	char cannonTex[] = "Assets/img/cannon(diffuse).jpg";
+	std::shared_ptr<Texture> cannonTexMap = std::make_shared<Texture>(cannonTex, cannonTex, 1.0f);
+
+	char boatTex[] = "Assets/img/boat(diffuse).png";
+	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
 	//Add textures to the map
 	textures["default"] = deskTexMap;
@@ -344,6 +362,9 @@ void initializeScene()
 	textures["crate"] = crateTexMap;
 	textures["palmtree"] = palmtreeTexMap;
 	textures["lampcup"] = lampcupTexMap;
+	textures["organizer"] = organizerTexMap;
+	textures["map"] = mapTexMap;
+	textures["marker"] = markerTexMap;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
@@ -363,16 +384,25 @@ void initializeScene()
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["corkboard"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
+		glm::vec3(0.0f, 0.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
+
+	gameobjects["organizer"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 0.0f, 0.0f), organizerMesh, defaultMaterial, organizerTexMap);
 
 	gameobjects["room"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
+		glm::vec3(0.0f, 0.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
 
 	gameobjects["boat"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 45.0f, 0.0f), boatMesh, defaultMaterial, boatTexMap);
 
 	gameobjects["books"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), booksMesh, defaultMaterial, booksTexMap);
+		glm::vec3(0.0f, 0.0f, 0.0f), booksMesh, defaultMaterial, booksTexMap);
+
+	gameobjects["map"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 0.0f, 0.0f), mapMesh, defaultMaterial, mapTexMap);
+
+	gameobjects["marker"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 0.0f, 0.0f), markerMesh, defaultMaterial, markerTexMap);
 
 	gameobjects["boulder"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 45.0f, 0.0f), boulderMesh, defaultMaterial, boulderTexMap);
@@ -384,7 +414,7 @@ void initializeScene()
 		glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
 
 	gameobjects["lampcup"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
+		glm::vec3(0.0f, 0.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
