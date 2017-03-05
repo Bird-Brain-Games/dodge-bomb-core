@@ -36,5 +36,5 @@ private:
 	float currentCooldown;	// The current cooldown on the bomb throw
 	std::shared_ptr<BombManager> bombManager;
 	float currentAngle;
-	
+	glm::vec3 throwingForce;
 };
