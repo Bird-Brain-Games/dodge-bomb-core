@@ -85,7 +85,7 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force
 
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////	BOMB	///////////////////////////////////////
-float Bomb::playerRadius = 3.0f;
+float Bomb::playerRadius = 2.0f;
 
 Bomb::Bomb(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -117,13 +117,13 @@ void Bomb::attachPlayerPtr(Player* _playerPtr)
 
 void Bomb::throwBomb(glm::vec2 direction, glm::vec3 force)
 {
-	setPosition(playerPtr->getWorldPosition() + glm::vec3(direction.x * playerRadius, 0.5f, direction.y * playerRadius));
+	setPosition(playerPtr->getWorldPosition() + glm::vec3(direction.x * playerRadius, 0.6f, -direction.y * playerRadius));
 
 	//	bomb->getRigidBody()->getBody()->setLinearVelocity(btVector3(0, 0, 0));
 	//	bomb->getRigidBody()->getBody()->clearForces();//clears force not impulse?
 
 	rigidBody->getBody()->applyCentralImpulse(
-		btVector3(direction.x * force.x, force.y, direction.y * force.z));
+		btVector3(direction.x * force.x, force.y, -direction.y * force.z));
 }
 
 void Bomb::draw(Camera& camera)

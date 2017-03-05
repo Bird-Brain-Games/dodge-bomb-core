@@ -51,12 +51,12 @@ void Player::update(float dt)
 
 	handleInput();
 	GameObject::update(dt);
-	std::cout << 
-		"X: " << getWorldPosition().x << " " << std::endl;
-		//"Y: " << getWorldPosition().y << " " <<
+	std::cout <<
+		//"X: " << getWorldPosition().x << " " << std::endl;
+		"Y: " << getWorldPosition().y << " " << std::endl;
 		//"Z: " << getWorldPosition().z << " " << std::endl;
 
-	//rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
+	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
 }
 
 void Player::handleInput()
@@ -95,7 +95,7 @@ void Player::handleInput()
 	}
 	else if (con.leftStickMoved() && !con.rightStickMoved())
 	{
-		//currentAngle = atan2(-LStick.y, LStick.x) + 180 * degToRad;
+		//currentAngle = atan2(LStick.y, LStick.x) + 180 * degToRad;
 		//this->setRotationAngleY(angle);
 	}
 
@@ -110,10 +110,10 @@ void Player::handleInput()
 	if (con.conButton(XINPUT_GAMEPAD_RIGHT_SHOULDER) && currentCooldown == 0.0f)
 	{
 		glm::vec2 normalized = glm::vec2(0);
-		if (RStick.y > 0.1 || RStick.y < -0.1 || RStick.x > 0.1 || RStick.x < -0.1)
+		if (con.rightStickMoved())
 			normalized = glm::normalize(glm::vec2(RStick.x, RStick.y));
 
-		glm::vec3 force(20.0f);
+		glm::vec3 force(5.0f);
 		bombManager->throwBomb(this, normalized, force);
 
 		currentCooldown += bombCooldown;

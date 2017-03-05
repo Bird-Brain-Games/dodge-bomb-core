@@ -70,10 +70,11 @@ void GameObject::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 
 void GameObject::setLocalTransformToBody()
 {
-	m_pLocalPosition = m_pLocalToWorldMatrix[3];
+	m_pLocalTransformMatrix = rigidBody->getWorldTransform();
+	m_pLocalPosition = m_pLocalTransformMatrix[3];
 	m_pScale = rigidBody->getScale();
+	m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
 	m_pLocalToWorldMatrix = m_pLocalToWorldMatrix * glm::scale(m_pScale);
-	m_pLocalTransformMatrix = m_pLocalToWorldMatrix;
 	// ROTATION NEEDED TO BE ADDED
 	//m_pRotX = m_pLocalToWorldMatrix[]
 }
@@ -81,9 +82,9 @@ void GameObject::setLocalTransformToBody()
 void GameObject::updateLocalTransform()
 {
 	// Create rotation matrix
-	glm::mat4 rx = glm::rotate(glm::radians(m_pRotX), glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::mat4 ry = glm::rotate(glm::radians(m_pRotY), glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 rz = glm::rotate(glm::radians(m_pRotZ), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 rx = glm::rotate(m_pRotX, glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 ry = glm::rotate(-m_pRotY, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 rz = glm::rotate(m_pRotZ, glm::vec3(0.0f, 0.0f, 1.0f));
 
 	// Note: pay attention to rotation order, ZYX is not the same as XYZ
 	m_pLocalRotation = rz * ry * rx;
@@ -162,18 +163,15 @@ void GameObject::update(float dt)
 			// set the world transform of the body to the gameobject.
 			if (needsUpdating || rigidBody->getBody()->isStaticOrKinematicObject())
 			{
-				rigidBody->setWorldTransform(m_pLocalPosition, glm::vec3(m_pRotX, m_pRotY, m_pRotZ));
-				//rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
+				rigidBody->setWorldTransform(m_pLocalPosition, 
+					glm::vec3(m_pRotX, m_pRotY, m_pRotZ));
 				rigidBody->setScale(m_pScale);
-
-				
 			}
 
-			// If the gameobject has updated, set the world transform
-			if (!rigidBody->getBody()->isStaticOrKinematicObject())
+			// If the gameobject has updated and we didn't control it
+			// set the world transform
+			if (!needsUpdating && !rigidBody->getBody()->isStaticOrKinematicObject())
 			{
-				m_pLocalToWorldMatrix = rigidBody->getWorldTransform();
-				// update local variables to have the properties
 				setLocalTransformToBody();
 			}
 		}
