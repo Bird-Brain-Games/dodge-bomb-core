@@ -48,6 +48,7 @@ GameObject::GameObject(GameObject& other)
 	rigidBody = std::make_unique<RigidBody>(*other.rigidBody);
 	rigidBody->load(other.rigidBody->getFileName(), 
 		(btCollisionObject::CollisionFlags)other.rigidBody->getBody()->getCollisionFlags());
+	rigidBody->setUserPointer(this);
 }
 
 GameObject::~GameObject() 
@@ -63,6 +64,7 @@ void GameObject::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 		updateLocalTransform();
 		m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
 		rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
+		rigidBody->setUserPointer(this);
 	}
 }
 
@@ -71,6 +73,7 @@ void GameObject::setLocalTransformToBody()
 	m_pLocalPosition = m_pLocalToWorldMatrix[3];
 	m_pScale = rigidBody->getScale();
 	m_pLocalToWorldMatrix = m_pLocalToWorldMatrix * glm::scale(m_pScale);
+	m_pLocalTransformMatrix = m_pLocalToWorldMatrix;
 	// ROTATION NEEDED TO BE ADDED
 	//m_pRotX = m_pLocalToWorldMatrix[]
 }
@@ -157,10 +160,13 @@ void GameObject::update(float dt)
 		{
 			// If the gameobject has updated
 			// set the world transform of the body to the gameobject.
-			if (needsUpdating)
+			if (needsUpdating || rigidBody->getBody()->isStaticOrKinematicObject())
 			{
-				rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
+				rigidBody->setWorldTransform(m_pLocalPosition, glm::vec3(m_pRotX, m_pRotY, m_pRotZ));
+				//rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
 				rigidBody->setScale(m_pScale);
+
+				
 			}
 
 			// If the gameobject has updated, set the world transform
@@ -258,7 +264,7 @@ bool GameObject::isRoot()
 		return true;
 }
 
-void GameObject::checkCollisionWith(std::shared_ptr<GameObject> other)
+void GameObject::checkCollisionWith(GameObject* other)
 {
 
 }

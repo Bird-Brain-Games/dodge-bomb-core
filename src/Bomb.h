@@ -25,7 +25,11 @@ public:
 	void draw(Camera& camera);
 	void update(float dt);
 
+	Player const* getPlayer() { return playerPtr; }
+	int getPlayerNum() { return playerNum; }
+
 private:
+	static float playerRadius;
 	float duration;
 	int playerNum;
 	Player* playerPtr;
