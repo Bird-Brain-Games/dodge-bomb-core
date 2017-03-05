@@ -80,7 +80,7 @@ void Node::update(float dt)
 			glm::mat4_cast(jointAnimation->jointBaseRotation * jointAnimation->jointRotations[m_pCurrentFrame]);
 
 		m_pLocalPosition = jointAnimation->jointBasePosition + jointAnimation->jointPositions[m_pCurrentFrame];
-
+		std::cout << m_pCurrentFrame << std::endl;
 		jointAnimation->jointScales[m_pCurrentFrame];
 
 		// Increment frame (note: you could do this based on dt)
