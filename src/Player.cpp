@@ -12,7 +12,8 @@ Player::Player(glm::vec3 position,
 	GameObject(position, _mesh, _material, _texture), 
 	con(_playerNum),
 	currentCooldown(0.0f),
-	bombCooldown(1.0f)
+	bombCooldown(1.0f),
+	currentAngle(0.0f)
 {
 	playerNum = _playerNum;
 }
@@ -21,7 +22,8 @@ Player::Player(Player& other)
 	: GameObject(other),
 	con(other.con.getPlayerNum()+1),
 	currentCooldown(0.0f),
-	bombCooldown(1.0f)
+	bombCooldown(1.0f),
+	currentAngle(0.0f)
 {
 
 }
@@ -49,7 +51,12 @@ void Player::update(float dt)
 
 	handleInput();
 	GameObject::update(dt);
-	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
+	std::cout << 
+		"X: " << getWorldPosition().x << " " << std::endl;
+		//"Y: " << getWorldPosition().y << " " <<
+		//"Z: " << getWorldPosition().z << " " << std::endl;
+
+	//rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
 }
 
 void Player::handleInput()
@@ -79,8 +86,18 @@ void Player::handleInput()
 	// Update the direction of the player
 	// Based on the position of the right stick
 	Coords RStick = con.getRightStick();
-	float angle = atan2(-RStick.y, RStick.x) + 270 * degToRad;
-	this->setRotationAngleY(angle);
+	float angle = atan2(-RStick.y, RStick.x) + 180 * degToRad;
+
+	if (currentAngle != angle && con.rightStickMoved())
+	{
+		currentAngle = angle;
+		this->setRotationAngleY(angle);
+	}
+	else if (con.leftStickMoved() && !con.rightStickMoved())
+	{
+		//currentAngle = atan2(-LStick.y, LStick.x) + 180 * degToRad;
+		//this->setRotationAngleY(angle);
+	}
 
 	if (hasMoved)
 	{

@@ -26,9 +26,6 @@ bool BombManager::init(std::shared_ptr<Loader> _mesh,
 	textures.push_back(_p3);
 	textures.push_back(_p4);
 
-	// Load the rigidBodies
-
-
 	// Create the bomb object templates
 	for (int i = 0; i < 4; i++)
 	{

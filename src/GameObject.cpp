@@ -70,6 +70,7 @@ void GameObject::setLocalTransformToBody()
 	m_pLocalPosition = m_pLocalToWorldMatrix[3];
 	m_pScale = rigidBody->getScale();
 	m_pLocalToWorldMatrix = m_pLocalToWorldMatrix * glm::scale(m_pScale);
+	m_pLocalTransformMatrix = m_pLocalToWorldMatrix;
 	// ROTATION NEEDED TO BE ADDED
 	//m_pRotX = m_pLocalToWorldMatrix[]
 }
@@ -156,10 +157,13 @@ void GameObject::update(float dt)
 		{
 			// If the gameobject has updated
 			// set the world transform of the body to the gameobject.
-			if (needsUpdating)
+			if (needsUpdating || rigidBody->getBody()->isStaticOrKinematicObject())
 			{
-				rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
+				rigidBody->setWorldTransform(m_pLocalPosition, glm::vec3(m_pRotX, m_pRotY, m_pRotZ));
+				//rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
 				rigidBody->setScale(m_pScale);
+
+				
 			}
 
 			// If the gameobject has updated, set the world transform
