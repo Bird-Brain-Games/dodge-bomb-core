@@ -21,7 +21,7 @@ public:
 
 	//sets the camera's position
 	void setPosition(glm::vec3 _pos);
-
+	void setForward(glm::vec3 _for);
 	void setAngle(float, float);
 
 	//returns view matrix
@@ -35,7 +35,7 @@ public:
 
 	//recalculates the view and projection matrix
 	void update();
-
+	void shadowCam();
 	//rotates camera based on values given.
 	void mouseMotion(int x, int y, int preY, int preX);
 

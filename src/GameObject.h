@@ -34,6 +34,7 @@ public:
 	void setRotationAngleY(float newAngle);
 	void setRotationAngleZ(float newAngle);
 	void setScale(glm::vec3 newScale);
+	void setOutlineColour(glm::vec4 colour);
 
 	virtual void update(float dt);	
 	virtual void draw(Camera &camera);
@@ -79,6 +80,7 @@ protected:
 	std::vector<GameObject*> m_pChildren;
 
 	// Graphics components
+	glm::vec4 outlineColour;
 	std::shared_ptr<Texture> texture;
 	std::shared_ptr<Loader> mesh;
 	std::shared_ptr<Material> material;

@@ -9,7 +9,8 @@ GameObject::GameObject()
 	mesh(nullptr),
 	material(nullptr),
 	texture(nullptr),
-	rigidBody(nullptr)
+	rigidBody(nullptr),
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
 {
 	
 }
@@ -27,7 +28,8 @@ GameObject::GameObject(
 	mesh(_mesh),
 	material(_material),
 	texture(_texture),
-	rigidBody(nullptr)
+	rigidBody(nullptr),
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
 {
 
 }
@@ -40,6 +42,7 @@ GameObject::GameObject(GameObject& other)
 	mesh(other.mesh),
 	material(other.material),
 	texture(other.texture),
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
 	rigidBody(nullptr)
 {
 	rigidBody = std::make_unique<RigidBody>(*other.rigidBody);
@@ -182,6 +185,7 @@ void GameObject::draw(Camera &camera)
 	material->shader->bind();
 	material->mat4Uniforms["u_mvp"] = camera.getViewProj() * m_pLocalToWorldMatrix;
 	material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
+	material->vec4Uniforms["u_outlineColour"] = outlineColour;
 
 	// Bind the texture
 	if (texture != nullptr)
@@ -259,3 +263,7 @@ void GameObject::checkCollisionWith(std::shared_ptr<GameObject> other)
 
 }
 
+void GameObject::setOutlineColour(glm::vec4 colour)
+{
+	outlineColour = colour;
+}
