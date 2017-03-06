@@ -60,6 +60,6 @@ void main()
 	vOut.normal = (u_mv* normalM).xyz;
 	vOut.posEye = (u_mv* position).xyz;
 	
-	gl_Position = u_mvp * vec4(vIn_vertex, 1.0);
+	gl_Position = u_mvp * position;
 	//colour = vec3(0.0, 0.0, 1.0);
 }

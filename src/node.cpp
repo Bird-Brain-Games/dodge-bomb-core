@@ -1,5 +1,8 @@
 #include "Node.h"
 #include <iostream>
+
+const float degToRad = 3.14159f / 180.0f;
+
 Node::Node()
 	: m_pScale(1.0f),
 	colour(glm::vec4(1.0)),
@@ -18,6 +21,11 @@ void Node::setFrame(int _pos)
 		m_pCurrentFrame = _pos;
 	else
 		std::cout << "Error: frame limit is  " << frame << " given value is greaten then this limit";
+}
+
+int Node::getFrame()
+{
+	return m_pCurrentFrame;
 }
 
 void Node::init()
@@ -55,7 +63,27 @@ glm::mat4 Node::getLocalToWorldMatrix()
 	return m_pLocalToWorldMatrix;
 }
 
+void Node::updateTop(float dt)
+{
+	//effeciancy only call this update in top or bot. need to change a couple of things first though
+	updating(dt);
+	m_pChildren[0]->update(dt);
+}
+
+void Node::updateBot(float dt, float overRide)
+{
+	updating(dt, overRide);
+	m_pChildren[1]->update(dt);
+}
+
 void Node::update(float dt)
+{
+	updating(dt);
+	for (int i = 0; i < m_pChildren.size(); i++)
+		m_pChildren[i]->update(dt);
+}
+
+void Node::updating(float dt, float overRide)
 {
 	frame++;
 
@@ -78,9 +106,15 @@ void Node::update(float dt)
 
 		m_pLocalRotation =
 			glm::mat4_cast(jointAnimation->jointBaseRotation * jointAnimation->jointRotations[m_pCurrentFrame]);
+		if (overRide != 0)
+		{
+			glm::mat4 rx = glm::rotate(overRide, glm::vec3(1.0f, 0.0f, 0.0f));
+			glm::mat4 ry = glm::rotate(glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 rz = glm::rotate(glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			m_pLocalRotation *= (rz * ry * rx);
+		}
 
 		m_pLocalPosition = jointAnimation->jointBasePosition + jointAnimation->jointPositions[m_pCurrentFrame];
-		std::cout << m_pCurrentFrame << std::endl;
 		jointAnimation->jointScales[m_pCurrentFrame];
 
 		// Increment frame (note: you could do this based on dt)
@@ -107,12 +141,6 @@ void Node::update(float dt)
 		m_pLocalToWorldMatrix = m_pParent->getLocalToWorldMatrix() * m_pLocalTransformMatrix;
 	else
 		m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
-
-	//}
-		// Update children
-	for (int i = 0; i < m_pChildren.size(); i++)
-		m_pChildren[i]->update(dt);
-
 }
 
 void Node::update()
@@ -135,7 +163,6 @@ void Node::update()
 	else
 		m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
 
-	//}
 	// Update children
 	for (int i = 0; i < m_pChildren.size(); i++)
 		m_pChildren[i]->update();
@@ -198,7 +225,6 @@ void Node::createBase(std::vector<glm::mat4> &baseCase, std::vector<glm::mat4> &
 		baseCase.push_back(glm::inverse(m_pLocalToWorldMatrix));
 	}
 
-	//}
 	// Update children
 	for (int i = 0; i < m_pChildren.size(); i++)
 		m_pChildren[i]->createBase(baseCase, matrix, count);
@@ -207,6 +233,7 @@ void Node::createBase(std::vector<glm::mat4> &baseCase, std::vector<glm::mat4> &
 
 
 
+//updates from count to max
 void Node::getMatrixStack(std::vector<glm::mat4> &temp, std::vector<glm::mat4> &origin, int &count)
 {
 	if (jointAnimation != NULL)
@@ -216,9 +243,27 @@ void Node::getMatrixStack(std::vector<glm::mat4> &temp, std::vector<glm::mat4> &
 	}
 	// Update children
 	for (int i = 0; i < m_pChildren.size(); i++)
+	{
 		m_pChildren[i]->getMatrixStack(temp, origin, count);
+	}
 }
 
+void Node::getMatrixStackT(std::vector<glm::mat4> &temp, std::vector<glm::mat4> &origin, int &count)
+{
+	if (jointAnimation != NULL)
+	{
+		temp[count] = m_pLocalToWorldMatrix * origin[count];
+		count++;
+	}
+	// Update children
+	m_pChildren[0]->getMatrixStack(temp, origin, count);
+}
+
+void Node::getMatrixStackB(std::vector<glm::mat4> &temp, std::vector<glm::mat4> &origin, int &count)
+{
+	// Update children
+	m_pChildren[1]->getMatrixStack(temp, origin, count);
+}
 
 void Node::drawSkeleton(glm::mat4 mvp, Shader shader)
 {
