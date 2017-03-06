@@ -458,7 +458,7 @@ void initializeScene()
 	
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
-	std::string bombotBodyPath = "assets\\bullet\\smolbot.btdata";
+	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
 	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
 	std::string bombBodyPath = "assets\\bullet\\bomb.btdata";
 
@@ -974,8 +974,8 @@ void handleKeyboardInput()
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
 	{
-		gameobjects["bombot1"]->setPosition(
-			gameobjects["bombot1"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
+		gameobjects["bombot2"]->setPosition(
+			gameobjects["bombot2"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
 	{

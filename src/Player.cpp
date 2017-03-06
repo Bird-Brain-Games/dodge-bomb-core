@@ -64,7 +64,7 @@ void Player::update(float dt)
 	switch (currentState)
 	{
 	case P_NORMAL:
-		handleInput();
+		handleInput(dt);
 		rigidBody->getBody()->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
 		break;
 
@@ -72,7 +72,7 @@ void Player::update(float dt)
 		invincibleTime -= dt;
 		// If they're still in the pause time, don't let them move
 		if (maxInvincibleTime - invincibleTime > pauseTime)
-			handleInput();
+			handleInput(dt);
 
 		if (invincibleTime <= 0.0f)
 		{
@@ -90,7 +90,7 @@ void Player::update(float dt)
 	}
 
 	GameObject::update(dt);
-//	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
+	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
 }
 
 void Player::handleInput(float dt)
