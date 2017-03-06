@@ -17,7 +17,7 @@ public:
 	Player(Player&);
 	~Player();
 
-	void handleInput();
+	void handleInput(float dt);
 
 	void update(float deltaT);
 	void draw(Camera _camera);

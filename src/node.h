@@ -33,11 +33,18 @@ protected:
 	//Loader sphere; debug sphere
 	GLuint VBO;
 	GLuint VAO;
+private:
+	//recursive function
+	virtual void update(float dt);
+	//the update function our updates call
+	void updating(float dt, float overRide = 0);
 
 public:
 	glm::vec3 m_pLocalPosition;
 
 	void setFrame(int);
+	int getFrame();
+
 	Node();
 	Node(std::string _name, glm::vec3 position);
 	~Node();
@@ -51,10 +58,24 @@ public:
 
 	glm::mat4 getLocalToWorldMatrix();
 
-	virtual void update(float dt);
+	
+	void updateTop(float dt);
+	void updateBot(float dt, float overRide);
+
 	virtual void update();
 	void Node::createBase(std::vector<glm::mat4> &temp, std::vector<glm::mat4> &, int &count);
+
+
+	// gets the top half of the matricies joints
+	void Node::getMatrixStackT(std::vector<glm::mat4>&, std::vector<glm::mat4>&, int&);
+
+	// gets the bottom half of the matricies joints
+	void Node::getMatrixStackB(std::vector<glm::mat4>&, std::vector<glm::mat4>&, int&);
+
+	//used to get the rest of the matrix after the special half and bot function
 	void Node::getMatrixStack(std::vector<glm::mat4>&, std::vector<glm::mat4>&, int&);
+
+
 	virtual void drawSkeleton(glm::mat4, Shader);
 	//virtual void draw();
 

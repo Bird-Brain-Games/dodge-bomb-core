@@ -104,7 +104,8 @@ class Holder : public Loader
 protected:
 	Node* basePose;
 	std::map<std::string, Node*> animations;
-	Node* current;
+	Node* currentTop;
+	Node* currentBot;
 	unsigned int numtris; // count number of vertices for data creation
 	int bones;
 
@@ -114,11 +115,14 @@ protected:
 	std::vector<glm::mat4> multipliedMatricies;
 	void createVAO();
 
+	float angle;
 public:
 	//
 	void setAnim(std::string);
 	bool baseLoad(std::string);
 	bool AniLoad(std::string, std::string);
 	void draw(std::shared_ptr<ShaderProgram> s);
-	void update(float);
+	void update(float, float);
+	//used to update a portion of the skeleton.
+	//void update(int frame, int max);
 };

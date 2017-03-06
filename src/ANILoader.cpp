@@ -4,6 +4,8 @@
 
 #define MAX_LINE_LENGTH 128
 
+const float degToRad = 3.14159f / 180.0f;
+
 ANILoader::ANILoader()
 {
 	rootNode = nullptr;
@@ -504,10 +506,6 @@ bool Holder::baseLoad(std::string _path)
 	int size = temp->getVertexs().size();
 	basePose = temp->getRootNode();
 
-	glm::vec3 *test;
-	glm::vec2 *help;
-	glm::vec4 *lost;
-
 	Attribute position(AttributeLocations::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_vertex", temp->getVertexsData());
 	vao.addAttribute(position);
 
@@ -524,104 +522,14 @@ bool Holder::baseLoad(std::string _path)
 	vao.addAttribute(weights);
 	createVAO();
 	bones = 0;
+
 	basePose->createBase(matricies, multipliedMatricies, bones);
-	current = basePose;
+	currentTop = basePose;
+	currentBot = basePose;
 	if (basePose != NULL && size > 0)
 		return true;
 	else
 		return false;
-	//
-	//m_pChild = data->getRootNode();
-	//
-	//
-	//bones = 0;
-	//m_pChild->createBase(multipliedMatricies, matricies, bones);
-	//
-	//
-	//
-	//
-	////int size = data->getVertexs().size();
-	////if (size > 0)
-	////{
-	////	Attribute positionAttrib(attribLoc::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, size, "inPosition", data->getVertexs().data());
-	////	vao.addAttribute(positionAttrib);
-	////
-	////}
-	////
-	////size = data->getUV().size();
-	////if (size > 0)
-	////{
-	////
-	////	Attribute UVAttrib(attribLoc::UV, GL_FLOAT, sizeof(glm::vec2), 2, size, "vertexUV", data->getUV().data());
-	////	vao.addAttribute(UVAttrib);
-	////}
-	////
-	////size = data->getNormals().size();
-	////if (size > 0)
-	////{
-	////	Attribute normalAttrib(attribLoc::NORMAL, GL_FLOAT, sizeof(glm::vec3), 3, size, "normal", data->getNormals().data());
-	////	vao.addAttribute(normalAttrib);
-	////}
-	////
-	////size = data->getJoints().size();
-	////if (size > 0)
-	////{
-	////	Attribute jointAttrib(attribLoc::BONES, GL_FLOAT, sizeof(glm::vec4), 4, size, "bones", data->getJoints().data());
-	////	vao.addAttribute(jointAttrib);
-	////}
-	////
-	////size = data->getWeights().size();
-	////if (size > 0)
-	////{
-	////	Attribute weightAttrib(attribLoc::WEIGHTS, GL_FLOAT, sizeof(glm::vec4), 4, size, "weights", data->getWeights().data());
-	////	vao.addAttribute(weightAttrib);
-	////}
-	////createVAO();
-	//numtris = data->getVertexs().size();
-
-	//glGenVertexArrays(1, &vao2);
-	//glBindVertexArray(vao2);
-	//
-	//// verts tho
-	//glGenBuffers(1, &vertbo);
-	//glBindBuffer(GL_ARRAY_BUFFER, vertbo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*numtris, data->getVertexs().data(), GL_STATIC_DRAW);
-	//glEnableVertexAttribArray(4); // position/vertices
-	//glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//
-	//// textures tho(poopybutt)
-	//glGenBuffers(1, &texbo);
-	//glBindBuffer(GL_ARRAY_BUFFER, texbo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2)*numtris, data->getUV().data(), GL_STATIC_DRAW);
-	//glEnableVertexAttribArray(5); // texcoords/uv
-	//glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//
-	//// normals tho
-	//glGenBuffers(1, &normbo);
-	//glBindBuffer(GL_ARRAY_BUFFER, normbo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*numtris, data->getNormals().data(), GL_STATIC_DRAW);
-	//glEnableVertexAttribArray(6); //  normals
-	//glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//
-	//// normals tho
-	//glGenBuffers(1, &weightbo);
-	//glBindBuffer(GL_ARRAY_BUFFER, weightbo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4)*numtris, data->getWeights().data(), GL_STATIC_DRAW);
-	//glEnableVertexAttribArray(9); //  colors
-	//glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//
-	//glGenBuffers(1, &bonebo);
-	//glBindBuffer(GL_ARRAY_BUFFER, bonebo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4)*numtris, data->getJoints().data(), GL_STATIC_DRAW);
-	//glEnableVertexAttribArray(8); //  colors
-	//glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//
-	//glBindVertexArray(0);
 }
 
 bool Holder::AniLoad(std::string _path, std::string _name)
@@ -632,7 +540,7 @@ bool Holder::AniLoad(std::string _path, std::string _name)
 	temp->createNodes();
 	animations[_name] = temp->getRootNode();
 
-	if (basePose != NULL )
+	if (basePose != NULL)
 		return true;
 	else
 		return false;
@@ -654,23 +562,44 @@ void Holder::draw(std::shared_ptr<ShaderProgram> s)
 	vao.draw();
 }
 
-void Holder::update(float dt)
+void Holder::update(float dt, float overRide)
 {
 	int count = 0;
-	current->update(dt);
-	current->getMatrixStack(multipliedMatricies, matricies, count);
-	//int count = 0;
-	//m_pChild->update(dt);
-	//m_pChild->getMatrixStack(matricies, multipliedMatricies, count);
+	if (overRide != 0)
+		angle = overRide;
+	currentBot->updateBot(dt, angle + 180 * degToRad);
+
+	currentTop->updateTop(dt);
+
+	//updates the top half of the skeleton. note order matters. you need to do top then bot.
+	currentTop->getMatrixStackT(multipliedMatricies, matricies, count);
+	//updates the bottom half of the skeleton
+	currentBot->getMatrixStackB(multipliedMatricies, matricies, count);
+
+	if (currentBot->getFrame() == 0)
+		currentBot = animations["idle"];
+
+	if (currentTop->getFrame() == 0)
+		currentTop = animations["idle"];
+
 }
+
 void Holder::setAnim(std::string _name)
 {
 
 	if (animations.count(_name) == 1)
 	{
-		std::cout << "the animation was set to " + _name << std::endl;
-		current = animations[_name];
-		current->setFrame(0);
+
+		if (currentTop == animations["idle"] || currentTop == animations["walk"])
+		{
+			currentTop = animations[_name];
+			currentTop->setFrame(0);
+		}
+		if (currentBot == animations["idle"] || currentBot == animations["throw"])
+		{
+			currentBot = animations[_name];
+			currentBot->setFrame(0);
+		}
 	}
 	else
 		std::cout << "error the animation " + _name + " does not exist" << std::endl;

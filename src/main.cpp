@@ -213,10 +213,12 @@ void initializeScene()
 	sphereMesh->load(meshPath + "sphere.obj");
 
 	bombotMesh->baseLoad("Assets/htr/bombot");
+	// do not change the names of these
+	// eventually the goal is change them to enums and not strings.
 	bombotMesh->AniLoad("Assets/htr/idle" , "idle");
 	bombotMesh->AniLoad("Assets/htr/throw", "throw");
 	bombotMesh->AniLoad("Assets/htr/walk" , "walk");
-	bombotMesh->setAnim("walk");
+	bombotMesh->setAnim("idle");
 
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
