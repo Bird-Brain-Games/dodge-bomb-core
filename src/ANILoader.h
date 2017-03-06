@@ -122,7 +122,7 @@ public:
 	bool baseLoad(std::string);
 	bool AniLoad(std::string, std::string);
 	void draw(std::shared_ptr<ShaderProgram> s);
-	void update(float, float);
+	void update(float, float, float);
 	//used to update a portion of the skeleton.
 	//void update(int frame, int max);
 };
