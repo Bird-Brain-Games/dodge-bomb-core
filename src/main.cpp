@@ -629,6 +629,8 @@ void setMaterialForAllGameObjects(std::string materialName)
 	{
 		itr->second->setMaterial(mat);
 	}
+
+	bombManager->setMaterialForAllBombs(mat);
 }
 
 // Only takes the highest brightness from the FBO

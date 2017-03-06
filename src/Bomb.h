@@ -75,6 +75,7 @@ public:
 
 	void update(float dt);
 	void draw(Camera& camera);
+	void setMaterialForAllBombs(std::shared_ptr<Material> mat);
 
 	// Create the new bomb, add it to the active list,
 	// and tell it to throw in the given direction.
