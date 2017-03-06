@@ -77,7 +77,7 @@ void Player::handleInput(float dt)
 	// Update the direction of the player
 	// Based on the position of the right stick
 	Coords RStick = con.getRightStick();
-	float angle = atan2(-RStick.y, RStick.x) + 270 * degToRad;
+	float angle = atan2(-RStick.y, RStick.x) + 180 * degToRad;
 	this->setRotationAngleY(angle);
 
 	// Check if the player has moved the left stick
@@ -97,8 +97,7 @@ void Player::handleInput(float dt)
 		hasMoved = true;
 	}
 
-	float angle = atan2(-RStick.y, RStick.x) + 180 * degToRad;
-
+	
 	if (currentAngle != angle && con.rightStickMoved())
 	{
 		currentAngle = angle;

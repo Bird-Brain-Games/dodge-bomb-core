@@ -142,11 +142,12 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru, v_null, v_skinning;
+	Shader v_default, v_passThru, v_null, v_skinning, v_shadow;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
 	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
+	v_shadow.loadShaderFromFile(shaderPath + "shadowMap_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, f_noLighting, f_toon, f_sobel, f_shadow;
@@ -226,13 +227,13 @@ void initializeShaders()
 	materials["blur"]->shader->linkProgram();
 
 	// Sobel filter material
-	materials["sobel"] = std::make_shared<Material>();
+	materials["sobel"] = std::make_shared<Material>("sobel");
 	materials["sobel"]->shader->attachShader(v_passThru);
 	materials["sobel"]->shader->attachShader(f_sobel);
 	materials["sobel"]->shader->linkProgram();
 
 	// Shadow filter material
-	materials["shadow"] = std::make_shared<Material>();
+	materials["shadow"] = std::make_shared<Material>("shadow");
 	materials["shadow"]->shader->attachShader(v_shadow);
 	materials["shadow"]->shader->attachShader(f_shadow);
 	materials["shadow"]->shader->linkProgram();
@@ -497,7 +498,7 @@ void initializeScene()
 
 	// Set default camera properties (WIP)
 	playerCamera.setPosition(glm::vec3(0.0f, 47.0f, 15.0f));
-	playerCamera.setAngle(3.14159012f, 75.98318052f);
+	//playerCamera.setAngle(3.14159012f, 75.98318052f);
 	//playerCamera.setProperties(44.00002, (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f, 0.001f);
 	playerCamera.update();
 
@@ -736,20 +737,20 @@ void DisplayCallbackFunction(void)
 	///////////////////////////// First Pass: Outlines
 	if (outlineToggle)
 	{
-		glCullFace(GL_FRONT);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glLineWidth(outlineWidth);
-
-		// Clear back buffer
-		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
-
-		// Tell all game objects to use the outline shading material
-		setMaterialForAllGameObjects("sobel");
-
-		drawScene(playerCamera);
-
-		glCullFace(GL_BACK);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glCullFace(GL_FRONT);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glLineWidth(outlineWidth);
+		//
+		//// Clear back buffer
+		//FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
+		//
+		//// Tell all game objects to use the outline shading material
+		//setMaterialForAllGameObjects("sobel");
+		//
+		//drawScene(playerCamera);
+		//
+		//glCullFace(GL_BACK);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 	
 	///////////////////////////// Second Pass: Lighting
@@ -759,6 +760,21 @@ void DisplayCallbackFunction(void)
 			case TOON:
 			{
 				setMaterialForAllGameObjects("toon");
+
+				setMaterialForAllPlayerObjects("toonPlayer");
+				materials["toonPlayer"]->shader->bind();
+
+				materials["toonPlayer"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+				materials["toonPlayer"]->intUniforms["u_diffuseTex"] = 31;
+				materials["toonPlayer"]->intUniforms["u_specularTex"] = 30;
+
+				materials["toonPlayer"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+				materials["toonPlayer"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
+				materials["toonPlayer"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
+				materials["toonPlayer"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+
+				materials["toonPlayer"]->sendUniforms();
+				materials["toonPlayer"]->shader->unbind();
 
 				materials["toon"]->shader->bind();
 
@@ -819,13 +835,7 @@ void DisplayCallbackFunction(void)
 
 				//sets the material properties for all our player objects
 
-				materials["toonPlayer"]->shader->bind();
-
-				materials["toonPlayer"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
-				materials["toonPlayer"]->intUniforms["u_diffuseTex"] = 31;
-				materials["toonPlayer"]->intUniforms["u_specularTex"] = 30;
-
-				materials["toonPlayer"]->sendUniforms();
+	
 		}
 
 		//draw the scene to the fbo

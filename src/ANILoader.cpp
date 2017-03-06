@@ -509,7 +509,7 @@ bool Holder::baseLoad(std::string _path)
 	Attribute position(AttributeLocations::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_vertex", temp->getVertexsData());
 	vao.addAttribute(position);
 
-	Attribute UV(AttributeLocations::TEX_COORD, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_uv", temp->getUVData());
+	Attribute UV(AttributeLocations::TEX_COORD, GL_FLOAT, sizeof(glm::vec2), 2, size, "vIn_uv", temp->getUVData());
 	vao.addAttribute(UV);
 
 	Attribute normal(AttributeLocations::NORMAL, GL_FLOAT, sizeof(glm::vec3), 3, size, "vIn_normal", temp->getNormalsData());
