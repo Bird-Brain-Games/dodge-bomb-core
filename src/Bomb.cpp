@@ -47,11 +47,20 @@ bool BombManager::init(std::shared_ptr<Loader> _mesh,
 		bombTemplates.push_back(bombObject);
 	}
 
+	// Set the bomb outline texture
 	bombTemplates[0]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	bombTemplates[1]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
 	initialized = true;
 	return true;
+}
+
+void BombManager::setMaterialForAllBombs(std::shared_ptr<Material> mat)
+{
+	for (auto bomb : activeBombs)
+	{
+		bomb->setMaterial(mat);
+	}
 }
 
 void BombManager::update(float dt)
@@ -144,6 +153,8 @@ void Bomb::throwBomb(glm::vec2 direction, glm::vec3 force)
 	rigidBody->getBody()->applyCentralImpulse(
 		btVector3(direction.x * force.x, force.y, -direction.y * force.z));
 }
+
+
 
 void Bomb::draw(Camera& camera)
 {
