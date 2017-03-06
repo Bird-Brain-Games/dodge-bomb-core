@@ -1,0 +1,20 @@
+syntax: glob
+*.opensdf
+*.ncb
+*.user
+*.exe
+*.pdb
+*.ilk
+*Debug
+*.suo
+*.sdf
+*.tlog
+*.idb
+*.log
+*/debug
+*/release
+bullet/
+build/
+Graphics.VC.db
+Dodge Bomb.VC.db
+Dodge Bomb.VC.VC.opendb
