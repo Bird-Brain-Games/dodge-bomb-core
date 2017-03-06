@@ -42,7 +42,7 @@ GameObject::GameObject(GameObject& other)
 	mesh(other.mesh),
 	material(other.material),
 	texture(other.texture),
-	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
+	outlineColour(other.outlineColour),
 	rigidBody(nullptr)
 {
 	rigidBody = std::make_unique<RigidBody>(*other.rigidBody);
