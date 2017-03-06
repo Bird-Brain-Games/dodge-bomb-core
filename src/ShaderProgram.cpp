@@ -39,7 +39,7 @@ int ShaderProgram::linkProgram()
 
 		if (linkStatus)
 		{
-			std::cout << "Shader linked Successfully." << std::endl;
+			std::cout << "Shader " + name + " linked Successfully." << std::endl;
 			return handle;
 		}
 
@@ -61,7 +61,7 @@ int ShaderProgram::linkProgram()
 	}
 	else
 	{
-		std::cout << "Shader program failed to link: handle not set" << std::endl;
+		std::cout << "Shader "+ name +" program failed to link: handle not set" << std::endl;
 	}
 }
 
@@ -115,7 +115,7 @@ int ShaderProgram::getUniformLocation(const std::string& uniformName)
 		i = location.find(uniformName);
 		if (i->second == -1)
 		{
-			std::cout << "error " << uniformName << " does not exist in " << name << std::endl;
+			std::cout << "error in shader " << name << " " << uniformName << " does not exist" << std::endl;
 		}
 	}
 	return i->second;
