@@ -34,6 +34,7 @@ public:
 	void setRotationAngleY(float newAngle);
 	void setRotationAngleZ(float newAngle);
 	void setScale(glm::vec3 newScale);
+	void setOutlineColour(glm::vec4 colour);
 
 	virtual void update(float dt);	
 	virtual void draw(Camera &camera);
@@ -52,7 +53,7 @@ public:
 	bool isRoot();
 	bool hasRigidBody() { return (rigidBody != nullptr); }
 	virtual void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
-	virtual void checkCollisionWith(std::shared_ptr<GameObject> other);
+	virtual void checkCollisionWith(GameObject* other);
 
 	void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
 
@@ -80,6 +81,7 @@ protected:
 	std::vector<GameObject*> m_pChildren;
 
 	// Graphics components
+	glm::vec4 outlineColour;
 	std::shared_ptr<Texture> texture;
 	std::shared_ptr<Loader> mesh;
 	std::shared_ptr<Material> material;

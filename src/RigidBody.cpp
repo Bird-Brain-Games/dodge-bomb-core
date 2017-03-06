@@ -1,4 +1,5 @@
 #include "RigidBody.h"
+#include "GameObject.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -273,7 +274,6 @@ bool RigidBody::load(std::string fileName)
 			body->setCollisionFlags(btCollisionObject::CollisionFlags::CF_STATIC_OBJECT);
 		}
 
-		body->getCollisionShape()->setUserPointer(this);
 		body->setMotionState(new btDefaultMotionState());
 
 		if (group >= 0)
@@ -304,7 +304,6 @@ bool RigidBody::load(std::string fileName, btCollisionObject::CollisionFlags fla
 		body = new btRigidBody(*rigidCI);
 
 		body->setCollisionFlags(body->getCollisionFlags() | flags);
-		body->getCollisionShape()->setUserPointer(this);
 		body->setMotionState(new btDefaultMotionState());
 
 		if (group >= 0)
@@ -398,4 +397,12 @@ glm::vec3 RigidBody::getScale()
 {
 	btVector3 ls = body->getCollisionShape()->getLocalScaling();
 	return glm::vec3(ls.getX(), ls.getY(), ls.getZ());
+}
+
+void RigidBody::setUserPointer(GameObject* gameObject)
+{
+	// WARNING: VERY UNSAFE
+	userPointer = gameObject;
+	body->getCollisionShape()->setUserPointer(userPointer);
+	body->setUserPointer(userPointer);
 }

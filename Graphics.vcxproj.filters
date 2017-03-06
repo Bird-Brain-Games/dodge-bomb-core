@@ -164,5 +164,14 @@
     <None Include="shaders\noLighting_f.glsl">
       <Filter>Graphics\Shaders</Filter>
     </None>
+    <None Include="shaders\sobel_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\shadowMap_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\shadowMap_v.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

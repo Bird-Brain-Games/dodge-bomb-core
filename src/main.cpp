@@ -34,8 +34,8 @@
 #define FRAMES_PER_SECOND 60
 const int FRAME_DELAY = 1000 / FRAMES_PER_SECOND; // Milliseconds per frame
 
-int windowWidth = 1280;
-int windowHeight = 720;
+float windowWidth = 1280.0;
+float windowHeight = 720.0;
 
 glm::vec3 mousePosition; // x,y,0
 glm::vec3 mousePositionFlipped; // x, height - y, 0
@@ -49,6 +49,14 @@ float deltaTime = 0.0f; // amount of time since last update (set every frame in 
 glm::vec3 position;
 float movementSpeed = 5.0f;
 glm::vec4 lightPos;
+glm::vec4 lightTwo;
+
+glm::mat4 biasMatrix(
+	0.5, 0.0, 0.0, 0.0,
+	0.0, 0.5, 0.0, 0.0,
+	0.0, 0.0, 0.5, 0.0,
+	0.5, 0.5, 0.5, 1.0
+);
 
 // Cameras
 Camera playerCamera; // the camera you move around with wasd
@@ -72,6 +80,10 @@ std::shared_ptr<BombManager> bombManager;
 FrameBufferObject fboUnlit;
 FrameBufferObject fboBright;
 FrameBufferObject fboBlurA, fboBlurB;
+FrameBufferObject shadowMap;
+
+//////////////////////////////////////////////////////////////////////
+///////////////////////	Lighting Controls	//////////////////////////
 
 enum LightingMode
 {
@@ -79,26 +91,49 @@ enum LightingMode
 	NOLIGHT,
 	TOON
 };
-LightingMode currentLightingMode = DEFAULT;
+LightingMode currentLightingMode = TOON;
 
-enum FBOMode
-{
-	NONE,
-	BLOOM,
-};
-FBOMode currentFBOMode = NONE;
+
+// Outline Controls
+float outlineWidth = 4.0;
+bool outlineToggle = true;
 
 // Lighting Controls
-float ka = 0.1f; // Ambient Lighting
-float kd = 1.0f; // Diffuse Lighting
-float ks = 0.5f; // Specular Lighting
-float n  = 1.0f; // Shinniness
-float kr = 1.0f; // Rim Lighting Constant
+float deskLamp = 0.6; 
+float innerCutOff = 0.8; // Spot Light Size
+float outerCutOff = 0.82;
+glm::vec3 deskForward = glm::vec3(0.3, 1.0, 0.4); // Spot Light Direction
+float roomLight = 0.6;
 
-// Shadow Map Variables
+float ambient = 0.1; // Ambient Lighting
+float diffuse = 1.0f; // Diffuse Lighting
+float specular = 0.2f; // Specular Lighting
+float shininess = 1.5f; // Shinniness
+float rim = 1.0f; // Rim Lighting
 
-GLuint shadowDepth;
+// Bloom Controls
+glm::vec4 bloomThreshold(0.6f);
+int numBlurPasses = 4;
+bool bloomToggle = false;
 
+// For Toggling
+bool  ambientToggle = true;
+float ka = ambient; // Ambient Lighting
+
+bool  diffuseToggle = true;
+float kd = diffuse; // Diffuse Lighting
+
+bool  specularToggle = true;
+float ks = specular; // Specular Lighting
+
+bool  rimToggle = true;
+float kr = rim; // Rim Lighting
+
+
+
+
+void bulletNearCallback(btBroadphasePair& collisionPair,
+	btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo);
 
 void initializeShaders()
 {
@@ -114,7 +149,7 @@ void initializeShaders()
 	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
-	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, f_noLighting, f_toon;
+	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, f_noLighting, f_toon, f_sobel, f_shadow;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
@@ -123,6 +158,8 @@ void initializeShaders()
 	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);
 	f_noLighting.loadShaderFromFile(shaderPath + "noLighting_f.glsl", GL_FRAGMENT_SHADER);
 	f_toon.loadShaderFromFile(shaderPath + "toon_f.glsl", GL_FRAGMENT_SHADER);
+	f_sobel.loadShaderFromFile(shaderPath + "sobel_f.glsl", GL_FRAGMENT_SHADER);
+	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);
 
 	// Geometry Shaders
 	Shader g_quad, g_menu;
@@ -187,6 +224,18 @@ void initializeShaders()
 	materials["blur"]->shader->attachShader(f_blur);
 	materials["blur"]->shader->attachShader(g_quad);
 	materials["blur"]->shader->linkProgram();
+
+	// Sobel filter material
+	materials["sobel"] = std::make_shared<Material>();
+	materials["sobel"]->shader->attachShader(v_passThru);
+	materials["sobel"]->shader->attachShader(f_sobel);
+	materials["sobel"]->shader->linkProgram();
+
+	// Shadow filter material
+	materials["shadow"] = std::make_shared<Material>();
+	materials["shadow"]->shader->attachShader(v_shadow);
+	materials["shadow"]->shader->attachShader(f_shadow);
+	materials["shadow"]->shader->linkProgram();
 }
 
 void initializeScene()
@@ -203,11 +252,20 @@ void initializeScene()
 	std::shared_ptr<LoadObject> corkboardMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> roomMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> bombMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> boatMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> booksMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> boulderMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> crateMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> palmtreeMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> lampcupMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> organizerMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> mapMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
 
 	std::shared_ptr<Holder> bombotMesh = std::make_shared<Holder>();
 
 	// Load all meshes
-	tableMesh->load(meshPath + "table.obj");
+	tableMesh->load(meshPath + "translatedtable.obj");
 	barrelMesh->load(meshPath + "barrel.obj");
 	cannonMesh->load(meshPath + "cannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
@@ -223,7 +281,15 @@ void initializeScene()
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
 	bombMesh->load(meshPath + "bomb.obj");
-
+	boatMesh->load(meshPath + "boat.obj");
+	booksMesh->load(meshPath + "books.obj");
+	boulderMesh->load(meshPath + "boulder.obj");
+	crateMesh->load(meshPath + "crate.obj");
+	palmtreeMesh->load(meshPath + "palmtree.obj");
+	lampcupMesh->load(meshPath + "lampcup.obj");
+	organizerMesh->load(meshPath + "scaledorganizer.obj");
+	mapMesh->load(meshPath + "scaledmap.obj");
+	markerMesh->load(meshPath + "scaledmarker.obj");
 
 	// Add all meshes to map
 	meshes["table"] = tableMesh;
@@ -234,32 +300,87 @@ void initializeScene()
 	meshes["corkboard"] = corkboardMesh;
 	meshes["room"] = roomMesh;
 	meshes["bomb"] = bombMesh;
+	meshes["boat"] = boatMesh;
+	meshes["books"] = booksMesh;
+	meshes["boulder"] = boulderMesh;
+	meshes["crate"] = crateMesh;
+	meshes["palmtree"] = palmtreeMesh;
+	meshes["lampcup"] = lampcupMesh;
+	meshes["organizer"] = organizerMesh;
+	meshes["map"] = mapMesh;
+	meshes["marker"] = markerMesh;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
 	// Load textures (WIP)
 	// Has to take char* due to ILUT
-	char diffuseTex[] = "Assets/img/desk (diffuse).png";
-	std::shared_ptr<Texture> deskTex = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
 
-	char bombotTex[] = "Assets/img/bombot(diffuse).png";
-	std::shared_ptr<Texture> bombotTexMap = std::make_shared<Texture>(bombotTex, bombotTex, 1.0f);
-
-	char corkboardTex[] = "Assets/img/corkboard(diffuse).png";
-	std::shared_ptr<Texture> corkboardTexMap = std::make_shared<Texture>(corkboardTex, corkboardTex, 1.0f);
-
-	char roomTex[] = "Assets/img/room(diffuse).png";
-	std::shared_ptr<Texture> roomTexMap = std::make_shared<Texture>(roomTex, roomTex, 1.0f);
+	char bombotTex[] = "Assets/img/bombot(diffuse)2-dash.png";
+	char bombotSpec[] = "Assets/img/bombot_specular.png";
+	std::shared_ptr<Texture> bombotTexMap = std::make_shared<Texture>(bombotTex, bombotSpec, 1.0f);
 
 	char bombTex[] = "Assets/img/bomb(diffuse).jpg";
 	std::shared_ptr<Texture> bombTexMap = std::make_shared<Texture>(bombTex, bombTex, 1.0f);
 
+	char diffuseTex[] = "Assets/img/desk (diffuse).png";
+	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
+
+	char corkboardTex[] = "Assets/img/corkboard(diffuse).png";
+	std::shared_ptr<Texture> corkboardTexMap = std::make_shared<Texture>(corkboardTex, corkboardTex, 1.0f);
+
+	char organizerTex[] = "Assets/img/organizer(diffuse).png";
+	std::shared_ptr<Texture> organizerTexMap = std::make_shared<Texture>(organizerTex, organizerTex, 1.0f);
+
+	char roomTex[] = "Assets/img/room(diffuse).png";
+	std::shared_ptr<Texture> roomTexMap = std::make_shared<Texture>(roomTex, roomTex, 1.0f);
+
+	char booksTex[] = "Assets/img/books(diffuse).png";
+	std::shared_ptr<Texture> booksTexMap = std::make_shared<Texture>(booksTex, booksTex, 1.0f);
+
+	char mapTex[] = "Assets/img/map(diffuse).png";
+	std::shared_ptr<Texture> mapTexMap = std::make_shared<Texture>(mapTex, mapTex, 1.0f);
+
+	char markerTex[] = "Assets/img/blake.png";
+	std::shared_ptr<Texture> markerTexMap = std::make_shared<Texture>(markerTex, markerTex, 1.0f);
+
+	char boulderTex[] = "Assets/img/boulder(diffuse).png";
+	std::shared_ptr<Texture> boulderTexMap = std::make_shared<Texture>(boulderTex, boulderTex, 1.0f);
+
+	char crateTex[] = "Assets/img/crate(diffuse).png";
+	std::shared_ptr<Texture> crateTexMap = std::make_shared<Texture>(crateTex, crateTex, 1.0f);
+
+	char palmtreeTex[] = "Assets/img/palmtree(diffuse).png";
+	std::shared_ptr<Texture> palmtreeTexMap = std::make_shared<Texture>(palmtreeTex, palmtreeTex, 1.0f);
+
+	char lampcupTex[] = "Assets/img/lampcup(diffuse).png";
+	std::shared_ptr<Texture> lampcupTexMap = std::make_shared<Texture>(lampcupTex, lampcupTex, 1.0f);
+
+	char barrelTex[] = "Assets/img/barrel(diffuse).jpg";
+	std::shared_ptr<Texture> barrelTexMap = std::make_shared<Texture>(barrelTex, barrelTex, 1.0f);
+
+	char cannonTex[] = "Assets/img/cannon(diffuse).jpg";
+	std::shared_ptr<Texture> cannonTexMap = std::make_shared<Texture>(cannonTex, cannonTex, 1.0f);
+
+	char boatTex[] = "Assets/img/boat(diffuse).png";
+	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
+
 	//Add textures to the map
-	textures["default"] = deskTex;
+	textures["default"] = deskTexMap;
 	textures["bombot"] = bombotTexMap;
 	textures["corkboard"] = corkboardTexMap;
 	textures["room"] = roomTexMap;
 	textures["bomb1"] = bombTexMap;
+	textures["barrel"] = barrelTexMap;
+	textures["cannon"] = cannonTexMap;
+	textures["boat"] = boatTexMap;
+	textures["books"] = booksTexMap;
+	textures["boulder"] = boulderTexMap;
+	textures["crate"] = crateTexMap;
+	textures["palmtree"] = palmtreeTexMap;
+	textures["lampcup"] = lampcupTexMap;
+	textures["organizer"] = organizerTexMap;
+	textures["map"] = mapTexMap;
+	textures["marker"] = markerTexMap;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
@@ -267,25 +388,52 @@ void initializeScene()
 
 
 	gameobjects["table"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTex);
+		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
 
 	gameobjects["barrel"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 20.0f, -5.f), barrelMesh, defaultMaterial, nullptr);
+		glm::vec3(-15.f, 45.0f, -5.f), barrelMesh, defaultMaterial, barrelTexMap);
 
 	gameobjects["cannon"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial, nullptr);
+		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial, cannonTexMap);
 
 	gameobjects["sphere"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["corkboard"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
+		glm::vec3(0.0f, 0.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
+
+	gameobjects["organizer"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 0.0f, 0.0f), organizerMesh, defaultMaterial, organizerTexMap);
 
 	gameobjects["room"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
+		glm::vec3(0.0f, 0.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
+
+	gameobjects["boat"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), boatMesh, defaultMaterial, boatTexMap);
+
+	gameobjects["books"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 0.0f, 0.0f), booksMesh, defaultMaterial, booksTexMap);
+
+	gameobjects["map"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 0.0f, 0.0f), mapMesh, defaultMaterial, mapTexMap);
+
+	gameobjects["marker"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 0.0f, 0.0f), markerMesh, defaultMaterial, markerTexMap);
+
+	gameobjects["boulder"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), boulderMesh, defaultMaterial, boulderTexMap);
+
+	gameobjects["crate"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), crateMesh, defaultMaterial, crateTexMap);
+
+	gameobjects["palmtree"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
+
+	gameobjects["lampcup"] = std::make_shared<GameObject>(
+		glm::vec3(0.0f, 0.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
 	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
@@ -301,7 +449,7 @@ void initializeScene()
 	
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
-	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
+	std::string bombotBodyPath = "assets\\bullet\\smolbot.btdata";
 	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
 	std::string bombBodyPath = "assets\\bullet\\bomb.btdata";
 
@@ -324,12 +472,11 @@ void initializeScene()
 	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
 
-
+	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
-	
-	// Set object properties
-	//gameobjects["bombot2"] = std::make_shared<GameObject>(*gameobjects["bombot1"]);
+
+	// Set up the bomb manager
 	bombManager = std::make_shared<BombManager>();
 	bombManager->init(bombMesh,
 		bombTexMap,		// Player1 bomb texture
@@ -341,20 +488,85 @@ void initializeScene()
 
 //	players["bombot1"]->attachBombManager(bombManager);
 
+	// Set up the bullet callbacks
+	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
+
 	// Set menu properties
-	mainMenu = std::make_unique<Menu>(deskTex);
+	mainMenu = std::make_unique<Menu>(deskTexMap);
 	mainMenu->setMaterial(materials["menu"]);
 
 	// Set default camera properties (WIP)
-	playerCamera.setPosition(glm::vec3(0.0f, 115.0f, 125.0f));
-	playerCamera.setAngle(0.0f, -0.6f);
+	playerCamera.setPosition(glm::vec3(0.0f, 47.0f, 15.0f));
+	playerCamera.setAngle(3.14159012f, 75.98318052f);
 	//playerCamera.setProperties(44.00002, (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f, 0.001f);
 	playerCamera.update();
 
-	shadowCamera.setPosition(glm::vec3(0.0f, 50.0f, 0.0f));
-	shadowCamera.setAngle(1.57f, 1.57f);
-	shadowCamera.update();
 	
+	
+}
+
+void bulletNearCallback(btBroadphasePair& collisionPair,
+	btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo)
+{
+	// Do your collision logic here
+	// Only dispatch the Bullet collision information if you want the physics to continue
+	// From Bullet user manual
+	
+	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger ||
+		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
+		return;*/
+
+	// Tell the dispatcher to do the collision information
+	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
+}
+
+void calculateCollisions()
+{
+	// Basis taken from 
+	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Collision_Callbacks_and_Triggers
+	btDispatcher* dispatcher = RigidBody::getDispatcher();
+	int numManifolds = dispatcher->getNumManifolds();
+
+	short objAGroup, objBGroup;
+
+	for (int i = 0; i < numManifolds; i++)
+	{
+		//std::cout << numManifolds << std::endl;
+		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
+		const btCollisionObject* objA = contactManifold->getBody0();
+		const btCollisionObject* objB = contactManifold->getBody1();
+
+		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
+		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
+
+		// Check if the bombs collide with geometry
+		if (objAGroup == btBroadphaseProxy::SensorTrigger ||
+			objBGroup == btBroadphaseProxy::SensorTrigger)
+		{
+			// Check if the bomb collides with a player
+			if (objAGroup != objBGroup &&
+				!objA->isStaticObject() &&
+				!objB->isStaticObject())
+			{
+				// Check if one is a sensor, the other is a player, 
+				// and they don't both belong to the same player.
+				if (objAGroup == btBroadphaseProxy::SensorTrigger &&
+					objBGroup == btBroadphaseProxy::CharacterFilter)
+				{
+					Player* p = (Player*)objB->getUserPointer();
+					Bomb* b = (Bomb*)objA->getUserPointer();
+					p->checkCollisionWith(b);
+				}
+				else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
+					objAGroup == btBroadphaseProxy::CharacterFilter)
+				{
+					Player* p = (Player*)objA->getUserPointer();
+					Bomb* b = (Bomb*)objB->getUserPointer();
+					p->checkCollisionWith(b);
+				}
+			}
+		}
+	}
 }
 
 void initializeFrameBuffers()
@@ -363,7 +575,7 @@ void initializeFrameBuffers()
 	fboBright.createFrameBuffer(80, 60, 1, false);
 	fboBlurA.createFrameBuffer(80, 60, 1, false);
 	fboBlurB.createFrameBuffer(80, 60, 1, false);
-
+	shadowMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
 }
 
 void updateScene()
@@ -372,12 +584,21 @@ void updateScene()
 	static float ang = 1.0f;
 
 	ang += deltaTime; // comment out to pause light
-	lightPos.x = 0.0f;
-	lightPos.y = 50.0f;
-	lightPos.z = 0.0f;
+	lightPos.x = 50.0f;
+	lightPos.y = 80.0f;
+	lightPos.z = -40.0f;
 	lightPos.w = 1.0f;
 
-	gameobjects["sphere"]->setPosition(lightPos);
+	lightTwo.x = 0.0f;
+	lightTwo.y = 100.0f;
+	lightTwo.z = 100.0f;
+	lightTwo.w = 1.0f;
+
+	shadowCamera.setPosition(glm::vec3(lightPos.x, lightPos.y, lightPos.z));
+	shadowCamera.setForward(glm::vec3(0.3, 1.0, 0.4));
+
+	//playerCamera.shadowCam();
+
 
 	// Update all game objects
 	for (auto itr = gameobjects.begin(); itr != gameobjects.end(); ++itr)
@@ -437,7 +658,7 @@ void brightPass()
 	static auto brightMaterial = materials["bright"];
 	brightMaterial->shader->bind();
 
-	static glm::vec4 bloomThreshold(0.2f);
+
 	brightMaterial->vec4Uniforms["u_bloomThreshold"] = bloomThreshold;
 	brightMaterial->intUniforms["u_tex"] = 0;
 	brightMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
@@ -471,7 +692,7 @@ void blurBrightPass()
 	// Draw a full screen quad using the geometry shader
 	glDrawArrays(GL_POINTS, 0, 1);
 
-	static int numBlurPasses = 4;
+
 	for (int i = 0; i < numBlurPasses; i++)
 	{
 		if (i % 2 == 0)
@@ -495,12 +716,69 @@ void blurBrightPass()
 void DisplayCallbackFunction(void)
 {
 	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
+
+	/////////Shadow Map
+	shadowMap.bindFrameBufferForDrawing();
+	FrameBufferObject::clearFrameBuffer(clearColor);
+
+	setMaterialForAllGameObjects("shadow");
+	materials["shadow"]->mat4Uniforms["u_bias"] = biasMatrix;
+
+	drawScene(playerCamera);
+
+	shadowMap.unbindFrameBuffer(windowWidth, windowHeight);
+	FrameBufferObject::clearFrameBuffer(clearColor);
+
 	// bind scene FBO
 	fboUnlit.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(clearColor);
-		switch (currentLightingMode)
+	
+	///////////////////////////// First Pass: Outlines
+	if (outlineToggle)
+	{
+		glCullFace(GL_FRONT);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glLineWidth(outlineWidth);
+
+		// Clear back buffer
+		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
+
+		// Tell all game objects to use the outline shading material
+		setMaterialForAllGameObjects("sobel");
+
+		drawScene(playerCamera);
+
+		glCullFace(GL_BACK);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+	
+	///////////////////////////// Second Pass: Lighting
+	switch (currentLightingMode)
 		{
-			// No fancy shit
+			// Our Default is Toon shading
+			case TOON:
+			{
+				setMaterialForAllGameObjects("toon");
+
+				materials["toon"]->shader->bind();
+
+				// Set material properties
+				materials["toon"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+				materials["toon"]->vec4Uniforms["u_lightTwo"] = playerCamera.getView() * lightTwo;
+
+				materials["toon"]->intUniforms["u_diffuseTex"] = 31;
+				materials["toon"]->intUniforms["u_specularTex"] = 30;
+
+				materials["toon"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+				materials["toon"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
+				materials["toon"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
+				materials["toon"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+
+
+				materials["toon"]->sendUniforms();
+			}
+			break;
+			// None Toon Shading
 			case DEFAULT:
 			{
 				setMaterialForAllGameObjects("default");
@@ -514,12 +792,13 @@ void DisplayCallbackFunction(void)
 				materials["default"]->intUniforms["u_specularTex"] = 30;
 
 				materials["default"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-				materials["default"]->vec4Uniforms["u_shine"] = glm::vec4(n);
+				materials["default"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
 		
 
 				materials["default"]->sendUniforms();
 			}
 			break;
+			// Just displays Textures
 			case NOLIGHT:
 			{
 				setMaterialForAllGameObjects("noLighting");
@@ -533,18 +812,8 @@ void DisplayCallbackFunction(void)
 				materials["noLighting"]->sendUniforms();
 			}
 			break;
-			case TOON:
-			{
-				setMaterialForAllGameObjects("toon");
 				setMaterialForAllPlayerObjects("toonPlayer");
 				// Set material properties for all our non player objects
-				materials["toon"]->shader->bind();
-
-				materials["toon"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
-				materials["toon"]->intUniforms["u_diffuseTex"] = 31;
-				materials["toon"]->intUniforms["u_specularTex"] = 30;
-
-				materials["toon"]->sendUniforms();
 
 				materials["toon"]->shader->unbind();
 
@@ -557,11 +826,9 @@ void DisplayCallbackFunction(void)
 				materials["toonPlayer"]->intUniforms["u_specularTex"] = 30;
 
 				materials["toonPlayer"]->sendUniforms();
-			}
-			break;
 		}
 
-		// draw the scene to the fbo
+		//draw the scene to the fbo
 		if (!inMenu)
 		{
 			drawScene(playerCamera);
@@ -577,53 +844,54 @@ void DisplayCallbackFunction(void)
 		fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
 		FrameBufferObject::clearFrameBuffer(clearColor);
 
-		static auto unlitMaterial = materials["unlitTexture"];
+		//////////////////////////////// Post Processing
 
-	// Apply a post process filter
-	switch (currentFBOMode)
-	{
-			case NONE:
+			if (bloomToggle)
 			{
-				// Bind FBO
-				fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-				
-				// Tell opengl which shader we want it to use
-				materials["unlitTexture"]->shader->bind();
+				//brightPass();
+				//blurBrightPass();
 
-				// Tell the sampler2d named "u_tex" to look at texture unit 0
-				materials["unlitTexture"]->shader->sendUniformInt("u_tex", 0);
+				//fboBlurA.bindTextureForSampling(0, GL_TEXTURE0);
+				//fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
 
-				// Send uniform varibles to GPU
-				materials["unlitTexture"]->sendUniforms();
-			
+				//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+				//FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+
+				//static auto bloomMaterial = materials["bloom"];
+
+				//bloomMaterial->shader->bind();
+				//bloomMaterial->shader->sendUniformInt("u_bright", 0);
+				//bloomMaterial->shader->sendUniformInt("u_scene", 1);
+				//bloomMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+				//bloomMaterial->sendUniforms();
+
+				//// Draw a full screen quad using the geometry shader
+				//glDrawArrays(GL_POINTS, 0, 1);
+
+				shadowMap.bindTextureForSampling(0, GL_TEXTURE0);
+				static auto unlitMaterial = materials["unlitTexture"];
+				unlitMaterial->shader->bind();
+				unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+				unlitMaterial->shader->sendUniformInt("u_tex", 0);
+				unlitMaterial->sendUniforms();
+
 				// Draw a full screen quad using the geometry shader
 				glDrawArrays(GL_POINTS, 0, 1);
 			}
-			break;
-		case BLOOM:
-		{
-			brightPass();
-			blurBrightPass();
+			else
+			{
+			    fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
+				static auto unlitMaterial = materials["unlitTexture"];
+				unlitMaterial->shader->bind();
+				unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+				unlitMaterial->shader->sendUniformInt("u_tex", 0);
+				unlitMaterial->sendUniforms();
 
-			fboBlurA.bindTextureForSampling(0, GL_TEXTURE0);
-			fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
+				// Draw a full screen quad using the geometry shader
+				glDrawArrays(GL_POINTS, 0, 1);
+			}
 
-			FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-			FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
 
-			static auto bloomMaterial = materials["bloom"];
-
-			bloomMaterial->shader->bind();
-			bloomMaterial->shader->sendUniformInt("u_bright", 0);
-			bloomMaterial->shader->sendUniformInt("u_scene", 1);
-			bloomMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-			bloomMaterial->sendUniforms();
-
-			// Draw a full screen quad using the geometry shader
-			glDrawArrays(GL_POINTS, 0, 1);
-		}
-		break;
-	}
 
 	/* Swap Buffers to Make it show up on screen */
 	glutSwapBuffers();
@@ -690,19 +958,11 @@ void handleKeyboardInput()
 	{
 		gameobjects["table"]->setScale(gameobjects["table"]->getScale() - 0.1f);
 	}
+	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
+	{
+		playerCamera.shakeScreen();
+	}
 
-	if (KEYBOARD_INPUT->CheckPressEvent('b') || KEYBOARD_INPUT->CheckPressEvent('B'))
-	{
-		players["bombot1"]->setAnim("walk");
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('n') || KEYBOARD_INPUT->CheckPressEvent('N'))
-	{
-		players["bombot1"]->setAnim("idle");
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('m') || KEYBOARD_INPUT->CheckPressEvent('M'))
-	{
-		players["bombot1"]->setAnim("throw");
-	}
 
 
 	// Switch Lighting Mode
@@ -720,61 +980,100 @@ void handleKeyboardInput()
 	}
 	
 	
-	// Changes Filter Mode
-	if (KEYBOARD_INPUT->CheckPressEvent('4'))
-	{
-		currentFBOMode = NONE;
-	}
+	// Toggle Outlines
 	if (KEYBOARD_INPUT->CheckPressEvent('5'))
 	{
-		currentFBOMode = BLOOM;
+		if (outlineToggle)
+			outlineToggle = false;
+		else
+			outlineToggle = true;
 	}
+	// Toggle Bloom
+	if (KEYBOARD_INPUT->CheckPressEvent('6'))
+	{
+		if (bloomToggle)
+			bloomToggle = false;
+		else
+			bloomToggle = true;
+	}
+
+	// Controls "Dimmers" for lights
+	if (KEYBOARD_INPUT->CheckPressEvent('='))
+	{
+		deskLamp += 0.1;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('-'))
+	{
+		if (deskLamp > 0)
+			deskLamp -= 0.1;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent(']'))
+	{
+		roomLight += 0.1;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('['))
+	{
+		if (roomLight > 0)
+			roomLight -= 0.1;
+	}
+	
+	// Toggles for each lighting component
+	if (KEYBOARD_INPUT->CheckPressEvent('z')) // ambient
+	{
+		if (ambientToggle)
+		{
+			ka = 0.0f;
+			ambientToggle = false;
+		}
+		else
+		{
+			ka = ambient;
+			ambientToggle = true;
+		}
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('x')) // diffuse
+	{
+		if (diffuseToggle)
+		{
+			kd = 0.0f;
+			diffuseToggle = false;
+		}
+		else
+		{
+			kd = diffuse;
+			diffuseToggle = true;
+		}
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('c')) // specular
+	{
+		if (specularToggle)
+		{
+			ks = 0.0f;
+			specularToggle = false;
+		}
+		else
+		{
+			ks = specular;
+			specularToggle = true;
+		}
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('v')) // rim
+	{
+		if (rimToggle)
+		{
+			kr = 0.0f;
+			rimToggle = false;
+		}
+		else
+		{
+			kr = rim;
+			rimToggle = true;
+		}
+	}
+
 
 	// Clear the keyboard input
 	KEYBOARD_INPUT->WipeEventList();
-}
-
-void calculateCollisions()
-{
-	// Basis taken from 
-	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php?title=Collision_Callbacks_and_Triggers
-	btDispatcher* dispatcher = RigidBody::getDispatcher();
-	int numManifolds = dispatcher->getNumManifolds();
-
-	short objAGroup, objBGroup;
-
-	for (int i = 0; i < numManifolds; i++)
-	{
-		//std::cout << numManifolds << std::endl;
-		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
-		const btCollisionObject* objA = contactManifold->getBody0();
-		const btCollisionObject* objB = contactManifold->getBody1();
-
-		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
-		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
-
-		if (objAGroup != objBGroup &&
-			!objA->isStaticObject() &&
-			!objB->isStaticObject())
-		{
-			// Check if one is a sensor, the other is a player, 
-			// and they don't both belong to the same player.
-			if (objAGroup == btBroadphaseProxy::SensorTrigger &&
-				objBGroup == btBroadphaseProxy::CharacterFilter)
-			{
-				Player* p = (Player*)objB->getUserPointer();
-				Bomb* b = (Bomb*)objA->getUserPointer();
-				p->checkCollisionWith(b);
-			}
-			else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
-				objAGroup == btBroadphaseProxy::CharacterFilter)
-			{
-				Player* p = (Player*)objA->getUserPointer();
-				Bomb* b = (Bomb*)objB->getUserPointer();
-				p->checkCollisionWith(b);
-			}
-		}
-	}
 }
 
 /* function TimerCallbackFunction(int value)

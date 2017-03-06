@@ -26,9 +26,6 @@ bool BombManager::init(std::shared_ptr<Loader> _mesh,
 	textures.push_back(_p3);
 	textures.push_back(_p4);
 
-	// Load the rigidBodies
-
-
 	// Create the bomb object templates
 	for (int i = 0; i < 4; i++)
 	{
@@ -80,7 +77,7 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force
 	std::shared_ptr<Bomb> newBomb = std::make_shared<Bomb>(*bombTemplates.at(playerNum));
 	newBomb->attachPlayerPtr(player);
 	activeBombs.push_back(newBomb);
-	newBomb->throwBomb(glm::vec3(direction.x, impulseY, direction.y), force);
+	newBomb->throwBomb(direction, force);
 	
 }
 
@@ -88,6 +85,8 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force
 
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////	BOMB	///////////////////////////////////////
+float Bomb::playerRadius = 2.0f;
+
 Bomb::Bomb(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
 	std::shared_ptr<Material> _material,
@@ -118,13 +117,13 @@ void Bomb::attachPlayerPtr(Player* _playerPtr)
 
 void Bomb::throwBomb(glm::vec2 direction, glm::vec3 force)
 {
-	setPosition(playerPtr->getWorldPosition() + glm::vec3(0.0f, 1.0f, 0.0f));
+	setPosition(playerPtr->getWorldPosition() + glm::vec3(direction.x * playerRadius, 0.6f, -direction.y * playerRadius));
 
 	//	bomb->getRigidBody()->getBody()->setLinearVelocity(btVector3(0, 0, 0));
 	//	bomb->getRigidBody()->getBody()->clearForces();//clears force not impulse?
 
 	rigidBody->getBody()->applyCentralImpulse(
-		btVector3(direction.x * force.x, force.y, direction.y * force.z));
+		btVector3(direction.x * force.x, force.y, -direction.y * force.z));
 }
 
 void Bomb::draw(Camera& camera)

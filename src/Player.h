@@ -25,6 +25,7 @@ public:
 	void attachBombManager(std::shared_ptr<BombManager> _manager);
 
 	void checkCollisionWith(GameObject* other);
+	void checkCollisionWith(Bomb* other);
 	int getPlayerNum();
 
 	void setAnim(std::string);
@@ -37,5 +38,6 @@ private:
 	float bombCooldown;		// The value the cooldown gets set to when thrown
 	float currentCooldown;	// The current cooldown on the bomb throw
 	std::shared_ptr<BombManager> bombManager;
-	
+	float currentAngle;
+	glm::vec3 throwingForce;
 };

@@ -9,7 +9,8 @@ GameObject::GameObject()
 	mesh(nullptr),
 	material(nullptr),
 	texture(nullptr),
-	rigidBody(nullptr)
+	rigidBody(nullptr),
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
 {
 	
 }
@@ -27,7 +28,8 @@ GameObject::GameObject(
 	mesh(_mesh),
 	material(_material),
 	texture(_texture),
-	rigidBody(nullptr)
+	rigidBody(nullptr),
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
 {
 
 }
@@ -40,11 +42,13 @@ GameObject::GameObject(GameObject& other)
 	mesh(other.mesh),
 	material(other.material),
 	texture(other.texture),
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
 	rigidBody(nullptr)
 {
 	rigidBody = std::make_unique<RigidBody>(*other.rigidBody);
 	rigidBody->load(other.rigidBody->getFileName(), 
 		(btCollisionObject::CollisionFlags)other.rigidBody->getBody()->getCollisionFlags());
+	rigidBody->setUserPointer(this);
 }
 
 GameObject::~GameObject() 
@@ -60,13 +64,16 @@ void GameObject::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 		updateLocalTransform();
 		m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
 		rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
+		rigidBody->setUserPointer(this);
 	}
 }
 
 void GameObject::setLocalTransformToBody()
 {
-	m_pLocalPosition = m_pLocalToWorldMatrix[3];
+	m_pLocalTransformMatrix = rigidBody->getWorldTransform();
+	m_pLocalPosition = m_pLocalTransformMatrix[3];
 	m_pScale = rigidBody->getScale();
+	m_pLocalToWorldMatrix = m_pLocalTransformMatrix;
 	m_pLocalToWorldMatrix = m_pLocalToWorldMatrix * glm::scale(m_pScale);
 	// ROTATION NEEDED TO BE ADDED
 	//m_pRotX = m_pLocalToWorldMatrix[]
@@ -75,9 +82,9 @@ void GameObject::setLocalTransformToBody()
 void GameObject::updateLocalTransform()
 {
 	// Create rotation matrix
-	glm::mat4 rx = glm::rotate(glm::radians(m_pRotX), glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::mat4 ry = glm::rotate(glm::radians(m_pRotY), glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 rz = glm::rotate(glm::radians(m_pRotZ), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 rx = glm::rotate(m_pRotX, glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 ry = glm::rotate(-m_pRotY, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 rz = glm::rotate(m_pRotZ, glm::vec3(0.0f, 0.0f, 1.0f));
 
 	// Note: pay attention to rotation order, ZYX is not the same as XYZ
 	m_pLocalRotation = rz * ry * rx;
@@ -154,17 +161,17 @@ void GameObject::update(float dt)
 		{
 			// If the gameobject has updated
 			// set the world transform of the body to the gameobject.
-			if (needsUpdating)
+			if (needsUpdating || rigidBody->getBody()->isStaticOrKinematicObject())
 			{
-				rigidBody->setWorldTransform(m_pLocalToWorldMatrix);
+				rigidBody->setWorldTransform(m_pLocalPosition, 
+					glm::vec3(m_pRotX, m_pRotY, m_pRotZ));
 				rigidBody->setScale(m_pScale);
 			}
 
-			// If the gameobject has updated, set the world transform
-			if (!rigidBody->getBody()->isStaticOrKinematicObject())
+			// If the gameobject has updated and we didn't control it
+			// set the world transform
+			if (!needsUpdating && !rigidBody->getBody()->isStaticOrKinematicObject())
 			{
-				m_pLocalToWorldMatrix = rigidBody->getWorldTransform();
-				// update local variables to have the properties
 				setLocalTransformToBody();
 			}
 		}
@@ -182,6 +189,7 @@ void GameObject::draw(Camera &camera)
 	material->shader->bind();
 	material->mat4Uniforms["u_mvp"] = camera.getViewProj() * m_pLocalToWorldMatrix;
 	material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
+	material->vec4Uniforms["u_outlineColour"] = outlineColour;
 
 	// Bind the texture
 	if (texture != nullptr)
@@ -254,8 +262,12 @@ bool GameObject::isRoot()
 		return true;
 }
 
-void GameObject::checkCollisionWith(std::shared_ptr<GameObject> other)
+void GameObject::checkCollisionWith(GameObject* other)
 {
 
 }
 
+void GameObject::setOutlineColour(glm::vec4 colour)
+{
+	outlineColour = colour;
+}

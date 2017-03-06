@@ -8,6 +8,8 @@ january 2017
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtx/rotate_vector.hpp>
 
+#include <random>
+
 // our camera
 class Camera
 {
@@ -21,7 +23,7 @@ public:
 
 	//sets the camera's position
 	void setPosition(glm::vec3 _pos);
-
+	void setForward(glm::vec3 _for);
 	void setAngle(float, float);
 
 	//returns view matrix
@@ -35,7 +37,7 @@ public:
 
 	//recalculates the view and projection matrix
 	void update();
-
+	void shadowCam();
 	//rotates camera based on values given.
 	void mouseMotion(int x, int y, int preY, int preX);
 
@@ -46,6 +48,8 @@ public:
 	void moveBackward();
 	void moveLeft();
 	void moveRight();
+
+	void shakeScreen();
 
 private:
 
@@ -70,4 +74,10 @@ private:
 	float maxRange;
 	float speed;
 
+	// Variables used for screen shake
+	float shakeRadius;
+	float shakeDegrade;
+	glm::vec3 shakeOffset;
+	std::default_random_engine generator;
+	std::uniform_real_distribution<float> distribution;
 };

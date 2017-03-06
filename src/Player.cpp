@@ -12,7 +12,9 @@ Player::Player(glm::vec3 position,
 	GameObject(position, _mesh, _material, _texture), 
 	con(_playerNum),
 	currentCooldown(0.0f),
-	bombCooldown(1.0f)
+	bombCooldown(1.0f),
+	currentAngle(0.0f),
+	throwingForce(5.0f)
 {
 	playerNum = _playerNum;
 }
@@ -21,7 +23,9 @@ Player::Player(Player& other)
 	: GameObject(other),
 	con(other.con.getPlayerNum()+1),
 	currentCooldown(0.0f),
-	bombCooldown(1.0f)
+	bombCooldown(1.0f),
+	currentAngle(0.0f),
+	throwingForce(other.throwingForce)
 {
 
 }
@@ -93,6 +97,17 @@ void Player::handleInput(float dt)
 		hasMoved = true;
 	}
 
+	float angle = atan2(-RStick.y, RStick.x) + 180 * degToRad;
+
+	if (currentAngle != angle && con.rightStickMoved())
+	{
+		currentAngle = angle;
+	}
+	else if (con.leftStickMoved() && !con.rightStickMoved())
+	{
+		//currentAngle = atan2(LStick.y, LStick.x) + 180 * degToRad;
+		//this->setRotationAngleY(angle);
+	}
 
 	if (hasMoved)
 	{
@@ -105,11 +120,11 @@ void Player::handleInput(float dt)
 	if (con.conButton(XINPUT_GAMEPAD_RIGHT_SHOULDER) && currentCooldown == 0.0f)
 	{
 		glm::vec2 normalized = glm::vec2(0);
-		if (RStick.y > 0.1 || RStick.y < -0.1 || RStick.x > 0.1 || RStick.x < -0.1)
+		if (con.rightStickMoved())
 			normalized = glm::normalize(glm::vec2(RStick.x, RStick.y));
 
-		glm::vec3 force(50.0f);
-		bombManager->throwBomb(this, normalized, force);
+		
+		bombManager->throwBomb(this, normalized, throwingForce);
 
 		currentCooldown += bombCooldown;
 	}
@@ -123,7 +138,16 @@ void Player::handleInput(float dt)
 
 void Player::checkCollisionWith(GameObject* other)
 {
-	std::cout << "bomb collided with player" << std::endl;
+	std::cout << "GameObject collided with player" << std::endl;
+}
+
+void Player::checkCollisionWith(Bomb* other)
+{
+	if (other->getPlayerNum() == playerNum)
+	{
+		//std::cout << "Bomb collided with the player who threw it" << std::endl;
+	}
+	std::cout << "bomb collided with player " << playerNum << std::endl;
 }
 
 void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
