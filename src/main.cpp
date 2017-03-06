@@ -232,6 +232,12 @@ void initializeShaders()
 	materials["sobel"]->shader->attachShader(f_sobel);
 	materials["sobel"]->shader->linkProgram();
 
+	// sobel filter for player
+	materials["sobelPlayer"] = std::make_shared<Material>("sobelPlayer");
+	materials["sobelPlayer"]->shader->attachShader(v_skinning);
+	materials["sobelPlayer"]->shader->attachShader(f_sobel);
+	materials["sobelPlayer"]->shader->linkProgram();
+
 	// Shadow filter material
 	materials["shadow"] = std::make_shared<Material>("shadow");
 	materials["shadow"]->shader->attachShader(v_shadow);
@@ -487,7 +493,7 @@ void initializeScene()
 		defaultMaterial,
 		bombBodyPath);
 
-//	players["bombot1"]->attachBombManager(bombManager);
+	players["bombot1"]->attachBombManager(bombManager);
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
@@ -737,20 +743,20 @@ void DisplayCallbackFunction(void)
 	///////////////////////////// First Pass: Outlines
 	if (outlineToggle)
 	{
-		//glCullFace(GL_FRONT);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//glLineWidth(outlineWidth);
-		//
-		//// Clear back buffer
-		//FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
-		//
-		//// Tell all game objects to use the outline shading material
-		//setMaterialForAllGameObjects("sobel");
-		//
-		//drawScene(playerCamera);
-		//
-		//glCullFace(GL_BACK);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glCullFace(GL_FRONT);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glLineWidth(outlineWidth);
+		
+		// Clear back buffer
+		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
+		
+		// Tell all game objects to use the outline shading material
+		setMaterialForAllGameObjects("sobel");
+		setMaterialForAllPlayerObjects("sobelPlayer");
+		drawScene(playerCamera);
+		
+		glCullFace(GL_BACK);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 	
 	///////////////////////////// Second Pass: Lighting

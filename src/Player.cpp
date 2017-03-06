@@ -77,8 +77,8 @@ void Player::handleInput(float dt)
 	// Update the direction of the player
 	// Based on the position of the right stick
 	Coords RStick = con.getRightStick();
-	float angle = atan2(-RStick.y, RStick.x) + 180 * degToRad;
-	this->setRotationAngleY(angle);
+	float angle = atan2(-RStick.y, RStick.x) + 270 * degToRad;
+
 
 	// Check if the player has moved the left stick
 	Coords LStick = con.getLeftStick();
@@ -102,12 +102,13 @@ void Player::handleInput(float dt)
 	{
 		currentAngle = angle;
 	}
+
 	else if (con.leftStickMoved() && !con.rightStickMoved())
 	{
 		//currentAngle = atan2(LStick.y, LStick.x) + 180 * degToRad;
 		//this->setRotationAngleY(angle);
 	}
-
+	this->setRotationAngleY(currentAngle);
 	if (hasMoved)
 	{
 		setPosition(getWorldPosition() + trans);
@@ -124,15 +125,14 @@ void Player::handleInput(float dt)
 
 		
 		bombManager->throwBomb(this, normalized, throwingForce);
-
+		mesh->setAnim("throw");
 		currentCooldown += bombCooldown;
 	}
-	if (con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER) && currentCooldown == 0.0f)
-		mesh->setAnim("throw");
+		
 
 	//tells the mesh(skeleton) to update
 	angle = atan2(-LStick.x, LStick.y);
-	mesh->update(dt, angle);
+	mesh->update(dt, angle, currentAngle);
 }
 
 void Player::checkCollisionWith(GameObject* other)

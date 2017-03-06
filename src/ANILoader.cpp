@@ -562,12 +562,13 @@ void Holder::draw(std::shared_ptr<ShaderProgram> s)
 	vao.draw();
 }
 
-void Holder::update(float dt, float overRide)
+void Holder::update(float dt, float overRide, float counter)
 {
 	int count = 0;
 	if (overRide != 0)
 		angle = overRide;
-	currentBot->updateBot(dt, angle + 180 * degToRad);
+
+	currentBot->updateBot(dt, angle + counter + 180 * degToRad);
 
 	currentTop->updateTop(dt);
 
