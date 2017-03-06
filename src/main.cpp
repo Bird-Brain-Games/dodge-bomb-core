@@ -442,9 +442,11 @@ void initializeScene()
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
+	
+	players["bombot2"] = std::make_shared<Player>(
+		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
+	gameobjects["bombot2"] = players["bombot2"];
 	/*
-	gameobjects["bombot2"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 2);
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
@@ -463,23 +465,26 @@ void initializeScene()
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
 	std::unique_ptr<RigidBody> bombot1Body;
+	std::unique_ptr<RigidBody> bombot2Body;
 	std::unique_ptr<RigidBody> sphereBody;
 
-	tableBody = std::make_unique<RigidBody>();
+	tableBody	= std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
-	sphereBody = std::make_unique<RigidBody>();
+	bombot2Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	sphereBody	= std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
 	bombot1Body->load(bombotBodyPath);
+	bombot2Body->load(bombotBodyPath);
 	sphereBody->load(sphereBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
 	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
+	gameobjects["bombot2"]->attachRigidBody(bombot2Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
 
-	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
 
@@ -494,6 +499,10 @@ void initializeScene()
 		bombBodyPath);
 
 	players["bombot1"]->attachBombManager(bombManager);
+
+	// Set the outline colors
+	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	gameobjects["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
@@ -643,6 +652,8 @@ void setMaterialForAllGameObjects(std::string materialName)
 	{
 		itr->second->setMaterial(mat);
 	}
+
+	bombManager->setMaterialForAllBombs(mat);
 }
 
 void setMaterialForAllPlayerObjects(std::string materialName)

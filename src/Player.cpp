@@ -3,6 +3,10 @@
 
 const float degToRad = 3.14159f / 180.0f;
 
+float Player::maxInvincibleTime = 3.0f;
+float Player::pauseTime = 0.5f;
+int Player::maxHealth = 2;
+
 Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
 	std::shared_ptr<Material> _material,
@@ -14,7 +18,9 @@ Player::Player(glm::vec3 position,
 	currentCooldown(0.0f),
 	bombCooldown(1.0f),
 	currentAngle(0.0f),
-	throwingForce(5.0f)
+	throwingForce(5.0f),
+	health(maxHealth),
+	currentState(P_NORMAL)
 {
 	playerNum = _playerNum;
 }
@@ -25,7 +31,9 @@ Player::Player(Player& other)
 	currentCooldown(0.0f),
 	bombCooldown(1.0f),
 	currentAngle(0.0f),
-	throwingForce(other.throwingForce)
+	health(maxHealth),
+	throwingForce(other.throwingForce),
+	currentState(P_NORMAL)
 {
 
 }
@@ -35,10 +43,12 @@ Player::~Player()
 
 }
 
-void Player::draw(Camera _camera)
+void Player::draw(Camera &camera)
 {
-	GameObject::draw(_camera);
-	//bomb->draw(_camera);
+	if (currentState == P_NORMAL)
+	{
+		GameObject::draw(camera);
+	}
 }
 
 void Player::update(float dt)
@@ -51,15 +61,35 @@ void Player::update(float dt)
 			currentCooldown = 0.0f;
 	}
 
-	// the mesh updates is now down in this call because we need to pass certain info about the controls to the htr 
-	handleInput(dt);
+	switch (currentState)
+	{
+	case P_NORMAL:
+		handleInput();
+		rigidBody->getBody()->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+		break;
 
+	case P_INVINCIBLE:
+		invincibleTime -= dt;
+		// If they're still in the pause time, don't let them move
+		if (maxInvincibleTime - invincibleTime > pauseTime)
+			handleInput();
 
+		if (invincibleTime <= 0.0f)
+		{
+			invincibleTime = 0.0f;
+			currentState = P_NORMAL;
+		}
+		break;
 
-	// orignal function order
+	case P_DEAD:
+		rigidBody->getBody()->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+		break;
+
+	default:
+		break;
+	}
+
 	GameObject::update(dt);
-
-	//was crashing have no idea why. needs fixing
 //	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
 }
 
@@ -142,11 +172,21 @@ void Player::checkCollisionWith(GameObject* other)
 
 void Player::checkCollisionWith(Bomb* other)
 {
+	// If the player is colliding with their own bomb
 	if (other->getPlayerNum() == playerNum)
 	{
-		//std::cout << "Bomb collided with the player who threw it" << std::endl;
+
 	}
-	std::cout << "bomb collided with player " << playerNum << std::endl;
+	else if (currentState == P_NORMAL)
+	{
+		if (other->getCurrentState() != BOMB_STATE::DONE)
+		{
+			other->explode();
+			takeDamage(1);
+		}
+	}
+	//std::cout << "C: bomb " << other->getPlayerNum() << " with player " << playerNum << std::endl;
+	
 }
 
 void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
@@ -168,4 +208,19 @@ void Player::attachBombManager(std::shared_ptr<BombManager> manager)
 void Player::setAnim(std::string _name)
 {
 	mesh->setAnim(_name);
+}
+
+void Player::takeDamage(int damage)
+{
+	invincibleTime = maxInvincibleTime;
+	currentState = P_INVINCIBLE;
+	std::cout << "Player " << playerNum << " took damage" << std::endl;
+
+	health--;
+	if (health <= 0)
+	{
+		std::cout << "Player " << playerNum << " is dead" << std::endl;
+		currentState = P_DEAD;
+		setPosition(glm::vec3(0.0f, -15.0f, 0.0f));
+	}
 }
