@@ -1,5 +1,6 @@
 #include "Bomb.h"
 #include "Player.h"
+#include <iostream>
 
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////	BOMB MANAGER	///////////////////////////////////
@@ -46,8 +47,8 @@ bool BombManager::init(std::shared_ptr<Loader> _mesh,
 		bombTemplates.push_back(bombObject);
 	}
 
-
-
+	bombTemplates[0]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	bombTemplates[1]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
 	initialized = true;
 	return true;
@@ -59,6 +60,17 @@ void BombManager::update(float dt)
 	{
 		it->update(dt);
 	}
+
+	// Remove finished bombs from list
+	for (auto it = activeBombs.begin(); it != activeBombs.end(); it++)
+	{
+		if (it->get()->getCurrentState() == DONE)
+		{
+			//activeBombs.erase(it);	//ERROR
+			it->get()->setPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
+		}
+	}
+	
 }
 
 void BombManager::draw(Camera& camera)
@@ -86,6 +98,8 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////	BOMB	///////////////////////////////////////
 float Bomb::playerRadius = 2.0f;
+float Bomb::maxExplodeTime = 1.0f;
+float Bomb::maxFuseTime = 3.0f;
 
 Bomb::Bomb(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -93,7 +107,10 @@ Bomb::Bomb(glm::vec3 position,
 	std::shared_ptr<Texture> _texture,
 	int _playerNum)	
 	: GameObject(position, _mesh, _material, _texture),
-	playerNum(_playerNum)
+	playerNum(_playerNum),
+	currentState(OFF),
+	currentExplodeTime(0.0f),
+	currentFuseTime(0.0f)
 {
 
 }
@@ -105,7 +122,10 @@ Bomb::~Bomb()
 
 Bomb::Bomb(Bomb& other)
 	: GameObject(other),
-	playerNum(other.playerNum)
+	playerNum(other.playerNum),
+	currentState(OFF),
+	currentExplodeTime(0.0f),
+	currentFuseTime(0.0f)
 {
 
 }
@@ -118,9 +138,8 @@ void Bomb::attachPlayerPtr(Player* _playerPtr)
 void Bomb::throwBomb(glm::vec2 direction, glm::vec3 force)
 {
 	setPosition(playerPtr->getWorldPosition() + glm::vec3(direction.x * playerRadius, 0.6f, -direction.y * playerRadius));
-
-	//	bomb->getRigidBody()->getBody()->setLinearVelocity(btVector3(0, 0, 0));
-	//	bomb->getRigidBody()->getBody()->clearForces();//clears force not impulse?
+	currentFuseTime = maxFuseTime;
+	currentState = THROWN;
 
 	rigidBody->getBody()->applyCentralImpulse(
 		btVector3(direction.x * force.x, force.y, -direction.y * force.z));
@@ -128,10 +147,52 @@ void Bomb::throwBomb(glm::vec2 direction, glm::vec3 force)
 
 void Bomb::draw(Camera& camera)
 {
-	GameObject::draw(camera);
+	if (currentState != OFF)
+		GameObject::draw(camera);
 }
 
 void Bomb::update(float dt)
 {
+	switch (currentState)
+	{
+	case OFF:
+		rigidBody->getBody()->clearForces();
+		break;
+	case THROWN:
+		currentFuseTime -= dt;
+		if (currentFuseTime <= 0.0f)
+		{
+			explode();
+		}
+		break;
+	case EXPLODING:
+		currentExplodeTime -= dt;
+		if (currentExplodeTime <= 0.0f)
+		{
+			destroy();
+		}
+		rigidBody->getBody()->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+		break;
+	case DONE:
+		break;
+	default:
+		break;
+	}
+
 	GameObject::update(dt);
+}
+
+void Bomb::explode()
+{
+	currentFuseTime = 0.0f;
+	currentExplodeTime = maxFuseTime;
+	currentState = EXPLODING;
+	std::cout << "Bomb " << playerNum << " exploded" << std::endl;
+}
+
+void Bomb::destroy()
+{
+	currentExplodeTime = 0.0f;
+	currentState = DONE;
+	std::cout << "Bomb " << playerNum << " destroyed" << std::endl;
 }
