@@ -17,7 +17,7 @@ public:
 	Player(Player&);
 	~Player();
 
-	void handleInput();
+	void handleInput(float dt);
 
 	void update(float deltaT);
 	void draw(Camera _camera);
@@ -28,7 +28,10 @@ public:
 	void checkCollisionWith(Bomb* other);
 	int getPlayerNum();
 
+	void setAnim(std::string);
+
 private:
+
 	Controller con;
 	int playerNum;
 

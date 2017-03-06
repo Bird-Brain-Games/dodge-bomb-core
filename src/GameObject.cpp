@@ -180,7 +180,7 @@ void GameObject::update(float dt)
 	// Update children
 	for (int i = 0; i < m_pChildren.size(); i++)
 		m_pChildren[i]->update(dt);
-
+	
 	needsUpdating = false;
 }
 

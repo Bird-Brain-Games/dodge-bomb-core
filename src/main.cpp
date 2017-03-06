@@ -28,6 +28,7 @@
 #include "FrameBufferObject.h"
 #include "InputManager.h"
 #include "menu.h"
+#include "ANILoader.h"
 
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
@@ -62,7 +63,7 @@ Camera playerCamera; // the camera you move around with wasd
 Camera shadowCamera; // Camera for the shadow map
 
 // Asset databases
-std::map<std::string, std::shared_ptr<LoadObject>> meshes;
+std::map<std::string, std::shared_ptr<Loader>> meshes;
 std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
 std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
@@ -141,11 +142,11 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru, v_null, v_shadow;
+	Shader v_default, v_passThru, v_null, v_skinning;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
-	v_shadow.loadShaderFromFile(shaderPath + "shadowMap_v.glsl", GL_VERTEX_SHADER);
+	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, f_noLighting, f_toon, f_sobel, f_shadow;
@@ -166,53 +167,59 @@ void initializeShaders()
 	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
 
 	// No Lighting material
-	materials["noLighting"] = std::make_shared<Material>();
+	materials["noLighting"] = std::make_shared<Material>("noLighting");
 	materials["noLighting"]->shader->attachShader(v_default);
 	materials["noLighting"]->shader->attachShader(f_noLighting);
 	materials["noLighting"]->shader->linkProgram();
 	
 	// Default material that all objects use
-	materials["default"] = std::make_shared<Material>();
+	materials["default"] = std::make_shared<Material>("default");
 	materials["default"]->shader->attachShader(v_default);
 	materials["default"]->shader->attachShader(f_default);
 	materials["default"]->shader->linkProgram();
 
 	// Default material that all objects use
-	materials["toon"] = std::make_shared<Material>();
+	materials["toon"] = std::make_shared<Material>("toon");
 	materials["toon"]->shader->attachShader(v_default);
 	materials["toon"]->shader->attachShader(f_toon);
 	materials["toon"]->shader->linkProgram();
 
+	//material for our players and there meshes.
+	materials["toonPlayer"] = std::make_shared<Material>("toonPlayer");
+	materials["toonPlayer"]->shader->attachShader(v_skinning);
+	materials["toonPlayer"]->shader->attachShader(f_toon);
+	materials["toonPlayer"]->shader->linkProgram();
+
 	// Material used for menu full screen drawing
-	materials["menu"] = std::make_shared<Material>();
+	materials["menu"] = std::make_shared<Material>("menu");
 	materials["menu"]->shader->attachShader(v_null);
 	materials["menu"]->shader->attachShader(f_texColor);
 	materials["menu"]->shader->attachShader(g_menu);
 	materials["menu"]->shader->linkProgram();
 
 	// Unlit texture material
-	materials["unlitTexture"] = std::make_shared<Material>();
+	materials["unlitTexture"] = std::make_shared<Material>("unlitTexture");
 	materials["unlitTexture"]->shader->attachShader(v_passThru);
 	materials["unlitTexture"]->shader->attachShader(f_unlitTex);
 	materials["unlitTexture"]->shader->attachShader(g_quad);
 	materials["unlitTexture"]->shader->linkProgram();
 
 	// Invert filter material
-	materials["bright"] = std::make_shared<Material>();
+	materials["bright"] = std::make_shared<Material>("bright");
 	materials["bright"]->shader->attachShader(v_passThru);
 	materials["bright"]->shader->attachShader(f_bright);
 	materials["bright"]->shader->attachShader(g_quad);
 	materials["bright"]->shader->linkProgram();
 
 	// Sobel filter material
-	materials["bloom"] = std::make_shared<Material>();
+	materials["bloom"] = std::make_shared<Material>("bloom");
 	materials["bloom"]->shader->attachShader(v_passThru);
 	materials["bloom"]->shader->attachShader(f_composite);
 	materials["bloom"]->shader->attachShader(g_quad);
 	materials["bloom"]->shader->linkProgram();
 
 	// Box blur filter
-	materials["blur"] = std::make_shared<Material>();
+	materials["blur"] = std::make_shared<Material>("blur");
 	materials["blur"]->shader->attachShader(v_passThru);
 	materials["blur"]->shader->attachShader(f_blur);
 	materials["blur"]->shader->attachShader(g_quad);
@@ -242,7 +249,6 @@ void initializeScene()
 	std::shared_ptr<LoadObject> barrelMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> cannonMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> sphereMesh = std::make_shared<LoadObject>();
-	std::shared_ptr<LoadObject> bombotMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> corkboardMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> roomMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> bombMesh = std::make_shared<LoadObject>();
@@ -256,12 +262,22 @@ void initializeScene()
 	std::shared_ptr<LoadObject> mapMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
 
+	std::shared_ptr<Holder> bombotMesh = std::make_shared<Holder>();
+
 	// Load all meshes
 	tableMesh->load(meshPath + "translatedtable.obj");
 	barrelMesh->load(meshPath + "barrel.obj");
 	cannonMesh->load(meshPath + "cannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
-	bombotMesh->load(meshPath + "smolbot.obj");
+
+	bombotMesh->baseLoad("Assets/htr/bombot");
+	// do not change the names of these
+	// eventually the goal is change them to enums and not strings.
+	bombotMesh->AniLoad("Assets/htr/idle" , "idle");
+	bombotMesh->AniLoad("Assets/htr/throw", "throw");
+	bombotMesh->AniLoad("Assets/htr/walk" , "walk");
+	bombotMesh->setAnim("idle");
+
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
 	bombMesh->load(meshPath + "bomb.obj");
@@ -435,7 +451,7 @@ void initializeScene()
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
 	std::string bombotBodyPath = "assets\\bullet\\smolbot.btdata";
 	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
-	std::string bombBodyPath = """assets\\bullet\\bomb.btdata";
+	std::string bombBodyPath = "assets\\bullet\\bomb.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
@@ -470,7 +486,7 @@ void initializeScene()
 		defaultMaterial,
 		bombBodyPath);
 
-	players["bombot1"]->attachBombManager(bombManager);
+//	players["bombot1"]->attachBombManager(bombManager);
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
@@ -621,6 +637,16 @@ void setMaterialForAllGameObjects(std::string materialName)
 		itr->second->setMaterial(mat);
 	}
 }
+
+void setMaterialForAllPlayerObjects(std::string materialName)
+{
+	auto mat = materials[materialName];
+	for (auto itr = players.begin(); itr != players.end(); ++itr)
+	{
+		itr->second->setMaterial(mat);
+	}
+}
+
 
 // Only takes the highest brightness from the FBO
 void brightPass()
@@ -786,6 +812,20 @@ void DisplayCallbackFunction(void)
 				materials["noLighting"]->sendUniforms();
 			}
 			break;
+				setMaterialForAllPlayerObjects("toonPlayer");
+				// Set material properties for all our non player objects
+
+				materials["toon"]->shader->unbind();
+
+				//sets the material properties for all our player objects
+
+				materials["toonPlayer"]->shader->bind();
+
+				materials["toonPlayer"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+				materials["toonPlayer"]->intUniforms["u_diffuseTex"] = 31;
+				materials["toonPlayer"]->intUniforms["u_specularTex"] = 30;
+
+				materials["toonPlayer"]->sendUniforms();
 		}
 
 		//draw the scene to the fbo
@@ -922,6 +962,8 @@ void handleKeyboardInput()
 	{
 		playerCamera.shakeScreen();
 	}
+
+
 
 	// Switch Lighting Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('1'))

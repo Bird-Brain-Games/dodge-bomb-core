@@ -4,6 +4,7 @@
 #include "Node.h"
 #include "JointTypes.h"
 #include "loader.h"
+#include <map>
 class ANILoader
 {
 public:
@@ -26,11 +27,21 @@ public:
 	// Returns root node (usually the hip if a humanoid skeleton)
 	Node* getRootNode();
 
+	//used to get some values.
 	std::vector<glm::vec3> getVertexs();
 	std::vector<glm::vec2> getUV();
 	std::vector<glm::vec3> getNormals();
 	std::vector<glm::vec4> getWeights();//the weights for each vertex
 	std::vector<glm::vec4> getJoints();//the joint for each vertex
+
+	//used to get data.
+	glm::vec3* ANILoader::getVertexsData();
+	glm::vec2* ANILoader::getUVData();
+	glm::vec3* ANILoader::getNormalsData();
+	glm::vec4* ANILoader::getWeightsData();
+	glm::vec4* ANILoader::getJointsData();
+
+	int getSegments();
 
 private:
 
@@ -41,7 +52,7 @@ private:
 	bool processBasePositionSection(FILE* fp, char* loc);
 	bool processAnimationSection(FILE* fp, char* loc);
 	bool processVBO(FILE* fp, char* loc);
-	
+
 	// Increments the file pointer to the next line in the file
 	// and copies it into buffer
 	void goToNextValidLineInFile(FILE* fp, char* buffer);
@@ -54,7 +65,7 @@ private:
 	std::string fileType;		// File extension
 	std::string dataType;		// What kind of data is stored in file. 
 								// Ie. HTRS means Hierarchical translations followed by rotations and scale
-	
+
 	int			fileVersion;	// Useful if you are generating binary object files on load, can check the version of an existing binary file, 
 								// check version of text, if text version > binary version then reparse, otherwise just use binary
 
@@ -91,24 +102,27 @@ private:
 class Holder : public Loader
 {
 protected:
-	Node* m_pChild;
-
+	Node* basePose;
+	std::map<std::string, Node*> animations;
+	Node* currentTop;
+	Node* currentBot;
 	unsigned int numtris; // count number of vertices for data creation
 	int bones;
 
+	// the base pose matricies
 	std::vector<glm::mat4> matricies;
+	// the current transformation matrix
 	std::vector<glm::mat4> multipliedMatricies;
 	void createVAO();
 
-	GLuint vao2;
-
-	GLuint vertbo;
-	GLuint texbo;
-	GLuint normbo;
-	GLuint weightbo;
-	GLuint bonebo;
+	float angle;
 public:
-	Holder(ANILoader* data);
+	//
+	void setAnim(std::string);
+	bool baseLoad(std::string);
+	bool AniLoad(std::string, std::string);
 	void draw(std::shared_ptr<ShaderProgram> s);
-	void update(float);
+	void update(float, float);
+	//used to update a portion of the skeleton.
+	//void update(int frame, int max);
 };

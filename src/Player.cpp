@@ -51,44 +51,57 @@ void Player::update(float dt)
 			currentCooldown = 0.0f;
 	}
 
-	handleInput();
+	// the mesh updates is now down in this call because we need to pass certain info about the controls to the htr 
+	handleInput(dt);
+
+
+
+	// orignal function order
 	GameObject::update(dt);
-	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
+
+	//was crashing have no idea why. needs fixing
+//	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
 }
 
-void Player::handleInput()
+void Player::handleInput(float dt)
 {
 	if (!con.connected())
 	{
 		//std::cerr << "Error: Controller disconnected" << std::endl;
 		return;
 	}
-	
+
+
+	bool hasMoved = false;
+
+	// Update the direction of the player
+	// Based on the position of the right stick
+	Coords RStick = con.getRightStick();
+	float angle = atan2(-RStick.y, RStick.x) + 270 * degToRad;
+	this->setRotationAngleY(angle);
+
 	// Check if the player has moved the left stick
 	Coords LStick = con.getLeftStick();
 	glm::vec3 trans = glm::vec3(0.0f);
 
-	bool hasMoved = false;
 	if (LStick.x < -0.1 || LStick.x > 0.1)
 	{
+		mesh->setAnim("walk");
 		trans.x = LStick.x / 2;
 		hasMoved = true;
 	}
 	if (LStick.y < -0.1 || LStick.y > 0.1)
 	{
+		mesh->setAnim("walk");
 		trans.z = -LStick.y / 2;
 		hasMoved = true;
 	}
 
-	// Update the direction of the player
-	// Based on the position of the right stick
-	Coords RStick = con.getRightStick();
 	float angle = atan2(-RStick.y, RStick.x) + 180 * degToRad;
 
 	if (currentAngle != angle && con.rightStickMoved())
 	{
 		currentAngle = angle;
-		this->setRotationAngleY(angle);
 	}
 	else if (con.leftStickMoved() && !con.rightStickMoved())
 	{
@@ -100,10 +113,10 @@ void Player::handleInput()
 	{
 		setPosition(getWorldPosition() + trans);
 		//player->rigidBody->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
-
 	}
 
-	// Throw a bomb
+
+	// Throw a bomb (crashes my code so im using left shoulder for animation throw)
 	if (con.conButton(XINPUT_GAMEPAD_RIGHT_SHOULDER) && currentCooldown == 0.0f)
 	{
 		glm::vec2 normalized = glm::vec2(0);
@@ -115,7 +128,12 @@ void Player::handleInput()
 
 		currentCooldown += bombCooldown;
 	}
+	if (con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER) && currentCooldown == 0.0f)
+		mesh->setAnim("throw");
 
+	//tells the mesh(skeleton) to update
+	angle = atan2(-LStick.x, LStick.y);
+	mesh->update(dt, angle);
 }
 
 void Player::checkCollisionWith(GameObject* other)
@@ -146,4 +164,9 @@ int Player::getPlayerNum()
 void Player::attachBombManager(std::shared_ptr<BombManager> manager)
 {
 	bombManager = manager;
+}
+
+void Player::setAnim(std::string _name)
+{
+	mesh->setAnim(_name);
 }
