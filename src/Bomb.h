@@ -8,6 +8,14 @@
 
 class Player;
 
+enum BOMB_STATE
+{
+	OFF,
+	THROWN,
+	EXPLODING,
+	DONE
+};
+
 // Bomb object 
 class Bomb : public GameObject
 {
@@ -21,9 +29,13 @@ public:
 	~Bomb();
 
 	void attachPlayerPtr(Player* _playerPtr);
-	void throwBomb(glm::vec2 direction, glm::vec3 force);
 	void draw(Camera& camera);
 	void update(float dt);
+
+	void throwBomb(glm::vec2 direction, glm::vec3 force);
+	void explode();
+	void destroy();
+	BOMB_STATE getCurrentState() { return currentState; }
 
 	Player const* getPlayer() { return playerPtr; }
 	int getPlayerNum() { return playerNum; }
@@ -33,6 +45,14 @@ private:
 	float duration;
 	int playerNum;
 	Player* playerPtr;
+
+	// Bomb stats
+	BOMB_STATE currentState;
+	float currentFuseTime;
+	float currentExplodeTime;
+
+	static float maxFuseTime;
+	static float maxExplodeTime;
 };
 
 /*

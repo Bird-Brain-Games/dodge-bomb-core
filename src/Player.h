@@ -4,6 +4,13 @@
 #include "Bomb.h"
 #include "controller.h"
 
+enum PLAYER_STATE
+{
+	P_NORMAL,
+	P_INVINCIBLE,
+	P_DEAD
+};
+
 // Player class takes in player input and performs movement
 // It also handles collision between players and bombs.
 class Player : public GameObject
@@ -20,9 +27,11 @@ public:
 	void handleInput();
 
 	void update(float deltaT);
-	void draw(Camera _camera);
+	void draw(Camera &camera);
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	void attachBombManager(std::shared_ptr<BombManager> _manager);
+	void takeDamage(int damage);
+	void reset();	// Reset values and positions
 
 	void checkCollisionWith(GameObject* other);
 	void checkCollisionWith(Bomb* other);
@@ -37,4 +46,13 @@ private:
 	std::shared_ptr<BombManager> bombManager;
 	float currentAngle;
 	glm::vec3 throwingForce;
+
+	// Player stats
+	int health;
+	float invincibleTime;
+	PLAYER_STATE currentState;
+
+	static float maxInvincibleTime;
+	static float pauseTime;
+	static int maxHealth;
 };
