@@ -259,16 +259,16 @@ void initializeScene()
 	// Load all meshes
 	tableMesh->load(meshPath + "translatedtable.obj");
 	barrelMesh->load(meshPath + "barrel.obj");
-	cannonMesh->load(meshPath + "cannon.obj");
+	cannonMesh->load(meshPath + "scaledcannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
-	bombotMesh->load(meshPath + "smolbot.obj");
+	bombotMesh->load(meshPath + "bombot.obj");
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
 	bombMesh->load(meshPath + "bomb.obj");
-	boatMesh->load(meshPath + "boat.obj");
+	boatMesh->load(meshPath + "scaledboat.obj");
 	booksMesh->load(meshPath + "books.obj");
-	boulderMesh->load(meshPath + "boulder.obj");
-	crateMesh->load(meshPath + "crate.obj");
+	boulderMesh->load(meshPath + "scaledboulder.obj");
+	crateMesh->load(meshPath + "scaledcrate.obj");
 	palmtreeMesh->load(meshPath + "palmtree.obj");
 	lampcupMesh->load(meshPath + "lampcup.obj");
 	organizerMesh->load(meshPath + "scaledorganizer.obj");
@@ -370,15 +370,10 @@ void initializeScene()
 	////////////////////////	GAME OBJECTS	///////////////////////////////
 	auto defaultMaterial = materials["default"];
 
+	// Set the Scene
 
 	gameobjects["table"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
-
-	gameobjects["barrel"] = std::make_shared<GameObject>(
-		glm::vec3(-15.f, 45.0f, -5.f), barrelMesh, defaultMaterial, barrelTexMap);
-
-	gameobjects["cannon"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial, cannonTexMap);
 
 	gameobjects["sphere"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
@@ -392,9 +387,6 @@ void initializeScene()
 	gameobjects["room"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
 
-	gameobjects["boat"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), boatMesh, defaultMaterial, boatTexMap);
-
 	gameobjects["books"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), booksMesh, defaultMaterial, booksTexMap);
 
@@ -404,17 +396,52 @@ void initializeScene()
 	gameobjects["marker"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), markerMesh, defaultMaterial, markerTexMap);
 
-	gameobjects["boulder"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), boulderMesh, defaultMaterial, boulderTexMap);
-
-	gameobjects["crate"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), crateMesh, defaultMaterial, crateTexMap);
-
-	gameobjects["palmtree"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
-
 	gameobjects["lampcup"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
+
+	// Build the play area
+
+	//gameobjects["barrel"] = std::make_shared<GameObject>(
+	//	glm::vec3(15.f, 42.0f, 10.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	gameobjects["barrelTR"] = std::make_shared<GameObject>(
+		glm::vec3(37.f, 42.0f, -2.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	//gameobjects["barrelBR"] = std::make_shared<GameObject>(
+	//	glm::vec3(40.f, 42.0f, 25.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	//gameobjects["barrelBL"] = std::make_shared<GameObject>(
+	//	glm::vec3(-15.f, 42.0f, 30.f), barrelMesh, defaultMaterial, barrelTexMap);
+	//
+	//gameobjects["barrelTL"] = std::make_shared<GameObject>(
+	//	glm::vec3(-15.f, 42.0f, -10.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	gameobjects["barrel1"] = std::make_shared<GameObject>(
+		glm::vec3(-5.f, 42.0f, 23.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	gameobjects["boulder2"] = std::make_shared<GameObject>(
+		glm::vec3(-10.0f, 41.0f, 18.0f), boulderMesh, defaultMaterial, boulderTexMap);
+
+	gameobjects["boulder"] = std::make_shared<GameObject>(
+		glm::vec3(18.0f, 41.0f, 8.0f), boulderMesh, defaultMaterial, boulderTexMap);
+
+	gameobjects["cannon"] = std::make_shared<GameObject>(
+		glm::vec3(20.f, 40.5f, 15.f), cannonMesh, defaultMaterial, cannonTexMap);
+
+	gameobjects["crate"] = std::make_shared<GameObject>(
+		glm::vec3(13.0f, 40.0f, 14.0f), crateMesh, defaultMaterial, crateTexMap);
+
+	gameobjects["crate2"] = std::make_shared<GameObject>(
+		glm::vec3(10.0f, 40.0f, 9.0f), crateMesh, defaultMaterial, crateTexMap);
+
+	gameobjects["boat"] = std::make_shared<GameObject>(
+		glm::vec3(35.0f, 41.0f, 23.0f), boatMesh, defaultMaterial, boatTexMap);
+	gameobjects["boat"]->setRotationAngleY(-45 * degToRad);
+
+	//gameobjects["palmtree"] = std::make_shared<GameObject>(
+	//	glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
+
+
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
@@ -433,28 +460,66 @@ void initializeScene()
 	
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
-	std::string bombotBodyPath = "assets\\bullet\\smolbot.btdata";
+	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
 	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
-	std::string bombBodyPath = """assets\\bullet\\bomb.btdata";
+	std::string bombBodyPath = "assets\\bullet\\bomb.btdata";
+	std::string barrelBodyPath = "assets\\bullet\\barrel.btdata";
+	std::string boulderBodyPath = "assets\\bullet\\scaledboulder.btdata";
+	std::string crateBodyPath = "assets\\bullet\\scaledcrate.btdata";
+	std::string cannonBodyPath = "assets\\bullet\\scaledcannon.btdata";
+	std::string boatBodyPath = "assets\\bullet\\scaledboat.btdata";
+
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
 	std::unique_ptr<RigidBody> bombot1Body;
 	std::unique_ptr<RigidBody> sphereBody;
+	std::unique_ptr<RigidBody> barrelBody;
+	std::unique_ptr<RigidBody> barrel1Body;
+	std::unique_ptr<RigidBody> boulderBody;
+	std::unique_ptr<RigidBody> boulder2Body;
+	std::unique_ptr<RigidBody> crateBody;
+	std::unique_ptr<RigidBody> crate2Body;
+	std::unique_ptr<RigidBody> cannonBody;
+	std::unique_ptr<RigidBody> boatBody;
 
 	tableBody = std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
 	sphereBody = std::make_unique<RigidBody>();
+	barrelBody = std::make_unique<RigidBody>();
+	barrel1Body = std::make_unique<RigidBody>();
+	boulderBody = std::make_unique<RigidBody>();
+	boulder2Body = std::make_unique<RigidBody>();
+	crateBody = std::make_unique<RigidBody>();
+	crate2Body = std::make_unique<RigidBody>();
+	cannonBody = std::make_unique<RigidBody>();
+	boatBody = std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
 	bombot1Body->load(bombotBodyPath);
 	sphereBody->load(sphereBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
+	barrelBody->load(barrelBodyPath);
+	barrel1Body->load(barrelBodyPath);
+	boulderBody->load(boulderBodyPath);
+	boulder2Body->load(boulderBodyPath);
+	crateBody->load(crateBodyPath);
+	crate2Body->load(crateBodyPath);
+	cannonBody->load(cannonBodyPath);
+	boatBody->load(boatBodyPath);
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
 	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
+	gameobjects["barrelTR"]->attachRigidBody(barrelBody);
+	gameobjects["barrel1"]->attachRigidBody(barrel1Body);
+	gameobjects["boulder"]->attachRigidBody(boulderBody);
+	gameobjects["boulder2"]->attachRigidBody(boulder2Body);
+	gameobjects["crate"]->attachRigidBody(crateBody);
+	gameobjects["crate2"]->attachRigidBody(crate2Body);
+	gameobjects["cannon"]->attachRigidBody(cannonBody);
+	gameobjects["boat"]->attachRigidBody(boatBody);
 
 	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	///////////////////////////////////////////////////////////////////////////
