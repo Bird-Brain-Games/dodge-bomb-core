@@ -101,7 +101,8 @@ private:
 
 class Holder : public Loader
 {
-protected:
+private:
+
 	Node* basePose;
 	std::map<std::string, Node*> animations;
 	Node* currentTop;
@@ -118,6 +119,8 @@ protected:
 	float angle;
 public:
 	//
+	Holder() {};
+	Holder(std::shared_ptr<Holder>);
 	void setAnim(std::string);
 	bool baseLoad(std::string);
 	bool AniLoad(std::string, std::string);

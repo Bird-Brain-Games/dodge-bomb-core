@@ -499,6 +499,7 @@ void initializeScene()
 		bombBodyPath);
 
 	players["bombot1"]->attachBombManager(bombManager);
+	players["bombot2"]->attachBombManager(bombManager);
 
 	// Set the outline colors
 	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));

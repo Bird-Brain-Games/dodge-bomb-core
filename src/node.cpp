@@ -3,6 +3,11 @@
 
 const float degToRad = 3.14159f / 180.0f;
 
+//Node::Node(Node *_duplicate)
+//{
+//
+//}
+
 Node::Node()
 	: m_pScale(1.0f),
 	colour(glm::vec4(1.0)),

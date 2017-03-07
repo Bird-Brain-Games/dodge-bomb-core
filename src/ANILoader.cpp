@@ -497,6 +497,15 @@ glm::vec4* ANILoader::getJointsData() { return jointsOrder.data(); }//the joint 
 
 int ANILoader::getSegments() { return numSegments; }
 
+Holder::Holder(std::shared_ptr<Holder> _duplicate)
+{
+	this->vao = _duplicate->vao;
+	this->basePose = new Node(*_duplicate->basePose);
+	//Node* temp = _duplicate->animations["idle"];
+	//this->animations[]
+
+}
+
 bool Holder::baseLoad(std::string _path)
 {
 
