@@ -86,7 +86,9 @@ void BombManager::draw(Camera& camera)
 {
 	for (auto it : activeBombs)
 	{
-		it->draw(camera);
+		if (it->getCurrentState() != BOMB_STATE::OFF ||
+			it->getCurrentState() != BOMB_STATE::DONE)
+			it->draw(camera);
 	}
 }
 

@@ -48,6 +48,7 @@ private:
 	float currentCooldown;	// The current cooldown on the bomb throw
 	std::shared_ptr<BombManager> bombManager;
 	float currentAngle;
+	float bottomAngle; //used for animation rotation.
 	glm::vec3 throwingForce;
 
 	// Player stats
