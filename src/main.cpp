@@ -495,6 +495,9 @@ void initializeScene()
 		bombTexMap,		// Player2 bomb texture
 		bombTexMap,		// Player3 bomb texture
 		bombTexMap,		// Player4 bomb texture
+		sphereMesh,		// Explosion mesh
+		markerTexMap,	// Explosion texture
+		sphereBodyPath,	// Explosion rigidbody
 		defaultMaterial,
 		bombBodyPath);
 
@@ -536,6 +539,26 @@ void bulletNearCallback(btBroadphasePair& collisionPair,
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
 }
 
+void collideWithCorrectType(Player* player, GameObject* object)
+{
+	switch (object->getColliderType())
+	{
+	case DEFAULT:
+		break;
+	case PLAYER:
+		player->checkCollisionWith((Player*)object);
+		break;
+	case BOMB_BASE:
+		//player->checkCollisionWith((Bomb*)object);
+		break;
+	case BOMB_EXPLOSION:
+		player->checkCollisionWith((Explosion*)object);
+		break;
+	default:
+		break;
+	}
+}
+
 void calculateCollisions()
 {
 	// Basis taken from 
@@ -547,7 +570,7 @@ void calculateCollisions()
 
 	for (int i = 0; i < numManifolds; i++)
 	{
-		//std::cout << numManifolds << std::endl;
+		std::cout << numManifolds << std::endl;
 		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
 		const btCollisionObject* objA = contactManifold->getBody0();
 		const btCollisionObject* objB = contactManifold->getBody1();
@@ -570,15 +593,13 @@ void calculateCollisions()
 					objBGroup == btBroadphaseProxy::CharacterFilter)
 				{
 					Player* p = (Player*)objB->getUserPointer();
-					Bomb* b = (Bomb*)objA->getUserPointer();
-					p->checkCollisionWith(b);
+					collideWithCorrectType(p, (GameObject*)objA->getUserPointer());
 				}
 				else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
 					objAGroup == btBroadphaseProxy::CharacterFilter)
 				{
 					Player* p = (Player*)objA->getUserPointer();
-					Bomb* b = (Bomb*)objB->getUserPointer();
-					p->checkCollisionWith(b);
+					collideWithCorrectType(p, (GameObject*)objB->getUserPointer());
 				}
 			}
 		}

@@ -170,6 +170,12 @@ void Player::checkCollisionWith(GameObject* other)
 	std::cout << "GameObject collided with player" << std::endl;
 }
 
+void Player::checkCollisionWith(Explosion* other)
+{
+	checkCollisionWith(other->getBombParent());
+	std::cout << "Collided with explosion " << std::endl;
+}
+
 void Player::checkCollisionWith(Bomb* other)
 {
 	// If the player is colliding with their own bomb

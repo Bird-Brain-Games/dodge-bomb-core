@@ -15,6 +15,14 @@
 #include "loadObject.h"
 #include "RigidBody.h"
 
+enum COLLIDER_TYPE
+{
+	COLLIDER_DEFAULT,
+	PLAYER,
+	BOMB_BASE,
+	BOMB_EXPLOSION
+};
+
 class GameObject
 {
 public:
@@ -49,6 +57,7 @@ public:
 	glm::vec3 getWorldPosition();
 	glm::mat4 getWorldRotation();
 	glm::vec3 getScale() { return m_pScale; }
+	COLLIDER_TYPE getColliderType() { return colliderType; }
 
 	bool isRoot();
 	bool hasRigidBody() { return (rigidBody != nullptr); }
@@ -91,4 +100,5 @@ protected:
 	std::unique_ptr<RigidBody> rigidBody;
 
 	bool needsUpdating;
+	COLLIDER_TYPE colliderType;
 };

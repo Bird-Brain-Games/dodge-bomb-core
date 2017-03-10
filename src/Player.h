@@ -35,6 +35,7 @@ public:
 
 	void checkCollisionWith(GameObject* other);
 	void checkCollisionWith(Bomb* other);
+	void checkCollisionWith(Explosion* other);
 	int getPlayerNum();
 
 	void setAnim(std::string);

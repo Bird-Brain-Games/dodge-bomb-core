@@ -10,7 +10,8 @@ GameObject::GameObject()
 	material(nullptr),
 	texture(nullptr),
 	rigidBody(nullptr),
-	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
+	colliderType(COLLIDER_TYPE::COLLIDER_DEFAULT)
 {
 	
 }
@@ -29,7 +30,8 @@ GameObject::GameObject(
 	material(_material),
 	texture(_texture),
 	rigidBody(nullptr),
-	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
+	colliderType(COLLIDER_TYPE::COLLIDER_DEFAULT)
 {
 
 }
@@ -43,7 +45,8 @@ GameObject::GameObject(GameObject& other)
 	material(other.material),
 	texture(other.texture),
 	outlineColour(other.outlineColour),
-	rigidBody(nullptr)
+	rigidBody(nullptr),
+	colliderType(other.colliderType)
 {
 	rigidBody = std::make_unique<RigidBody>(*other.rigidBody);
 	rigidBody->load(other.rigidBody->getFileName(), 

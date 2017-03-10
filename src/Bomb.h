@@ -2,6 +2,7 @@
 
 #include "GameObject.h"
 #include <btBulletDynamicsCommon.h>
+#include <queue>
 
 // Bomb emitter class tracks active bombs
 // And assigns bomb properties upon creation
@@ -16,6 +17,8 @@ enum BOMB_STATE
 	DONE
 };
 
+class Explosion;
+
 // Bomb object 
 class Bomb : public GameObject
 {
@@ -24,13 +27,15 @@ public:
 		std::shared_ptr<Loader> _mesh,
 		std::shared_ptr<Material> _material,
 		std::shared_ptr<Texture> _texture,
-		int _playerNum);
+		int _playerNum,
+		std::shared_ptr<Explosion> explosion);
 	Bomb(Bomb&);
 	~Bomb();
 
 	void attachPlayerPtr(Player* _playerPtr);
 	void draw(Camera& camera);
 	void update(float dt);
+	void setMaterial(std::shared_ptr<Material> _material);
 
 	void throwBomb(glm::vec2 direction, glm::vec3 force);
 	void explode();
@@ -45,6 +50,7 @@ private:
 	float duration;
 	int playerNum;
 	Player* playerPtr;
+	std::shared_ptr<Explosion> explosion;
 
 	// Bomb stats
 	BOMB_STATE currentState;
@@ -53,6 +59,25 @@ private:
 
 	static float maxFuseTime;
 	static float maxExplodeTime;
+};
+
+class Explosion : public GameObject
+{
+public:
+	Explosion(glm::vec3 position,
+		std::shared_ptr<Loader> _mesh,
+		std::shared_ptr<Material> _material,
+		std::shared_ptr<Texture> _texture,
+		Bomb* _parent);
+	Explosion(Explosion&);
+
+	//void draw(Camera& camera);
+	void update(float dt);
+	void setBombParent(Bomb*);
+	Bomb* getBombParent() { return parent; }
+
+private:
+	Bomb* parent;
 };
 
 /*
@@ -65,11 +90,15 @@ class BombManager
 {
 public:
 	BombManager();
-	bool init(std::shared_ptr<Loader> _mesh,
+	bool init(
+		std::shared_ptr<Loader> _bombMesh,
 		std::shared_ptr<Texture> _p1,
 		std::shared_ptr<Texture> _p2,
 		std::shared_ptr<Texture> _p3,
-		std::shared_ptr<Texture> _p4, 
+		std::shared_ptr<Texture> _p4,
+		std::shared_ptr<Loader> _explosionMesh,
+		std::shared_ptr<Texture> _explosionTex,
+		std::string _explosionBodyPath,
 		std::shared_ptr<Material> _material,
 		std::string bodyPath);
 
@@ -82,11 +111,13 @@ public:
 	void throwBomb(Player*, glm::vec2 direction, glm::vec3 force);
 
 private:
-	std::shared_ptr<Loader> mesh;
+	std::shared_ptr<Loader> bombMesh, explosionMesh;
 	std::shared_ptr<Material> material;
 	std::vector <std::shared_ptr<Texture>> textures;
 	std::vector <std::shared_ptr<Bomb>> bombTemplates;
 	std::vector <std::shared_ptr<Bomb>> activeBombs;
+	std::queue<std::shared_ptr<Bomb>> bombQueue;
+	std::shared_ptr<Explosion> explosion;
 
 	bool initialized;
 	float impulseY;
