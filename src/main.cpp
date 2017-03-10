@@ -28,6 +28,7 @@
 #include "FrameBufferObject.h"
 #include "InputManager.h"
 #include "menu.h"
+#include "ANILoader.h"
 
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
@@ -55,7 +56,7 @@ Camera playerCamera; // the camera you move around with wasd
 Camera shadowCamera; // Camera for the shadow map
 
 // Asset databases
-std::map<std::string, std::shared_ptr<LoadObject>> meshes;
+std::map<std::string, std::shared_ptr<Loader>> meshes;
 std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
 std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
@@ -135,10 +136,11 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru, v_null, v_shadow;
+	Shader v_default, v_passThru, v_null, v_skinning, v_shadow;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
+	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
 	v_shadow.loadShaderFromFile(shaderPath + "shadowMap_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
@@ -160,53 +162,59 @@ void initializeShaders()
 	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
 
 	// No Lighting material
-	materials["noLighting"] = std::make_shared<Material>();
+	materials["noLighting"] = std::make_shared<Material>("noLighting");
 	materials["noLighting"]->shader->attachShader(v_default);
 	materials["noLighting"]->shader->attachShader(f_noLighting);
 	materials["noLighting"]->shader->linkProgram();
 	
 	// Default material that all objects use
-	materials["default"] = std::make_shared<Material>();
+	materials["default"] = std::make_shared<Material>("default");
 	materials["default"]->shader->attachShader(v_default);
 	materials["default"]->shader->attachShader(f_default);
 	materials["default"]->shader->linkProgram();
 
 	// Default material that all objects use
-	materials["toon"] = std::make_shared<Material>();
+	materials["toon"] = std::make_shared<Material>("toon");
 	materials["toon"]->shader->attachShader(v_default);
 	materials["toon"]->shader->attachShader(f_toon);
 	materials["toon"]->shader->linkProgram();
 
+	//material for our players and there meshes.
+	materials["toonPlayer"] = std::make_shared<Material>("toonPlayer");
+	materials["toonPlayer"]->shader->attachShader(v_skinning);
+	materials["toonPlayer"]->shader->attachShader(f_toon);
+	materials["toonPlayer"]->shader->linkProgram();
+
 	// Material used for menu full screen drawing
-	materials["menu"] = std::make_shared<Material>();
+	materials["menu"] = std::make_shared<Material>("menu");
 	materials["menu"]->shader->attachShader(v_null);
 	materials["menu"]->shader->attachShader(f_texColor);
 	materials["menu"]->shader->attachShader(g_menu);
 	materials["menu"]->shader->linkProgram();
 
 	// Unlit texture material
-	materials["unlitTexture"] = std::make_shared<Material>();
+	materials["unlitTexture"] = std::make_shared<Material>("unlitTexture");
 	materials["unlitTexture"]->shader->attachShader(v_passThru);
 	materials["unlitTexture"]->shader->attachShader(f_unlitTex);
 	materials["unlitTexture"]->shader->attachShader(g_quad);
 	materials["unlitTexture"]->shader->linkProgram();
 
 	// Invert filter material
-	materials["bright"] = std::make_shared<Material>();
+	materials["bright"] = std::make_shared<Material>("bright");
 	materials["bright"]->shader->attachShader(v_passThru);
 	materials["bright"]->shader->attachShader(f_bright);
 	materials["bright"]->shader->attachShader(g_quad);
 	materials["bright"]->shader->linkProgram();
 
 	// Sobel filter material
-	materials["bloom"] = std::make_shared<Material>();
+	materials["bloom"] = std::make_shared<Material>("bloom");
 	materials["bloom"]->shader->attachShader(v_passThru);
 	materials["bloom"]->shader->attachShader(f_composite);
 	materials["bloom"]->shader->attachShader(g_quad);
 	materials["bloom"]->shader->linkProgram();
 
 	// Box blur filter
-	materials["blur"] = std::make_shared<Material>();
+	materials["blur"] = std::make_shared<Material>("blur");
 	materials["blur"]->shader->attachShader(v_passThru);
 	materials["blur"]->shader->attachShader(f_blur);
 	materials["blur"]->shader->attachShader(g_quad);
@@ -218,8 +226,14 @@ void initializeShaders()
 	materials["outline"]->shader->attachShader(f_sobel);
 	materials["outline"]->shader->linkProgram();
 
+	// sobel filter for player
+	materials["sobelPlayer"] = std::make_shared<Material>("sobelPlayer");
+	materials["sobelPlayer"]->shader->attachShader(v_skinning);
+	materials["sobelPlayer"]->shader->attachShader(f_sobel);
+	materials["sobelPlayer"]->shader->linkProgram();
+
 	// Shadow filter material
-	materials["shadow"] = std::make_shared<Material>();
+	materials["shadow"] = std::make_shared<Material>("shadow");
 	materials["shadow"]->shader->attachShader(v_shadow);
 	materials["shadow"]->shader->attachShader(f_shadow);
 	materials["shadow"]->shader->linkProgram();
@@ -236,7 +250,6 @@ void initializeScene()
 	std::shared_ptr<LoadObject> barrelMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> cannonMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> sphereMesh = std::make_shared<LoadObject>();
-	std::shared_ptr<LoadObject> bombotMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> corkboardMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> roomMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> bombMesh = std::make_shared<LoadObject>();
@@ -250,19 +263,29 @@ void initializeScene()
 	std::shared_ptr<LoadObject> mapMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
 
+	std::shared_ptr<Holder> bombotMesh = std::make_shared<Holder>();
+
 	// Load all meshes
 	tableMesh->load(meshPath + "translatedtable.obj");
 	barrelMesh->load(meshPath + "barrel.obj");
-	cannonMesh->load(meshPath + "cannon.obj");
+	cannonMesh->load(meshPath + "scaledcannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
-	bombotMesh->load(meshPath + "smolbot.obj");
+
+	bombotMesh->baseLoad("Assets/htr/bombot");
+	// do not change the names of these
+	// eventually the goal is change them to enums and not strings.
+	bombotMesh->AniLoad("Assets/htr/idle" , "idle");
+	bombotMesh->AniLoad("Assets/htr/throw", "throw");
+	bombotMesh->AniLoad("Assets/htr/walk" , "walk");
+	bombotMesh->setAnim("idle");
+
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
 	bombMesh->load(meshPath + "bomb.obj");
-	boatMesh->load(meshPath + "boat.obj");
+	boatMesh->load(meshPath + "scaledboat.obj");
 	booksMesh->load(meshPath + "books.obj");
-	boulderMesh->load(meshPath + "boulder.obj");
-	crateMesh->load(meshPath + "crate.obj");
+	boulderMesh->load(meshPath + "scaledboulder.obj");
+	crateMesh->load(meshPath + "scaledcrate.obj");
 	palmtreeMesh->load(meshPath + "palmtree.obj");
 	lampcupMesh->load(meshPath + "lampcup.obj");
 	organizerMesh->load(meshPath + "scaledorganizer.obj");
@@ -369,15 +392,10 @@ void initializeScene()
 	////////////////////////	GAME OBJECTS	///////////////////////////////
 	auto defaultMaterial = materials["default"];
 
+	// Set the Scene
 
 	gameobjects["table"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
-
-	gameobjects["barrel"] = std::make_shared<GameObject>(
-		glm::vec3(-15.f, 45.0f, -5.f), barrelMesh, defaultMaterial, barrelTexMap);
-
-	gameobjects["cannon"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 45.0f, -5.f), cannonMesh, defaultMaterial, cannonTexMap);
 
 	gameobjects["sphere"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
@@ -391,9 +409,6 @@ void initializeScene()
 	gameobjects["room"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), roomMesh, defaultMaterial, roomTexMap);
 
-	gameobjects["boat"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), boatMesh, defaultMaterial, boatTexMap);
-
 	gameobjects["books"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), booksMesh, defaultMaterial, booksTexMap);
 
@@ -403,26 +418,69 @@ void initializeScene()
 	gameobjects["marker"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), markerMesh, defaultMaterial, markerTexMap);
 
-	gameobjects["boulder"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), boulderMesh, defaultMaterial, boulderTexMap);
-
-	gameobjects["crate"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), crateMesh, defaultMaterial, crateTexMap);
-
-	gameobjects["palmtree"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
-
 	gameobjects["lampcup"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
+
+	gameobjects["sketch"] = std::make_shared<GameObject>(
+		glm::vec3(-16.719f, 44.256f, -20.508f), nullptr, defaultMaterial, nullptr);
+	gameobjects["sketch"]->setRotationAngleX(15.781 * degToRad);
+	gameobjects["sketch"]->setRotationAngleY(-33.145 * degToRad);
+	gameobjects["sketch"]->setRotationAngleZ(-0.142);
+	
+
+	// Build the play area
+
+	//gameobjects["barrel"] = std::make_shared<GameObject>(
+	//	glm::vec3(15.f, 42.0f, 10.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	gameobjects["barrelTR"] = std::make_shared<GameObject>(
+		glm::vec3(37.f, 42.0f, -2.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	//gameobjects["barrelBR"] = std::make_shared<GameObject>(
+	//	glm::vec3(40.f, 42.0f, 25.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	//gameobjects["barrelBL"] = std::make_shared<GameObject>(
+	//	glm::vec3(-15.f, 42.0f, 30.f), barrelMesh, defaultMaterial, barrelTexMap);
+	//
+	//gameobjects["barrelTL"] = std::make_shared<GameObject>(
+	//	glm::vec3(-15.f, 42.0f, -10.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	gameobjects["barrel1"] = std::make_shared<GameObject>(
+		glm::vec3(-5.f, 42.0f, 23.f), barrelMesh, defaultMaterial, barrelTexMap);
+
+	gameobjects["boulder2"] = std::make_shared<GameObject>(
+		glm::vec3(-10.0f, 41.0f, 18.0f), boulderMesh, defaultMaterial, boulderTexMap);
+
+	gameobjects["boulder"] = std::make_shared<GameObject>(
+		glm::vec3(18.0f, 41.0f, 8.0f), boulderMesh, defaultMaterial, boulderTexMap);
+
+	gameobjects["cannon"] = std::make_shared<GameObject>(
+		glm::vec3(20.f, 40.5f, 15.f), cannonMesh, defaultMaterial, cannonTexMap);
+
+	gameobjects["crate"] = std::make_shared<GameObject>(
+		glm::vec3(13.0f, 40.0f, 14.0f), crateMesh, defaultMaterial, crateTexMap);
+
+	gameobjects["crate2"] = std::make_shared<GameObject>(
+		glm::vec3(10.0f, 40.0f, 9.0f), crateMesh, defaultMaterial, crateTexMap);
+
+	gameobjects["boat"] = std::make_shared<GameObject>(
+		glm::vec3(35.0f, 41.0f, 23.0f), boatMesh, defaultMaterial, boatTexMap);
+	gameobjects["boat"]->setRotationAngleY(-45 * degToRad);
+
+	//gameobjects["palmtree"] = std::make_shared<GameObject>(
+	//	glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
+
+
 
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
-	gameobjects["bombot1"]->setScale(glm::vec3(3.0f));
+	
+	players["bombot2"] = std::make_shared<Player>(
+		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
+	gameobjects["bombot2"] = players["bombot2"];
 	/*
-	gameobjects["bombot2"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 2);
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
@@ -436,30 +494,76 @@ void initializeScene()
 	
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
-	std::string bombotBodyPath = "assets\\bullet\\smolbot.btdata";
+	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
 	std::string sphereBodyPath = "assets\\bullet\\sphere.btdata";
-	std::string bombBodyPath = """assets\\bullet\\bomb.btdata";
+	std::string bombBodyPath = "assets\\bullet\\bomb.btdata";
+	std::string barrelBodyPath = "assets\\bullet\\barrel.btdata";
+	std::string boulderBodyPath = "assets\\bullet\\scaledboulder.btdata";
+	std::string crateBodyPath = "assets\\bullet\\scaledcrate.btdata";
+	std::string cannonBodyPath = "assets\\bullet\\scaledcannon.btdata";
+	std::string boatBodyPath = "assets\\bullet\\scaledboat.btdata";
+	std::string sketchBodyPath = "assets\\bullet\\sketch.btdata";
+
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
 	std::unique_ptr<RigidBody> bombot1Body;
+	std::unique_ptr<RigidBody> bombot2Body;
 	std::unique_ptr<RigidBody> sphereBody;
+	std::unique_ptr<RigidBody> barrelBody;
+	std::unique_ptr<RigidBody> barrel1Body;
+	std::unique_ptr<RigidBody> boulderBody;
+	std::unique_ptr<RigidBody> boulder2Body;
+	std::unique_ptr<RigidBody> crateBody;
+	std::unique_ptr<RigidBody> crate2Body;
+	std::unique_ptr<RigidBody> cannonBody;
+	std::unique_ptr<RigidBody> boatBody;
+	std::unique_ptr<RigidBody> sketchBody;
 
-	tableBody = std::make_unique<RigidBody>();
+	tableBody	= std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
-	sphereBody = std::make_unique<RigidBody>();
+	bombot2Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	sphereBody	= std::make_unique<RigidBody>();
+	barrelBody = std::make_unique<RigidBody>();
+	barrel1Body = std::make_unique<RigidBody>();
+	boulderBody = std::make_unique<RigidBody>();
+	boulder2Body = std::make_unique<RigidBody>();
+	crateBody = std::make_unique<RigidBody>();
+	crate2Body = std::make_unique<RigidBody>();
+	cannonBody = std::make_unique<RigidBody>();
+	boatBody = std::make_unique<RigidBody>();
+	sketchBody = std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
 	bombot1Body->load(bombotBodyPath);
+	bombot2Body->load(bombotBodyPath);
 	sphereBody->load(sphereBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
+	barrelBody->load(barrelBodyPath);
+	barrel1Body->load(barrelBodyPath);
+	boulderBody->load(boulderBodyPath);
+	boulder2Body->load(boulderBodyPath);
+	crateBody->load(crateBodyPath);
+	crate2Body->load(crateBodyPath);
+	cannonBody->load(cannonBodyPath);
+	boatBody->load(boatBodyPath);
+	sketchBody->load(sketchBodyPath);
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
 	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
+	gameobjects["bombot2"]->attachRigidBody(bombot2Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
+	gameobjects["barrelTR"]->attachRigidBody(barrelBody);
+	gameobjects["barrel1"]->attachRigidBody(barrel1Body);
+	gameobjects["boulder"]->attachRigidBody(boulderBody);
+	gameobjects["boulder2"]->attachRigidBody(boulder2Body);
+	gameobjects["crate"]->attachRigidBody(crateBody);
+	gameobjects["crate2"]->attachRigidBody(crate2Body);
+	gameobjects["cannon"]->attachRigidBody(cannonBody);
+	gameobjects["boat"]->attachRigidBody(boatBody);
+	gameobjects["sketch"]->attachRigidBody(sketchBody);
 
-	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
 
@@ -470,10 +574,17 @@ void initializeScene()
 		bombTexMap,		// Player2 bomb texture
 		bombTexMap,		// Player3 bomb texture
 		bombTexMap,		// Player4 bomb texture
+		sphereMesh,		// Explosion mesh
+		markerTexMap,	// Explosion texture
+		sphereBodyPath,	// Explosion rigidbody
 		defaultMaterial,
 		bombBodyPath);
 
 	players["bombot1"]->attachBombManager(bombManager);
+
+	// Set the outline colors
+	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	gameobjects["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
@@ -484,7 +595,7 @@ void initializeScene()
 
 	// Set default camera properties (WIP)
 	playerCamera.setPosition(glm::vec3(23.0f, 90.0f, 40.0f));
-	playerCamera.setAngle(3.14159012f, 5.3f);
+	//playerCamera.setAngle(3.14159012f, 75.98318052f);
 	playerCamera.update();
 	playerCamera.shadowCam();
 	
@@ -498,12 +609,36 @@ void bulletNearCallback(btBroadphasePair& collisionPair,
 	// Only dispatch the Bullet collision information if you want the physics to continue
 	// From Bullet user manual
 	
-	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger ||
+	if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
+		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter ||
+		collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
-		return;*/
+	{
+		return;
+	}
 
 	// Tell the dispatcher to do the collision information
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
+}
+
+void collideWithCorrectType(Player* player, GameObject* object)
+{
+	switch (object->getColliderType())
+	{
+	case DEFAULT:
+		break;
+	case PLAYER:
+		player->checkCollisionWith((Player*)object);
+		break;
+	case BOMB_BASE:
+		player->checkCollisionWith((Bomb*)object);
+		break;
+	case BOMB_EXPLOSION:
+		player->checkCollisionWith((Explosion*)object);
+		break;
+	default:
+		break;
+	}
 }
 
 void calculateCollisions()
@@ -525,31 +660,20 @@ void calculateCollisions()
 		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
 		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
 
-		// Check if the bombs collide with geometry
-		if (objAGroup == btBroadphaseProxy::SensorTrigger ||
-			objBGroup == btBroadphaseProxy::SensorTrigger)
+		// Check if the collision isn't with geometry
+		if (!objA->isStaticObject() &&
+			!objB->isStaticObject())
 		{
-			// Check if the bomb collides with a player
-			if (objAGroup != objBGroup &&
-				!objA->isStaticObject() &&
-				!objB->isStaticObject())
+			// Tell the player to collide with stuff
+			if (objAGroup == btBroadphaseProxy::CharacterFilter)
 			{
-				// Check if one is a sensor, the other is a player, 
-				// and they don't both belong to the same player.
-				if (objAGroup == btBroadphaseProxy::SensorTrigger &&
-					objBGroup == btBroadphaseProxy::CharacterFilter)
-				{
-					Player* p = (Player*)objB->getUserPointer();
-					Bomb* b = (Bomb*)objA->getUserPointer();
-					p->checkCollisionWith(b);
-				}
-				else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
-					objAGroup == btBroadphaseProxy::CharacterFilter)
-				{
-					Player* p = (Player*)objA->getUserPointer();
-					Bomb* b = (Bomb*)objB->getUserPointer();
-					p->checkCollisionWith(b);
-				}
+				Player* p = (Player*)objA->getUserPointer();
+				collideWithCorrectType(p, (GameObject*)objB->getUserPointer());
+			} 
+			else if (objBGroup == btBroadphaseProxy::CharacterFilter)
+			{
+				Player* p = (Player*)objB->getUserPointer();
+				collideWithCorrectType(p, (GameObject*)objA->getUserPointer());
 			}
 		}
 	}
@@ -619,7 +743,19 @@ void setMaterialForAllGameObjects(std::string materialName)
 	{
 		itr->second->setMaterial(mat);
 	}
+
+	bombManager->setMaterialForAllBombs(mat);
 }
+
+void setMaterialForAllPlayerObjects(std::string materialName)
+{
+	auto mat = materials[materialName];
+	for (auto itr = players.begin(); itr != players.end(); ++itr)
+	{
+		itr->second->setMaterial(mat);
+	}
+}
+
 
 // Only takes the highest brightness from the FBO
 void brightPass()
@@ -711,15 +847,15 @@ void DisplayCallbackFunction(void)
 		glCullFace(GL_FRONT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glLineWidth(outlineWidth);
-
+		
 		// Clear back buffer
 		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
-
+		
 		// Tell all game objects to use the outline shading material
 		setMaterialForAllGameObjects("outline");
-
+		setMaterialForAllPlayerObjects("sobelPlayer");
 		drawScene(playerCamera);
-
+		
 		glCullFace(GL_BACK);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
@@ -731,6 +867,21 @@ void DisplayCallbackFunction(void)
 			case TOON:
 			{
 				setMaterialForAllGameObjects("toon");
+
+				setMaterialForAllPlayerObjects("toonPlayer");
+				materials["toonPlayer"]->shader->bind();
+
+				materials["toonPlayer"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+				materials["toonPlayer"]->intUniforms["u_diffuseTex"] = 31;
+				materials["toonPlayer"]->intUniforms["u_specularTex"] = 30;
+
+				materials["toonPlayer"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+				materials["toonPlayer"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
+				materials["toonPlayer"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
+				materials["toonPlayer"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+
+				materials["toonPlayer"]->sendUniforms();
+				materials["toonPlayer"]->shader->unbind();
 
 				materials["toon"]->shader->bind();
 
@@ -766,6 +917,14 @@ void DisplayCallbackFunction(void)
 				materials["noLighting"]->sendUniforms();
 			}
 			break;
+				setMaterialForAllPlayerObjects("toonPlayer");
+				// Set material properties for all our non player objects
+
+				materials["toon"]->shader->unbind();
+
+				//sets the material properties for all our player objects
+
+	
 		}
 
 		//draw the scene to the fbo
@@ -877,8 +1036,8 @@ void handleKeyboardInput()
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
 	{
-		gameobjects["bombot1"]->setPosition(
-			gameobjects["bombot1"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
+		gameobjects["bombot2"]->setPosition(
+			gameobjects["bombot2"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
 	{
@@ -892,6 +1051,8 @@ void handleKeyboardInput()
 	{
 		playerCamera.shakeScreen();
 	}
+
+
 
 	// Lighting Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('2'))
