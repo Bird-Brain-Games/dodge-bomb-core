@@ -595,9 +595,8 @@ void initializeScene()
 
 	// Set default camera properties (WIP)
 	playerCamera.setPosition(glm::vec3(23.0f, 90.0f, 40.0f));
-	//playerCamera.setAngle(3.14159012f, 75.98318052f);
+	playerCamera.setAngle(3.14159012f, 5.3f);
 	playerCamera.update();
-	playerCamera.shadowCam();
 	
 	
 }
