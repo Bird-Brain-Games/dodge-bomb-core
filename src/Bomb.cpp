@@ -6,7 +6,7 @@
 ////////////////////////	BOMB MANAGER	///////////////////////////////////
 BombManager::BombManager()
 {
-	impulseY = 75.0f;
+	impulseY = 25.0f;
 	initialized = false;
 }
 
@@ -128,7 +128,7 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force
 	std::shared_ptr<Bomb> newBomb = std::make_shared<Bomb>(*bombTemplates.at(playerNum));
 	newBomb->attachPlayerPtr(player);
 	activeBombs.push_back(newBomb);
-	newBomb->throwBomb(direction, force);
+	newBomb->throwBomb(direction, glm::vec3(force.x, impulseY, force.z));
 }
 
 
@@ -136,8 +136,8 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////	BOMB	///////////////////////////////////////
 float Bomb::playerRadius = 2.0f;
-float Bomb::maxExplodeTime = 1.0f;
-float Bomb::maxFuseTime = 3.0f;
+float Bomb::maxExplodeTime = 0.5f;
+float Bomb::maxFuseTime = 1.7f;
 
 Bomb::Bomb(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -154,6 +154,7 @@ Bomb::Bomb(glm::vec3 position,
 {
 	colliderType = COLLIDER_TYPE::BOMB_BASE;
 	explosion->setBombParent(this);
+	setScale(glm::vec3(3.0f));
 }
 
 Bomb::~Bomb()
@@ -171,6 +172,7 @@ Bomb::Bomb(Bomb& other)
 {
 	colliderType = COLLIDER_TYPE::BOMB_BASE;
 	explosion->setBombParent(this);
+	setScale(glm::vec3(3.0f));
 }
 
 void Bomb::attachPlayerPtr(Player* _playerPtr)
@@ -271,6 +273,8 @@ void Bomb::setMaterial(std::shared_ptr<Material> _material)
 	explosion->setMaterial(_material);
 }
 
+////////////////////////////////////
+
 Explosion::Explosion(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
 	std::shared_ptr<Material> _material,
@@ -280,7 +284,7 @@ Explosion::Explosion(glm::vec3 position,
 	parent(_parent)
 {
 	colliderType = COLLIDER_TYPE::BOMB_EXPLOSION;
-	setScale(glm::vec3(5.0f));
+	setScale(glm::vec3(7.5f));
 }
 
 Explosion::Explosion(Explosion& other)
@@ -288,7 +292,7 @@ Explosion::Explosion(Explosion& other)
 	parent(nullptr)
 {
 	colliderType = COLLIDER_TYPE::BOMB_EXPLOSION;
-	setScale(glm::vec3(5.0f));
+	setScale(glm::vec3(7.5f));
 }
 
 void Explosion::update(float dt)

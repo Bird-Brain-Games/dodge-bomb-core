@@ -59,7 +59,7 @@ bool PhysicsEngine::init()
 
 	// The world
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-	dynamicsWorld->setGravity(btVector3(0, -10, 0));
+	dynamicsWorld->setGravity(btVector3(0, -65, 0));
 
 	// The debugger
 	debugger = new BulletDebugger();

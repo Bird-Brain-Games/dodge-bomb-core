@@ -19,7 +19,7 @@ Player::Player(glm::vec3 position,
 	currentCooldown(0.0f),
 	bombCooldown(maxBombCooldown),
 	currentAngle(0.0f),
-	throwingForce(5.0f),
+	throwingForce(30.0f),
 	health(maxHealth),
 	currentState(P_NORMAL)
 {
