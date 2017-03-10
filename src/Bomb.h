@@ -70,6 +70,7 @@ public:
 		std::shared_ptr<Texture> _texture,
 		Bomb* _parent);
 	Explosion(Explosion&);
+	//~Explosion();
 
 	//void draw(Camera& camera);
 	void update(float dt);

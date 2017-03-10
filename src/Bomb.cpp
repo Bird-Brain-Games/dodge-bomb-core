@@ -43,7 +43,7 @@ bool BombManager::init(
 
 	// Create the explosion rigidBody
 	std::unique_ptr<RigidBody> explosionBody = 
-		std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger);
+		std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter);
 	explosionBody->load(_explosionBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 	explosion->attachRigidBody(explosionBody);
 
@@ -105,6 +105,7 @@ void BombManager::update(float dt)
 	}
 
 	// Removes finished bombs from the game
+	// ERROR: can't delete multiple bombs at a time
 	for (auto it : inactiveBombs)
 	{
 		activeBombs.erase(it);
@@ -128,7 +129,6 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force
 	newBomb->attachPlayerPtr(player);
 	activeBombs.push_back(newBomb);
 	newBomb->throwBomb(direction, force);
-	
 }
 
 
@@ -163,7 +163,7 @@ Bomb::~Bomb()
 
 Bomb::Bomb(Bomb& other)
 	: GameObject(other),
-	explosion(other.explosion),
+	explosion(std::make_shared<Explosion>(*other.explosion)),
 	playerNum(other.playerNum),
 	currentState(OFF),
 	currentExplodeTime(0.0f),
@@ -262,6 +262,7 @@ void Bomb::destroy()
 	currentState = DONE;
 	std::cout << "Bomb " << playerNum << " destroyed" << std::endl;
 	explosion->setPosition(glm::vec3(-100.0f));
+	explosion->setBombParent(nullptr);
 }
 
 void Bomb::setMaterial(std::shared_ptr<Material> _material)

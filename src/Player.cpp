@@ -6,6 +6,7 @@ const float degToRad = 3.14159f / 180.0f;
 float Player::maxInvincibleTime = 3.0f;
 float Player::pauseTime = 0.5f;
 int Player::maxHealth = 2;
+float Player::maxBombCooldown = 1.0f;
 
 Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -16,7 +17,7 @@ Player::Player(glm::vec3 position,
 	GameObject(position, _mesh, _material, _texture), 
 	con(_playerNum),
 	currentCooldown(0.0f),
-	bombCooldown(1.0f),
+	bombCooldown(maxBombCooldown),
 	currentAngle(0.0f),
 	throwingForce(5.0f),
 	health(maxHealth),
@@ -29,7 +30,7 @@ Player::Player(Player& other)
 	: GameObject(other),
 	con(other.con.getPlayerNum()+1),
 	currentCooldown(0.0f),
-	bombCooldown(1.0f),
+	bombCooldown(maxBombCooldown),
 	currentAngle(0.0f),
 	health(maxHealth),
 	throwingForce(other.throwingForce),
@@ -172,12 +173,22 @@ void Player::checkCollisionWith(GameObject* other)
 
 void Player::checkCollisionWith(Explosion* other)
 {
-	checkCollisionWith(other->getBombParent());
-	std::cout << "Collided with explosion " << std::endl;
+	if (other->getBombParent() == nullptr) return;
+	Bomb* bombParent = other->getBombParent();
+
+	if (bombParent->getPlayerNum() == playerNum)
+	{
+
+	}
+	else if (currentState == P_NORMAL)
+	{
+		takeDamage(1);
+	}
 }
 
 void Player::checkCollisionWith(Bomb* other)
 {
+	if (other == nullptr) return;
 	// If the player is colliding with their own bomb
 	if (other->getPlayerNum() == playerNum)
 	{
@@ -190,9 +201,7 @@ void Player::checkCollisionWith(Bomb* other)
 			other->explode();
 			takeDamage(1);
 		}
-	}
-	//std::cout << "C: bomb " << other->getPlayerNum() << " with player " << playerNum << std::endl;
-	
+	}	
 }
 
 void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
