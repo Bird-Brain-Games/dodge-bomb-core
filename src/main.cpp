@@ -92,8 +92,8 @@ bool outlineToggle = true;
 
 // Lighting Controls
 float deskLamp = 0.8; 
-float innerCutOff = 0.45; // Spot Light Size
-float outerCutOff = 0.50;
+float innerCutOff = 0.42; // Spot Light Size
+float outerCutOff = 0.47;
 glm::vec3 deskForward = glm::vec3(0.2, 1.0, 1.5); // Spot Light Direction
 float roomLight = 0.4;
 
@@ -427,6 +427,17 @@ void initializeScene()
 	gameobjects["sketch"]->setRotationAngleY(-33.145 * degToRad);
 	gameobjects["sketch"]->setRotationAngleZ(-0.142);
 	
+	gameobjects["trumps_wall"] = std::make_shared<GameObject>(
+		glm::vec3(-48.796f, 46.3f, -14.61f), nullptr, defaultMaterial, nullptr);
+
+	gameobjects["botwall"] = std::make_shared<GameObject>(
+		glm::vec3(33.384f, 39.0f, 36.964f), nullptr, defaultMaterial, nullptr);
+
+	gameobjects["topwall"] = std::make_shared<GameObject>(
+		glm::vec3(33.384f, 39.0f, -44.964f), nullptr, defaultMaterial, nullptr);
+
+	gameobjects["booksbody"] = std::make_shared<GameObject>(
+		glm::vec3(-5.232f, 46.713f, -34.777f), nullptr, defaultMaterial, nullptr);
 
 	// Build the play area
 
@@ -503,7 +514,10 @@ void initializeScene()
 	std::string cannonBodyPath = "assets\\bullet\\scaledcannon.btdata";
 	std::string boatBodyPath = "assets\\bullet\\scaledboat.btdata";
 	std::string sketchBodyPath = "assets\\bullet\\sketch.btdata";
-
+	std::string trumpBodyPath = "assets\\bullet\\Trumps_wall.btdata";
+	std::string booksBodyPath = "assets\\bullet\\books.btdata";
+	std::string botwallBodyPath = "assets\\bullet\\botwall.btdata";
+	std::string topwallBodyPath = "assets\\bullet\\topwall.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
@@ -519,6 +533,10 @@ void initializeScene()
 	std::unique_ptr<RigidBody> cannonBody;
 	std::unique_ptr<RigidBody> boatBody;
 	std::unique_ptr<RigidBody> sketchBody;
+	std::unique_ptr<RigidBody> trumpBody;
+	std::unique_ptr<RigidBody> booksBody;
+	std::unique_ptr<RigidBody> botwallBody;
+	std::unique_ptr<RigidBody> topwallBody;
 
 	tableBody	= std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
@@ -533,6 +551,10 @@ void initializeScene()
 	cannonBody = std::make_unique<RigidBody>();
 	boatBody = std::make_unique<RigidBody>();
 	sketchBody = std::make_unique<RigidBody>();
+	trumpBody = std::make_unique<RigidBody>();
+	booksBody = std::make_unique<RigidBody>();
+	botwallBody = std::make_unique<RigidBody>();
+	topwallBody = std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
@@ -548,6 +570,10 @@ void initializeScene()
 	cannonBody->load(cannonBodyPath);
 	boatBody->load(boatBodyPath);
 	sketchBody->load(sketchBodyPath);
+	trumpBody->load(trumpBodyPath);
+	booksBody->load(booksBodyPath);
+	botwallBody->load(botwallBodyPath);
+	topwallBody->load(topwallBodyPath);
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
@@ -563,6 +589,10 @@ void initializeScene()
 	gameobjects["cannon"]->attachRigidBody(cannonBody);
 	gameobjects["boat"]->attachRigidBody(boatBody);
 	gameobjects["sketch"]->attachRigidBody(sketchBody);
+	gameobjects["trumps_wall"]->attachRigidBody(trumpBody);
+	gameobjects["booksbody"]->attachRigidBody(booksBody);
+	gameobjects["botwall"]->attachRigidBody(botwallBody);
+	gameobjects["topwall"]->attachRigidBody(topwallBody);
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
