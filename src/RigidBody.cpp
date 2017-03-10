@@ -1,4 +1,5 @@
 #include "RigidBody.h"
+#include "GameObject.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -76,6 +77,7 @@ void PhysicsEngine::drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 co
 {
 	debugger->SetMatrices(modelViewMatrix, projectionMatrix);
 	dynamicsWorld->debugDrawWorld();
+	//debugger->drawVAO();
 }
 
 btRigidBody::btRigidBodyConstructionInfo* PhysicsEngine::getRigidBodyCI(std::string fileName)
@@ -189,7 +191,7 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 				break;
 			case 2:
 				// Sphere model
-				shape = nullptr;
+				shape = new btSphereShape(radius);
 				break;
 			default:
 				shape = nullptr;
@@ -243,6 +245,14 @@ RigidBody::RigidBody(short _group, short _mask)
 	mask = _mask;
 }
 
+RigidBody::RigidBody(RigidBody& other)
+	:body(nullptr),
+	group(other.group),
+	mask(other.mask)
+{
+	
+}
+
 RigidBody::~RigidBody()
 {
 	Sys.removeRigidBody(body);
@@ -258,14 +268,20 @@ bool RigidBody::load(std::string fileName)
 	{
 		btRigidBody::btRigidBodyConstructionInfo* rigidCI = Sys.getRigidBodyCI(fileName);
 		body = new btRigidBody(*rigidCI);
-		
-		body->getCollisionShape()->setUserPointer(this);
+
+		if (rigidCI->m_mass <= 0.0)
+		{
+			body->setCollisionFlags(btCollisionObject::CollisionFlags::CF_STATIC_OBJECT);
+		}
+
 		body->setMotionState(new btDefaultMotionState());
 
-		if (mask >= 0 && group >= 0)
+		if (group >= 0)
 			Sys.addRigidBody(body, group, mask);
 		else
 			Sys.addRigidBody(body);
+
+		u_fileName = fileName;
 		return true;
 
 	}
@@ -288,13 +304,14 @@ bool RigidBody::load(std::string fileName, btCollisionObject::CollisionFlags fla
 		body = new btRigidBody(*rigidCI);
 
 		body->setCollisionFlags(body->getCollisionFlags() | flags);
-		body->getCollisionShape()->setUserPointer(this);
 		body->setMotionState(new btDefaultMotionState());
 
 		if (group >= 0)
 			Sys.addRigidBody(body, group, mask);
 		else
 			Sys.addRigidBody(body);
+
+		u_fileName = fileName;
 		return true;
 
 	}
@@ -315,13 +332,13 @@ void RigidBody::systemUpdate(float deltaTasSeconds, int maxStep)
 void RigidBody::setKinematic()
 {
 	body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-	setDeactive();
+	setDeactivationMode(DISABLE_DEACTIVATION);
 	std::cout << body->isKinematicObject() << std::endl;
 }
 
-void RigidBody::setDeactive()
+void RigidBody::setDeactivationMode(int mode)
 {
-	body->setActivationState(DISABLE_DEACTIVATION);
+	body->setActivationState(mode);
 }
 
 void RigidBody::drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 const& projectionMatrix)
@@ -334,9 +351,7 @@ glm::mat4x4 RigidBody::getWorldTransform()
 	btTransform t;
 	btScalar m[16];
 	body->getMotionState()->getWorldTransform(t);
-	//btTransform::getOpenGLMatrix(m);
 	t.getOpenGLMatrix(m);
-
 	return glm::make_mat4x4((float*)m);
 }
 
@@ -367,4 +382,27 @@ void RigidBody::setWorldTransform(glm::vec3 pos)
 void RigidBody::setWorldTransform(glm::mat4x4 transform)
 {
 	setWorldTransform(transform[3]);
+}
+
+void RigidBody::setScale(glm::vec3 newScale)
+{
+	body->getCollisionShape()->setLocalScaling(btVector3(
+		newScale.x,
+		newScale.y,
+		newScale.z
+	));
+}
+
+glm::vec3 RigidBody::getScale()
+{
+	btVector3 ls = body->getCollisionShape()->getLocalScaling();
+	return glm::vec3(ls.getX(), ls.getY(), ls.getZ());
+}
+
+void RigidBody::setUserPointer(GameObject* gameObject)
+{
+	// WARNING: VERY UNSAFE
+	userPointer = gameObject;
+	body->getCollisionShape()->setUserPointer(userPointer);
+	body->setUserPointer(userPointer);
 }

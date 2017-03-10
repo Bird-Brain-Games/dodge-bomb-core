@@ -9,6 +9,9 @@
 #include "BulletDebug.h"
 #include <btBulletDynamicsCommon.h>
 
+// Temp class
+class GameObject;
+
 // Class to manage physics operations and memory
 class PhysicsEngine
 {
@@ -25,6 +28,7 @@ public:
 	void addRigidBody(btRigidBody* rb);
 	void addRigidBody(btRigidBody* rb, short group, short mask);
 	void removeRigidBody(btRigidBody* rb);
+	btCollisionDispatcher* getDispatcher() { return dispatcher; }
 
 	void setDebugDraw(bool isDrawing);
 
@@ -56,7 +60,8 @@ class RigidBody
 {
 public:
 	RigidBody();
-	RigidBody(short _group, short _mask);
+	RigidBody(short _group, short _mask = -1);
+	RigidBody(RigidBody&);
 	~RigidBody();
 
 	bool load(std::string fileName);
@@ -65,24 +70,31 @@ public:
 	void setWorldTransform(glm::vec3 pos);
 	void setWorldTransform(glm::vec3 pos, glm::vec3 quat);
 	void setWorldTransform(glm::mat4x4 transform);
+	void setScale(glm::vec3 newScale);
+	glm::vec3 getScale();
 	
 	//void applyImpulse()
 
 	btRigidBody* getBody() { return body; }
+	std::string getFileName() { return u_fileName; }
+
+	void setKinematic();
+	void setDeactivationMode(int mode);
+	void setUserPointer(GameObject* gameObject);
 	
 public:
 	static void systemUpdate(float deltaTasSeconds, int maxStep);
 	static void drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 const& projectionMatrix);
 	static void setDebugDraw(bool isDrawing) { Sys.setDebugDraw(isDrawing); }
 	static bool isDrawingDebug() { return Sys.isDrawingDebug(); }
-	static btDispatcher* getDispatcher() { return Sys.dynamicsWorld->getDispatcher(); }
-	void setKinematic();
-	void setDeactive();
+	static btCollisionDispatcher* getDispatcher() { return Sys.getDispatcher(); }
+
 protected:
 	static PhysicsEngine Sys;
 
 private:
 	btRigidBody *body;
-
+	std::string u_fileName;
 	short group, mask;
+	GameObject* userPointer;
 };

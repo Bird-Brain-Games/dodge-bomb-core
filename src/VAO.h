@@ -6,12 +6,14 @@ january 2017
 #include "gl\glew.h"
 #include <string>
 #include <vector>
+
 //attribute locations;
-enum attribLoc
+enum AttributeLocations
 {
-	VERTEX = 4,
-	UV,
+	VERTEX = 0,
 	NORMAL,
+	TEX_COORD,
+	COLOUR,
 	BONES = 8,
 	WEIGHTS
 };
@@ -20,9 +22,11 @@ enum attribLoc
 class Attribute
 {
 public:
-	Attribute(attribLoc _attribLocation, GLenum _element, unsigned int _dataSize, unsigned int _EPA, unsigned int numElements, std::string _name, void* _data);
+	Attribute(AttributeLocations _attribLocation, GLenum _element, 
+		unsigned int _dataSize, unsigned int _EPA, 
+		unsigned int numElements, std::string _name, void* _data);
 
-	attribLoc  getAttribLocation();
+	AttributeLocations  getAttribLocation();
 	GLenum getElement();
 	unsigned int getDataSize();
 	unsigned int getElementsPerAttrib();
@@ -32,7 +36,7 @@ public:
 
 
 private:
-	attribLoc  attribLocation;
+	AttributeLocations  attribLocation;
 
 	GLenum element;					// type of data
 	unsigned int dataSize;			// size of the data
@@ -52,6 +56,7 @@ public:
 	int addAttribute(Attribute attrib);
 	void createVAO();
 	void draw();
+	void drawLines();
 	void destroy();
 
 private:

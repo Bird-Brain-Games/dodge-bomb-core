@@ -13,6 +13,7 @@ layout(location = 3) in vec4 vIn_colour;
 uniform mat4 u_mvp;
 uniform mat4 u_mv;
 uniform vec4 u_colour;
+uniform mat4 u_bias;
 
 out VertexData
 {
@@ -24,7 +25,6 @@ out VertexData
 
 void main() 
 {
-	vOut.texCoord = vIn_uv;
-	vOut.normal = vIn_normal;
-	gl_Position = u_mvp * vec4(vIn_vertex, 1.0);
+
+	gl_Position = ((u_mvp) * vec4(vIn_vertex, 1.0));
 }

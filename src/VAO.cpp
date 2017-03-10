@@ -4,7 +4,7 @@ january 2017
 
 #include "VAO.h"
 
-Attribute::Attribute(attribLoc _attribLocation, GLenum _element, unsigned int _dataSize, unsigned int _EPA, unsigned int _numElements, std::string _name, void* _data)
+Attribute::Attribute(AttributeLocations _attribLocation, GLenum _element, unsigned int _dataSize, unsigned int _EPA, unsigned int _numElements, std::string _name, void* _data)
 {
 	attribLocation = _attribLocation;
 	element = _element;
@@ -64,19 +64,33 @@ void VAO::draw()
 		glBindVertexArray(0);
 	}
 }
+
+void VAO::drawLines()
+{
+	if (vaoHandle)
+	{
+		glBindVertexArray(vaoHandle);
+
+		glDrawArrays(GL_LINES, 0, attributes[0].getNumElements());
+
+		glBindVertexArray(0);
+	}
+}
+
 void VAO::destroy()
 {
 	if (vaoHandle)
 	{
 		glDeleteVertexArrays(1, &vaoHandle);
 		glDeleteBuffers(vboHandles.size(), &vboHandles[0]);
+		vaoHandle = 0;
 	}
 
 	vboHandles.clear();
 	attributes.clear();
 }
 
-attribLoc		Attribute::getAttribLocation() { return attribLocation; }
+AttributeLocations		Attribute::getAttribLocation() { return attribLocation; }
 GLenum			Attribute::getElement() { return element; }
 unsigned int	Attribute::getDataSize() { return dataSize; }
 unsigned int	Attribute::getElementsPerAttrib() { return elementsPerAttrib; }
