@@ -399,6 +399,13 @@ void initializeScene()
 	gameobjects["lampcup"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
 
+	gameobjects["sketch"] = std::make_shared<GameObject>(
+		glm::vec3(-16.719f, 44.256f, -20.508f), nullptr, defaultMaterial, nullptr);
+	gameobjects["sketch"]->setRotationAngleX(15.781 * degToRad);
+	gameobjects["sketch"]->setRotationAngleY(-33.145 * degToRad);
+	gameobjects["sketch"]->setRotationAngleZ(-0.142);
+	
+
 	// Build the play area
 
 	//gameobjects["barrel"] = std::make_shared<GameObject>(
@@ -468,6 +475,7 @@ void initializeScene()
 	std::string crateBodyPath = "assets\\bullet\\scaledcrate.btdata";
 	std::string cannonBodyPath = "assets\\bullet\\scaledcannon.btdata";
 	std::string boatBodyPath = "assets\\bullet\\scaledboat.btdata";
+	std::string sketchBodyPath = "assets\\bullet\\sketch.btdata";
 
 
 	// Create rigidbodies
@@ -482,6 +490,7 @@ void initializeScene()
 	std::unique_ptr<RigidBody> crate2Body;
 	std::unique_ptr<RigidBody> cannonBody;
 	std::unique_ptr<RigidBody> boatBody;
+	std::unique_ptr<RigidBody> sketchBody;
 
 	tableBody = std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
@@ -494,6 +503,7 @@ void initializeScene()
 	crate2Body = std::make_unique<RigidBody>();
 	cannonBody = std::make_unique<RigidBody>();
 	boatBody = std::make_unique<RigidBody>();
+	sketchBody = std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
@@ -507,6 +517,7 @@ void initializeScene()
 	crate2Body->load(crateBodyPath);
 	cannonBody->load(cannonBodyPath);
 	boatBody->load(boatBodyPath);
+	sketchBody->load(sketchBodyPath);
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
@@ -520,6 +531,7 @@ void initializeScene()
 	gameobjects["crate2"]->attachRigidBody(crate2Body);
 	gameobjects["cannon"]->attachRigidBody(cannonBody);
 	gameobjects["boat"]->attachRigidBody(boatBody);
+	gameobjects["sketch"]->attachRigidBody(sketchBody);
 
 	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	///////////////////////////////////////////////////////////////////////////
