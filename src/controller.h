@@ -19,9 +19,14 @@ public:
 	Controller(int ControllerIndex);//the constructor. ControllerIndex is the Controller number.
 
 	bool connected();//checks whether the Controller is plugged in or not.
+	int getPlayerNum() { return m_ControllerHandle; }
 
 	Coords getLeftStick();//gets the right stick. returns a coord variable (a structure with two floats in it. x and y)
 	Coords getRightStick();//gets the left stick. returns a coord variable (a structure with two floats in it. x and y)
+
+	bool rightStickMoved();
+	bool leftStickMoved();
+
 	/**
 	*XINPUT_GAMEPAD_DPAD_UP		0x0001
 	*XINPUT_GAMEPAD_DPAD_DOWN	0x0002

@@ -1,96 +1,93 @@
-// GameObject.h
-// - Class that represents a object in game
-// - Bare minimum must have
-// -- a renderable (a sprite, a 3d obj, a wavefront obj)
-// -- A position in gamespace (x,y,z)
-// - additional properties may be
-// -- velocity
-// -- acceleration
-// -- rotations (x, y, z)
-// -- texture
-// -- collision bounds (radius, xMins and xMaxs for cube)
 #pragma once
-#include <memory>
-#include <string>
-#include <GLM\glm.hpp>
-#include <btBulletDynamicsCommon.h>
-#include <iostream>
-#include "loadObject.h"
-#include "Shader.h"
-#include "ANILoader.h"
-#include "camera.h"
-#include "material.h"
-#include "controller.h"
-class RigidBody;
 
+#include <GLM/glm.hpp>
+#include <GLM\gtx\transform.hpp>
+#include <GLM\gtc\type_ptr.hpp>
+#include <vector>
+#include <string>
+#include <utility>
+#include <memory>
+#include <map>
+
+#include "camera.h"
+#include "Texture.h"
+#include "Material.h"
+#include "loadObject.h"
+#include "RigidBody.h"
 
 class GameObject
 {
 public:
-	GameObject(Loader* _model, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material, std::string _tag = "Undefined");
+	GameObject();
+	GameObject(glm::vec3 position, 
+		std::shared_ptr<Loader> _mesh, 
+		std::shared_ptr<Material> _material, 
+		std::shared_ptr<Texture> _texture);	
+
+	GameObject(GameObject&);
 	~GameObject();
 
-	virtual void draw(Camera);
-	virtual void draw(Camera, bool);
-	virtual void update(float deltaT);
+	void setTexture(std::shared_ptr<Texture> _texture) { texture = _texture; }
 
-	void setTransform(glm::vec3 pos, glm::vec3 orientation = glm::vec3(0.0f));
-	void setTransform(glm::mat4x4 transform);
-	RigidBody* getRigidBody() 
-	{ 
-		return body;
-	};
+	void setPosition(glm::vec3 newPosition);
+	void setRotationAngleX(float newAngle);
+	void setRotationAngleY(float newAngle);
+	void setRotationAngleZ(float newAngle);
+	void setScale(glm::vec3 newScale);
+	void setOutlineColour(glm::vec4 colour);
 
+	virtual void update(float dt);	
+	virtual void draw(Camera &camera);
+
+	// Forward Kinematics
+	// Pass in null to make game object a root node
+	void setParent(GameObject* newParent);
+	void addChild(GameObject* newChild);
+	void removeChild(GameObject* rip);
+	glm::mat4 getLocalToWorldMatrix();
+	glm::vec3 getWorldPosition();
+	glm::mat4 getWorldRotation();
+	glm::vec3 getScale() { return m_pScale; }
+
+	bool isRoot();
+	bool hasRigidBody() { return (rigidBody != nullptr); }
+	virtual void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
+	virtual void checkCollisionWith(GameObject* other);
+
+	void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
+
+	// Other Properties
+	std::string name;
 
 private:
-	//the Controllers 
-	//Controller con;
-	// Physics rigid body with Bullet
-	RigidBody* body;
+	// Updates the local transform based on the updated variables
+	void updateLocalTransform();
+	// Sets the local variables based on the rigidbody (dynamic bodies)
+	void setLocalTransformToBody();
 
-	// Used for non rigid body things.
-	glm::mat4x4 worldTransform;
-	//
+protected:
+	float m_pRotX, m_pRotY, m_pRotZ; // local rotation angles
+	glm::vec3 m_pScale;
 
+	glm::vec3 m_pLocalPosition;
+	glm::mat4 m_pLocalRotation;
 
-	// loaded obj file
-	std::shared_ptr<Loader> model;
+	glm::mat4 m_pLocalTransformMatrix;
+	glm::mat4 m_pLocalToWorldMatrix;
 
+	// Forward Kinematics
+	GameObject* m_pParent;
+	std::vector<GameObject*> m_pChildren;
+
+	// Graphics components
+	glm::vec4 outlineColour;
+	std::shared_ptr<Texture> texture;
+	std::shared_ptr<Loader> mesh;
 	std::shared_ptr<Material> material;
 
-	// Texture
-	Texture* tex;
+	// Rigid body for rigidbody dynamics
+	// Using unique_ptr as objects shouldn't share rigidBodies
+	std::unique_ptr<RigidBody> rigidBody;
 
-	// Identifier Tag???
-	std::string const tag;
-
-	// Unique name
-	std::string name;
-};
-
-// Player class takes in player input and performs movement
-// It also handles collision between players and bombs.
-
-
-class Player : public GameObject
-{
-public:
-	Player(GameObject* _bomb, int _index, Loader* _model, RigidBody* _body, Texture* _tex, std::shared_ptr<Material> _material, std::string _tag = "Undefined");
-	~Player();
-	void controls();
-	void update(float deltaT);
-	void draw(Camera _camera);
-	void checkCollisionWith(GameObject* other);
-
-private:
-	// how long the bomb has been thrown for and how long it lasts
-	float timer;
-	float duration;
-	bool thrown;
-
-	GameObject* bomb;
-	Controller con;
-	float angle;
-	
-	//btBroadphaseProxy::
+	bool needsUpdating;
 };

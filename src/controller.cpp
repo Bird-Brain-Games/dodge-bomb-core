@@ -65,7 +65,8 @@ Coords Controller::getLeftStick()
 
 
 	Coords result;
-	if ((int)sqrt((float)(m_CurrentState.Gamepad.sThumbLY * m_CurrentState.Gamepad.sThumbLY) + (m_CurrentState.Gamepad.sThumbLX * m_CurrentState.Gamepad.sThumbLX)) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+	if ((int)sqrt((float)(m_CurrentState.Gamepad.sThumbLY * m_CurrentState.Gamepad.sThumbLY) + 
+		(m_CurrentState.Gamepad.sThumbLX * m_CurrentState.Gamepad.sThumbLX)) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
 	{
 		result.x = (float)m_CurrentState.Gamepad.sThumbLX / (float)MAXVALUE;
 		result.y = (float)m_CurrentState.Gamepad.sThumbLY / (float)MAXVALUE;
@@ -103,4 +104,18 @@ float Controller::conLeftTrigger()
 Controller::~Controller()
 {
 
+}
+
+bool Controller::rightStickMoved()
+{
+	return (
+		getRightStick().x < -0.1 || getRightStick().x > 0.1 ||
+		getRightStick().y < -0.1 || getRightStick().y > 0.1);
+}
+
+bool Controller::leftStickMoved()
+{
+	return (
+		getLeftStick().x < -0.1 || getLeftStick().x > 0.1 ||
+		getLeftStick().y < -0.1 || getLeftStick().y > 0.1);
 }

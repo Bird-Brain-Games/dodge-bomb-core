@@ -2,12 +2,12 @@
 #include "GLM\glm.hpp"
 #include <vector>
 #include "VAO.h"
-#include "Shader.h"
+#include "ShaderProgram.h"
 class Loader
 {
 public:
 	virtual bool load(char const* filename) { return false; };
-	virtual void draw(std::shared_ptr<Shader> s) = 0;
+	virtual void draw(std::shared_ptr<ShaderProgram> s) = 0;
 	virtual void createVAO() = 0;
 	virtual void update(float dt) {};
 

@@ -8,6 +8,8 @@ january 2017
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtx/rotate_vector.hpp>
 
+#include <random>
+
 // our camera
 class Camera
 {
@@ -15,21 +17,30 @@ public:
 	Camera();
 	void setProperties(float _FOV, float _ratio, float _minRange, float _maxRange, float _speed);
 
+	// Set the camera window ratio
+	void setRatio(float _ratio) { windowRatio = _ratio; }
+	void setRatio(float windowHeight, float windowWidth) { windowRatio = windowWidth / windowHeight; }
+
 	//sets the camera's position
 	void setPosition(glm::vec3 _pos);
-
+	void setForward(glm::vec3 _for);
 	void setAngle(float, float);
 
 	//returns view matrix
 	glm::mat4x4 getView();
+
 	//returns projection matrix
 	glm::mat4x4 getProj();
+
+	// returns view projection matrix
+	glm::mat4x4 getViewProj() { return viewProjMatrix; }
+
 	//recalculates the view and projection matrix
 	void update();
+	void shadowCam();
 	//rotates camera based on values given.
 	void mouseMotion(int x, int y, int preY, int preX);
 
-	//make general movement call? bound to wasdqe keys?
 	//moves the camera
 	void moveUp();
 	void moveDown();
@@ -38,18 +49,19 @@ public:
 	void moveLeft();
 	void moveRight();
 
+	void shakeScreen();
+
 private:
 
 	//the camera's matricies 
 	glm::mat4x4 projectionMatrix;
 	glm::mat4x4 viewMatrix;
-
-	//camera variables.
+	glm::mat4x4 viewProjMatrix;
 
 	//transformation data
 	glm::vec3 pos;
 	glm::vec3 up;
-	glm::vec3 direction;
+	glm::vec3 forward;
 	glm::vec3 right;
 
 	// yaw and pitch
@@ -62,4 +74,10 @@ private:
 	float maxRange;
 	float speed;
 
+	// Variables used for screen shake
+	float shakeRadius;
+	float shakeDegrade;
+	glm::vec3 shakeOffset;
+	std::default_random_engine generator;
+	std::uniform_real_distribution<float> distribution;
 };

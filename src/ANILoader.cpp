@@ -591,10 +591,10 @@ void Holder::createVAO()
 	vao.createVAO();
 }
 
-void Holder::draw(std::shared_ptr<Shader> s)
+void Holder::draw(std::shared_ptr<ShaderProgram> s)
 {
-	s->uniformMat4x4("BoneMatrixArray", &matricies[0], bones);
-	s->uniformInt("boneCount", bones);
+	//s->uniformMat4x4("BoneMatrixArray", &matricies[0], bones);
+	//s->uniformInt("boneCount", bones);
 
 	glBindVertexArray(vao2);
 	glDrawArrays(GL_TRIANGLES, 0, numtris);
