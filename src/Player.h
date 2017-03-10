@@ -59,4 +59,5 @@ private:
 	static float maxInvincibleTime;
 	static float pauseTime;
 	static int maxHealth;
+	static float maxBombCooldown;
 };

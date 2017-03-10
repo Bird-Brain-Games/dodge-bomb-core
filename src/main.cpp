@@ -531,9 +531,13 @@ void bulletNearCallback(btBroadphasePair& collisionPair,
 	// Only dispatch the Bullet collision information if you want the physics to continue
 	// From Bullet user manual
 	
-	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger ||
+	if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
+		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter ||
+		collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
-		return;*/
+	{
+		return;
+	}
 
 	// Tell the dispatcher to do the collision information
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
@@ -549,7 +553,7 @@ void collideWithCorrectType(Player* player, GameObject* object)
 		player->checkCollisionWith((Player*)object);
 		break;
 	case BOMB_BASE:
-		//player->checkCollisionWith((Bomb*)object);
+		player->checkCollisionWith((Bomb*)object);
 		break;
 	case BOMB_EXPLOSION:
 		player->checkCollisionWith((Explosion*)object);
@@ -570,7 +574,7 @@ void calculateCollisions()
 
 	for (int i = 0; i < numManifolds; i++)
 	{
-		std::cout << numManifolds << std::endl;
+		//std::cout << numManifolds << std::endl;
 		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
 		const btCollisionObject* objA = contactManifold->getBody0();
 		const btCollisionObject* objB = contactManifold->getBody1();
@@ -578,29 +582,20 @@ void calculateCollisions()
 		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
 		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
 
-		// Check if the bombs collide with geometry
-		if (objAGroup == btBroadphaseProxy::SensorTrigger ||
-			objBGroup == btBroadphaseProxy::SensorTrigger)
+		// Check if the collision isn't with geometry
+		if (!objA->isStaticObject() &&
+			!objB->isStaticObject())
 		{
-			// Check if the bomb collides with a player
-			if (objAGroup != objBGroup &&
-				!objA->isStaticObject() &&
-				!objB->isStaticObject())
+			// Tell the player to collide with stuff
+			if (objAGroup == btBroadphaseProxy::CharacterFilter)
 			{
-				// Check if one is a sensor, the other is a player, 
-				// and they don't both belong to the same player.
-				if (objAGroup == btBroadphaseProxy::SensorTrigger &&
-					objBGroup == btBroadphaseProxy::CharacterFilter)
-				{
-					Player* p = (Player*)objB->getUserPointer();
-					collideWithCorrectType(p, (GameObject*)objA->getUserPointer());
-				}
-				else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
-					objAGroup == btBroadphaseProxy::CharacterFilter)
-				{
-					Player* p = (Player*)objA->getUserPointer();
-					collideWithCorrectType(p, (GameObject*)objB->getUserPointer());
-				}
+				Player* p = (Player*)objA->getUserPointer();
+				collideWithCorrectType(p, (GameObject*)objB->getUserPointer());
+			} 
+			else if (objBGroup == btBroadphaseProxy::CharacterFilter)
+			{
+				Player* p = (Player*)objB->getUserPointer();
+				collideWithCorrectType(p, (GameObject*)objA->getUserPointer());
 			}
 		}
 	}
