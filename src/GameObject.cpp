@@ -186,30 +186,33 @@ void GameObject::update(float dt)
 
 void GameObject::draw(Camera &camera)
 {
-	material->shader->bind();
-	material->mat4Uniforms["u_mvp"] = camera.getViewProj() * m_pLocalToWorldMatrix;
-	material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
-	material->vec4Uniforms["u_outlineColour"] = outlineColour;
-
-	// Bind the texture
-	if (texture != nullptr)
+	if (mesh != nullptr)
 	{
-		texture->bind(GL_TEXTURE31, GL_TEXTURE30);
+		material->shader->bind();
+		material->mat4Uniforms["u_mvp"] = camera.getViewProj() * m_pLocalToWorldMatrix;
+		material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
+		material->vec4Uniforms["u_outlineColour"] = outlineColour;
+
+		// Bind the texture
+		if (texture != nullptr)
+		{
+			texture->bind(GL_TEXTURE31, GL_TEXTURE30);
+		}
+
+		material->sendUniforms();
+
+		mesh->draw(material->shader);
+
+		// Unbind the texture
+		if (texture != nullptr)
+		{
+			texture->unbind(GL_TEXTURE31, GL_TEXTURE30);
+		}
+
+		// Draw children
+		for (int i = 0; i < m_pChildren.size(); ++i)
+			m_pChildren[i]->draw(camera);
 	}
-
-	material->sendUniforms();
-
-	mesh->draw(material->shader);
-
-	// Unbind the texture
-	if (texture != nullptr)
-	{
-		texture->unbind(GL_TEXTURE31, GL_TEXTURE30);
-	}
-
-	// Draw children
-	for (int i = 0; i < m_pChildren.size(); ++i)
-		m_pChildren[i]->draw(camera);
 }
 
 void GameObject::setParent(GameObject* newParent)
