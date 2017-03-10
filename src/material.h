@@ -13,9 +13,12 @@ public:
 	std::map<std::string, int> intUniforms;
 	// maps for other uniform types ...
 
-	Material()
-		: shader(std::make_shared<ShaderProgram>())
-	{}
+	//the name of our material
+	std::string name;
+
+	Material(std::string _name)
+		: shader(std::make_shared<ShaderProgram>(_name))
+	{name = _name;}
 
 	void sendUniforms()
 	{

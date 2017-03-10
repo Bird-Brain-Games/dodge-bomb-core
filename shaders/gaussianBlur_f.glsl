@@ -11,7 +11,7 @@ uniform vec4 u_kernel;
 in VertexData
 {
 	vec3 normal;
-	vec3 texCoord;
+	vec2 texCoord;
 	vec4 colour;
 	vec3 posEye;
 } vIn;

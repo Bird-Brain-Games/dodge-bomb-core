@@ -10,7 +10,8 @@ GameObject::GameObject()
 	material(nullptr),
 	texture(nullptr),
 	rigidBody(nullptr),
-	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
+	colliderType(COLLIDER_TYPE::COLLIDER_DEFAULT)
 {
 	
 }
@@ -29,7 +30,8 @@ GameObject::GameObject(
 	material(_material),
 	texture(_texture),
 	rigidBody(nullptr),
-	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
+	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
+	colliderType(COLLIDER_TYPE::COLLIDER_DEFAULT)
 {
 
 }
@@ -42,8 +44,9 @@ GameObject::GameObject(GameObject& other)
 	mesh(other.mesh),
 	material(other.material),
 	texture(other.texture),
-	outlineColour(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)),
-	rigidBody(nullptr)
+	outlineColour(other.outlineColour),
+	rigidBody(nullptr),
+	colliderType(other.colliderType)
 {
 	rigidBody = std::make_unique<RigidBody>(*other.rigidBody);
 	rigidBody->load(other.rigidBody->getFileName(), 
@@ -180,7 +183,7 @@ void GameObject::update(float dt)
 	// Update children
 	for (int i = 0; i < m_pChildren.size(); i++)
 		m_pChildren[i]->update(dt);
-
+	
 	needsUpdating = false;
 }
 

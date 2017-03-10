@@ -303,7 +303,7 @@ bool RigidBody::load(std::string fileName, btCollisionObject::CollisionFlags fla
 		btRigidBody::btRigidBodyConstructionInfo* rigidCI = Sys.getRigidBodyCI(fileName);
 		body = new btRigidBody(*rigidCI);
 
-		body->setCollisionFlags(body->getCollisionFlags() | flags);
+		body->setCollisionFlags(flags);
 		body->setMotionState(new btDefaultMotionState());
 
 		if (group >= 0)
