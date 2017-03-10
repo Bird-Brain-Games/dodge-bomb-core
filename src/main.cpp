@@ -28,6 +28,7 @@
 #include "FrameBufferObject.h"
 #include "InputManager.h"
 #include "menu.h"
+#include "ANILoader.h"
 
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
@@ -62,7 +63,7 @@ Camera playerCamera; // the camera you move around with wasd
 Camera shadowCamera; // Camera for the shadow map
 
 // Asset databases
-std::map<std::string, std::shared_ptr<LoadObject>> meshes;
+std::map<std::string, std::shared_ptr<Loader>> meshes;
 std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
 std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
@@ -141,10 +142,11 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru, v_null, v_shadow;
+	Shader v_default, v_passThru, v_null, v_skinning, v_shadow;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
+	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
 	v_shadow.loadShaderFromFile(shaderPath + "shadowMap_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
@@ -166,66 +168,78 @@ void initializeShaders()
 	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
 
 	// No Lighting material
-	materials["noLighting"] = std::make_shared<Material>();
+	materials["noLighting"] = std::make_shared<Material>("noLighting");
 	materials["noLighting"]->shader->attachShader(v_default);
 	materials["noLighting"]->shader->attachShader(f_noLighting);
 	materials["noLighting"]->shader->linkProgram();
 	
 	// Default material that all objects use
-	materials["default"] = std::make_shared<Material>();
+	materials["default"] = std::make_shared<Material>("default");
 	materials["default"]->shader->attachShader(v_default);
 	materials["default"]->shader->attachShader(f_default);
 	materials["default"]->shader->linkProgram();
 
 	// Default material that all objects use
-	materials["toon"] = std::make_shared<Material>();
+	materials["toon"] = std::make_shared<Material>("toon");
 	materials["toon"]->shader->attachShader(v_default);
 	materials["toon"]->shader->attachShader(f_toon);
 	materials["toon"]->shader->linkProgram();
 
+	//material for our players and there meshes.
+	materials["toonPlayer"] = std::make_shared<Material>("toonPlayer");
+	materials["toonPlayer"]->shader->attachShader(v_skinning);
+	materials["toonPlayer"]->shader->attachShader(f_toon);
+	materials["toonPlayer"]->shader->linkProgram();
+
 	// Material used for menu full screen drawing
-	materials["menu"] = std::make_shared<Material>();
+	materials["menu"] = std::make_shared<Material>("menu");
 	materials["menu"]->shader->attachShader(v_null);
 	materials["menu"]->shader->attachShader(f_texColor);
 	materials["menu"]->shader->attachShader(g_menu);
 	materials["menu"]->shader->linkProgram();
 
 	// Unlit texture material
-	materials["unlitTexture"] = std::make_shared<Material>();
+	materials["unlitTexture"] = std::make_shared<Material>("unlitTexture");
 	materials["unlitTexture"]->shader->attachShader(v_passThru);
 	materials["unlitTexture"]->shader->attachShader(f_unlitTex);
 	materials["unlitTexture"]->shader->attachShader(g_quad);
 	materials["unlitTexture"]->shader->linkProgram();
 
 	// Invert filter material
-	materials["bright"] = std::make_shared<Material>();
+	materials["bright"] = std::make_shared<Material>("bright");
 	materials["bright"]->shader->attachShader(v_passThru);
 	materials["bright"]->shader->attachShader(f_bright);
 	materials["bright"]->shader->attachShader(g_quad);
 	materials["bright"]->shader->linkProgram();
 
 	// Sobel filter material
-	materials["bloom"] = std::make_shared<Material>();
+	materials["bloom"] = std::make_shared<Material>("bloom");
 	materials["bloom"]->shader->attachShader(v_passThru);
 	materials["bloom"]->shader->attachShader(f_composite);
 	materials["bloom"]->shader->attachShader(g_quad);
 	materials["bloom"]->shader->linkProgram();
 
 	// Box blur filter
-	materials["blur"] = std::make_shared<Material>();
+	materials["blur"] = std::make_shared<Material>("blur");
 	materials["blur"]->shader->attachShader(v_passThru);
 	materials["blur"]->shader->attachShader(f_blur);
 	materials["blur"]->shader->attachShader(g_quad);
 	materials["blur"]->shader->linkProgram();
 
 	// Sobel filter material
-	materials["sobel"] = std::make_shared<Material>();
+	materials["sobel"] = std::make_shared<Material>("sobel");
 	materials["sobel"]->shader->attachShader(v_passThru);
 	materials["sobel"]->shader->attachShader(f_sobel);
 	materials["sobel"]->shader->linkProgram();
 
+	// sobel filter for player
+	materials["sobelPlayer"] = std::make_shared<Material>("sobelPlayer");
+	materials["sobelPlayer"]->shader->attachShader(v_skinning);
+	materials["sobelPlayer"]->shader->attachShader(f_sobel);
+	materials["sobelPlayer"]->shader->linkProgram();
+
 	// Shadow filter material
-	materials["shadow"] = std::make_shared<Material>();
+	materials["shadow"] = std::make_shared<Material>("shadow");
 	materials["shadow"]->shader->attachShader(v_shadow);
 	materials["shadow"]->shader->attachShader(f_shadow);
 	materials["shadow"]->shader->linkProgram();
@@ -242,7 +256,6 @@ void initializeScene()
 	std::shared_ptr<LoadObject> barrelMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> cannonMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> sphereMesh = std::make_shared<LoadObject>();
-	std::shared_ptr<LoadObject> bombotMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> corkboardMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> roomMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> bombMesh = std::make_shared<LoadObject>();
@@ -256,12 +269,22 @@ void initializeScene()
 	std::shared_ptr<LoadObject> mapMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
 
+	std::shared_ptr<Holder> bombotMesh = std::make_shared<Holder>();
+
 	// Load all meshes
 	tableMesh->load(meshPath + "translatedtable.obj");
 	barrelMesh->load(meshPath + "barrel.obj");
 	cannonMesh->load(meshPath + "scaledcannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
-	bombotMesh->load(meshPath + "bombot.obj");
+
+	bombotMesh->baseLoad("Assets/htr/bombot");
+	// do not change the names of these
+	// eventually the goal is change them to enums and not strings.
+	bombotMesh->AniLoad("Assets/htr/idle" , "idle");
+	bombotMesh->AniLoad("Assets/htr/throw", "throw");
+	bombotMesh->AniLoad("Assets/htr/walk" , "walk");
+	bombotMesh->setAnim("idle");
+
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
 	bombMesh->load(meshPath + "bomb.obj");
@@ -453,9 +476,11 @@ void initializeScene()
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
+	
+	players["bombot2"] = std::make_shared<Player>(
+		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
+	gameobjects["bombot2"] = players["bombot2"];
 	/*
-	gameobjects["bombot2"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 2);
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
@@ -481,6 +506,7 @@ void initializeScene()
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
 	std::unique_ptr<RigidBody> bombot1Body;
+	std::unique_ptr<RigidBody> bombot2Body;
 	std::unique_ptr<RigidBody> sphereBody;
 	std::unique_ptr<RigidBody> barrelBody;
 	std::unique_ptr<RigidBody> barrel1Body;
@@ -492,9 +518,10 @@ void initializeScene()
 	std::unique_ptr<RigidBody> boatBody;
 	std::unique_ptr<RigidBody> sketchBody;
 
-	tableBody = std::make_unique<RigidBody>();
+	tableBody	= std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
-	sphereBody = std::make_unique<RigidBody>();
+	bombot2Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	sphereBody	= std::make_unique<RigidBody>();
 	barrelBody = std::make_unique<RigidBody>();
 	barrel1Body = std::make_unique<RigidBody>();
 	boulderBody = std::make_unique<RigidBody>();
@@ -508,6 +535,7 @@ void initializeScene()
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
 	bombot1Body->load(bombotBodyPath);
+	bombot2Body->load(bombotBodyPath);
 	sphereBody->load(sphereBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 	barrelBody->load(barrelBodyPath);
 	barrel1Body->load(barrelBodyPath);
@@ -522,6 +550,7 @@ void initializeScene()
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
 	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
+	gameobjects["bombot2"]->attachRigidBody(bombot2Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
 	gameobjects["barrelTR"]->attachRigidBody(barrelBody);
 	gameobjects["barrel1"]->attachRigidBody(barrel1Body);
@@ -533,7 +562,6 @@ void initializeScene()
 	gameobjects["boat"]->attachRigidBody(boatBody);
 	gameobjects["sketch"]->attachRigidBody(sketchBody);
 
-	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
 
@@ -544,10 +572,17 @@ void initializeScene()
 		bombTexMap,		// Player2 bomb texture
 		bombTexMap,		// Player3 bomb texture
 		bombTexMap,		// Player4 bomb texture
+		sphereMesh,		// Explosion mesh
+		markerTexMap,	// Explosion texture
+		sphereBodyPath,	// Explosion rigidbody
 		defaultMaterial,
 		bombBodyPath);
 
 	players["bombot1"]->attachBombManager(bombManager);
+
+	// Set the outline colors
+	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	gameobjects["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
@@ -558,7 +593,7 @@ void initializeScene()
 
 	// Set default camera properties (WIP)
 	playerCamera.setPosition(glm::vec3(0.0f, 47.0f, 15.0f));
-	playerCamera.setAngle(3.14159012f, 75.98318052f);
+	//playerCamera.setAngle(3.14159012f, 75.98318052f);
 	//playerCamera.setProperties(44.00002, (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f, 0.001f);
 	playerCamera.update();
 
@@ -573,12 +608,36 @@ void bulletNearCallback(btBroadphasePair& collisionPair,
 	// Only dispatch the Bullet collision information if you want the physics to continue
 	// From Bullet user manual
 	
-	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger ||
+	if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
+		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter ||
+		collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
-		return;*/
+	{
+		return;
+	}
 
 	// Tell the dispatcher to do the collision information
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
+}
+
+void collideWithCorrectType(Player* player, GameObject* object)
+{
+	switch (object->getColliderType())
+	{
+	case DEFAULT:
+		break;
+	case PLAYER:
+		player->checkCollisionWith((Player*)object);
+		break;
+	case BOMB_BASE:
+		player->checkCollisionWith((Bomb*)object);
+		break;
+	case BOMB_EXPLOSION:
+		player->checkCollisionWith((Explosion*)object);
+		break;
+	default:
+		break;
+	}
 }
 
 void calculateCollisions()
@@ -600,31 +659,20 @@ void calculateCollisions()
 		objAGroup = objA->getBroadphaseHandle()->m_collisionFilterGroup;
 		objBGroup = objB->getBroadphaseHandle()->m_collisionFilterGroup;
 
-		// Check if the bombs collide with geometry
-		if (objAGroup == btBroadphaseProxy::SensorTrigger ||
-			objBGroup == btBroadphaseProxy::SensorTrigger)
+		// Check if the collision isn't with geometry
+		if (!objA->isStaticObject() &&
+			!objB->isStaticObject())
 		{
-			// Check if the bomb collides with a player
-			if (objAGroup != objBGroup &&
-				!objA->isStaticObject() &&
-				!objB->isStaticObject())
+			// Tell the player to collide with stuff
+			if (objAGroup == btBroadphaseProxy::CharacterFilter)
 			{
-				// Check if one is a sensor, the other is a player, 
-				// and they don't both belong to the same player.
-				if (objAGroup == btBroadphaseProxy::SensorTrigger &&
-					objBGroup == btBroadphaseProxy::CharacterFilter)
-				{
-					Player* p = (Player*)objB->getUserPointer();
-					Bomb* b = (Bomb*)objA->getUserPointer();
-					p->checkCollisionWith(b);
-				}
-				else if (objBGroup == btBroadphaseProxy::SensorTrigger &&
-					objAGroup == btBroadphaseProxy::CharacterFilter)
-				{
-					Player* p = (Player*)objA->getUserPointer();
-					Bomb* b = (Bomb*)objB->getUserPointer();
-					p->checkCollisionWith(b);
-				}
+				Player* p = (Player*)objA->getUserPointer();
+				collideWithCorrectType(p, (GameObject*)objB->getUserPointer());
+			} 
+			else if (objBGroup == btBroadphaseProxy::CharacterFilter)
+			{
+				Player* p = (Player*)objB->getUserPointer();
+				collideWithCorrectType(p, (GameObject*)objA->getUserPointer());
 			}
 		}
 	}
@@ -697,7 +745,19 @@ void setMaterialForAllGameObjects(std::string materialName)
 	{
 		itr->second->setMaterial(mat);
 	}
+
+	bombManager->setMaterialForAllBombs(mat);
 }
+
+void setMaterialForAllPlayerObjects(std::string materialName)
+{
+	auto mat = materials[materialName];
+	for (auto itr = players.begin(); itr != players.end(); ++itr)
+	{
+		itr->second->setMaterial(mat);
+	}
+}
+
 
 // Only takes the highest brightness from the FBO
 void brightPass()
@@ -790,15 +850,15 @@ void DisplayCallbackFunction(void)
 		glCullFace(GL_FRONT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glLineWidth(outlineWidth);
-
+		
 		// Clear back buffer
 		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
-
+		
 		// Tell all game objects to use the outline shading material
 		setMaterialForAllGameObjects("sobel");
-
+		setMaterialForAllPlayerObjects("sobelPlayer");
 		drawScene(playerCamera);
-
+		
 		glCullFace(GL_BACK);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
@@ -810,6 +870,21 @@ void DisplayCallbackFunction(void)
 			case TOON:
 			{
 				setMaterialForAllGameObjects("toon");
+
+				setMaterialForAllPlayerObjects("toonPlayer");
+				materials["toonPlayer"]->shader->bind();
+
+				materials["toonPlayer"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+				materials["toonPlayer"]->intUniforms["u_diffuseTex"] = 31;
+				materials["toonPlayer"]->intUniforms["u_specularTex"] = 30;
+
+				materials["toonPlayer"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+				materials["toonPlayer"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
+				materials["toonPlayer"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
+				materials["toonPlayer"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+
+				materials["toonPlayer"]->sendUniforms();
+				materials["toonPlayer"]->shader->unbind();
 
 				materials["toon"]->shader->bind();
 
@@ -863,6 +938,14 @@ void DisplayCallbackFunction(void)
 				materials["noLighting"]->sendUniforms();
 			}
 			break;
+				setMaterialForAllPlayerObjects("toonPlayer");
+				// Set material properties for all our non player objects
+
+				materials["toon"]->shader->unbind();
+
+				//sets the material properties for all our player objects
+
+	
 		}
 
 		//draw the scene to the fbo
@@ -984,8 +1067,8 @@ void handleKeyboardInput()
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
 	{
-		gameobjects["bombot1"]->setPosition(
-			gameobjects["bombot1"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
+		gameobjects["bombot2"]->setPosition(
+			gameobjects["bombot2"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
 	{
@@ -999,6 +1082,8 @@ void handleKeyboardInput()
 	{
 		playerCamera.shakeScreen();
 	}
+
+
 
 	// Switch Lighting Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('1'))

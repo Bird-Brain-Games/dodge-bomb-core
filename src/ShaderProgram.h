@@ -3,17 +3,18 @@
 #include "Shader.h"
 #include <glm\matrix.hpp>
 #include "GLEW/glew.h"
+#include <unordered_map>
 
 class ShaderProgram
 {
 public:
-	ShaderProgram();
+	ShaderProgram(std::string);
 	~ShaderProgram();
 
 	// Initialization functions
 	void attachShader(Shader shader);
 	int linkProgram();
-	
+
 	// Usage functions
 	void bind();
 	void unbind();
@@ -30,20 +31,23 @@ public:
 
 	// Sends a 4x4 matrix stored in an array to GPU
 	// Must have to apply the MVP transform
-	void sendUniformMat4(const std::string& uniformName, glm::mat4& mat4);
+	void sendUniformMat4(const std::string& uniformName, glm::mat4& mat4, int _num = 1);
 
 	void destroy();
 
 	unsigned int getHandle() { return handle; }
 
 private:
+	//name used for outputing error messages.
+	std::string name;
 	unsigned int handle;
 
+
+	//we use unordered map because its faster to look up info. complexity of o(1) vs o(logn) for a normal map
+	std::unordered_map<std::string, int> location;
 	// All uniforms have a constant location
 	// This function searches for the uniform name (as written in the shader)
-	// and returns that location. If name is not found, it returns 0
-	// Note: This is a pretty slow operation and you do not want to be
-	// calling this every frame. Set up a system, such as a std::map which caches
-	// the location and used the string name as a key
+	// and stores it in the above map and then returns it.
+	// we store it because the call to get the location is a weight call.
 	int getUniformLocation(const std::string& uniformName);
 };
