@@ -221,7 +221,7 @@ void initializeShaders()
 	materials["blur"]->shader->linkProgram();
 
 	// Sobel filter material
-	materials["outline"] = std::make_shared<Material>();
+	materials["outline"] = std::make_shared<Material>("outline");
 	materials["outline"]->shader->attachShader(v_passThru);
 	materials["outline"]->shader->attachShader(f_sobel);
 	materials["outline"]->shader->linkProgram();
@@ -625,7 +625,7 @@ void collideWithCorrectType(Player* player, GameObject* object)
 {
 	switch (object->getColliderType())
 	{
-	case DEFAULT:
+	case COLLIDER_DEFAULT:
 		break;
 	case PLAYER:
 		player->checkCollisionWith((Player*)object);
