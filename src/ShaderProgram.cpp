@@ -1,8 +1,9 @@
 #include "ShaderProgram.h"
 #include <iostream>
 
-ShaderProgram::ShaderProgram()
+ShaderProgram::ShaderProgram(std::string _name)
 {
+	name = _name;
 	handle = 0;
 }
 
@@ -38,7 +39,7 @@ int ShaderProgram::linkProgram()
 
 		if (linkStatus)
 		{
-			std::cout << "Shader linked Successfully." << std::endl;
+			std::cout << "Shader " + name + " linked Successfully." << std::endl;
 			return handle;
 		}
 
@@ -60,7 +61,7 @@ int ShaderProgram::linkProgram()
 	}
 	else
 	{
-		std::cout << "Shader program failed to link: handle not set" << std::endl;
+		std::cout << "Shader "+ name +" program failed to link: handle not set" << std::endl;
 	}
 }
 
@@ -86,10 +87,10 @@ void ShaderProgram::sendUniformVec4(const std::string& uniformName, glm::vec4& v
 	glUniform4fv(uniformLocation, 1, &vec4[0]);
 }
 
-void ShaderProgram::sendUniformMat4(const std::string& uniformName, glm::mat4& mat4)
+void ShaderProgram::sendUniformMat4(const std::string& uniformName, glm::mat4& mat4, int _num)
 {
 	int uniformLocation = getUniformLocation(uniformName);
-	glUniformMatrix4fv(uniformLocation, 1, false, &mat4[0][0]);
+	glUniformMatrix4fv(uniformLocation, _num, false, &mat4[0][0]);
 }
 
 void ShaderProgram::destroy()
@@ -102,5 +103,21 @@ void ShaderProgram::destroy()
 
 int ShaderProgram::getUniformLocation(const std::string& uniformName)
 {
-	return glGetUniformLocation(handle, uniformName.c_str());
+	//create a copy of an element in the map.
+	std::unordered_map<std::string, int>::iterator i = location.find(uniformName);
+
+	//checks whether it the element actually existed
+	if (i == location.end())
+	{
+		//if not found add the uniform to the list
+		location[uniformName] = glGetUniformLocation(handle, uniformName.c_str());
+		//check whether the value is actually being sent to our shader
+		i = location.find(uniformName);
+		if (i->second == -1)
+		{
+			std::cout << "error in shader " << name << " " << uniformName << " does not exist" << std::endl;
+		}
+	}
+	return i->second;
+
 }
