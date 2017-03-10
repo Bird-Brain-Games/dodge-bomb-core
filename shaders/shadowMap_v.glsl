@@ -11,7 +11,7 @@ layout(location = 3) in vec4 vIn_colour;
 // Constants throughout the entire pipeline
 // These values are sent from C++ (glSendUniform*)
 uniform mat4 u_mvp;
-uniform mat4 u_mv;
+
 uniform vec4 u_colour;
 uniform mat4 u_bias;
 

@@ -20,7 +20,7 @@ Camera::Camera()
 	setPosition(glm::vec3(15.0f));
 	setAngle(0.0f, 0.0f);
 
-	setProperties(45, 1080.0f / 720.0f, 0.1f, 10000.0f, 0.5f);
+	setProperties(45, 1080.0f / 720.0f, 0.1f, 100000.0f, 0.5f);
 	forward = glm::vec3(0.0f, -10.0f, -10.0f);
 
 	shakeRadius = 0.0f;
@@ -31,6 +31,19 @@ Camera::Camera()
 void Camera::setAngle(float x, float y)
 {
 	angle = glm::vec2(x, y);
+
+	forward = glm::vec3(
+		cos(angle.y) * sin(angle.x),
+		sin(angle.y),
+		cos(angle.y) * cos(angle.x)
+	);
+	//1.57f is pi/2
+	right = glm::vec3(
+		sin(angle.x - 1.57f),
+		0,
+		cos(angle.x - 1.57f)
+	);
+	up = glm::cross(right, forward);
 }
 
 void Camera::setProperties(float _FOV, float _windowRatio, float _minRange, float _maxRange, float _speed)

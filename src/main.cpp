@@ -33,8 +33,8 @@
 #define FRAMES_PER_SECOND 60
 const int FRAME_DELAY = 1000 / FRAMES_PER_SECOND; // Milliseconds per frame
 
-float windowWidth = 1280.0;
-float windowHeight = 720.0;
+float windowWidth = 1920.0;
+float windowHeight = 1080.0;
 
 glm::vec3 mousePosition; // x,y,0
 glm::vec3 mousePositionFlipped; // x, height - y, 0
@@ -49,13 +49,6 @@ glm::vec3 position;
 float movementSpeed = 5.0f;
 glm::vec4 lightPos;
 glm::vec4 lightTwo;
-
-glm::mat4 biasMatrix(
-	0.5, 0.0, 0.0, 0.0,
-	0.0, 0.5, 0.0, 0.0,
-	0.0, 0.0, 0.5, 0.0,
-	0.5, 0.5, 0.5, 1.0
-);
 
 // Cameras
 Camera playerCamera; // the camera you move around with wasd
@@ -78,7 +71,7 @@ std::shared_ptr<BombManager> bombManager;
 // Framebuffer objects
 FrameBufferObject fboUnlit;
 FrameBufferObject fboBright;
-FrameBufferObject fboBlurA, fboBlurB;
+FrameBufferObject fboBlur, fboBlurB;
 FrameBufferObject shadowMap;
 
 //////////////////////////////////////////////////////////////////////
@@ -86,7 +79,6 @@ FrameBufferObject shadowMap;
 
 enum LightingMode
 {
-	DEFAULT,
 	NOLIGHT,
 	TOON
 };
@@ -98,17 +90,19 @@ float outlineWidth = 4.0;
 bool outlineToggle = true;
 
 // Lighting Controls
-float deskLamp = 0.6; 
-float innerCutOff = 0.8; // Spot Light Size
-float outerCutOff = 0.82;
-glm::vec3 deskForward = glm::vec3(0.3, 1.0, 0.4); // Spot Light Direction
-float roomLight = 0.6;
+float deskLamp = 0.8; 
+float innerCutOff = 0.45; // Spot Light Size
+float outerCutOff = 0.50;
+glm::vec3 deskForward = glm::vec3(0.2, 1.0, 1.5); // Spot Light Direction
+float roomLight = 0.4;
 
 float ambient = 0.1; // Ambient Lighting
 float diffuse = 1.0f; // Diffuse Lighting
 float specular = 0.2f; // Specular Lighting
-float shininess = 1.5f; // Shinniness
-float rim = 1.0f; // Rim Lighting
+float shininess = 2.0f; // Shinniness
+float rim = 0.5f; // Rim Lighting
+
+GLuint toonRamp;
 
 // Bloom Controls
 glm::vec4 bloomThreshold(0.6f);
@@ -219,10 +213,10 @@ void initializeShaders()
 	materials["blur"]->shader->linkProgram();
 
 	// Sobel filter material
-	materials["sobel"] = std::make_shared<Material>();
-	materials["sobel"]->shader->attachShader(v_passThru);
-	materials["sobel"]->shader->attachShader(f_sobel);
-	materials["sobel"]->shader->linkProgram();
+	materials["outline"] = std::make_shared<Material>();
+	materials["outline"]->shader->attachShader(v_passThru);
+	materials["outline"]->shader->attachShader(f_sobel);
+	materials["outline"]->shader->linkProgram();
 
 	// Shadow filter material
 	materials["shadow"] = std::make_shared<Material>();
@@ -348,6 +342,10 @@ void initializeScene()
 	char boatTex[] = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
+
+
+	toonRamp = ilutGLLoadImage("../../Assets/img/toonRamp.png");
+
 	//Add textures to the map
 	textures["default"] = deskTexMap;
 	textures["bombot"] = bombotTexMap;
@@ -365,6 +363,7 @@ void initializeScene()
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
+
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
@@ -416,9 +415,11 @@ void initializeScene()
 	gameobjects["lampcup"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
 
+
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
+	gameobjects["bombot1"]->setScale(glm::vec3(3.0f));
 	/*
 	gameobjects["bombot2"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
@@ -427,7 +428,9 @@ void initializeScene()
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 3);
 	*/
-	
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, toonRamp);
+
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	RIGID BODIES	///////////////////////////////
 	
@@ -480,11 +483,10 @@ void initializeScene()
 	mainMenu->setMaterial(materials["menu"]);
 
 	// Set default camera properties (WIP)
-	playerCamera.setPosition(glm::vec3(0.0f, 47.0f, 15.0f));
-	playerCamera.setAngle(3.14159012f, 75.98318052f);
-	//playerCamera.setProperties(44.00002, (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f, 0.001f);
+	playerCamera.setPosition(glm::vec3(23.0f, 90.0f, 40.0f));
+	playerCamera.setAngle(3.14159012f, 5.3f);
 	playerCamera.update();
-
+	playerCamera.shadowCam();
 	
 	
 }
@@ -555,9 +557,9 @@ void calculateCollisions()
 
 void initializeFrameBuffers()
 {
-	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 1, true);
+	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 2, true);
 	fboBright.createFrameBuffer(80, 60, 1, false);
-	fboBlurA.createFrameBuffer(80, 60, 1, false);
+	fboBlur.createFrameBuffer(80, 60, 1, false);
 	fboBlurB.createFrameBuffer(80, 60, 1, false);
 	shadowMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
 }
@@ -568,20 +570,17 @@ void updateScene()
 	static float ang = 1.0f;
 
 	ang += deltaTime; // comment out to pause light
-	lightPos.x = 50.0f;
-	lightPos.y = 80.0f;
-	lightPos.z = -40.0f;
+	lightPos.x = 40.0f;
+	lightPos.y = 65.0f;
+	lightPos.z = 0.0f;
 	lightPos.w = 1.0f;
 
 	lightTwo.x = 0.0f;
-	lightTwo.y = 100.0f;
+	lightTwo.y = 80.0f;
 	lightTwo.z = 100.0f;
 	lightTwo.w = 1.0f;
 
-	shadowCamera.setPosition(glm::vec3(lightPos.x, lightPos.y, lightPos.z));
-	shadowCamera.setForward(glm::vec3(0.3, 1.0, 0.4));
-
-	//playerCamera.shadowCam();
+	playerCamera.update();
 
 
 	// Update all game objects
@@ -643,11 +642,11 @@ void brightPass()
 }
 
 // Blurs the FBO
-void blurBrightPass()
+void blurPass(FrameBufferObject fboIn, FrameBufferObject fboOut)
 {
-	fboBlurA.bindFrameBufferForDrawing();
+	fboOut.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
-	fboBright.bindTextureForSampling(0, GL_TEXTURE0);
+	fboIn.bindTextureForSampling(0, GL_TEXTURE0);
 
 	static auto blurMaterial = materials["blur"];
 
@@ -666,19 +665,18 @@ void blurBrightPass()
 	// Draw a full screen quad using the geometry shader
 	glDrawArrays(GL_POINTS, 0, 1);
 
-
 	for (int i = 0; i < numBlurPasses; i++)
 	{
 		if (i % 2 == 0)
 		{
 			fboBlurB.bindFrameBufferForDrawing();
-			fboBlurA.bindTextureForSampling(0, GL_TEXTURE0);
+			fboOut.bindTextureForSampling(0, GL_TEXTURE0);
 			// Draw a full screen quad using the geometry shader
 			glDrawArrays(GL_POINTS, 0, 1);
 		}
 		else
 		{
-			fboBlurA.bindFrameBufferForDrawing();
+			fboOut.bindFrameBufferForDrawing();
 			fboBlurB.bindTextureForSampling(0, GL_TEXTURE0);
 			// Draw a full screen quad using the geometry shader
 			glDrawArrays(GL_POINTS, 0, 1);
@@ -691,21 +689,21 @@ void DisplayCallbackFunction(void)
 {
 	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
 
-	/////////Shadow Map
-	shadowMap.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(clearColor);
+	
+	///////////Shadow Map
+	//shadowMap.bindFrameBufferForDrawing();
+	//FrameBufferObject::clearFrameBuffer(clearColor);
 
-	setMaterialForAllGameObjects("shadow");
-	materials["shadow"]->mat4Uniforms["u_bias"] = biasMatrix;
+	//setMaterialForAllGameObjects("shadow");
+	//materials["shadow"]->mat4Uniforms["u_bias"] = biasMatrix;
 
-	drawScene(playerCamera);
+	//drawScene(playerCamera);
 
-	shadowMap.unbindFrameBuffer(windowWidth, windowHeight);
-	FrameBufferObject::clearFrameBuffer(clearColor);
+	//shadowMap.unbindFrameBuffer(windowWidth, windowHeight);
 
 	// bind scene FBO
 	fboUnlit.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(clearColor);
+	FrameBufferObject::clearFrameBuffer(clearColor); 
 	
 	///////////////////////////// First Pass: Outlines
 	if (outlineToggle)
@@ -718,7 +716,7 @@ void DisplayCallbackFunction(void)
 		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
 
 		// Tell all game objects to use the outline shading material
-		setMaterialForAllGameObjects("sobel");
+		setMaterialForAllGameObjects("outline");
 
 		drawScene(playerCamera);
 
@@ -740,6 +738,8 @@ void DisplayCallbackFunction(void)
 				materials["toon"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
 				materials["toon"]->vec4Uniforms["u_lightTwo"] = playerCamera.getView() * lightTwo;
 
+
+				materials["toon"]->intUniforms["u_toonRamp"] = 5;
 				materials["toon"]->intUniforms["u_diffuseTex"] = 31;
 				materials["toon"]->intUniforms["u_specularTex"] = 30;
 
@@ -750,26 +750,6 @@ void DisplayCallbackFunction(void)
 
 
 				materials["toon"]->sendUniforms();
-			}
-			break;
-			// None Toon Shading
-			case DEFAULT:
-			{
-				setMaterialForAllGameObjects("default");
-				
-				materials["default"]->shader->bind();
-				
-				// Set material properties
-				materials["default"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
-
-				materials["default"]->intUniforms["u_diffuseTex"] = 31;
-				materials["default"]->intUniforms["u_specularTex"] = 30;
-
-				materials["default"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-				materials["default"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
-		
-
-				materials["default"]->sendUniforms();
 			}
 			break;
 			// Just displays Textures
@@ -808,32 +788,22 @@ void DisplayCallbackFunction(void)
 
 			if (bloomToggle)
 			{
-				//brightPass();
-				//blurBrightPass();
+				brightPass();
+				blurPass(fboBright, fboBlur);
 
-				//fboBlurA.bindTextureForSampling(0, GL_TEXTURE0);
-				//fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
+				fboBlur.bindTextureForSampling(0, GL_TEXTURE0);
+				fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
 
-				//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-				//FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+				FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+				FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
 
-				//static auto bloomMaterial = materials["bloom"];
+				static auto bloomMaterial = materials["bloom"];
 
-				//bloomMaterial->shader->bind();
-				//bloomMaterial->shader->sendUniformInt("u_bright", 0);
-				//bloomMaterial->shader->sendUniformInt("u_scene", 1);
-				//bloomMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-				//bloomMaterial->sendUniforms();
-
-				//// Draw a full screen quad using the geometry shader
-				//glDrawArrays(GL_POINTS, 0, 1);
-
-				shadowMap.bindTextureForSampling(0, GL_TEXTURE0);
-				static auto unlitMaterial = materials["unlitTexture"];
-				unlitMaterial->shader->bind();
-				unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-				unlitMaterial->shader->sendUniformInt("u_tex", 0);
-				unlitMaterial->sendUniforms();
+				bloomMaterial->shader->bind();
+				bloomMaterial->shader->sendUniformInt("u_bright", 0); 
+				bloomMaterial->shader->sendUniformInt("u_scene", 1);
+				bloomMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+				bloomMaterial->sendUniforms();
 
 				// Draw a full screen quad using the geometry shader
 				glDrawArrays(GL_POINTS, 0, 1);
@@ -923,16 +893,12 @@ void handleKeyboardInput()
 		playerCamera.shakeScreen();
 	}
 
-	// Switch Lighting Mode
-	if (KEYBOARD_INPUT->CheckPressEvent('1'))
-	{
-		currentLightingMode = DEFAULT;
-	}
+	// Lighting Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('2'))
 	{
 		currentLightingMode = NOLIGHT;
 	}
-	if (KEYBOARD_INPUT->CheckPressEvent('3'))
+	if (KEYBOARD_INPUT->CheckPressEvent('1'))
 	{
 		currentLightingMode = TOON;
 	}

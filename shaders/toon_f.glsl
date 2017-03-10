@@ -10,6 +10,7 @@ uniform vec4 u_shine;
 
 uniform sampler2D u_diffuseTex;
 uniform sampler2D u_specularTex;
+uniform sampler2D u_toonRamp;
 
 in VertexData
 {
@@ -31,6 +32,7 @@ void main()
 	vec3 N = normalize(vIn.normal);
 	float diffuse = max(0.0, dot(N, L));
 
+	//diffuse = texture(u_toonRamp, vec2(diffuse)).x;
 
 	//Specular Component
 	vec3 V = normalize(-vIn.posEye);
@@ -42,33 +44,34 @@ void main()
 
 	// Toon Lighting
 	if (diffuse <= 0) specular = 0;
-	else if (diffuse <= 0.15) diffuse = 0.15;
-	//else if (diffuse <= 0.30) diffuse = 0.30;
+	//else if (diffuse <= 0.15) diffuse = 0.15;
 	else if (diffuse <= 0.30) diffuse = 0.30;
+	//else if (diffuse <= 0.50) diffuse = 0.5;
 	//else if (diffuse <= 0.50) diffuse = 0.50;
-	//else if (diffuse <= 0.60) diffuse = 0.60;
+	else if (diffuse <= 0.60) diffuse = 0.60;
 	//else if (diffuse <= 0.70) diffuse = 0.70;
 	//else if (diffuse <= 0.80) diffuse = 0.80;
 	//else if (diffuse <= 0.90) diffuse = 0.90;
-	else diffuse = 1.00;
+	//else diffuse = 1.00;
 
 	vec3 deskLamp = vec3(
 		+ vec3(diffuse * diffuseColour.rgb * u_controls.y)                      // Diffuse for Desk Lamp
 		+ vec3(specular * specColour.rgb * u_controls.z)				        // Specular for Desk Lamp
 		);
-	
+
+	// Calculations for Spot Light
 	vec3 spotDirection = normalize(u_spotDir.xyz);
 	float cosDirection = max(dot(L, spotDirection), 0.0);
-	
+
 	deskLamp = vec3(deskLamp * smoothstep(u_dimmers.z, u_dimmers.w, cosDirection));
 
 
-	//Diffuse Component for Light 2
+	//Diffuse Component for Room Light
 	vec3 L2 = normalize(u_lightTwo.xyz - vIn.posEye);
 	float diffuse2 = max(0.0, dot(N, L2));
 
 
-	//Specular For Light 2
+	//Specular For Room Light
 	vec3 R2 = normalize(2.0 * N * diffuse2 - L2);
 	float specular2 = pow(max(dot(V, R2), 0.0), u_shine.x);
 
@@ -76,6 +79,8 @@ void main()
 		+ vec3(diffuse2 * diffuseColour.rgb * u_controls.y)                      // Diffuse for room light
 		+ vec3(specular2 * specColour.rgb * u_controls.z)				         // Specular for room light   
 		);
+
+
 
 	vec3 lights = (deskLamp * u_dimmers.x + roomLight * u_dimmers.y);
 
