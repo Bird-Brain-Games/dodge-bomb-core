@@ -4,8 +4,8 @@
 
 Texture::Texture(char* _diffuseTex, char* _specularTex, float _shininess)
 {
-	diffuseTex = ilutGLLoadImage(_diffuseTex);
-	specularTex = ilutGLLoadImage(_specularTex);
+	//diffuseTex = ilutGLLoadImage(_diffuseTex);
+	//specularTex = ilutGLLoadImage(_specularTex);
 	shininess = _shininess;
 }
 

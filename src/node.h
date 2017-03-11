@@ -41,8 +41,10 @@ private:
 
 public:
 	glm::vec3 m_pLocalPosition;
-
+	//old version
 	void setFrame(int);
+	//new version
+	void setAllFrames(int);
 	int getFrame();
 
 	//Node(Node);

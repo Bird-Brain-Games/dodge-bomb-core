@@ -562,7 +562,6 @@ void Holder::createVAO()
 
 void Holder::draw(std::shared_ptr<ShaderProgram> s)
 {
-	s->sendUniformMat4("BoneMatrixArray", multipliedMatricies[0], bones);
 	s->sendUniformInt("boneCount", bones);
 
 	//glBindVertexArray(vao2);
@@ -571,14 +570,16 @@ void Holder::draw(std::shared_ptr<ShaderProgram> s)
 	vao.draw();
 }
 
-void Holder::update(float dt, float overRide, float counter)
+std::vector<glm::mat4> Holder::update(float dt, float overRide, float counter)
 {
 	int count = 0;
 	if (overRide != 0)
 		angle = overRide;
-
+	std::cout << currentBot << " " << currentTop << std::endl;
+	currentBot->setAllFrames(*botFrame);
 	currentBot->updateBot(dt, angle + counter + 180 * degToRad);
 
+	currentTop->setAllFrames(*topFrame);
 	currentTop->updateTop(dt);
 
 	//updates the top half of the skeleton. note order matters. you need to do top then bot.
@@ -586,31 +587,48 @@ void Holder::update(float dt, float overRide, float counter)
 	//updates the bottom half of the skeleton
 	currentBot->getMatrixStackB(multipliedMatricies, matricies, count);
 
-	if (currentBot->getFrame() == 0)
+	//done in player object
+	/*if (currentBot->getFrame() == 0)
 		currentBot = animations["idle"];
 
 	if (currentTop->getFrame() == 0)
-		currentTop = animations["idle"];
-
+		currentTop = animations["idle"];*/
+	currentBot = NULL;
+	currentTop = NULL;
+	return multipliedMatricies;
 }
 
 void Holder::setAnim(std::string _name)
 {
+//	//std::cout << _name << std::endl;
+//	if (animations.count(_name) == 1)
+//	{
+//		
+//		if (currentTop == animations["idle"] || currentTop == animations["walk"])
+//		{
+//			currentTop = animations[_name];
+//			currentTop->setFrame(0);
+//		}
+//		if (currentBot == animations["idle"] || currentBot == animations["throw"])
+//		{
+//			currentBot = animations[_name];
+//			currentBot->setFrame(0);
+//		}
+//	}
+//	else
+//		std::cout << "error the animation " + _name + " does not exist" << std::endl;
+}
 
-	if (animations.count(_name) == 1)
-	{
+std::map<std::string, Node*> Holder::getAnimations()
+{
+	return animations;
+}
 
-		if (currentTop == animations["idle"] || currentTop == animations["walk"])
-		{
-			currentTop = animations[_name];
-			currentTop->setFrame(0);
-		}
-		if (currentBot == animations["idle"] || currentBot == animations["throw"])
-		{
-			currentBot = animations[_name];
-			currentBot->setFrame(0);
-		}
-	}
-	else
-		std::cout << "error the animation " + _name + " does not exist" << std::endl;
+void Holder::setPlayer(Node* _top, Node* _bot, int* _topFrame, int* _botFrame)
+{
+	currentTop = _top;
+	currentBot = _bot;
+	topFrame = _topFrame;
+	botFrame = _botFrame;
+	
 }
