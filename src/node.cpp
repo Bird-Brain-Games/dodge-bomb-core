@@ -28,6 +28,13 @@ void Node::setFrame(int _pos)
 		std::cout << "Error: frame limit is  " << frame << " given value is greaten then this limit";
 }
 
+void Node::setAllFrames(int _frame)
+{
+	m_pCurrentFrame = _frame;
+	for (int i = 0; i < m_pChildren.size(); i++)
+		m_pChildren[i]->setAllFrames(_frame);
+}
+
 int Node::getFrame()
 {
 	return m_pCurrentFrame;

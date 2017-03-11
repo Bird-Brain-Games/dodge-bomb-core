@@ -8,12 +8,12 @@ float Player::pauseTime = 0.5f;
 int Player::maxHealth = 2;
 
 Player::Player(glm::vec3 position,
-	std::shared_ptr<Loader> _mesh,
+	std::shared_ptr<Holder> _mesh,
 	std::shared_ptr<Material> _material,
 	std::shared_ptr<Texture> _texture,
 	int _playerNum)
 	:
-	GameObject(position, _mesh, _material, _texture), 
+	GameObject(position, _mesh, _material, _texture),
 	con(_playerNum),
 	currentCooldown(0.0f),
 	bombCooldown(1.0f),
@@ -23,11 +23,17 @@ Player::Player(glm::vec3 position,
 	currentState(P_NORMAL)
 {
 	playerNum = _playerNum;
+
+	
+	animation = _mesh; 
+	topFrame = 0; botFrame = 0; 
+	top = animation->getAnimations().at("idle");
+	bot = animation->getAnimations().at("idle");
 }
 
 Player::Player(Player& other)
 	: GameObject(other),
-	con(other.con.getPlayerNum()+1),
+	con(other.con.getPlayerNum() + 1),
 	currentCooldown(0.0f),
 	bombCooldown(1.0f),
 	currentAngle(0.0f),
@@ -47,6 +53,7 @@ void Player::draw(Camera &camera)
 {
 	if (currentState == P_NORMAL)
 	{
+		material->shader->sendUniformMat4("BoneMatrixArray", multipliedMatricies[0], 28);
 		GameObject::draw(camera);
 	}
 }
@@ -90,8 +97,39 @@ void Player::update(float dt)
 	}
 
 	GameObject::update(dt);
-	mesh->update(dt, bottomAngle, currentAngle);
+	topFrame++;
+	botFrame++;
+
+	if (playerNum == 0)
+	{
+		topFrame = 5;
+		botFrame = 5;
+	}
+
+	//std::cout << topFrame << " " << botFrame << std::endl;
+
+	animation->setPlayer(top, bot, &topFrame, &botFrame);
+	//std::cout << bot << std::endl;
+	multipliedMatricies = mesh->update(dt, bottomAngle, currentAngle);
+
+	if (topFrame >= top->jointAnimation->numFrames - 1)
+	{
+		topFrame = 0;
+	//	std::cout << "idle" << std::endl;
+		top = animation->getAnimations().at("idle");
+	}
+	if (botFrame >= bot->jointAnimation->numFrames - 1)
+	{
+		botFrame = 0;
+	//	std::cout << "idle" << std::endl;
+		bot = animation->getAnimations().at("idle");
+	}
+
 	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
+	if (playerNum == 0)
+	{
+		std::cout << topFrame << " " << botFrame << std::endl;
+	}
 }
 
 void Player::handleInput(float dt)
@@ -117,18 +155,18 @@ void Player::handleInput(float dt)
 
 	if (LStick.x < -0.1 || LStick.x > 0.1)
 	{
-		mesh->setAnim("walk");
+		setAnimations("walk");
 		trans.x = LStick.x / 2;
 		hasMoved = true;
 	}
 	if (LStick.y < -0.1 || LStick.y > 0.1)
 	{
-		mesh->setAnim("walk");
+		setAnimations("walk");
 		trans.z = -LStick.y / 2;
 		hasMoved = true;
 	}
 
-	
+
 	if (currentAngle != angle && con.rightStickMoved())
 	{
 		currentAngle = angle;
@@ -154,12 +192,12 @@ void Player::handleInput(float dt)
 		if (con.rightStickMoved())
 			normalized = glm::normalize(glm::vec2(RStick.x, RStick.y));
 
-		
+
 		bombManager->throwBomb(this, normalized, throwingForce);
-		mesh->setAnim("throw");
+		setAnimations("throw");
 		currentCooldown += bombCooldown;
 	}
-		
+
 
 	//tells the mesh(skeleton) to update
 	bottomAngle = atan2(-LStick.x, LStick.y);
@@ -186,7 +224,7 @@ void Player::checkCollisionWith(Bomb* other)
 		}
 	}
 	//std::cout << "C: bomb " << other->getPlayerNum() << " with player " << playerNum << std::endl;
-	
+
 }
 
 void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
@@ -205,10 +243,7 @@ void Player::attachBombManager(std::shared_ptr<BombManager> manager)
 	bombManager = manager;
 }
 
-void Player::setAnim(std::string _name)
-{
-	mesh->setAnim(_name);
-}
+
 
 void Player::takeDamage(int damage)
 {
@@ -223,4 +258,35 @@ void Player::takeDamage(int damage)
 		currentState = P_DEAD;
 		setPosition(glm::vec3(0.0f, -15.0f, 0.0f));
 	}
+}
+
+
+void Player::setAnimations(std::string _name)
+{
+
+	
+	if (animation->getAnimations().count(_name) == 1)
+	{
+		if (top == animation->getAnimations().at("idle") || top == animation->getAnimations().at("walk"))
+		{
+			if (top != animation->getAnimations().at(_name))
+			{
+				std::cout << _name << std::endl;
+			top = animation->getAnimations().at(_name);
+			topFrame = 0;
+			}
+		}
+		if (bot == animation->getAnimations().at("idle") || bot == animation->getAnimations().at("throw"))
+		{
+			if (bot != animation->getAnimations().at(_name))
+			{
+				std::cout << _name << std::endl;
+				bot = animation->getAnimations().at(_name);
+				botFrame = 0;
+			}
+
+		}
+	}
+	else
+		std::cout << "error the animation " + _name + " does not exist" << std::endl;
 }

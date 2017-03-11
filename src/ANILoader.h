@@ -105,8 +105,7 @@ private:
 
 	Node* basePose;
 	std::map<std::string, Node*> animations;
-	Node* currentTop;
-	Node* currentBot;
+
 	unsigned int numtris; // count number of vertices for data creation
 	int bones;
 
@@ -125,7 +124,14 @@ public:
 	bool baseLoad(std::string);
 	bool AniLoad(std::string, std::string);
 	void draw(std::shared_ptr<ShaderProgram> s);
-	void update(float, float, float);
+	std::vector<glm::mat4> update(float, float, float);
+	std::map<std::string, Node*> getAnimations();
+	//in this we need to set the currenTop and bot equal to our players 
+	//we need to set the frames to point to the write frame count.
+	void setPlayer(Node*, Node*, int*, int*);
 	//used to update a portion of the skeleton.
 	//void update(int frame, int max);
+	Node* currentTop;
+	Node* currentBot;
+	int *topFrame, *botFrame;
 };

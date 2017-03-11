@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "Bomb.h"
 #include "controller.h"
+#include "ANILoader.h"
 
 enum PLAYER_STATE
 {
@@ -17,7 +18,7 @@ class Player : public GameObject
 {
 public:
 	Player(glm::vec3 position,
-		std::shared_ptr<Loader> _mesh,
+		std::shared_ptr<Holder> _mesh,
 		std::shared_ptr<Material> _material,
 		std::shared_ptr<Texture> _texture, 
 		int _playerNum);
@@ -37,7 +38,6 @@ public:
 	void checkCollisionWith(Bomb* other);
 	int getPlayerNum();
 
-	void setAnim(std::string);
 
 private:
 
@@ -48,8 +48,19 @@ private:
 	float currentCooldown;	// The current cooldown on the bomb throw
 	std::shared_ptr<BombManager> bombManager;
 	float currentAngle;
-	float bottomAngle; //used for animation rotation.
+
 	glm::vec3 throwingForce;
+
+	//animation stats;
+	float bottomAngle; //used for animation rotation.
+
+	void setAnimations(std::string);//used to set our player nodes equal to what animations we want
+	std::shared_ptr<Holder> animation; // allows us to call our animation functions without them being part of the loader class.
+	int topFrame, botFrame; // for the top and bottom of the skeleton
+	Node* top;//points to what our top animations is
+	Node* bot;//points to what our bot animations is
+	//the matrix we send our shaders.
+	std::vector<glm::mat4> multipliedMatricies;
 
 	// Player stats
 	int health;
@@ -59,4 +70,5 @@ private:
 	static float maxInvincibleTime;
 	static float pauseTime;
 	static int maxHealth;
+
 };

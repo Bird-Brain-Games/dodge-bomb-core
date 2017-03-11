@@ -9,7 +9,7 @@ public:
 	virtual bool load(char const* filename) { return false; };
 	virtual void draw(std::shared_ptr<ShaderProgram> s) = 0;
 	virtual void createVAO() = 0;
-	virtual void update(float dt, float overRide, float counter) {};
+	virtual std::vector<glm::mat4> update(float dt, float overRide, float counter) { std::vector<glm::mat4> IHE;  return IHE; };
 	virtual void setAnim(std::string) {};
 protected:
 

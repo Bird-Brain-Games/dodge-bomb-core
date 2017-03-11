@@ -283,7 +283,6 @@ void initializeScene()
 	bombotMesh->AniLoad("Assets/htr/idle" , "idle");
 	bombotMesh->AniLoad("Assets/htr/throw", "throw");
 	bombotMesh->AniLoad("Assets/htr/walk" , "walk");
-	bombotMesh->setAnim("idle");
 
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
@@ -440,11 +439,11 @@ void initializeScene()
 		glm::vec3(0.0f, 0.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
 	gameobjects["bombot1"] = players["bombot1"];
 	
 	players["bombot2"] = std::make_shared<Player>(
-		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
+		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot2"] = players["bombot2"];
 	/*
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
@@ -1251,10 +1250,10 @@ int main(int argc, char **argv)
 
 
 	// Init IL
-	ilInit();
-	iluInit();
-	ilutInit();
-	ilutRenderer(ILUT_OPENGL);
+	//ilInit();
+	//iluInit();
+	//ilutInit();
+	//ilutRenderer(ILUT_OPENGL);
 
 	// Init GL
 	glEnable(GL_CULL_FACE);
