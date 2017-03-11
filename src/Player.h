@@ -31,7 +31,7 @@ public:
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	void attachBombManager(std::shared_ptr<BombManager> _manager);
 	void takeDamage(int damage);
-	void reset();	// Reset values and positions
+	void reset(glm::vec3 newPos);	// Reset values and positions
 
 	void checkCollisionWith(GameObject* other);
 	void checkCollisionWith(Bomb* other);
@@ -56,6 +56,7 @@ private:
 	float invincibleTime;
 	PLAYER_STATE currentState;
 
+private:
 	static float maxInvincibleTime;
 	static float pauseTime;
 	static int maxHealth;

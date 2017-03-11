@@ -77,8 +77,17 @@ public:
 	void setBombParent(Bomb*);
 	Bomb* getBombParent() { return parent; }
 
+	void explode();
+
 private:
 	Bomb* parent;
+	float expandTimer;
+	bool isExpanding;
+
+private:
+	static float timeToExpand;
+	static float minScale;
+	static float maxScale;
 };
 
 /*

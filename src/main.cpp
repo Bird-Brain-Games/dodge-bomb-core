@@ -538,23 +538,23 @@ void initializeScene()
 	std::unique_ptr<RigidBody> botwallBody;
 	std::unique_ptr<RigidBody> topwallBody;
 
-	tableBody	= std::make_unique<RigidBody>();
-	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
-	bombot2Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
-	sphereBody	= std::make_unique<RigidBody>();
-	barrelBody = std::make_unique<RigidBody>();
-	barrel1Body = std::make_unique<RigidBody>();
-	boulderBody = std::make_unique<RigidBody>();
-	boulder2Body = std::make_unique<RigidBody>();
-	crateBody = std::make_unique<RigidBody>();
-	crate2Body = std::make_unique<RigidBody>();
-	cannonBody = std::make_unique<RigidBody>();
-	boatBody = std::make_unique<RigidBody>();
-	sketchBody = std::make_unique<RigidBody>();
-	trumpBody = std::make_unique<RigidBody>();
-	booksBody = std::make_unique<RigidBody>();
-	botwallBody = std::make_unique<RigidBody>();
-	topwallBody = std::make_unique<RigidBody>();
+	tableBody		= std::make_unique<RigidBody>();
+	bombot1Body		= std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	bombot2Body		= std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	sphereBody		= std::make_unique<RigidBody>();
+	barrelBody		= std::make_unique<RigidBody>();
+	barrel1Body		= std::make_unique<RigidBody>();
+	boulderBody		= std::make_unique<RigidBody>();
+	boulder2Body	= std::make_unique<RigidBody>();
+	crateBody		= std::make_unique<RigidBody>();
+	crate2Body		= std::make_unique<RigidBody>();
+	cannonBody		= std::make_unique<RigidBody>();
+	boatBody		= std::make_unique<RigidBody>();
+	sketchBody		= std::make_unique<RigidBody>();
+	trumpBody		= std::make_unique<RigidBody>();
+	booksBody		= std::make_unique<RigidBody>();
+	botwallBody		= std::make_unique<RigidBody>();
+	topwallBody		= std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
@@ -1033,56 +1033,8 @@ void KeyboardUpCallbackFunction(unsigned char key, int x, int y)
 	KEYBOARD_INPUT->SetActive(key, false);
 }
 
-void handleKeyboardInput()
+void handleKeyboardInputShaders()
 {
-	if (KEYBOARD_INPUT->CheckPressEvent(27))
-	{
-		glutLeaveMainLoop();
-	}
-
-	// Use the E key to set the debug draw
-	if (KEYBOARD_INPUT->CheckPressEvent('e') || KEYBOARD_INPUT->CheckPressEvent('E'))
-	{
-		RigidBody::setDebugDraw(!RigidBody::isDrawingDebug());
-	}
-
-	// Move the camera
-	if (KEYBOARD_INPUT->CheckPressEvent('w') || KEYBOARD_INPUT->CheckPressEvent('W'))
-	{
-		playerCamera.moveForward();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('s') || KEYBOARD_INPUT->CheckPressEvent('S'))
-	{
-		playerCamera.moveBackward();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('d') || KEYBOARD_INPUT->CheckPressEvent('D'))
-	{
-		playerCamera.moveRight();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('a') || KEYBOARD_INPUT->CheckPressEvent('A'))
-	{
-		playerCamera.moveLeft();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
-	{
-		gameobjects["bombot2"]->setPosition(
-			gameobjects["bombot2"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
-	{
-		gameobjects["bombot1"]->setScale(gameobjects["bombot1"]->getScale() + 0.1f);
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('L'))
-	{
-		gameobjects["table"]->setScale(gameobjects["table"]->getScale() - 0.1f);
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
-	{
-		playerCamera.shakeScreen();
-	}
-
-
-
 	// Lighting Mode
 	if (KEYBOARD_INPUT->CheckPressEvent('2'))
 	{
@@ -1092,8 +1044,8 @@ void handleKeyboardInput()
 	{
 		currentLightingMode = TOON;
 	}
-	
-	
+
+
 	// Toggle Outlines
 	if (KEYBOARD_INPUT->CheckPressEvent('5'))
 	{
@@ -1130,7 +1082,7 @@ void handleKeyboardInput()
 		if (roomLight > 0)
 			roomLight -= 0.1;
 	}
-	
+
 	// Toggles for each lighting component
 	if (KEYBOARD_INPUT->CheckPressEvent('z')) // ambient
 	{
@@ -1184,6 +1136,70 @@ void handleKeyboardInput()
 			rimToggle = true;
 		}
 	}
+}
+
+
+void handleKeyboardInput()
+{
+	if (KEYBOARD_INPUT->CheckPressEvent(27))
+	{
+		glutLeaveMainLoop();
+	}
+
+	// Use the E key to set the debug draw
+	if (KEYBOARD_INPUT->CheckPressEvent('e') || KEYBOARD_INPUT->CheckPressEvent('E'))
+	{
+		RigidBody::setDebugDraw(!RigidBody::isDrawingDebug());
+	}
+
+	// Move the camera
+	if (KEYBOARD_INPUT->CheckPressEvent('w') || KEYBOARD_INPUT->CheckPressEvent('W'))
+	{
+		playerCamera.moveForward();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('s') || KEYBOARD_INPUT->CheckPressEvent('S'))
+	{
+		playerCamera.moveBackward();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('d') || KEYBOARD_INPUT->CheckPressEvent('D'))
+	{
+		playerCamera.moveRight();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('a') || KEYBOARD_INPUT->CheckPressEvent('A'))
+	{
+		playerCamera.moveLeft();
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
+	{
+		gameobjects["bombot2"]->setPosition(
+			gameobjects["bombot2"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
+	{
+		gameobjects["bombot1"]->setScale(gameobjects["bombot1"]->getScale() + 0.1f);
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('L'))
+	{
+		gameobjects["table"]->setScale(gameobjects["table"]->getScale() - 0.1f);
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
+	{
+		playerCamera.shakeScreen();
+	}
+	// Reset all players
+	if (KEYBOARD_INPUT->CheckPressEvent('r') || KEYBOARD_INPUT->CheckPressEvent('R'))
+	{
+		float count = 0.0f;
+		for (auto it : players)
+		{
+			it.second->reset(glm::vec3(20.0f * count, 40.0f, 0.0f));
+			count++;
+		}
+	}
+
+
+
+	handleKeyboardInputShaders();
 
 
 	// Clear the keyboard input
