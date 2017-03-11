@@ -255,6 +255,7 @@ void Bomb::explode()
 
 	// Swap the bomb and the explosion's position
 	explosion->setPosition(getWorldPosition());
+	explosion->explode();
 	setPosition(glm::vec3(-100.0f));
 }
 
@@ -273,7 +274,11 @@ void Bomb::setMaterial(std::shared_ptr<Material> _material)
 	explosion->setMaterial(_material);
 }
 
-////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+////////////////////////	EXPLOOOOSION	///////////////////////////////////
+float Explosion::timeToExpand = 0.15f;
+float Explosion::maxScale = 7.5f;
+float Explosion::minScale = 0.5f;
 
 Explosion::Explosion(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -281,22 +286,35 @@ Explosion::Explosion(glm::vec3 position,
 	std::shared_ptr<Texture> _texture,
 	Bomb* _parent)
 	: GameObject(position, _mesh, _material, _texture),
+	expandTimer(timeToExpand),
 	parent(_parent)
 {
 	colliderType = COLLIDER_TYPE::BOMB_EXPLOSION;
-	setScale(glm::vec3(7.5f));
+	//setScale(glm::vec3(maxScale));
 }
 
 Explosion::Explosion(Explosion& other)
 	: GameObject(other),
+	expandTimer(timeToExpand),
 	parent(nullptr)
 {
 	colliderType = COLLIDER_TYPE::BOMB_EXPLOSION;
-	setScale(glm::vec3(7.5f));
+	//setScale(glm::vec3(maxScale));
 }
 
 void Explosion::update(float dt)
 {
+	if (expandTimer < timeToExpand)
+	{
+		expandTimer += dt;
+		if (expandTimer > timeToExpand)
+		{
+			expandTimer = timeToExpand;
+
+		}
+		setScale(glm::vec3(minScale + 
+			(expandTimer / timeToExpand) * (maxScale - minScale)));
+	}
 
 	GameObject::update(dt);
 }
@@ -304,4 +322,9 @@ void Explosion::update(float dt)
 void Explosion::setBombParent(Bomb* newParent)
 {
 	parent = newParent;
+}
+
+void Explosion::explode()
+{
+	expandTimer = 0.0f;
 }

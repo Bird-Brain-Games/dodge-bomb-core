@@ -16,27 +16,22 @@ Player::Player(glm::vec3 position,
 	:
 	GameObject(position, _mesh, _material, _texture), 
 	con(_playerNum),
-	currentCooldown(0.0f),
 	bombCooldown(maxBombCooldown),
 	currentAngle(0.0f),
-	throwingForce(30.0f),
-	health(maxHealth),
-	currentState(P_NORMAL)
+	throwingForce(30.0f)
 {
+	reset(position);
 	playerNum = _playerNum;
 }
 
 Player::Player(Player& other)
 	: GameObject(other),
 	con(other.con.getPlayerNum()+1),
-	currentCooldown(0.0f),
 	bombCooldown(maxBombCooldown),
 	currentAngle(0.0f),
-	health(maxHealth),
-	throwingForce(other.throwingForce),
-	currentState(P_NORMAL)
+	throwingForce(other.throwingForce)
 {
-
+	reset(other.getWorldPosition());
 }
 
 Player::~Player()
@@ -89,6 +84,10 @@ void Player::update(float dt)
 	default:
 		break;
 	}
+
+	// Allow player to reset all stats (DEBUG)
+	if (con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER))
+		reset(glm::vec3(0.0f, 40.0f, 0.0f));
 
 	GameObject::update(dt);
 	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
@@ -238,4 +237,12 @@ void Player::takeDamage(int damage)
 		currentState = P_DEAD;
 		setPosition(glm::vec3(0.0f, -15.0f, 0.0f));
 	}
+}
+
+void Player::reset(glm::vec3 newPos)
+{
+	setPosition(newPos);
+	health = maxHealth;
+	currentCooldown = 0.0f;
+	currentState = P_NORMAL;
 }
