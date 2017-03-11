@@ -117,6 +117,10 @@ void BombManager::draw(Camera& camera)
 	for (auto it : activeBombs)
 	{
 		it->draw(camera);
+		/*if (it->getCurrentState() == EXPLODING)
+		{
+			camera.shakeScreen();
+		}*/
 	}
 }
 
@@ -136,7 +140,7 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////	BOMB	///////////////////////////////////////
 float Bomb::playerRadius = 2.0f;
-float Bomb::maxExplodeTime = 0.5f;
+float Bomb::maxExplodeTime = 0.75f;
 float Bomb::maxFuseTime = 1.7f;
 
 Bomb::Bomb(glm::vec3 position,
@@ -249,7 +253,7 @@ void Bomb::update(float dt)
 void Bomb::explode()
 {
 	currentFuseTime = 0.0f;
-	currentExplodeTime = maxFuseTime;
+	currentExplodeTime = maxExplodeTime;
 	currentState = EXPLODING;
 	std::cout << "Bomb " << playerNum << " exploded" << std::endl;
 
