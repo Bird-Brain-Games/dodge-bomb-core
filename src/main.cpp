@@ -264,6 +264,11 @@ void initializeScene()
 	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
 
 	std::shared_ptr<Holder> bombotMesh = std::make_shared<Holder>();
+	std::shared_ptr<Holder> bombotMesh2 = std::make_shared<Holder>();
+	std::shared_ptr<Holder> bombotMesh3 = std::make_shared<Holder>();
+	std::shared_ptr<Holder> bombotMesh4 = std::make_shared<Holder>();
+
+	//loadAnimations(bombotMesh2);
 
 	// Load all meshes
 	tableMesh->load(meshPath + "translatedtable.obj");
@@ -271,13 +276,14 @@ void initializeScene()
 	cannonMesh->load(meshPath + "scaledcannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
 
-	bombotMesh->baseLoad("Assets/htr/bombot");
-	// do not change the names of these
-	// eventually the goal is change them to enums and not strings.
-	bombotMesh->AniLoad("Assets/htr/idle" , "idle");
-	bombotMesh->AniLoad("Assets/htr/throw", "throw");
-	bombotMesh->AniLoad("Assets/htr/walk" , "walk");
-	bombotMesh->setAnim("idle");
+	// function wrapper for loading animations. makes less cluttered
+	loadAnimations(bombotMesh);
+	loadAnimations(bombotMesh2);
+	loadAnimations(bombotMesh3);
+	loadAnimations(bombotMesh4);
+
+
+	
 
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
@@ -298,6 +304,7 @@ void initializeScene()
 	meshes["cannon"] = cannonMesh;
 	meshes["sphere"] = sphereMesh;
 	meshes["bombot"] = bombotMesh;
+	meshes["bombot2"] = bombotMesh2;
 	meshes["corkboard"] = corkboardMesh;
 	meshes["room"] = roomMesh;
 	meshes["bomb"] = bombMesh;
@@ -489,7 +496,7 @@ void initializeScene()
 	gameobjects["bombot1"] = players["bombot1"];
 	
 	players["bombot2"] = std::make_shared<Player>(
-		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
+		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh2, defaultMaterial, bombotTexMap, 1);
 	gameobjects["bombot2"] = players["bombot2"];
 	/*
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
@@ -611,6 +618,7 @@ void initializeScene()
 		bombBodyPath);
 
 	players["bombot1"]->attachBombManager(bombManager);
+	players["bombot2"]->attachBombManager(bombManager);
 
 	// Set the outline colors
 	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
