@@ -4,6 +4,7 @@
 /// CREATE UNIFORMS ///
 ///////////////////////
 uniform vec4 u_outlineColour;
+uniform vec4 u_transparency;
 
 
 // Fragment Shader Inputs
@@ -23,4 +24,5 @@ void main()
 	/// SET FRAGCOLOR TO UNIFORM COLOR ///
 	//////////////////////////////////////
 	FragColor = u_outlineColour;
+	FragColor.w = u_transparency.x;
 }
