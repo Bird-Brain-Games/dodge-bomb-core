@@ -91,7 +91,9 @@ void Player::update(float dt)
 
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);
-	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
+
+	// Make it so they can't rotate along other than the Y axis.
+	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 1.0, 0.0));	
 }
 
 void Player::handleInput(float dt)
@@ -144,6 +146,7 @@ void Player::handleInput(float dt)
 	if (hasMoved)
 	{
 		setPosition(getWorldPosition() + trans);
+		//rigidBody->getBody()->
 		//player->rigidBody->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
 	}
 
@@ -208,6 +211,9 @@ void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 {
 	GameObject::attachRigidBody(_rb);
 	rigidBody->setDeactivationMode(DISABLE_DEACTIVATION);
+
+	// Essentially friction
+	rigidBody->getBody()->setDamping(0.2, 1.0);
 }
 
 int Player::getPlayerNum()

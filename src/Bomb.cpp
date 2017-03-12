@@ -333,4 +333,5 @@ void Explosion::setBombParent(Bomb* newParent)
 void Explosion::explode()
 {
 	expandTimer = 0.0f;
+	rigidBody->setDeactivationMode(ISLAND_SLEEPING);
 }
