@@ -99,7 +99,7 @@ float outlineWidth = 4.0;
 bool outlineToggle = true;
 
 // Lighting Controls
-float deskLamp = 0.6; 
+float deskLamp = 0.6;
 float innerCutOff = 0.8; // Spot Light Size
 float outerCutOff = 0.82;
 glm::vec3 deskForward = glm::vec3(0.3, 1.0, 0.4); // Spot Light Direction
@@ -172,7 +172,7 @@ void initializeShaders()
 	materials["noLighting"]->shader->attachShader(v_default);
 	materials["noLighting"]->shader->attachShader(f_noLighting);
 	materials["noLighting"]->shader->linkProgram();
-	
+
 	// Default material that all objects use
 	materials["default"] = std::make_shared<Material>("default");
 	materials["default"]->shader->attachShader(v_default);
@@ -250,7 +250,7 @@ void initializeScene()
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	MESHES		///////////////////////////////
 	std::string meshPath = "Assets/obj/";
-	
+
 	// Initialize all meshes
 	std::shared_ptr<LoadObject> tableMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> barrelMesh = std::make_shared<LoadObject>();
@@ -280,9 +280,9 @@ void initializeScene()
 	bombotMesh->baseLoad("Assets/htr/bombot");
 	// do not change the names of these
 	// eventually the goal is change them to enums and not strings.
-	bombotMesh->AniLoad("Assets/htr/idle" , "idle");
+	bombotMesh->AniLoad("Assets/htr/idle", "idle");
 	bombotMesh->AniLoad("Assets/htr/throw", "throw");
-	bombotMesh->AniLoad("Assets/htr/walk" , "walk");
+	bombotMesh->AniLoad("Assets/htr/walk", "walk");
 
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
@@ -439,22 +439,22 @@ void initializeScene()
 		glm::vec3(0.0f, 0.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
-	gameobjects["bombot1"] = players["bombot1"];
-	
+		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+	//gameobjects["bombot1"] = players["bombot1"];
+
 	players["bombot2"] = std::make_shared<Player>(
-		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
-	gameobjects["bombot2"] = players["bombot2"];
+		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 1);
+	//gameobjects["bombot2"] = players["bombot2"];
 	/*
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 2);
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 3);
 	*/
-	
+
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	RIGID BODIES	///////////////////////////////
-	
+
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
 	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
@@ -467,10 +467,10 @@ void initializeScene()
 	std::unique_ptr<RigidBody> bombot2Body;
 	std::unique_ptr<RigidBody> sphereBody;
 
-	tableBody	= std::make_unique<RigidBody>();
+	tableBody = std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
 	bombot2Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
-	sphereBody	= std::make_unique<RigidBody>();
+	sphereBody = std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
@@ -480,8 +480,8 @@ void initializeScene()
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
-	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
-	gameobjects["bombot2"]->attachRigidBody(bombot2Body);
+	players["bombot1"]->attachRigidBody(bombot1Body);
+	players["bombot2"]->attachRigidBody(bombot2Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
 
 	///////////////////////////////////////////////////////////////////////////
@@ -501,8 +501,8 @@ void initializeScene()
 	players["bombot2"]->attachBombManager(bombManager);
 
 	// Set the outline colors
-	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-	gameobjects["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	players["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	players["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
@@ -517,8 +517,8 @@ void initializeScene()
 	//playerCamera.setProperties(44.00002, (float)windowWidth / (float)windowHeight, 0.1f, 10000.0f, 0.001f);
 	playerCamera.update();
 
-	
-	
+
+
 }
 
 void bulletNearCallback(btBroadphasePair& collisionPair,
@@ -527,12 +527,12 @@ void bulletNearCallback(btBroadphasePair& collisionPair,
 	// Do your collision logic here
 	// Only dispatch the Bullet collision information if you want the physics to continue
 	// From Bullet user manual
-	
+
 	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger ||
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
 		return;*/
 
-	// Tell the dispatcher to do the collision information
+		// Tell the dispatcher to do the collision information
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
 }
 
@@ -594,6 +594,10 @@ void initializeFrameBuffers()
 	shadowMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
 }
 
+std::string test = "bombot3";
+std::string test2 = "bombot3";
+bool zero = false;
+
 void updateScene()
 {
 	// Move light in simple circular path
@@ -628,6 +632,18 @@ void updateScene()
 			gameobject->update(deltaTime);
 	}
 
+	for (auto itr = players.begin(); itr != players.end(); ++itr)
+	{
+		auto player = itr->second;
+
+		// Remember: root nodes are responsible for updating all of its children
+		// So we need to make sure to only invoke update() for the root nodes.
+		// Otherwise some objects would get updated twice in a frame!
+		if (player->isRoot())
+			if (itr->first != test)
+				player->update(deltaTime);
+	}
+
 	bombManager->update(deltaTime);
 }
 
@@ -640,6 +656,23 @@ void drawScene(Camera& cam)
 
 		if (gameobject->isRoot())
 			gameobject->draw(cam);
+	}
+
+	for (auto itr = players.begin(); itr != players.end(); ++itr)
+	{
+		auto player = itr->second;
+
+		if (player->isRoot())
+			if (itr->first != test2)
+			{
+				if (zero == true)
+				{
+					for (int i = 0; i < players["bombot1"]->multipliedMatricies.size(); i++)
+						players["bombot1"]->multipliedMatricies[i] = glm::mat4(1);
+				}
+
+				player->draw(cam);
+			}
 	}
 
 	bombManager->draw(cam);
@@ -750,173 +783,173 @@ void DisplayCallbackFunction(void)
 	// bind scene FBO
 	fboUnlit.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(clearColor);
-	
+
 	///////////////////////////// First Pass: Outlines
 	if (outlineToggle)
 	{
 		glCullFace(GL_FRONT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glLineWidth(outlineWidth);
-		
+
 		// Clear back buffer
 		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
-		
+
 		// Tell all game objects to use the outline shading material
 		setMaterialForAllGameObjects("sobel");
 		setMaterialForAllPlayerObjects("sobelPlayer");
 		drawScene(playerCamera);
-		
+
 		glCullFace(GL_BACK);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-	
+
 	///////////////////////////// Second Pass: Lighting
 	switch (currentLightingMode)
-		{
-			// Our Default is Toon shading
-			case TOON:
-			{
-				setMaterialForAllGameObjects("toon");
+	{
+		// Our Default is Toon shading
+	case TOON:
+	{
+		setMaterialForAllGameObjects("toon");
 
-				setMaterialForAllPlayerObjects("toonPlayer");
-				materials["toonPlayer"]->shader->bind();
+		setMaterialForAllPlayerObjects("toonPlayer");
+		materials["toonPlayer"]->shader->bind();
 
-				materials["toonPlayer"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
-				materials["toonPlayer"]->intUniforms["u_diffuseTex"] = 31;
-				materials["toonPlayer"]->intUniforms["u_specularTex"] = 30;
+		materials["toonPlayer"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+		materials["toonPlayer"]->intUniforms["u_diffuseTex"] = 31;
+		materials["toonPlayer"]->intUniforms["u_specularTex"] = 30;
 
-				materials["toonPlayer"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-				materials["toonPlayer"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
-				materials["toonPlayer"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
-				materials["toonPlayer"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+		materials["toonPlayer"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+		materials["toonPlayer"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
+		materials["toonPlayer"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
+		materials["toonPlayer"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
 
-				materials["toonPlayer"]->sendUniforms();
-				materials["toonPlayer"]->shader->unbind();
+		materials["toonPlayer"]->sendUniforms();
+		materials["toonPlayer"]->shader->unbind();
 
-				materials["toon"]->shader->bind();
+		materials["toon"]->shader->bind();
 
-				// Set material properties
-				materials["toon"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
-				materials["toon"]->vec4Uniforms["u_lightTwo"] = playerCamera.getView() * lightTwo;
+		// Set material properties
+		materials["toon"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+		materials["toon"]->vec4Uniforms["u_lightTwo"] = playerCamera.getView() * lightTwo;
 
-				materials["toon"]->intUniforms["u_diffuseTex"] = 31;
-				materials["toon"]->intUniforms["u_specularTex"] = 30;
+		materials["toon"]->intUniforms["u_diffuseTex"] = 31;
+		materials["toon"]->intUniforms["u_specularTex"] = 30;
 
-				materials["toon"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-				materials["toon"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
-				materials["toon"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
-				materials["toon"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+		materials["toon"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+		materials["toon"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
+		materials["toon"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
+		materials["toon"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
 
 
-				materials["toon"]->sendUniforms();
-			}
-			break;
-			// None Toon Shading
-			case DEFAULT:
-			{
-				setMaterialForAllGameObjects("default");
-				
-				materials["default"]->shader->bind();
-				
-				// Set material properties
-				materials["default"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
+		materials["toon"]->sendUniforms();
+	}
+	break;
+	// None Toon Shading
+	case DEFAULT:
+	{
+		setMaterialForAllGameObjects("default");
 
-				materials["default"]->intUniforms["u_diffuseTex"] = 31;
-				materials["default"]->intUniforms["u_specularTex"] = 30;
+		materials["default"]->shader->bind();
 
-				materials["default"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-				materials["default"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
-		
+		// Set material properties
+		materials["default"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
 
-				materials["default"]->sendUniforms();
-			}
-			break;
-			// Just displays Textures
-			case NOLIGHT:
-			{
-				setMaterialForAllGameObjects("noLighting");
+		materials["default"]->intUniforms["u_diffuseTex"] = 31;
+		materials["default"]->intUniforms["u_specularTex"] = 30;
 
-				// Set material properties
-				materials["noLighting"]->shader->bind();
+		materials["default"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+		materials["default"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
 
-				materials["noLighting"]->intUniforms["u_diffuseTex"] = 31;
-				materials["noLighting"]->intUniforms["u_specularTex"] = 30;
 
-				materials["noLighting"]->sendUniforms();
-			}
-			break;
-				setMaterialForAllPlayerObjects("toonPlayer");
-				// Set material properties for all our non player objects
+		materials["default"]->sendUniforms();
+	}
+	break;
+	// Just displays Textures
+	case NOLIGHT:
+	{
+		setMaterialForAllGameObjects("noLighting");
 
-				materials["toon"]->shader->unbind();
+		// Set material properties
+		materials["noLighting"]->shader->bind();
 
-				//sets the material properties for all our player objects
+		materials["noLighting"]->intUniforms["u_diffuseTex"] = 31;
+		materials["noLighting"]->intUniforms["u_specularTex"] = 30;
 
-	
-		}
+		materials["noLighting"]->sendUniforms();
+	}
+	break;
+	setMaterialForAllPlayerObjects("toonPlayer");
+	// Set material properties for all our non player objects
 
-		//draw the scene to the fbo
-		if (!inMenu)
-		{
-			drawScene(playerCamera);
-		}
-		else
-			mainMenu->draw();
+	materials["toon"]->shader->unbind();
 
-		// Draw the debug (if on)
-		if (RigidBody::isDrawingDebug())
-			RigidBody::drawDebug(playerCamera.getView(), playerCamera.getProj());
+	//sets the material properties for all our player objects
 
-		// Unbind scene FBO
-		fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
-		FrameBufferObject::clearFrameBuffer(clearColor);
 
-		//////////////////////////////// Post Processing
+	}
 
-			if (bloomToggle)
-			{
-				//brightPass();
-				//blurBrightPass();
+	//draw the scene to the fbo
+	if (!inMenu)
+	{
+		drawScene(playerCamera);
+	}
+	else
+		mainMenu->draw();
 
-				//fboBlurA.bindTextureForSampling(0, GL_TEXTURE0);
-				//fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
+	// Draw the debug (if on)
+	if (RigidBody::isDrawingDebug())
+		RigidBody::drawDebug(playerCamera.getView(), playerCamera.getProj());
 
-				//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-				//FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+	// Unbind scene FBO
+	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
+	FrameBufferObject::clearFrameBuffer(clearColor);
 
-				//static auto bloomMaterial = materials["bloom"];
+	//////////////////////////////// Post Processing
 
-				//bloomMaterial->shader->bind();
-				//bloomMaterial->shader->sendUniformInt("u_bright", 0);
-				//bloomMaterial->shader->sendUniformInt("u_scene", 1);
-				//bloomMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-				//bloomMaterial->sendUniforms();
+	if (bloomToggle)
+	{
+		//brightPass();
+		//blurBrightPass();
 
-				//// Draw a full screen quad using the geometry shader
-				//glDrawArrays(GL_POINTS, 0, 1);
+		//fboBlurA.bindTextureForSampling(0, GL_TEXTURE0);
+		//fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
 
-				shadowMap.bindTextureForSampling(0, GL_TEXTURE0);
-				static auto unlitMaterial = materials["unlitTexture"];
-				unlitMaterial->shader->bind();
-				unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-				unlitMaterial->shader->sendUniformInt("u_tex", 0);
-				unlitMaterial->sendUniforms();
+		//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		//FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
 
-				// Draw a full screen quad using the geometry shader
-				glDrawArrays(GL_POINTS, 0, 1);
-			}
-			else
-			{
-			    fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-				static auto unlitMaterial = materials["unlitTexture"];
-				unlitMaterial->shader->bind();
-				unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-				unlitMaterial->shader->sendUniformInt("u_tex", 0);
-				unlitMaterial->sendUniforms();
+		//static auto bloomMaterial = materials["bloom"];
 
-				// Draw a full screen quad using the geometry shader
-				glDrawArrays(GL_POINTS, 0, 1);
-			}
+		//bloomMaterial->shader->bind();
+		//bloomMaterial->shader->sendUniformInt("u_bright", 0);
+		//bloomMaterial->shader->sendUniformInt("u_scene", 1);
+		//bloomMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+		//bloomMaterial->sendUniforms();
+
+		//// Draw a full screen quad using the geometry shader
+		//glDrawArrays(GL_POINTS, 0, 1);
+
+		shadowMap.bindTextureForSampling(0, GL_TEXTURE0);
+		static auto unlitMaterial = materials["unlitTexture"];
+		unlitMaterial->shader->bind();
+		unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+		unlitMaterial->shader->sendUniformInt("u_tex", 0);
+		unlitMaterial->sendUniforms();
+
+		// Draw a full screen quad using the geometry shader
+		glDrawArrays(GL_POINTS, 0, 1);
+	}
+	else
+	{
+		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
+		static auto unlitMaterial = materials["unlitTexture"];
+		unlitMaterial->shader->bind();
+		unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+		unlitMaterial->shader->sendUniformInt("u_tex", 0);
+		unlitMaterial->sendUniforms();
+
+		// Draw a full screen quad using the geometry shader
+		glDrawArrays(GL_POINTS, 0, 1);
+	}
 
 
 
@@ -989,7 +1022,24 @@ void handleKeyboardInput()
 	{
 		playerCamera.shakeScreen();
 	}
-
+	if (KEYBOARD_INPUT->CheckPressEvent(',') || KEYBOARD_INPUT->CheckPressEvent('<'))
+	{
+		test = "bombot2";
+		test2 = "bombot2";
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('.') || KEYBOARD_INPUT->CheckPressEvent('>'))
+	{
+		test = "bombot3";
+		test2 = "bombot3";
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('m') || KEYBOARD_INPUT->CheckPressEvent('M'))
+	{
+		zero = true;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('n') || KEYBOARD_INPUT->CheckPressEvent('N'))
+	{
+		zero = false;
+	}
 
 
 	// Switch Lighting Mode
@@ -1005,8 +1055,8 @@ void handleKeyboardInput()
 	{
 		currentLightingMode = TOON;
 	}
-	
-	
+
+
 	// Toggle Outlines
 	if (KEYBOARD_INPUT->CheckPressEvent('5'))
 	{
@@ -1043,7 +1093,7 @@ void handleKeyboardInput()
 		if (roomLight > 0)
 			roomLight -= 0.1;
 	}
-	
+
 	// Toggles for each lighting component
 	if (KEYBOARD_INPUT->CheckPressEvent('z')) // ambient
 	{
@@ -1127,7 +1177,7 @@ void TimerCallbackFunction(int value)
 	// Step through world simulation with Bullet
 	RigidBody::systemUpdate(deltaTime, 10);
 	calculateCollisions();
-	
+
 	// Update the camera's position
 	playerCamera.update();
 
