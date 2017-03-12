@@ -18,6 +18,7 @@ Player::Player(glm::vec3 position,
 	currentCooldown(0.0f),
 	bombCooldown(1.0f),
 	currentAngle(0.0f),
+	bottomAngle(0.0f),
 	throwingForce(5.0f),
 	health(maxHealth),
 	currentState(P_NORMAL)
@@ -37,6 +38,7 @@ Player::Player(Player& other)
 	currentCooldown(0.0f),
 	bombCooldown(1.0f),
 	currentAngle(0.0f),
+	bottomAngle(0.0f),
 	health(maxHealth),
 	throwingForce(other.throwingForce),
 	currentState(P_NORMAL)
@@ -53,10 +55,14 @@ void Player::draw(Camera &camera)
 {
 	if (currentState == P_NORMAL)
 	{
+		//if (playerNum == 1)
+		//	for (int i = 0; i < multipliedMatricies.size(); i++)
+		//		multipliedMatricies[i] = glm::mat4(1);
 		material->shader->sendUniformMat4("BoneMatrixArray", multipliedMatricies[0], 28);
 		GameObject::draw(camera);
 	}
 }
+
 
 void Player::update(float dt)
 {
@@ -100,11 +106,7 @@ void Player::update(float dt)
 	topFrame++;
 	botFrame++;
 
-	if (playerNum == 0)
-	{
-		topFrame = 5;
-		botFrame = 5;
-	}
+
 
 	//std::cout << topFrame << " " << botFrame << std::endl;
 

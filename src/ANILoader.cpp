@@ -577,7 +577,7 @@ std::vector<glm::mat4> Holder::update(float dt, float overRide, float counter)
 		angle = overRide;
 	std::cout << currentBot << " " << currentTop << std::endl;
 	currentBot->setAllFrames(*botFrame);
-	currentBot->updateBot(dt, angle + counter + 180 * degToRad);
+	currentBot->updateBot(dt, overRide + counter + 180 * degToRad);
 
 	currentTop->setAllFrames(*topFrame);
 	currentTop->updateTop(dt);
