@@ -61,7 +61,7 @@ void Player::update(float dt)
 	{
 	case P_NORMAL:
 		handleInput(dt);
-		rigidBody->getBody()->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+		//rigidBody->getBody()->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
 		break;
 
 	case P_INVINCIBLE:
@@ -90,6 +90,7 @@ void Player::update(float dt)
 		reset(glm::vec3(0.0f, 40.0f, 0.0f));
 
 	GameObject::update(dt);
+	mesh->update(dt, bottomAngle, currentAngle);
 	rigidBody->getBody()->setAngularFactor(btVector3(0, 1, 0));	// Every frame?
 }
 
@@ -161,8 +162,7 @@ void Player::handleInput(float dt)
 		
 
 	//tells the mesh(skeleton) to update
-	angle = atan2(-LStick.x, LStick.y);
-	mesh->update(dt, angle, currentAngle);
+	bottomAngle = atan2(-LStick.x, LStick.y);
 }
 
 void Player::checkCollisionWith(GameObject* other)

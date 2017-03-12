@@ -45,6 +45,7 @@ public:
 	void setFrame(int);
 	int getFrame();
 
+	//Node(Node);
 	Node();
 	Node(std::string _name, glm::vec3 position);
 	~Node();
