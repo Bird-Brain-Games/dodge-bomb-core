@@ -131,6 +131,7 @@ void Player::handleInput(float dt)
 	if (currentAngle != angle && con.rightStickMoved())
 	{
 		currentAngle = angle;
+		this->setRotationAngleY(currentAngle);
 	}
 
 	else if (con.leftStickMoved() && !con.rightStickMoved())
@@ -138,7 +139,7 @@ void Player::handleInput(float dt)
 		//currentAngle = atan2(LStick.y, LStick.x) + 180 * degToRad;
 		//this->setRotationAngleY(angle);
 	}
-	this->setRotationAngleY(currentAngle);
+	
 	if (hasMoved)
 	{
 		setPosition(getWorldPosition() + trans);

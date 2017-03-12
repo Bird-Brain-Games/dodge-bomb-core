@@ -108,7 +108,7 @@ void GameObject::updateLocalTransform()
 void GameObject::setPosition(glm::vec3 newPosition)
 {
 	m_pLocalPosition = newPosition;
-	needsUpdating = true;
+	posNeedsUpdating = true;
 }
 
 void GameObject::setScale(glm::vec3 newScale)
@@ -118,26 +118,26 @@ void GameObject::setScale(glm::vec3 newScale)
 		newScale.z > 0.0f)
 	{
 		m_pScale = newScale;
-		needsUpdating = true;
+		rotNeedsUpdating = true;
 	}
 }
 
 void GameObject::setRotationAngleX(float newAngle)
 {
 	m_pRotX = newAngle;
-	needsUpdating = true;
+	rotNeedsUpdating = true;
 }
 
 void GameObject::setRotationAngleY(float newAngle)
 {
 	m_pRotY = newAngle;
-	needsUpdating = true;
+	rotNeedsUpdating = true;
 }
 
 void GameObject::setRotationAngleZ(float newAngle)
 {
 	m_pRotZ = newAngle;
-	needsUpdating = true;
+	rotNeedsUpdating = true;
 }
 
 glm::mat4 GameObject::getLocalToWorldMatrix()
@@ -148,7 +148,7 @@ glm::mat4 GameObject::getLocalToWorldMatrix()
 void GameObject::update(float dt)
 {
 	// Create 4x4 transformation matrix
-	if (!hasRigidBody() || needsUpdating)
+	if (!hasRigidBody() || posNeedsUpdating || rotNeedsUpdating)
 	{
 		updateLocalTransform();
 	}
@@ -164,16 +164,23 @@ void GameObject::update(float dt)
 		{
 			// If the gameobject has updated
 			// set the world transform of the body to the gameobject.
-			if (needsUpdating || rigidBody->getBody()->isStaticOrKinematicObject())
+			if (posNeedsUpdating || rigidBody->getBody()->isStaticOrKinematicObject())
 			{
 				rigidBody->setWorldTransform(m_pLocalPosition, 
+					glm::vec3(m_pRotX, m_pRotY, m_pRotZ));
+				rigidBody->setScale(m_pScale);
+			}
+			// If it needs to be rotated but not position updated
+			else if (rotNeedsUpdating)
+			{
+				rigidBody->setWorldTransform(rigidBody->getWorldTransform()[3],
 					glm::vec3(m_pRotX, m_pRotY, m_pRotZ));
 				rigidBody->setScale(m_pScale);
 			}
 
 			// If the gameobject has updated and we didn't control it
 			// set the world transform
-			if (!needsUpdating && !rigidBody->getBody()->isStaticOrKinematicObject())
+			if (!posNeedsUpdating && !rigidBody->getBody()->isStaticOrKinematicObject())
 			{
 				setLocalTransformToBody();
 			}
@@ -184,7 +191,8 @@ void GameObject::update(float dt)
 	for (int i = 0; i < m_pChildren.size(); i++)
 		m_pChildren[i]->update(dt);
 	
-	needsUpdating = false;
+	posNeedsUpdating = false;
+	rotNeedsUpdating = false;
 }
 
 void GameObject::draw(Camera &camera)

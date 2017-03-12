@@ -99,6 +99,6 @@ protected:
 	// Using unique_ptr as objects shouldn't share rigidBodies
 	std::unique_ptr<RigidBody> rigidBody;
 
-	bool needsUpdating;
+	bool posNeedsUpdating, rotNeedsUpdating = false;
 	COLLIDER_TYPE colliderType;
 };
