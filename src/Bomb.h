@@ -118,7 +118,7 @@ public:
 
 	// Create the new bomb, add it to the active list,
 	// and tell it to throw in the given direction.
-	void throwBomb(Player*, glm::vec2 direction, glm::vec3 force);
+	void throwBomb(Player*, glm::vec2 direction, glm::vec2 playerVelocity, glm::vec3 force);
 
 private:
 	std::shared_ptr<Loader> bombMesh, explosionMesh;

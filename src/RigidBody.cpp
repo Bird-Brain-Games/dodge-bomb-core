@@ -368,7 +368,7 @@ void RigidBody::setWorldTransform(glm::vec3 pos, glm::vec3 rot)
 	btMatrix3x3 bullet(rotations[0].x, rotations[0].y, rotations[0].z,
 		rotations[1].x, rotations[1].y, rotations[1].z,
 		rotations[2].x, rotations[2].y, rotations[2].z);
-	btTransform newTran(bullet, btVector3(pos.x, pos.y, pos.z));
+	btTransform newTran(bullet, GLMtoBT(pos));
 	body->setWorldTransform(newTran);
 }
 
@@ -390,17 +390,12 @@ void RigidBody::setWorldTransform(glm::mat4x4 transform)
 
 void RigidBody::setScale(glm::vec3 newScale)
 {
-	body->getCollisionShape()->setLocalScaling(btVector3(
-		newScale.x,
-		newScale.y,
-		newScale.z
-	));
+	body->getCollisionShape()->setLocalScaling(GLMtoBT(newScale));
 }
 
 glm::vec3 RigidBody::getScale()
 {
-	btVector3 ls = body->getCollisionShape()->getLocalScaling();
-	return glm::vec3(ls.getX(), ls.getY(), ls.getZ());
+	return BTtoGLM(body->getCollisionShape()->getLocalScaling());
 }
 
 void RigidBody::setUserPointer(GameObject* gameObject)
@@ -415,4 +410,27 @@ void RigidBody::setLinearVelocity(glm::vec3 newVelocity)
 {
 	body->setLinearVelocity(
 		btVector3(newVelocity.x, newVelocity.y, newVelocity.z));
+}
+
+glm::vec3 RigidBody::getLinearVelocity()
+{
+	return (BTtoGLM(body->getLinearVelocity()));
+}
+
+glm::vec3 RigidBody::BTtoGLM(btVector3 const& other)
+{
+	return glm::vec3(
+		other.getX(),
+		other.getY(),
+		other.getZ()
+	);
+}
+
+btVector3 RigidBody::GLMtoBT(glm::vec3 other)
+{
+	return btVector3(
+		other.x,
+		other.y,
+		other.z
+	);
 }

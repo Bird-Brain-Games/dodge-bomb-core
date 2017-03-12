@@ -94,6 +94,7 @@ void Player::update(float dt)
 
 	// Make it so they can't rotate through physics
 	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 0.0, 0.0));	
+	rigidBody->getBody()->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
 }
 
 void Player::handleInput(float dt)
@@ -146,7 +147,6 @@ void Player::handleInput(float dt)
 	if (hasMoved)
 	{
 		rigidBody->setLinearVelocity(trans * 50.0f);
-		rigidBody->getBody()->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
 	}
 
 
@@ -156,9 +156,17 @@ void Player::handleInput(float dt)
 		glm::vec2 normalized = glm::vec2(0);
 		if (con.rightStickMoved())
 			normalized = glm::normalize(glm::vec2(RStick.x, RStick.y));
-
+		else
+			normalized = glm::vec2(-glm::sin(currentAngle), -glm::cos(currentAngle));
 		
-		bombManager->throwBomb(this, normalized, throwingForce);
+		glm::vec2 playerVelocity;
+		if (hasMoved)
+			playerVelocity = glm::vec2(rigidBody->getLinearVelocity().x,
+				-rigidBody->getLinearVelocity().z);
+		else
+			playerVelocity = glm::vec2(0.0f);
+
+		bombManager->throwBomb(this, normalized, playerVelocity, throwingForce);
 		mesh->setAnim("throw");
 		currentCooldown += bombCooldown;
 	}
@@ -251,4 +259,9 @@ void Player::reset(glm::vec3 newPos)
 	health = maxHealth;
 	currentCooldown = 0.0f;
 	currentState = P_NORMAL;
+}
+
+glm::vec3 Player::getCurrentVelocity()
+{
+	return rigidBody->getLinearVelocity();
 }
