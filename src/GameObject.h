@@ -91,6 +91,7 @@ protected:
 
 	// Graphics components
 	glm::vec4 outlineColour;
+	float transparency;
 	std::shared_ptr<Texture> texture;
 	std::shared_ptr<Loader> mesh;
 	std::shared_ptr<Material> material;

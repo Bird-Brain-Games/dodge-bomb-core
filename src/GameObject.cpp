@@ -6,6 +6,7 @@ GameObject::GameObject()
 	m_pParent(nullptr),
 	m_pRotX(0.0f), m_pRotY(0.0f), m_pRotZ(0.0f),
 	m_pScale(1.0f),
+	transparency(1.0f),
 	mesh(nullptr),
 	material(nullptr),
 	texture(nullptr),
@@ -26,6 +27,7 @@ GameObject::GameObject(
 	m_pParent(nullptr),
 	m_pRotX(0.0f), m_pRotY(0.0f), m_pRotZ(0.0f),
 	m_pScale(1.0f),
+	transparency(1.0f),
 	mesh(_mesh),
 	material(_material),
 	texture(_texture),
@@ -44,6 +46,7 @@ GameObject::GameObject(GameObject& other)
 	mesh(other.mesh),
 	material(other.material),
 	texture(other.texture),
+	transparency(other.transparency),
 	outlineColour(other.outlineColour),
 	rigidBody(nullptr),
 	colliderType(other.colliderType)
@@ -203,6 +206,7 @@ void GameObject::draw(Camera &camera)
 		material->mat4Uniforms["u_mvp"] = camera.getViewProj() * m_pLocalToWorldMatrix;
 		material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
 		material->vec4Uniforms["u_outlineColour"] = outlineColour;
+		material->vec4Uniforms["u_transparency"] = glm::vec4(transparency);
 
 		// Bind the texture
 		if (texture != nullptr)

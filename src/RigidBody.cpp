@@ -193,6 +193,10 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 				// Sphere model
 				shape = new btSphereShape(radius);
 				break;
+			case 3:
+				// Capsule model
+				shape = new btCapsuleShape(radius, extents[1]);
+				break;
 			default:
 				shape = nullptr;
 				break;

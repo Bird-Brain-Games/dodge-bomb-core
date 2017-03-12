@@ -12,6 +12,8 @@ uniform sampler2D u_diffuseTex;
 uniform sampler2D u_specularTex;
 uniform sampler2D u_toonRamp;
 
+uniform vec4 u_transparency;
+
 in VertexData
 {
 	vec3 normal;
@@ -89,5 +91,5 @@ void main()
 		+ vec3(lights)
 		+ vec3(smoothstep(0.8, 1.0, rim) * vec3(1.0, 1.0, 1.0) * u_controls.w)  // Rim		   
 		);		
-	FragColor.w = 1.0;
+	FragColor.w = u_transparency.x;
 }
