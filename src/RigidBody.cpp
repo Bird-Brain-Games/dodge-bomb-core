@@ -406,3 +406,9 @@ void RigidBody::setUserPointer(GameObject* gameObject)
 	body->getCollisionShape()->setUserPointer(userPointer);
 	body->setUserPointer(userPointer);
 }
+
+void RigidBody::setLinearVelocity(glm::vec3 newVelocity)
+{
+	body->setLinearVelocity(
+		btVector3(newVelocity.x, newVelocity.y, newVelocity.z));
+}

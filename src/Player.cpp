@@ -61,7 +61,7 @@ void Player::update(float dt)
 	{
 	case P_NORMAL:
 		handleInput(dt);
-		//rigidBody->getBody()->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+		rigidBody->getBody()->setLinearFactor(btVector3(1.0f, 0.5f, 1.0f));
 		break;
 
 	case P_INVINCIBLE:
@@ -92,8 +92,8 @@ void Player::update(float dt)
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);
 
-	// Make it so they can't rotate along other than the Y axis.
-	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 1.0, 0.0));	
+	// Make it so they can't rotate through physics
+	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 0.0, 0.0));	
 }
 
 void Player::handleInput(float dt)
@@ -145,9 +145,8 @@ void Player::handleInput(float dt)
 	
 	if (hasMoved)
 	{
-		setPosition(getWorldPosition() + trans);
-		//rigidBody->getBody()->
-		//player->rigidBody->getBody()->applyCentralImpulse(btVector3(-stick.y, 0, -stick.x));
+		rigidBody->setLinearVelocity(trans * 50.0f);
+		rigidBody->getBody()->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
 	}
 
 
