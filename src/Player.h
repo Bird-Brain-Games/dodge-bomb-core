@@ -37,6 +37,7 @@ public:
 	void checkCollisionWith(Bomb* other);
 	void checkCollisionWith(Explosion* other);
 	int getPlayerNum();
+	glm::vec3 getCurrentVelocity();
 
 	void setAnim(std::string);
 

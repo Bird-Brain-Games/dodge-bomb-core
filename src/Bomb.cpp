@@ -126,7 +126,7 @@ void BombManager::draw(Camera& camera)
 	}
 }
 
-void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force)
+void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playerVelocity, glm::vec3 force)
 {
 	if (!initialized) return;
 
@@ -134,6 +134,22 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec3 force
 	std::shared_ptr<Bomb> newBomb = std::make_shared<Bomb>(*bombTemplates.at(playerNum));
 	newBomb->attachPlayerPtr(player);
 	activeBombs.push_back(newBomb);
+
+	glm::vec2 playerForce;
+	if (playerVelocity != glm::vec2(0.0f))
+	{
+		playerForce = glm::normalize(playerVelocity) * glm::abs(playerVelocity);
+	}
+	else
+	{
+		playerForce = glm::vec2(0.0f);
+	}
+
+	// direction of bomb * bomb force + direction of player * player force
+	force = glm::vec3(direction.x, 0.0f, -direction.y) * force +
+		glm::vec3(playerForce.x, 0.0f, -playerForce.y);
+	std::cout << "Force vector: " << force.x << " " << force.z << std::endl;
+
 	newBomb->throwBomb(direction, glm::vec3(force.x, impulseY, force.z));
 }
 
@@ -193,7 +209,7 @@ void Bomb::throwBomb(glm::vec2 direction, glm::vec3 force)
 	currentState = THROWN;
 
 	rigidBody->getBody()->applyCentralImpulse(
-		btVector3(direction.x * force.x, force.y, -direction.y * force.z));
+		btVector3(force.x, force.y, force.z));
 }
 
 

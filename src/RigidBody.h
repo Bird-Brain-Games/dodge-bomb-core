@@ -75,6 +75,7 @@ public:
 	glm::vec3 getScale();
 	
 	void setLinearVelocity(glm::vec3 newVelocity);
+	glm::vec3 getLinearVelocity();
 
 	btRigidBody* getBody() { return body; }
 	std::string getFileName() { return u_fileName; }
@@ -98,4 +99,9 @@ private:
 	std::string u_fileName;
 	short group, mask;
 	GameObject* userPointer;
+
+private:
+	glm::vec3 BTtoGLM(btVector3 const& other);
+
+	btVector3 GLMtoBT(glm::vec3 other);
 };
