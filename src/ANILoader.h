@@ -129,3 +129,5 @@ public:
 	//used to update a portion of the skeleton.
 	//void update(int frame, int max);
 };
+
+void loadAnimations(std::shared_ptr<Holder> _temp);
