@@ -37,6 +37,7 @@ public:
 private:
 	// Create the rigid body construction information
 	bool createRigidBodyCI(std::string fileName);
+
 private:
 	// Bullet core variables
 	btBroadphaseInterface* broadphase;
@@ -73,7 +74,7 @@ public:
 	void setScale(glm::vec3 newScale);
 	glm::vec3 getScale();
 	
-	//void applyImpulse()
+	void setLinearVelocity(glm::vec3 newVelocity);
 
 	btRigidBody* getBody() { return body; }
 	std::string getFileName() { return u_fileName; }
