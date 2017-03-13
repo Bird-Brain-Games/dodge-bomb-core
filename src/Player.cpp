@@ -95,11 +95,13 @@ void Player::update(float dt)
 		{
 			invincibleTime = 0.0f;
 			currentState = P_NORMAL;
+			con.setVibration(0, 0);
 		}
 		break;
 
 	case P_DEAD:
 		rigidBody->getBody()->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+		con.setVibration(0, 0);
 		break;
 
 	default:
@@ -229,6 +231,7 @@ void Player::checkCollisionWith(Bomb* other)
 		{
 			other->explode();
 			takeDamage(1);
+			con.setVibration(32000, 16000);
 			//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 		}
 	}	
@@ -281,6 +284,7 @@ void Player::reset(glm::vec3 newPos)
 	health = maxHealth;
 	currentCooldown = 0.0f;
 	currentState = P_NORMAL;
+	con.setVibration(0, 0);
 }
 
 glm::vec3 Player::getCurrentVelocity()
