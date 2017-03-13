@@ -54,6 +54,21 @@
     <ClCompile Include="src\main.cpp">
       <Filter>states and menu</Filter>
     </ClCompile>
+    <ClCompile Include="src\MainGameState.cpp">
+      <Filter>states and menu\States</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MainMenuState.cpp">
+      <Filter>states and menu\States</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DebugState.cpp">
+      <Filter>states and menu\States</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ScoreState.cpp">
+      <Filter>states and menu\States</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PauseState.cpp">
+      <Filter>states and menu\States</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />
@@ -115,6 +130,21 @@
     <ClInclude Include="src\menu.h">
       <Filter>states and menu</Filter>
     </ClInclude>
+    <ClInclude Include="src\MainGameState.h">
+      <Filter>states and menu\States</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MainMenuState.h">
+      <Filter>states and menu\States</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DebugState.h">
+      <Filter>states and menu\States</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ScoreState.h">
+      <Filter>states and menu\States</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PauseState.h">
+      <Filter>states and menu\States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Graphics">
@@ -131,6 +161,9 @@
     </Filter>
     <Filter Include="states and menu">
       <UniqueIdentifier>{36414be0-7cee-4fe8-9698-dd44423a735b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="states and menu\States">
+      <UniqueIdentifier>{998bf942-7557-46b7-9145-e2b667f1882e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
