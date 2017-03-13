@@ -44,6 +44,8 @@ public:
 
 	Player const* getPlayer() { return playerPtr; }
 	int getPlayerNum() { return playerNum; }
+	
+	bool justExploded;
 
 private:
 	static float playerRadius;
@@ -56,6 +58,7 @@ private:
 	BOMB_STATE currentState;
 	float currentFuseTime;
 	float currentExplodeTime;
+	
 
 	static float maxFuseTime;
 	static float maxExplodeTime;
@@ -107,12 +110,16 @@ public:
 		std::shared_ptr<Texture> _p3,
 		std::shared_ptr<Texture> _p4,
 		std::shared_ptr<Loader> _explosionMesh,
-		std::shared_ptr<Texture> _explosionTex,
+		std::shared_ptr<Texture> _explosionTex1,
+		std::shared_ptr<Texture> _explosionTex2,
+		std::shared_ptr<Texture> _explosionTex3,
+		std::shared_ptr<Texture> _explosionTex4,
 		std::string _explosionBodyPath,
 		std::shared_ptr<Material> _material,
 		std::string bodyPath);
 
 	void update(float dt);
+	void checkIfExploded(Camera& camera);
 	void draw(Camera& camera);
 	void setMaterialForAllBombs(std::shared_ptr<Material> mat);
 
@@ -125,9 +132,9 @@ private:
 	std::shared_ptr<Material> material;
 	std::vector <std::shared_ptr<Texture>> textures;
 	std::vector <std::shared_ptr<Bomb>> bombTemplates;
+	std::vector<std::shared_ptr<Explosion>> explosionTemplates;
 	std::vector <std::shared_ptr<Bomb>> activeBombs;
 	std::queue<std::shared_ptr<Bomb>> bombQueue;
-	std::shared_ptr<Explosion> explosion;
 
 	bool initialized;
 	float impulseY;

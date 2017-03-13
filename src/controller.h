@@ -27,6 +27,8 @@ public:
 	bool rightStickMoved();
 	bool leftStickMoved();
 
+	void setVibration(unsigned short leftMotor, unsigned short rightMotor);
+
 	/**
 	*XINPUT_GAMEPAD_DPAD_UP		0x0001
 	*XINPUT_GAMEPAD_DPAD_DOWN	0x0002
@@ -52,6 +54,7 @@ public:
 private:
 	XINPUT_STATE m_CurrentState;
 	DWORD m_ControllerHandle;
+	XINPUT_VIBRATION m_vibration;
 };
 
 
