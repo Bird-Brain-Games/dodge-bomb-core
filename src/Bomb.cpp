@@ -95,20 +95,11 @@ void BombManager::update(float dt)
 	static std::vector<std::vector<std::shared_ptr<Bomb>>::iterator> inactiveBombs;
 	inactiveBombs.clear();
 
-	// Gets the list of finished bombs
-	for (auto it = activeBombs.begin(); it != activeBombs.end(); it++)
+	// Pop off inactive bombs
+	while (activeBombs.size() > 0 &&
+		activeBombs.back()->getCurrentState() == DONE)
 	{
-		if (it->get()->getCurrentState() == DONE)
-		{
-			inactiveBombs.push_back(it);
-		}
-	}
-
-	// Removes finished bombs from the game
-	// ERROR: can't delete multiple bombs at a time
-	for (auto it : inactiveBombs)
-	{
-		activeBombs.erase(it);
+		activeBombs.pop_back();
 	}
 }
 
