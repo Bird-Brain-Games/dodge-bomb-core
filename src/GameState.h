@@ -28,7 +28,7 @@ public:
 
 	virtual void update(float dt) = 0;//this is a function that doesnt exsist in this class but can be defined by those that it is inherited from.
 	virtual void draw() = 0;//this is a function that doesnt exsist in this class but can be defined by those that it is inherited from.
-	void setPaused(int a_paused);//this controls whether a game state is paused or not. When paused it doesnt update
+	virtual void setPaused(int a_paused);//this controls whether a game state is paused or not. When paused it doesnt update
 	bool m_isPaused = false;//the variable that controls whether the game state is paused. it starts unpaused
 	GameStateManager* m_parent;// a pointer the the game state manager.
 	

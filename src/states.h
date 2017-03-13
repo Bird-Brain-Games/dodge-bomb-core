@@ -32,9 +32,13 @@ public:
 
 	void update(float dt);
 	void draw();
-	void setPaused(bool);
+	void setPaused(int);
 
 private:
+	float accept;
+	float time;
+	float timer;
+	float incrememnt;
 	int position, frame;
 	std::shared_ptr<Menu> atlas;
 };
@@ -43,14 +47,18 @@ class Pause : public GameState
 {
 public:
 	Pause(std::shared_ptr<Menu>);
-	void setPaused(bool);
+	void setPaused(int);
 	void update(float dt);
 	void draw();
 	void setActive(Controller*);
 	Controller *active;
 	//used so we cant pause then immediately unpause.
-	float pauseTimer;
+
 private:
+	float time;
+	float timer;
+
+	int position;
 	//when we pause it passes the controller used so only that player can unpause
 	std::shared_ptr<Menu> atlas;
 };
@@ -59,12 +67,13 @@ class Score : public GameState
 {
 public:
 	Score(std::shared_ptr<Menu>);
-	void setPaused(bool);
+	void setPaused(int);
 	void update(float dt);
 	void draw();
 	Controller *active;
 	std::shared_ptr<Menu> atlas;
 private:
+	float accept;
 	float pauseTimer;
 };
 

@@ -90,7 +90,7 @@ void ShaderProgram::sendUniformVec4(const std::string& uniformName, glm::vec4& v
 void ShaderProgram::sendUniformVec2(const std::string& uniformName, glm::vec2& vec2)
 {
 	int uniformLocation = getUniformLocation(uniformName);
-	glUniform4fv(uniformLocation, 1, &vec2[0]);
+	glUniform2fv(uniformLocation, 1, &vec2[0]);
 }
 
 void ShaderProgram::sendUniformMat4(const std::string& uniformName, glm::mat4& mat4, int _num)
