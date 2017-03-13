@@ -19,10 +19,11 @@ Player::Player(glm::vec3 position,
 	con(_playerNum),
 	bombCooldown(maxBombCooldown),
 	currentAngle(0.0f),
-	throwingForce(30.0f)
+	throwingForce(25.0f)
 {
 	reset(position);
 	playerNum = _playerNum;
+	setScale(glm::vec3(0.75f));
 }
 
 Player::Player(Player& other)

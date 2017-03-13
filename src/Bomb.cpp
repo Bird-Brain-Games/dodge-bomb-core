@@ -6,7 +6,7 @@
 ////////////////////////	BOMB MANAGER	///////////////////////////////////
 BombManager::BombManager()
 {
-	impulseY = 25.0f;
+	impulseY = 35.0f;
 	initialized = false;
 }
 
@@ -155,7 +155,7 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 
 	// direction of bomb * bomb force + direction of player * player force
 	force = glm::vec3(direction.x, 0.0f, -direction.y) * force +
-		glm::vec3(playerForce.x, 0.0f, -playerForce.y);
+		glm::vec3(playerForce.x, 2.0f, -playerForce.y) * 0.5f;
 	std::cout << "Force vector: " << force.x << " " << force.z << std::endl;
 
 	newBomb->throwBomb(direction, glm::vec3(force.x, impulseY, force.z));
@@ -166,8 +166,8 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////	BOMB	///////////////////////////////////////
 float Bomb::playerRadius = 2.0f;
-float Bomb::maxExplodeTime = 0.75f;
-float Bomb::maxFuseTime = 1.7f;
+float Bomb::maxExplodeTime = 0.45f;
+float Bomb::maxFuseTime = 1.3f;
 
 Bomb::Bomb(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,

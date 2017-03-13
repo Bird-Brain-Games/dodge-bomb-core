@@ -92,7 +92,7 @@ bool outlineToggle = true;
 
 // Lighting Controls
 float deskLamp = 0.8; 
-float innerCutOff = 0.42; // Spot Light Size
+float innerCutOff = 0.45; // Spot Light Size
 float outerCutOff = 0.47;
 glm::vec3 deskForward = glm::vec3(0.2, 1.0, 1.5); // Spot Light Direction
 float roomLight = 0.4;
@@ -438,7 +438,7 @@ void initializeScene()
 		glm::vec3(-48.796f, 46.3f, -14.61f), nullptr, defaultMaterial, nullptr);
 
 	gameobjects["botwall"] = std::make_shared<GameObject>(
-		glm::vec3(33.384f, 39.0f, 36.964f), nullptr, defaultMaterial, nullptr);
+		glm::vec3(33.384f, 39.0f, 39.964f), nullptr, defaultMaterial, nullptr);
 
 	gameobjects["topwall"] = std::make_shared<GameObject>(
 		glm::vec3(33.384f, 39.0f, -44.964f), nullptr, defaultMaterial, nullptr);
@@ -452,8 +452,8 @@ void initializeScene()
 	//	glm::vec3(15.f, 42.0f, 10.f), barrelMesh, defaultMaterial, barrelTexMap);
 
 	gameobjects["barrelTR"] = std::make_shared<GameObject>(
-		glm::vec3(37.f, 42.0f, -2.f), barrelMesh, defaultMaterial, barrelTexMap);
-
+		glm::vec3(37.f, -20.0f, -2.0f), barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["barrelTR"]->setScale(glm::vec3(1.2));
 	//gameobjects["barrelBR"] = std::make_shared<GameObject>(
 	//	glm::vec3(40.f, 42.0f, 25.f), barrelMesh, defaultMaterial, barrelTexMap);
 
@@ -464,25 +464,31 @@ void initializeScene()
 	//	glm::vec3(-15.f, 42.0f, -10.f), barrelMesh, defaultMaterial, barrelTexMap);
 
 	gameobjects["barrel1"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 42.0f, 23.f), barrelMesh, defaultMaterial, barrelTexMap);
+		glm::vec3(-2.0f, 42.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["barrel1"]->setScale(glm::vec3(1.2));
 
 	gameobjects["boulder2"] = std::make_shared<GameObject>(
-		glm::vec3(-10.0f, 41.0f, 18.0f), boulderMesh, defaultMaterial, boulderTexMap);
+		glm::vec3(-5.f, 44.0f, 23.f), boulderMesh, defaultMaterial, boulderTexMap);
+	gameobjects["boulder2"]->setScale(glm::vec3(1.3));
 
 	gameobjects["boulder"] = std::make_shared<GameObject>(
-		glm::vec3(18.0f, 41.0f, 8.0f), boulderMesh, defaultMaterial, boulderTexMap);
+		glm::vec3(21.0f, 44.0f, -18.0f), boulderMesh, defaultMaterial, boulderTexMap);
+	gameobjects["boulder"]->setScale(glm::vec3(1.6));
 
 	gameobjects["cannon"] = std::make_shared<GameObject>(
-		glm::vec3(20.f, 40.5f, 15.f), cannonMesh, defaultMaterial, cannonTexMap);
+		glm::vec3(23.f, 44.0f, 10.f), cannonMesh, defaultMaterial, cannonTexMap);
+	gameobjects["cannon"]->setScale(glm::vec3(2.0f));
 
 	gameobjects["crate"] = std::make_shared<GameObject>(
-		glm::vec3(13.0f, 40.0f, 14.0f), crateMesh, defaultMaterial, crateTexMap);
-
+		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
+	gameobjects["crate"]->setScale(glm::vec3(1.6));
+	
 	gameobjects["crate2"] = std::make_shared<GameObject>(
-		glm::vec3(10.0f, 40.0f, 9.0f), crateMesh, defaultMaterial, crateTexMap);
+		glm::vec3(15.0f, -20.0f, 2.0f), crateMesh, defaultMaterial, crateTexMap);
+	gameobjects["crate2"]->setScale(glm::vec3(1.3));
 
 	gameobjects["boat"] = std::make_shared<GameObject>(
-		glm::vec3(35.0f, 41.0f, 23.0f), boatMesh, defaultMaterial, boatTexMap);
+		glm::vec3(45.0f, 41.0f, 23.0f), boatMesh, defaultMaterial, boatTexMap);
 	gameobjects["boat"]->setRotationAngleY(-45 * degToRad);
 
 	//gameobjects["palmtree"] = std::make_shared<GameObject>(
@@ -492,11 +498,10 @@ void initializeScene()
 
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
-	
 	players["bombot2"] = std::make_shared<Player>(
-		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh2, defaultMaterial, bombotTexMap, 1);
+		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombotTexMap, 1);
 	gameobjects["bombot2"] = players["bombot2"];
 	/*
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
