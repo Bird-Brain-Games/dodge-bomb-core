@@ -443,6 +443,8 @@ void initializeScene()
 	gameobjects["booksbody"] = std::make_shared<GameObject>(
 		glm::vec3(-5.232f, 46.713f, -34.777f), nullptr, defaultMaterial, nullptr);
 
+	gameobjects["lamp"] = std::make_shared<GameObject>(
+		glm::vec3(67.9f, 38.756f, -31.772f), nullptr, defaultMaterial, nullptr);
 	// Build the play area
 
 	//gameobjects["barrel"] = std::make_shared<GameObject>(
@@ -528,6 +530,7 @@ void initializeScene()
 	std::string botleftBodyPath = "assets\\bullet\\botwall.btdata";
 	std::string rightwallBodyPath = "assets\\bullet\\botwall.btdata";
 	std::string topwallBodyPath = "assets\\bullet\\topwall.btdata";
+	std::string lampBodyPath = "assets\\bullet\\lamp.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
@@ -549,6 +552,7 @@ void initializeScene()
 	std::unique_ptr<RigidBody> rightwallBody;
 	std::unique_ptr<RigidBody> botleftBody;
 	std::unique_ptr<RigidBody> topwallBody;
+	std::unique_ptr<RigidBody> lampBody;
 
 	tableBody = std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
@@ -569,6 +573,7 @@ void initializeScene()
 	rightwallBody	= std::make_unique<RigidBody>();
 	botleftBody		= std::make_unique<RigidBody>();
 	topwallBody = std::make_unique<RigidBody>();
+	lampBody = std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
@@ -590,6 +595,7 @@ void initializeScene()
 	rightwallBody->load(botwallBodyPath);
 	botleftBody->load(botleftBodyPath);
 	topwallBody->load(topwallBodyPath);
+	lampBody->load(lampBodyPath);
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
@@ -611,6 +617,7 @@ void initializeScene()
 	gameobjects["botleftwall"]->attachRigidBody(botleftBody);
 	gameobjects["rightwall"]->attachRigidBody(rightwallBody);
 	gameobjects["topwall"]->attachRigidBody(topwallBody);
+	gameobjects["lamp"]->attachRigidBody(lampBody);
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////

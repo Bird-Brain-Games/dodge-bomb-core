@@ -166,7 +166,7 @@ void Game::update(float dt)
 	RigidBody::systemUpdate(dt, 10);
 	calculateCollisions();
 
-
+	handleKeyboardInput();
 	// Update all gameobjects
 	updateScene(dt);
 
