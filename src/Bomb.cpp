@@ -163,6 +163,10 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 	newBomb->throwBomb(direction, glm::vec3(force.x, impulseY, force.z));
 }
 
+void BombManager::clearAllBombs()
+{
+	activeBombs.clear();
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

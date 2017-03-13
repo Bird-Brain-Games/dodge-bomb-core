@@ -152,12 +152,9 @@ void Game::setPaused(int a_paused)
 		// Reset all players
 
 		float count = 0.0f;
-		for (auto it : *players)
-		{
-			it.second->reset(glm::vec3(20.0f * count, 40.0f, 0.0f));
-			count++;
-		}
-
+		players->at("bombot1")->reset(glm::vec3(-8.0f, 39.5f, 9.0f));
+		players->at("bombot2")->reset(glm::vec3(50.0f, 39.5f, 5.0f));
+		bombManager->clearAllBombs();
 	}
 }
 
@@ -528,6 +525,7 @@ void Game::updateScene(float dt)
 	}
 
 	bombManager->update(dt);
+	bombManager->checkIfExploded(*camera);
 }
 
 void Game::initializeFrameBuffers()
@@ -807,7 +805,7 @@ void Game::handleKeyboardInput()
 	//}
 	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
 	{
-		camera->shakeScreen();
+		camera->shakeScreen(1.0f);
 	}
 	// Reset all players
 

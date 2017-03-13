@@ -122,6 +122,7 @@ public:
 	void checkIfExploded(Camera& camera);
 	void draw(Camera& camera);
 	void setMaterialForAllBombs(std::shared_ptr<Material> mat);
+	void clearAllBombs();
 
 	// Create the new bomb, add it to the active list,
 	// and tell it to throw in the given direction.

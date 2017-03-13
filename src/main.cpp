@@ -712,9 +712,6 @@ void calculateCollisions()
 	}
 }
 
-
-
-	bombManager->checkIfExploded(playerCamera);
 // This is where we draw stuff
 void DisplayCallbackFunction(void)
 {
