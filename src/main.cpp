@@ -429,6 +429,14 @@ void initializeScene()
 	gameobjects["botwall"] = std::make_shared<GameObject>(
 		glm::vec3(33.384f, 39.0f, 39.964f), nullptr, defaultMaterial, nullptr);
 
+	gameobjects["botleftwall"] = std::make_shared<GameObject>(
+		glm::vec3(-17.384f, 39.0f, 39.964f), nullptr, defaultMaterial, nullptr);
+	gameobjects["botleftwall"]->setRotationAngleY(70 * degToRad);
+
+	gameobjects["rightwall"] = std::make_shared<GameObject>(
+		glm::vec3(67.384f, 39.0f, -9.964f), nullptr, defaultMaterial, nullptr);
+	gameobjects["rightwall"]->setRotationAngleY(90 * degToRad);
+
 	gameobjects["topwall"] = std::make_shared<GameObject>(
 		glm::vec3(33.384f, 39.0f, -44.964f), nullptr, defaultMaterial, nullptr);
 
@@ -517,6 +525,8 @@ void initializeScene()
 	std::string trumpBodyPath = "assets\\bullet\\Trumps_wall.btdata";
 	std::string booksBodyPath = "assets\\bullet\\books.btdata";
 	std::string botwallBodyPath = "assets\\bullet\\botwall.btdata";
+	std::string botleftBodyPath = "assets\\bullet\\botwall.btdata";
+	std::string rightwallBodyPath = "assets\\bullet\\botwall.btdata";
 	std::string topwallBodyPath = "assets\\bullet\\topwall.btdata";
 
 	// Create rigidbodies
@@ -536,6 +546,8 @@ void initializeScene()
 	std::unique_ptr<RigidBody> trumpBody;
 	std::unique_ptr<RigidBody> booksBody;
 	std::unique_ptr<RigidBody> botwallBody;
+	std::unique_ptr<RigidBody> rightwallBody;
+	std::unique_ptr<RigidBody> botleftBody;
 	std::unique_ptr<RigidBody> topwallBody;
 
 	tableBody = std::make_unique<RigidBody>();
@@ -554,6 +566,8 @@ void initializeScene()
 	trumpBody = std::make_unique<RigidBody>();
 	booksBody = std::make_unique<RigidBody>();
 	botwallBody = std::make_unique<RigidBody>();
+	rightwallBody	= std::make_unique<RigidBody>();
+	botleftBody		= std::make_unique<RigidBody>();
 	topwallBody = std::make_unique<RigidBody>();
 
 	// Load rigidbodies
@@ -573,6 +587,8 @@ void initializeScene()
 	trumpBody->load(trumpBodyPath);
 	booksBody->load(booksBodyPath);
 	botwallBody->load(botwallBodyPath);
+	rightwallBody->load(botwallBodyPath);
+	botleftBody->load(botleftBodyPath);
 	topwallBody->load(topwallBodyPath);
 
 	// Attach rigidbodies
@@ -592,6 +608,8 @@ void initializeScene()
 	gameobjects["trumps_wall"]->attachRigidBody(trumpBody);
 	gameobjects["booksbody"]->attachRigidBody(booksBody);
 	gameobjects["botwall"]->attachRigidBody(botwallBody);
+	gameobjects["botleftwall"]->attachRigidBody(botleftBody);
+	gameobjects["rightwall"]->attachRigidBody(rightwallBody);
 	gameobjects["topwall"]->attachRigidBody(topwallBody);
 
 	///////////////////////////////////////////////////////////////////////////
