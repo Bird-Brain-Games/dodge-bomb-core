@@ -43,6 +43,7 @@ public:
 
 private:
 	void lookDirectlyAtExplosion(glm::vec3 direction);
+	void quickDash(glm::vec3 direction);
 
 private:
 
@@ -51,6 +52,8 @@ private:
 
 	float bombCooldown;		// The value the cooldown gets set to when thrown
 	float currentCooldown;	// The current cooldown on the bomb throw
+	float dashCooldown;
+	float dashDuration;
 	std::shared_ptr<BombManager> bombManager;
 	float currentAngle;
 	float bottomAngle; //used for animation rotation.
@@ -68,5 +71,8 @@ private:
 	static float pauseTime;
 	static int maxHealth;
 	static float maxBombCooldown;
+	static float maxDashCooldown;
 	static float flashInterval;
+	static float dashForce;
+	static float maxDashDuration;
 };

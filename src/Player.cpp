@@ -7,7 +7,9 @@ float Player::maxInvincibleTime = 3.0f;
 float Player::pauseTime = 0.5f;
 int Player::maxHealth = 2;
 float Player::maxBombCooldown = 1.0f;
+float Player::maxDashCooldown = 1.0f;
 float Player::flashInterval = 0.2f;
+float Player::dashForce = 100.0f;
 
 Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -67,6 +69,24 @@ void Player::update(float dt)
 			currentCooldown = 0.0f;
 	}
 
+	// Update the dash cooldown
+	if (dashCooldown > 0.0f)
+	{
+		dashCooldown -= dt;
+		if (dashCooldown < 0.0f)
+			dashCooldown = 0.0f;
+	}
+
+	// Update the dash action
+	if (dashDuration > 0.0f)
+	{
+		dashDuration -= dt;
+		if (dashDuration < 0.0f)
+			dashDuration = 0.0f;
+	}
+
+
+
 	switch (currentState)
 	{
 	case P_NORMAL:
@@ -106,7 +126,7 @@ void Player::update(float dt)
 	}
 
 	// Allow player to reset all stats (DEBUG)
-	if (con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER))
+	if (con.conButton(XINPUT_GAMEPAD_BACK))
 		reset(glm::vec3(0.0f, 40.0f, 0.0f));
 
 	GameObject::update(dt);
@@ -164,7 +184,12 @@ void Player::handleInput(float dt)
 		//this->setRotationAngleY(angle);
 	}
 	
-	if (hasMoved)
+	// If currently dashing, don't let them change direction
+	if (dashDuration)
+	{
+
+	}
+	else if (hasMoved)
 	{
 		rigidBody->setLinearVelocity(trans * 50.0f);
 	}
@@ -190,10 +215,30 @@ void Player::handleInput(float dt)
 		mesh->setAnim("throw");
 		currentCooldown += bombCooldown;
 	}
+
+	// Quick dash
+	if (con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER) && dashCooldown == 0.0f)
+	{
+		glm::vec3 playerDirection;
+		if (hasMoved)
+			playerDirection = glm::normalize(glm::vec3(rigidBody->getLinearVelocity().x, 0.0f,
+				-rigidBody->getLinearVelocity().z));
+		else
+			playerDirection = glm::normalize(glm::vec3(-glm::sin(currentAngle), 0.0f, glm::cos(currentAngle)));
+
+		quickDash(playerDirection);
+	}
 		
 
 	//tells the mesh(skeleton) to update
 	bottomAngle = atan2(-LStick.x, LStick.y);
+}
+
+void Player::quickDash(glm::vec3 playerDirection)
+{
+	rigidBody->getBody()->applyCentralImpulse(btVector3(
+		playerDirection.x, playerDirection.y, playerDirection.z) * dashForce);
+	dashCooldown = maxDashCooldown;
 }
 
 void Player::checkCollisionWith(GameObject* other)
@@ -279,6 +324,8 @@ void Player::reset(glm::vec3 newPos)
 	setPosition(newPos);
 	health = maxHealth;
 	currentCooldown = 0.0f;
+	dashCooldown = 0.0f;
+	dashDuration = 0.0f;
 	currentState = P_NORMAL;
 }
 
