@@ -73,7 +73,11 @@ std::map<std::string, std::shared_ptr<Material>> materials;
 
 // Controls
 bool inMenu = false;
-std::shared_ptr<Menu> menu;
+std::shared_ptr<Menu> startMenu;
+std::shared_ptr<Menu> scoreMenu;
+std::shared_ptr<Menu> scoreMenu2;
+std::shared_ptr<Menu> pause;
+
 std::shared_ptr<BombManager> bombManager;
 
 
@@ -352,10 +356,17 @@ void initializeScene()
 	char boatTex[] = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
-	char menuTex[] = "Assets/img/atlas.png";
-	std::shared_ptr<Texture> menuTexMap = std::make_shared<Texture>(menuTex, menuTex, 1.0f);
+	char startTex[] = "Assets/img/menMain_atlas.png";
+	std::shared_ptr<Texture> startTexMap = std::make_shared<Texture>(startTex, startTex, 1.0f);
 
+	char scoreTex[] = "Assets/img/winScreen_atlas.png";
+	std::shared_ptr<Texture> scoreTexMap = std::make_shared<Texture>(scoreTex, scoreTex, 1.0f);
 
+	char scoreTex2[] = "Assets/img/playerTransLayer_atlas.png";
+	std::shared_ptr<Texture> scoreTex2Map = std::make_shared<Texture>(scoreTex2, scoreTex2, 1.0f);
+
+	char pauseTex[] = "Assets/img/menPause_arlas.png";
+	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
 
 	//Add textures to the map
 	textures["default"] = deskTexMap;
@@ -936,13 +947,25 @@ int main(int argc, char **argv)
 	deltaTime = glutGet(GLUT_ELAPSED_TIME);
 	deltaTime /= 1000.0f;
 
-	mainMenu = new MainMenu(menu);
+	char startTex[] = "Assets/img/menMain_atlas.png";
+	std::shared_ptr<Texture> startTexMap = std::make_shared<Texture>(startTex, startTex, 1.0f);
+
+	char scoreTex[] = "Assets/img/winScreen_atlas.png";
+	std::shared_ptr<Texture> scoreTexMap = std::make_shared<Texture>(scoreTex, scoreTex, 1.0f);
+
+	char scoreTex2[] = "Assets/img/playerTransLayer_atlas.png";
+	std::shared_ptr<Texture> scoreTex2Map = std::make_shared<Texture>(scoreTex2, scoreTex2, 1.0f);
+
+	char pauseTex[] = "Assets/img/menPause_arlas.png";
+	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
+
+	mainMenu = new MainMenu(startTexMap);
 	mainMenu->setPaused(false);
 
-	pause = new Pause(menu);
+	pause = new Pause(pauseTexMap);
 	pause->setPaused(true);
 
-	score = new Score(menu);
+	score = new Score(scoreTexMap, scoreTex2Map);
 	score->setPaused(true);
 
 	game = new Game(&gameobjects, &players, &materials, bombManager, pause, score, &playerCamera);

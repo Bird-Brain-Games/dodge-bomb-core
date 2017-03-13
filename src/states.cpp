@@ -40,6 +40,11 @@ void MainMenu::update(float dt)
 			break;
 		}
 	}
+	if (KEYBOARD_INPUT->CheckPressEvent(13))
+	{
+		setPaused(true);
+		m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
+	}
 
 	Coords rStick = menus1.getLeftStick();
 	if (rStick.y > 0 && position < 14 && timer > 0.35)
