@@ -6,7 +6,7 @@
 ////////////////////////	BOMB MANAGER	///////////////////////////////////
 BombManager::BombManager()
 {
-	impulseY = 25.0f;
+	impulseY = 35.0f;
 	initialized = false;
 }
 
@@ -17,7 +17,10 @@ bool BombManager::init(
 	std::shared_ptr<Texture> _p3,
 	std::shared_ptr<Texture> _p4,
 	std::shared_ptr<Loader> _explosionMesh,
-	std::shared_ptr<Texture> _explosionTex,
+	std::shared_ptr<Texture> _explosionTex1,
+	std::shared_ptr<Texture> _explosionTex2,
+	std::shared_ptr<Texture> _explosionTex3,
+	std::shared_ptr<Texture> _explosionTex4,
 	std::string _explosionBodyPath,
 	std::shared_ptr<Material> _material,
 	std::string bodyPath)
@@ -31,21 +34,29 @@ bool BombManager::init(
 	textures.push_back(_p2);
 	textures.push_back(_p3);
 	textures.push_back(_p4);
-	textures.push_back(_explosionTex);
+	textures.push_back(_explosionTex1);
+	textures.push_back(_explosionTex2);
+	textures.push_back(_explosionTex3);
+	textures.push_back(_explosionTex4);
 
-	// Create the explosion object
-	explosion = std::make_shared<Explosion>(
-		glm::vec3(-100.0f),
-		explosionMesh,
-		material,
-		textures[4],
-		nullptr);
+	// Create explosion objects
+	for (int i = 0; i < 4; i++)
+	{
+		std::shared_ptr<Explosion> explosionObject = std::make_shared<Explosion>(
+			glm::vec3(-100.0f),
+			explosionMesh,
+			material,
+			textures[i + 4],
+			nullptr);
 
-	// Create the explosion rigidBody
-	std::unique_ptr<RigidBody> explosionBody = 
-		std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter);
-	explosionBody->load(_explosionBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
-	explosion->attachRigidBody(explosionBody);
+		// Create the explosion rigidBody
+		std::unique_ptr<RigidBody> explosionBody =
+			std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter);
+		explosionBody->load(_explosionBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
+		explosionObject->attachRigidBody(explosionBody);
+
+		explosionTemplates.push_back(explosionObject);
+	}
 
 	// Create the bomb object templates
 	for (int i = 0; i < 4; i++)
@@ -56,7 +67,7 @@ bool BombManager::init(
 			material,
 			textures.at(i),
 			i,
-			explosion);
+			explosionTemplates.at(i));
 
 		// Create the rigidbody
 		std::unique_ptr<RigidBody> rb = std::make_unique<RigidBody>(
@@ -69,8 +80,8 @@ bool BombManager::init(
 	}
 
 	// Set the bomb outline texture
-	bombTemplates[0]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-	bombTemplates[1]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	bombTemplates[0]->setOutlineColour(glm::vec4(0.39f, 0.72f, 1.0f, 1.0f));
+	bombTemplates[1]->setOutlineColour(glm::vec4(1.0f, 0.41f, 0.37f, 1.0f));
 
 	initialized = true;
 	return true;
@@ -95,20 +106,11 @@ void BombManager::update(float dt)
 	static std::vector<std::vector<std::shared_ptr<Bomb>>::iterator> inactiveBombs;
 	inactiveBombs.clear();
 
-	// Gets the list of finished bombs
-	for (auto it = activeBombs.begin(); it != activeBombs.end(); it++)
+	// Pop off inactive bombs
+	while (activeBombs.size() > 0 &&
+		activeBombs.back()->getCurrentState() == DONE)
 	{
-		if (it->get()->getCurrentState() == DONE)
-		{
-			inactiveBombs.push_back(it);
-		}
-	}
-
-	// Removes finished bombs from the game
-	// ERROR: can't delete multiple bombs at a time
-	for (auto it : inactiveBombs)
-	{
-		activeBombs.erase(it);
+		activeBombs.pop_back();
 	}
 }
 
@@ -119,10 +121,18 @@ void BombManager::draw(Camera& camera)
 		if (it->getCurrentState() != BOMB_STATE::OFF ||
 			it->getCurrentState() != BOMB_STATE::DONE)
 			it->draw(camera);
-		/*if (it->getCurrentState() == EXPLODING)
+	}
+}
+
+void BombManager::checkIfExploded(Camera& camera)
+{
+	for (auto it : activeBombs)
+	{
+		if (it->justExploded)
 		{
-			camera.shakeScreen();
-		}*/
+			camera.shakeScreen(1.0f);
+			it->justExploded = false;
+		}
 	}
 }
 
@@ -147,7 +157,7 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 
 	// direction of bomb * bomb force + direction of player * player force
 	force = glm::vec3(direction.x, 0.0f, -direction.y) * force +
-		glm::vec3(playerForce.x, 0.0f, -playerForce.y);
+		glm::vec3(playerForce.x, 2.0f, -playerForce.y) * 0.5f;
 	std::cout << "Force vector: " << force.x << " " << force.z << std::endl;
 
 	newBomb->throwBomb(direction, glm::vec3(force.x, impulseY, force.z));
@@ -158,8 +168,8 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////	BOMB	///////////////////////////////////////
 float Bomb::playerRadius = 2.0f;
-float Bomb::maxExplodeTime = 0.75f;
-float Bomb::maxFuseTime = 1.7f;
+float Bomb::maxExplodeTime = 0.45f;
+float Bomb::maxFuseTime = 1.3f;
 
 Bomb::Bomb(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -172,7 +182,8 @@ Bomb::Bomb(glm::vec3 position,
 	currentState(OFF),
 	currentExplodeTime(0.0f),
 	currentFuseTime(0.0f),
-	explosion(_explosion)
+	explosion(_explosion),
+	justExploded(false)
 {
 	colliderType = COLLIDER_TYPE::BOMB_BASE;
 	explosion->setBombParent(this);
@@ -190,7 +201,8 @@ Bomb::Bomb(Bomb& other)
 	playerNum(other.playerNum),
 	currentState(OFF),
 	currentExplodeTime(0.0f),
-	currentFuseTime(0.0f)
+	currentFuseTime(0.0f),
+	justExploded(false)
 {
 	colliderType = COLLIDER_TYPE::BOMB_BASE;
 	explosion->setBombParent(this);
@@ -279,6 +291,7 @@ void Bomb::explode()
 	explosion->setPosition(getWorldPosition());
 	explosion->explode();
 	setPosition(glm::vec3(-100.0f));
+	justExploded = true;
 }
 
 void Bomb::destroy()

@@ -160,7 +160,7 @@ void Camera::moveRight()
 	pos -= right *  (speed);
 }
 
-void Camera::shakeScreen()
+void Camera::shakeScreen(float radius)
 {
-	shakeRadius = 0.5f;
+	shakeRadius = radius;
 }

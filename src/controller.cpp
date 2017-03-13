@@ -119,3 +119,11 @@ bool Controller::leftStickMoved()
 		getLeftStick().x < -0.1 || getLeftStick().x > 0.1 ||
 		getLeftStick().y < -0.1 || getLeftStick().y > 0.1);
 }
+
+void Controller::setVibration(unsigned short leftMotor, unsigned short rightMotor)
+{
+	ZeroMemory(&m_vibration, sizeof(XINPUT_VIBRATION));
+	m_vibration.wLeftMotorSpeed = leftMotor; // use any value between 0-65535 here
+	m_vibration.wRightMotorSpeed = rightMotor; // use any value between 0-65535 here
+	XInputSetState(m_ControllerHandle, &m_vibration);
+}
