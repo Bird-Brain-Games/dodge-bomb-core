@@ -327,8 +327,29 @@ void initializeScene()
 	char bombotSpec[] = "Assets/img/bombot_specular.png";
 	std::shared_ptr<Texture> bombotTexMap = std::make_shared<Texture>(bombotTex, bombotSpec, 1.0f);
 
-	char bombTex[] = "Assets/img/bomb(diffuse).jpg";
-	std::shared_ptr<Texture> bombTexMap = std::make_shared<Texture>(bombTex, bombTex, 1.0f);
+	char bombTex1[] = "Assets/img/bombDefault.png";
+	std::shared_ptr<Texture> bombTexMap1 = std::make_shared<Texture>(bombTex1, bombTex1, 1.0f);
+
+	char bombTex2[] = "Assets/img/bombDefault.png";
+	std::shared_ptr<Texture> bombTexMap2 = std::make_shared<Texture>(bombTex2, bombTex2, 1.0f);
+
+	char bombTex3[] = "Assets/img/bombDefault.png";
+	std::shared_ptr<Texture> bombTexMap3 = std::make_shared<Texture>(bombTex3, bombTex3, 1.0f);
+
+	char bombTex4[] = "Assets/img/bombDefault.png";
+	std::shared_ptr<Texture> bombTexMap4 = std::make_shared<Texture>(bombTex4, bombTex4, 1.0f);
+
+	char explosionTex1[] = "Assets/img/ex-1.png";
+	std::shared_ptr<Texture> explosionTexMap1 = std::make_shared<Texture>(explosionTex1, explosionTex1, 1.0f);
+
+	char explosionTex2[] = "Assets/img/ex-2.png";
+	std::shared_ptr<Texture> explosionTexMap2 = std::make_shared<Texture>(explosionTex2, explosionTex2, 1.0f);
+
+	char explosionTex3[] = "Assets/img/ex-3.png";
+	std::shared_ptr<Texture> explosionTexMap3 = std::make_shared<Texture>(explosionTex3, explosionTex3, 1.0f);
+
+	char explosionTex4[] = "Assets/img/ex-4.png";
+	std::shared_ptr<Texture> explosionTexMap4 = std::make_shared<Texture>(explosionTex4, explosionTex4, 1.0f);
 
 	char diffuseTex[] = "Assets/img/desk (diffuse).png";
 	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
@@ -381,7 +402,14 @@ void initializeScene()
 	textures["bombot"] = bombotTexMap;
 	textures["corkboard"] = corkboardTexMap;
 	textures["room"] = roomTexMap;
-	textures["bomb1"] = bombTexMap;
+	textures["bomb1"] = bombTexMap1;
+	textures["bomb2"] = bombTexMap2;
+	textures["bomb3"] = bombTexMap3;
+	textures["bomb4"] = bombTexMap4;
+	textures["explosion1"] = explosionTexMap1;
+	textures["explosion2"] = explosionTexMap2;
+	textures["explosion3"] = explosionTexMap3;
+	textures["explosion4"] = explosionTexMap4;
 	textures["barrel"] = barrelTexMap;
 	textures["cannon"] = cannonTexMap;
 	textures["boat"] = boatTexMap;
@@ -476,8 +504,8 @@ void initializeScene()
 	gameobjects["boulder"]->setScale(glm::vec3(1.6));
 
 	gameobjects["cannon"] = std::make_shared<GameObject>(
-		glm::vec3(23.f, 44.0f, 10.f), cannonMesh, defaultMaterial, cannonTexMap);
-	gameobjects["cannon"]->setScale(glm::vec3(2.0f));
+		glm::vec3(23.f, 43.0f, 10.f), cannonMesh, defaultMaterial, cannonTexMap);
+	gameobjects["cannon"]->setScale(glm::vec3(1.7f));
 
 	gameobjects["crate"] = std::make_shared<GameObject>(
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
@@ -612,12 +640,15 @@ void initializeScene()
 	// Set up the bomb manager
 	bombManager = std::make_shared<BombManager>();
 	bombManager->init(bombMesh,
-		bombTexMap,		// Player1 bomb texture
-		bombTexMap,		// Player2 bomb texture
-		bombTexMap,		// Player3 bomb texture
-		bombTexMap,		// Player4 bomb texture
+		bombTexMap1,		// Player1 bomb texture
+		bombTexMap2,		// Player2 bomb texture
+		bombTexMap3,		// Player3 bomb texture
+		bombTexMap4,		// Player4 bomb texture
 		sphereMesh,		// Explosion mesh
-		markerTexMap,	// Explosion texture
+		explosionTexMap1,	// Explosion texture 1
+		explosionTexMap2,	// Explosion texture 2
+		explosionTexMap3,	// Explosion texture 3
+		explosionTexMap4,	// Explosion texture 4
 		sphereBodyPath,	// Explosion rigidbody
 		defaultMaterial,
 		bombBodyPath);
@@ -626,8 +657,8 @@ void initializeScene()
 	players["bombot2"]->attachBombManager(bombManager);
 
 	// Set the outline colors
-	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-	gameobjects["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.39f, 0.72f, 1.0f, 1.0f));
+	gameobjects["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.41f, 0.37f, 1.0f));
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);

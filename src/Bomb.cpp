@@ -17,7 +17,10 @@ bool BombManager::init(
 	std::shared_ptr<Texture> _p3,
 	std::shared_ptr<Texture> _p4,
 	std::shared_ptr<Loader> _explosionMesh,
-	std::shared_ptr<Texture> _explosionTex,
+	std::shared_ptr<Texture> _explosionTex1,
+	std::shared_ptr<Texture> _explosionTex2,
+	std::shared_ptr<Texture> _explosionTex3,
+	std::shared_ptr<Texture> _explosionTex4,
 	std::string _explosionBodyPath,
 	std::shared_ptr<Material> _material,
 	std::string bodyPath)
@@ -31,21 +34,29 @@ bool BombManager::init(
 	textures.push_back(_p2);
 	textures.push_back(_p3);
 	textures.push_back(_p4);
-	textures.push_back(_explosionTex);
+	textures.push_back(_explosionTex1);
+	textures.push_back(_explosionTex2);
+	textures.push_back(_explosionTex3);
+	textures.push_back(_explosionTex4);
 
-	// Create the explosion object
-	explosion = std::make_shared<Explosion>(
-		glm::vec3(-100.0f),
-		explosionMesh,
-		material,
-		textures[4],
-		nullptr);
+	// Create explosion objects
+	for (int i = 0; i < 4; i++)
+	{
+		std::shared_ptr<Explosion> explosionObject = std::make_shared<Explosion>(
+			glm::vec3(-100.0f),
+			explosionMesh,
+			material,
+			textures[i + 4],
+			nullptr);
 
-	// Create the explosion rigidBody
-	std::unique_ptr<RigidBody> explosionBody = 
-		std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter);
-	explosionBody->load(_explosionBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
-	explosion->attachRigidBody(explosionBody);
+		// Create the explosion rigidBody
+		std::unique_ptr<RigidBody> explosionBody =
+			std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter);
+		explosionBody->load(_explosionBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
+		explosionObject->attachRigidBody(explosionBody);
+
+		explosionTemplates.push_back(explosionObject);
+	}
 
 	// Create the bomb object templates
 	for (int i = 0; i < 4; i++)
@@ -56,7 +67,7 @@ bool BombManager::init(
 			material,
 			textures.at(i),
 			i,
-			explosion);
+			explosionTemplates.at(i));
 
 		// Create the rigidbody
 		std::unique_ptr<RigidBody> rb = std::make_unique<RigidBody>(
@@ -69,8 +80,8 @@ bool BombManager::init(
 	}
 
 	// Set the bomb outline texture
-	bombTemplates[0]->setOutlineColour(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
-	bombTemplates[1]->setOutlineColour(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	bombTemplates[0]->setOutlineColour(glm::vec4(0.39f, 0.72f, 1.0f, 1.0f));
+	bombTemplates[1]->setOutlineColour(glm::vec4(1.0f, 0.41f, 0.37f, 1.0f));
 
 	initialized = true;
 	return true;
