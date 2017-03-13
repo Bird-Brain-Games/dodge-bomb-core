@@ -7,6 +7,7 @@ float Player::maxInvincibleTime = 3.0f;
 float Player::pauseTime = 0.5f;
 int Player::maxHealth = 2;
 float Player::maxBombCooldown = 1.0f;
+float Player::flashInterval = 0.2f;
 
 Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -45,6 +46,15 @@ void Player::draw(Camera &camera)
 	{
 		GameObject::draw(camera);
 	}
+	else if (currentState == P_INVINCIBLE)
+	{
+		// If they're still in the pause time, draw them,
+		// And if they're invincible make them flash
+		if (!isFlashing)
+		{
+			GameObject::draw(camera);
+		}
+	}
 }
 
 void Player::update(float dt)
@@ -66,9 +76,19 @@ void Player::update(float dt)
 
 	case P_INVINCIBLE:
 		invincibleTime -= dt;
-		// If they're still in the pause time, don't let them move
+		// If they're not in the pause time, let them move
 		if (maxInvincibleTime - invincibleTime > pauseTime)
+		{
 			handleInput(dt);
+
+			// Handle player flashing when invincible
+			flashTime += dt;
+			if (flashTime >= flashInterval)
+			{
+				isFlashing = !isFlashing;
+				flashTime -= flashInterval;
+			}
+		}
 
 		if (invincibleTime <= 0.0f)
 		{
@@ -186,13 +206,11 @@ void Player::checkCollisionWith(Explosion* other)
 	if (other->getBombParent() == nullptr) return;
 	Bomb* bombParent = other->getBombParent();
 
-	if (bombParent->getPlayerNum() == playerNum)
-	{
-
-	}
-	else if (currentState == P_NORMAL)
+	if (currentState == P_NORMAL && 
+		bombParent->getPlayerNum() != playerNum)
 	{
 		takeDamage(1);
+		//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 	}
 }
 
@@ -210,6 +228,7 @@ void Player::checkCollisionWith(Bomb* other)
 		{
 			other->explode();
 			takeDamage(1);
+			//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 		}
 	}	
 }
@@ -241,6 +260,8 @@ void Player::setAnim(std::string _name)
 void Player::takeDamage(int damage)
 {
 	invincibleTime = maxInvincibleTime;
+	flashTime = 0.0f;
+	isFlashing = false;
 	currentState = P_INVINCIBLE;
 	std::cout << "Player " << playerNum << " took damage" << std::endl;
 
@@ -265,3 +286,9 @@ glm::vec3 Player::getCurrentVelocity()
 {
 	return rigidBody->getLinearVelocity();
 }
+
+//void Player::lookDirectlyAtExplosion(glm::vec3 direction)
+//{
+//	direction = glm::normalize(direction);
+//	float angleY = 
+//}

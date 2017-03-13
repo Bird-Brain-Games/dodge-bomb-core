@@ -42,6 +42,9 @@ public:
 	void setAnim(std::string);
 
 private:
+	void lookDirectlyAtExplosion(glm::vec3 direction);
+
+private:
 
 	Controller con;
 	int playerNum;
@@ -56,6 +59,8 @@ private:
 	// Player stats
 	int health;
 	float invincibleTime;
+	float flashTime;
+	bool isFlashing;
 	PLAYER_STATE currentState;
 
 private:
@@ -63,4 +68,5 @@ private:
 	static float pauseTime;
 	static int maxHealth;
 	static float maxBombCooldown;
+	static float flashInterval;
 };

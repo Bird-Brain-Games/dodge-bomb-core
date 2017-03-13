@@ -49,7 +49,7 @@ public:
 	void moveLeft();
 	void moveRight();
 
-	void shakeScreen();
+	void shakeScreen(float radius);
 
 private:
 

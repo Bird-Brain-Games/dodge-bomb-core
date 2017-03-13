@@ -44,6 +44,8 @@ public:
 
 	Player const* getPlayer() { return playerPtr; }
 	int getPlayerNum() { return playerNum; }
+	
+	bool justExploded;
 
 private:
 	static float playerRadius;
@@ -56,6 +58,7 @@ private:
 	BOMB_STATE currentState;
 	float currentFuseTime;
 	float currentExplodeTime;
+	
 
 	static float maxFuseTime;
 	static float maxExplodeTime;
@@ -113,6 +116,7 @@ public:
 		std::string bodyPath);
 
 	void update(float dt);
+	void checkIfExploded(Camera& camera);
 	void draw(Camera& camera);
 	void setMaterialForAllBombs(std::shared_ptr<Material> mat);
 
