@@ -119,10 +119,18 @@ void BombManager::draw(Camera& camera)
 		if (it->getCurrentState() != BOMB_STATE::OFF ||
 			it->getCurrentState() != BOMB_STATE::DONE)
 			it->draw(camera);
-		/*if (it->getCurrentState() == EXPLODING)
+	}
+}
+
+void BombManager::checkIfExploded(Camera& camera)
+{
+	for (auto it : activeBombs)
+	{
+		if (it->justExploded)
 		{
-			camera.shakeScreen();
-		}*/
+			camera.shakeScreen(1.0f);
+			it->justExploded = false;
+		}
 	}
 }
 
@@ -172,7 +180,8 @@ Bomb::Bomb(glm::vec3 position,
 	currentState(OFF),
 	currentExplodeTime(0.0f),
 	currentFuseTime(0.0f),
-	explosion(_explosion)
+	explosion(_explosion),
+	justExploded(false)
 {
 	colliderType = COLLIDER_TYPE::BOMB_BASE;
 	explosion->setBombParent(this);
@@ -190,7 +199,8 @@ Bomb::Bomb(Bomb& other)
 	playerNum(other.playerNum),
 	currentState(OFF),
 	currentExplodeTime(0.0f),
-	currentFuseTime(0.0f)
+	currentFuseTime(0.0f),
+	justExploded(false)
 {
 	colliderType = COLLIDER_TYPE::BOMB_BASE;
 	explosion->setBombParent(this);
@@ -279,6 +289,7 @@ void Bomb::explode()
 	explosion->setPosition(getWorldPosition());
 	explosion->explode();
 	setPosition(glm::vec3(-100.0f));
+	justExploded = true;
 }
 
 void Bomb::destroy()

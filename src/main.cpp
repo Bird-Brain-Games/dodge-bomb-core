@@ -757,6 +757,7 @@ void updateScene()
 	}
 
 	bombManager->update(deltaTime);
+	bombManager->checkIfExploded(playerCamera);
 }
 
 
@@ -1192,7 +1193,7 @@ void handleKeyboardInput()
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
 	{
-		playerCamera.shakeScreen();
+		playerCamera.shakeScreen(1.0f);
 	}
 	// Reset all players
 	if (KEYBOARD_INPUT->CheckPressEvent('r') || KEYBOARD_INPUT->CheckPressEvent('R'))
