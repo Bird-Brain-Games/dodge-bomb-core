@@ -29,13 +29,13 @@
 #include "InputManager.h"
 #include "menu.h"
 #include "ANILoader.h"
-
+#include "GameState.h"
+#include "states.h"
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
 const int FRAME_DELAY = 1000 / FRAMES_PER_SECOND; // Milliseconds per frame
 
-float windowWidth = 1920.0;
-float windowHeight = 1080.0;
+
 
 glm::vec3 mousePosition; // x,y,0
 glm::vec3 mousePositionFlipped; // x, height - y, 0
@@ -46,14 +46,21 @@ const float radToDeg = 180.0f / 3.14159f;
 
 float deltaTime = 0.0f; // amount of time since last update (set every frame in timer callback)
 
+//state machine
+GameStateManager states;
+MainMenu* mainMenu;
+Game* game;
+Score* score;
+Pause* pause;
+
+
+
 glm::vec3 position;
 float movementSpeed = 5.0f;
-glm::vec4 lightPos;
-glm::vec4 lightTwo;
 
-// Cameras
 Camera playerCamera; // the camera you move around with wasd
 Camera shadowCamera; // Camera for the shadow map
+
 
 // Asset databases
 std::map<std::string, std::shared_ptr<Loader>> meshes;
@@ -66,62 +73,14 @@ std::map<std::string, std::shared_ptr<Material>> materials;
 
 // Controls
 bool inMenu = false;
-std::unique_ptr<Menu> mainMenu;
+std::shared_ptr<Menu> menu;
 std::shared_ptr<BombManager> bombManager;
 
-// Framebuffer objects
-FrameBufferObject fboUnlit;
-FrameBufferObject fboBright;
-FrameBufferObject fboBlur, fboBlurB;
-FrameBufferObject shadowMap;
-
-//////////////////////////////////////////////////////////////////////
-///////////////////////	Lighting Controls	//////////////////////////
-
-enum LightingMode
-{
-	NOLIGHT,
-	TOON
-};
-LightingMode currentLightingMode = TOON;
 
 
-// Outline Controls
-float outlineWidth = 4.0;
-bool outlineToggle = true;
 
-// Lighting Controls
-float deskLamp = 0.8; 
-float innerCutOff = 0.42; // Spot Light Size
-float outerCutOff = 0.47;
-glm::vec3 deskForward = glm::vec3(0.2, 1.0, 1.5); // Spot Light Direction
-float roomLight = 0.4;
 
-float ambient = 0.1; // Ambient Lighting
-float diffuse = 1.0f; // Diffuse Lighting
-float specular = 0.2f; // Specular Lighting
-float shininess = 2.0f; // Shinniness
-float rim = 0.5f; // Rim Lighting
 
-GLuint toonRamp;
-
-// Bloom Controls
-glm::vec4 bloomThreshold(0.6f);
-int numBlurPasses = 4;
-bool bloomToggle = false;
-
-// For Toggling
-bool  ambientToggle = true;
-float ka = ambient; // Ambient Lighting
-
-bool  diffuseToggle = true;
-float kd = diffuse; // Diffuse Lighting
-
-bool  specularToggle = true;
-float ks = specular; // Specular Lighting
-
-bool  rimToggle = true;
-float kr = rim; // Rim Lighting
 
 
 
@@ -166,7 +125,7 @@ void initializeShaders()
 	materials["noLighting"]->shader->attachShader(v_default);
 	materials["noLighting"]->shader->attachShader(f_noLighting);
 	materials["noLighting"]->shader->linkProgram();
-	
+
 	// Default material that all objects use
 	materials["default"] = std::make_shared<Material>("default");
 	materials["default"]->shader->attachShader(v_default);
@@ -244,7 +203,7 @@ void initializeScene()
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	MESHES		///////////////////////////////
 	std::string meshPath = "Assets/obj/";
-	
+
 	// Initialize all meshes
 	std::shared_ptr<LoadObject> tableMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> barrelMesh = std::make_shared<LoadObject>();
@@ -283,7 +242,7 @@ void initializeScene()
 	loadAnimations(bombotMesh4);
 
 
-	
+
 
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
@@ -372,9 +331,10 @@ void initializeScene()
 	char boatTex[] = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
+	char menuTex[] = "Assets/img/menu_atlas.png.png";
+	std::shared_ptr<Texture> menuTexMap = std::make_shared<Texture>(menuTex, menuTex, 1.0f);
 
 
-	toonRamp = ilutGLLoadImage("../../Assets/img/toonRamp.png");
 
 	//Add textures to the map
 	textures["default"] = deskTexMap;
@@ -393,6 +353,7 @@ void initializeScene()
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
+	textures["menu"] = menuTexMap;
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -433,7 +394,7 @@ void initializeScene()
 	gameobjects["sketch"]->setRotationAngleX(15.781 * degToRad);
 	gameobjects["sketch"]->setRotationAngleY(-33.145 * degToRad);
 	gameobjects["sketch"]->setRotationAngleZ(-0.142);
-	
+
 	gameobjects["trumps_wall"] = std::make_shared<GameObject>(
 		glm::vec3(-48.796f, 46.3f, -14.61f), nullptr, defaultMaterial, nullptr);
 
@@ -494,7 +455,7 @@ void initializeScene()
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 39.5f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
-	
+
 	players["bombot2"] = std::make_shared<Player>(
 		glm::vec3(10.0f, 39.5f, 0.0f), bombotMesh2, defaultMaterial, bombotTexMap, 1);
 	gameobjects["bombot2"] = players["bombot2"];
@@ -504,12 +465,10 @@ void initializeScene()
 	gameobjects["bombot4"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 3);
 	*/
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, toonRamp);
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	RIGID BODIES	///////////////////////////////
-	
+
 	// Create rigidbody paths
 	std::string tableBodyPath = "assets\\bullet\\table.btdata";
 	std::string bombotBodyPath = "assets\\bullet\\bombot.btdata";
@@ -545,23 +504,23 @@ void initializeScene()
 	std::unique_ptr<RigidBody> botwallBody;
 	std::unique_ptr<RigidBody> topwallBody;
 
-	tableBody		= std::make_unique<RigidBody>();
-	bombot1Body		= std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
-	bombot2Body		= std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
-	sphereBody		= std::make_unique<RigidBody>();
-	barrelBody		= std::make_unique<RigidBody>();
-	barrel1Body		= std::make_unique<RigidBody>();
-	boulderBody		= std::make_unique<RigidBody>();
-	boulder2Body	= std::make_unique<RigidBody>();
-	crateBody		= std::make_unique<RigidBody>();
-	crate2Body		= std::make_unique<RigidBody>();
-	cannonBody		= std::make_unique<RigidBody>();
-	boatBody		= std::make_unique<RigidBody>();
-	sketchBody		= std::make_unique<RigidBody>();
-	trumpBody		= std::make_unique<RigidBody>();
-	booksBody		= std::make_unique<RigidBody>();
-	botwallBody		= std::make_unique<RigidBody>();
-	topwallBody		= std::make_unique<RigidBody>();
+	tableBody = std::make_unique<RigidBody>();
+	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	bombot2Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	sphereBody = std::make_unique<RigidBody>();
+	barrelBody = std::make_unique<RigidBody>();
+	barrel1Body = std::make_unique<RigidBody>();
+	boulderBody = std::make_unique<RigidBody>();
+	boulder2Body = std::make_unique<RigidBody>();
+	crateBody = std::make_unique<RigidBody>();
+	crate2Body = std::make_unique<RigidBody>();
+	cannonBody = std::make_unique<RigidBody>();
+	boatBody = std::make_unique<RigidBody>();
+	sketchBody = std::make_unique<RigidBody>();
+	trumpBody = std::make_unique<RigidBody>();
+	booksBody = std::make_unique<RigidBody>();
+	botwallBody = std::make_unique<RigidBody>();
+	topwallBody = std::make_unique<RigidBody>();
 
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
@@ -628,15 +587,14 @@ void initializeScene()
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
 
 	// Set menu properties
-	mainMenu = std::make_unique<Menu>(deskTexMap);
-	mainMenu->setMaterial(materials["menu"]);
+	menu = std::make_shared<Menu>(markerTexMap);
+	menu->setMaterial(materials["menu"]);
+
 
 	// Set default camera properties (WIP)
-	playerCamera.setPosition(glm::vec3(23.0f, 90.0f, 40.0f));
-	playerCamera.setAngle(3.14159012f, 5.3f);
-	playerCamera.update();
-	
-	
+
+
+
 }
 
 void bulletNearCallback(btBroadphasePair& collisionPair,
@@ -645,7 +603,7 @@ void bulletNearCallback(btBroadphasePair& collisionPair,
 	// Do your collision logic here
 	// Only dispatch the Bullet collision information if you want the physics to continue
 	// From Bullet user manual
-	
+
 	if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter ||
 		collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter &&
@@ -706,7 +664,7 @@ void calculateCollisions()
 			{
 				Player* p = (Player*)objA->getUserPointer();
 				collideWithCorrectType(p, (GameObject*)objB->getUserPointer());
-			} 
+			}
 			else if (objBGroup == btBroadphaseProxy::CharacterFilter)
 			{
 				Player* p = (Player*)objB->getUserPointer();
@@ -716,153 +674,13 @@ void calculateCollisions()
 	}
 }
 
-void initializeFrameBuffers()
-{
-	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 2, true);
-	fboBright.createFrameBuffer(80, 60, 1, false);
-	fboBlur.createFrameBuffer(80, 60, 1, false);
-	fboBlurB.createFrameBuffer(80, 60, 1, false);
-	shadowMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
-}
 
-void updateScene()
-{
-	// Move light in simple circular path
-	static float ang = 1.0f;
-
-	ang += deltaTime; // comment out to pause light
-	lightPos.x = 40.0f;
-	lightPos.y = 65.0f;
-	lightPos.z = 0.0f;
-	lightPos.w = 1.0f;
-
-	lightTwo.x = 0.0f;
-	lightTwo.y = 80.0f;
-	lightTwo.z = 100.0f;
-	lightTwo.w = 1.0f;
-
-	playerCamera.update();
-
-
-	// Update all game objects
-	for (auto itr = gameobjects.begin(); itr != gameobjects.end(); ++itr)
-	{
-		auto gameobject = itr->second;
-
-		// Remember: root nodes are responsible for updating all of its children
-		// So we need to make sure to only invoke update() for the root nodes.
-		// Otherwise some objects would get updated twice in a frame!
-		if (gameobject->isRoot())
-			gameobject->update(deltaTime);
-	}
-
-	bombManager->update(deltaTime);
-}
-
-
-void drawScene(Camera& cam)
-{
-	for (auto itr = gameobjects.begin(); itr != gameobjects.end(); ++itr)
-	{
-		auto gameobject = itr->second;
-
-		if (gameobject->isRoot())
-			gameobject->draw(cam);
-	}
-
-	bombManager->draw(cam);
-}
-
-void setMaterialForAllGameObjects(std::string materialName)
-{
-	auto mat = materials[materialName];
-	for (auto itr = gameobjects.begin(); itr != gameobjects.end(); ++itr)
-	{
-		itr->second->setMaterial(mat);
-	}
-
-	bombManager->setMaterialForAllBombs(mat);
-}
-
-void setMaterialForAllPlayerObjects(std::string materialName)
-{
-	auto mat = materials[materialName];
-	for (auto itr = players.begin(); itr != players.end(); ++itr)
-	{
-		itr->second->setMaterial(mat);
-	}
-}
-
-
-// Only takes the highest brightness from the FBO
-void brightPass()
-{
-	fboBright.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
-	fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-
-	static auto brightMaterial = materials["bright"];
-	brightMaterial->shader->bind();
-
-
-	brightMaterial->vec4Uniforms["u_bloomThreshold"] = bloomThreshold;
-	brightMaterial->intUniforms["u_tex"] = 0;
-	brightMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-
-	brightMaterial->sendUniforms();
-
-	glDrawArrays(GL_POINTS, 0, 1);
-}
-
-// Blurs the FBO
-void blurPass(FrameBufferObject fboIn, FrameBufferObject fboOut)
-{
-	fboOut.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
-	fboIn.bindTextureForSampling(0, GL_TEXTURE0);
-
-	static auto blurMaterial = materials["blur"];
-
-	// Corner, mid, centre, sigma
-	// For 3x3 kernel
-	static glm::vec4 kernelWeights(0.077847f, 0.123317f, 0.195346f, 1.0f);
-	blurMaterial->shader->bind();
-
-	blurMaterial->intUniforms["u_tex"] = 0;
-	blurMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-	blurMaterial->vec4Uniforms["u_texelSize"] = glm::vec4(1.0 / 80, 1.0 / 60, 0.0, 0.0);
-	blurMaterial->vec4Uniforms["u_kernel"] = kernelWeights;
-
-	blurMaterial->sendUniforms();
-
-	// Draw a full screen quad using the geometry shader
-	glDrawArrays(GL_POINTS, 0, 1);
-
-	for (int i = 0; i < numBlurPasses; i++)
-	{
-		if (i % 2 == 0)
-		{
-			fboBlurB.bindFrameBufferForDrawing();
-			fboOut.bindTextureForSampling(0, GL_TEXTURE0);
-			// Draw a full screen quad using the geometry shader
-			glDrawArrays(GL_POINTS, 0, 1);
-		}
-		else
-		{
-			fboOut.bindFrameBufferForDrawing();
-			fboBlurB.bindTextureForSampling(0, GL_TEXTURE0);
-			// Draw a full screen quad using the geometry shader
-			glDrawArrays(GL_POINTS, 0, 1);
-		}
-	}
-}
 
 // This is where we draw stuff
 void DisplayCallbackFunction(void)
 {
-	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
 
-	
+
 	///////////Shadow Map
 	//shadowMap.bindFrameBufferForDrawing();
 	//FrameBufferObject::clearFrameBuffer(clearColor);
@@ -875,149 +693,12 @@ void DisplayCallbackFunction(void)
 	//shadowMap.unbindFrameBuffer(windowWidth, windowHeight);
 
 	// bind scene FBO
-	fboUnlit.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(clearColor); 
-	
-	///////////////////////////// First Pass: Outlines
-	if (outlineToggle)
-	{
-		glCullFace(GL_FRONT);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glLineWidth(outlineWidth);
-		
-		// Clear back buffer
-		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
-		
-		// Tell all game objects to use the outline shading material
-		setMaterialForAllGameObjects("outline");
-		setMaterialForAllPlayerObjects("sobelPlayer");
-		drawScene(playerCamera);
-		
-		glCullFace(GL_BACK);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-	
-	///////////////////////////// Second Pass: Lighting
-	switch (currentLightingMode)
-		{
-			// Our Default is Toon shading
-			case TOON:
-			{
-				setMaterialForAllGameObjects("toon");
-
-				setMaterialForAllPlayerObjects("toonPlayer");
-				materials["toonPlayer"]->shader->bind();
-
-				materials["toonPlayer"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
-				materials["toonPlayer"]->intUniforms["u_diffuseTex"] = 31;
-				materials["toonPlayer"]->intUniforms["u_specularTex"] = 30;
-
-				materials["toonPlayer"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-				materials["toonPlayer"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
-				materials["toonPlayer"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
-				materials["toonPlayer"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
-
-				materials["toonPlayer"]->sendUniforms();
-				materials["toonPlayer"]->shader->unbind();
-
-				materials["toon"]->shader->bind();
-
-				// Set material properties
-				materials["toon"]->vec4Uniforms["u_lightPos"] = playerCamera.getView() * lightPos;
-				materials["toon"]->vec4Uniforms["u_lightTwo"] = playerCamera.getView() * lightTwo;
 
 
-				materials["toon"]->intUniforms["u_toonRamp"] = 5;
-				materials["toon"]->intUniforms["u_diffuseTex"] = 31;
-				materials["toon"]->intUniforms["u_specularTex"] = 30;
-
-				materials["toon"]->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-				materials["toon"]->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
-				materials["toon"]->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
-				materials["toon"]->vec4Uniforms["u_shine"] = glm::vec4(shininess);
 
 
-				materials["toon"]->sendUniforms();
-			}
-			break;
-			// Just displays Textures
-			case NOLIGHT:
-			{
-				setMaterialForAllGameObjects("noLighting");
 
-				// Set material properties
-				materials["noLighting"]->shader->bind();
-
-				materials["noLighting"]->intUniforms["u_diffuseTex"] = 31;
-				materials["noLighting"]->intUniforms["u_specularTex"] = 30;
-
-				materials["noLighting"]->sendUniforms();
-			}
-			break;
-				setMaterialForAllPlayerObjects("toonPlayer");
-				// Set material properties for all our non player objects
-
-				materials["toon"]->shader->unbind();
-
-				//sets the material properties for all our player objects
-
-	
-		}
-
-		//draw the scene to the fbo
-		if (!inMenu)
-		{
-			drawScene(playerCamera);
-		}
-		else
-			mainMenu->draw();
-
-		// Draw the debug (if on)
-		if (RigidBody::isDrawingDebug())
-			RigidBody::drawDebug(playerCamera.getView(), playerCamera.getProj());
-
-		// Unbind scene FBO
-		fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
-		FrameBufferObject::clearFrameBuffer(clearColor);
-
-		//////////////////////////////// Post Processing
-
-			if (bloomToggle)
-			{
-				brightPass();
-				blurPass(fboBright, fboBlur);
-
-				fboBlur.bindTextureForSampling(0, GL_TEXTURE0);
-				fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
-
-				FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-				FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
-
-				static auto bloomMaterial = materials["bloom"];
-
-				bloomMaterial->shader->bind();
-				bloomMaterial->shader->sendUniformInt("u_bright", 0); 
-				bloomMaterial->shader->sendUniformInt("u_scene", 1);
-				bloomMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-				bloomMaterial->sendUniforms();
-
-				// Draw a full screen quad using the geometry shader
-				glDrawArrays(GL_POINTS, 0, 1);
-			}
-			else
-			{
-			    fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-				static auto unlitMaterial = materials["unlitTexture"];
-				unlitMaterial->shader->bind();
-				unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-				unlitMaterial->shader->sendUniformInt("u_tex", 0);
-				unlitMaterial->sendUniforms();
-
-				// Draw a full screen quad using the geometry shader
-				glDrawArrays(GL_POINTS, 0, 1);
-			}
-
-
+	states.draw();
 
 	/* Swap Buffers to Make it show up on screen */
 	glutSwapBuffers();
@@ -1041,178 +722,6 @@ void KeyboardUpCallbackFunction(unsigned char key, int x, int y)
 	KEYBOARD_INPUT->SetActive(key, false);
 }
 
-void handleKeyboardInputShaders()
-{
-	// Lighting Mode
-	if (KEYBOARD_INPUT->CheckPressEvent('2'))
-	{
-		currentLightingMode = NOLIGHT;
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('1'))
-	{
-		currentLightingMode = TOON;
-	}
-
-
-	// Toggle Outlines
-	if (KEYBOARD_INPUT->CheckPressEvent('5'))
-	{
-		if (outlineToggle)
-			outlineToggle = false;
-		else
-			outlineToggle = true;
-	}
-	// Toggle Bloom
-	if (KEYBOARD_INPUT->CheckPressEvent('6'))
-	{
-		if (bloomToggle)
-			bloomToggle = false;
-		else
-			bloomToggle = true;
-	}
-
-	// Controls "Dimmers" for lights
-	if (KEYBOARD_INPUT->CheckPressEvent('='))
-	{
-		deskLamp += 0.1;
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('-'))
-	{
-		if (deskLamp > 0)
-			deskLamp -= 0.1;
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent(']'))
-	{
-		roomLight += 0.1;
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('['))
-	{
-		if (roomLight > 0)
-			roomLight -= 0.1;
-	}
-
-	// Toggles for each lighting component
-	if (KEYBOARD_INPUT->CheckPressEvent('z')) // ambient
-	{
-		if (ambientToggle)
-		{
-			ka = 0.0f;
-			ambientToggle = false;
-		}
-		else
-		{
-			ka = ambient;
-			ambientToggle = true;
-		}
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('x')) // diffuse
-	{
-		if (diffuseToggle)
-		{
-			kd = 0.0f;
-			diffuseToggle = false;
-		}
-		else
-		{
-			kd = diffuse;
-			diffuseToggle = true;
-		}
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('c')) // specular
-	{
-		if (specularToggle)
-		{
-			ks = 0.0f;
-			specularToggle = false;
-		}
-		else
-		{
-			ks = specular;
-			specularToggle = true;
-		}
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('v')) // rim
-	{
-		if (rimToggle)
-		{
-			kr = 0.0f;
-			rimToggle = false;
-		}
-		else
-		{
-			kr = rim;
-			rimToggle = true;
-		}
-	}
-}
-
-
-void handleKeyboardInput()
-{
-	if (KEYBOARD_INPUT->CheckPressEvent(27))
-	{
-		glutLeaveMainLoop();
-	}
-
-	// Use the E key to set the debug draw
-	if (KEYBOARD_INPUT->CheckPressEvent('e') || KEYBOARD_INPUT->CheckPressEvent('E'))
-	{
-		RigidBody::setDebugDraw(!RigidBody::isDrawingDebug());
-	}
-
-	// Move the camera
-	if (KEYBOARD_INPUT->CheckPressEvent('w') || KEYBOARD_INPUT->CheckPressEvent('W'))
-	{
-		playerCamera.moveForward();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('s') || KEYBOARD_INPUT->CheckPressEvent('S'))
-	{
-		playerCamera.moveBackward();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('d') || KEYBOARD_INPUT->CheckPressEvent('D'))
-	{
-		playerCamera.moveRight();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('a') || KEYBOARD_INPUT->CheckPressEvent('A'))
-	{
-		playerCamera.moveLeft();
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
-	{
-		gameobjects["bombot2"]->setPosition(
-			gameobjects["bombot2"]->getWorldPosition() + glm::vec3(10.0, 0.0, 0.0));
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('K'))
-	{
-		gameobjects["bombot1"]->setScale(gameobjects["bombot1"]->getScale() + 0.1f);
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('L'))
-	{
-		gameobjects["table"]->setScale(gameobjects["table"]->getScale() - 0.1f);
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
-	{
-		playerCamera.shakeScreen();
-	}
-	// Reset all players
-	if (KEYBOARD_INPUT->CheckPressEvent('r') || KEYBOARD_INPUT->CheckPressEvent('R'))
-	{
-		float count = 0.0f;
-		for (auto it : players)
-		{
-			it.second->reset(glm::vec3(20.0f * count, 40.0f, 0.0f));
-			count++;
-		}
-	}
-
-
-
-	handleKeyboardInputShaders();
-
-
-	// Clear the keyboard input
-	KEYBOARD_INPUT->WipeEventList();
-}
 
 /* function TimerCallbackFunction(int value)
 * Description:
@@ -1233,17 +742,12 @@ void TimerCallbackFunction(int value)
 	elapsedTimeAtLastTick = totalElapsedTime;
 
 	// Handle all inputs 
-	handleKeyboardInput();
-
-	// Step through world simulation with Bullet
-	RigidBody::systemUpdate(deltaTime, 10);
-	calculateCollisions();
 	
+
 	// Update the camera's position
 	playerCamera.update();
 
-	// Update all gameobjects
-	updateScene();
+	states.update(deltaTime);
 
 	/* this call makes it actually show up on screen */
 	glutPostRedisplay();
@@ -1259,8 +763,8 @@ void TimerCallbackFunction(int value)
 void WindowReshapeCallbackFunction(int w, int h)
 {
 	/* Update our Window Properties */
-	windowWidth = w;
-	windowHeight = h;
+	//windowWidth = w;
+	//windowHeight = h;
 
 	// TODO: more needed?
 
@@ -1273,7 +777,7 @@ void WindowReshapeCallbackFunction(int w, int h)
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadIdentity();
 
-	playerCamera.setRatio(windowHeight, windowWidth);
+	//playerCamera.setRatio(windowHeight, windowWidth);
 }
 
 
@@ -1282,8 +786,8 @@ void MouseClickCallbackFunction(int button, int state, int x, int y)
 	mousePosition.x = x;
 	mousePosition.y = y;
 
-	mousePositionFlipped = mousePosition;
-	mousePositionFlipped.y = windowHeight - mousePosition.y;
+	//mousePositionFlipped = mousePosition;
+	//mousePositionFlipped.y = windowHeight - mousePosition.y;
 }
 
 // Called when the mouse is clicked and moves
@@ -1295,8 +799,8 @@ void MouseMotionCallbackFunction(int x, int y)
 	mousePosition.x = x;
 	mousePosition.y = y;
 
-	mousePositionFlipped = mousePosition;
-	mousePositionFlipped.y = windowHeight - mousePosition.y;
+	//mousePositionFlipped = mousePosition;
+	//mousePositionFlipped.y = windowHeight - mousePosition.y;
 }
 
 /* function InitErrorFuncCallbackFunction()
@@ -1337,7 +841,7 @@ int main(int argc, char **argv)
 
 	/* initialize the window and OpenGL properly */
 	glutInit(&argc, argv);
-	glutInitWindowSize(windowWidth, windowHeight);
+	glutInitWindowSize(1920, 1080);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutCreateWindow("Dodge Bomb");
 
@@ -1376,11 +880,28 @@ int main(int argc, char **argv)
 	// Initialize scene
 	initializeShaders();
 	initializeScene();
-	initializeFrameBuffers();
+
 
 	/* Start Game Loop */
 	deltaTime = glutGet(GLUT_ELAPSED_TIME);
 	deltaTime /= 1000.0f;
+
+	mainMenu = new MainMenu(menu);
+	mainMenu->setPaused(false);
+
+	pause = new Pause(menu);
+	pause->setPaused(true);
+
+	score = new Score(menu);
+	score->setPaused(true);
+
+	game = new Game(&gameobjects, &players, &materials, bombManager, pause, score, &playerCamera);
+	game->setPaused(true);
+
+	states.addGameState("MainMenu", mainMenu);
+	states.addGameState("game", game);
+	states.addGameState("pause", pause);
+	states.addGameState("score", score);
 
 	glutMainLoop();
 	return 0;

@@ -87,6 +87,7 @@
     <ClCompile Include="src\controller.cpp" />
     <ClCompile Include="src\FrameBufferObject.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
+    <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\loadObject.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -97,6 +98,7 @@
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
     <ClCompile Include="src\sound engine.cpp" />
+    <ClCompile Include="src\states.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\VAO.cpp" />
   </ItemGroup>
@@ -119,6 +121,7 @@
     <ClInclude Include="src\controller.h" />
     <ClInclude Include="src\FrameBufferObject.h" />
     <ClInclude Include="src\GameObject.h" />
+    <ClInclude Include="src\GameState.h" />
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\JointTypes.h" />
     <ClInclude Include="src\loader.h" />
@@ -131,6 +134,7 @@
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\ShaderProgram.h" />
     <ClInclude Include="src\sound engine.h" />
+    <ClInclude Include="src\states.h" />
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\VAO.h" />
   </ItemGroup>

@@ -31,7 +31,25 @@ void Menu::setSpot(glm::vec2 _spot)
 		spot.y = dim.y - 1;
 }
 
-void Menu::incSpot()
+void Menu::setSpot(int x, int y)
+{
+	spot = glm::vec2(x, y);
+	if (spot.x >= dim.x)
+		spot.x = dim.x - 1;
+	if (spot.y >= dim.y)
+		spot.y = dim.y - 1;
+}
+
+void Menu::incSpotR()
+{
+	spot.x++;
+	if (spot.x >= dim.x)
+	{
+		spot.x = 0;
+	}
+}
+
+void Menu::incSpotM()
 {
 	spot.x++;
 	if (spot.x >= dim.x)
@@ -43,23 +61,23 @@ void Menu::incSpot()
 			spot.y = 0;
 		}
 	}
-
 }
 
 void Menu::draw()
 {
 	glBindVertexArray(vaoD);
-
 	menuMaterial->shader->bind();
-
-	tex->bind(GL_TEXTURE29, GL_TEXTURE28);
+	tex->bind(GL_TEXTURE31, GL_TEXTURE30);
 
 	//menuMaterial->
-	//menu.uniformVec2("_dim", dim);
-	//menu.uniformVec2("_spot", spot);
+	menuMaterial->shader->sendUniformInt("diffuseTex", 31);
+	menuMaterial->shader->sendUniformVec2("_dim", dim);
+	menuMaterial->shader->sendUniformVec2("_spot", spot);
 	glDrawArrays(GL_POINTS, 0, 1);
 	//menu.unbind();
 	glBindVertexArray(0);
+	menuMaterial->shader->unbind();
+	tex->unbind(GL_TEXTURE31, GL_TEXTURE30);
 }
 
 void Menu::updateTex(std::shared_ptr<Texture> _tex)

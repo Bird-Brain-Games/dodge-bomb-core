@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\controller.cpp" />
@@ -42,8 +41,19 @@
     <ClCompile Include="src\ShaderProgram.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\Bomb.cpp" />
+    <ClCompile Include="src\GameState.cpp">
+      <Filter>states and menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\states.cpp">
+      <Filter>states and menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\menu.cpp">
+      <Filter>states and menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>states and menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />
@@ -95,8 +105,16 @@
     <ClInclude Include="src\Shader.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\Bomb.h" />
+    <ClInclude Include="src\GameState.h">
+      <Filter>states and menu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\states.h">
+      <Filter>states and menu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\menu.h">
+      <Filter>states and menu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Graphics">
@@ -110,6 +128,9 @@
     </Filter>
     <Filter Include="Graphics\Shaders">
       <UniqueIdentifier>{a7b2ea0f-19fc-40db-9be6-db5d0b683e51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="states and menu">
+      <UniqueIdentifier>{36414be0-7cee-4fe8-9698-dd44423a735b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

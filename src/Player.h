@@ -40,7 +40,7 @@ public:
 	glm::vec3 getCurrentVelocity();
 
 	void setAnim(std::string);
-
+	int getHealth();
 private:
 
 	Controller con;

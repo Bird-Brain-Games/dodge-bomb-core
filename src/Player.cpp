@@ -47,6 +47,11 @@ void Player::draw(Camera &camera)
 	}
 }
 
+int Player::getHealth()
+{
+	return health;
+}
+
 void Player::update(float dt)
 {
 	// Update the bomb cooldown
