@@ -18,23 +18,48 @@ void calculateCollisions();
 
 void MainMenu::update(float dt)
 {
-	if (menus1.conButton(XINPUT_GAMEPAD_A))
+	time += dt;
+	timer += dt;
+	accept += dt;
+	if (accept > 0.5)
 	{
-		setPaused(true);
-		m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
+		switch (position)
+		{
+		case 14:
+			if (menus1.conButton(XINPUT_GAMEPAD_A))
+			{
+				setPaused(true);
+				m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
+			}
+			break;
+		case 11:
+			if (menus1.conButton(XINPUT_GAMEPAD_A))
+			{
+				glutLeaveMainLoop();
+			}
+			break;
+		}
 	}
-	Coords rStick = menus1.getRightStick();
-	if (rStick.x > 0 && position < 3)
+
+	Coords rStick = menus1.getLeftStick();
+	if (rStick.y > 0 && position < 14 && timer > 0.35)
 	{
 		position++;
-		atlas->setSpot(position, 0);
+		atlas->setSpot(0, position);
+		timer = 0;
 	}
-	else if (rStick.x < 0 && position > 0)
+	else if (rStick.y < 0 && position > 11 && timer > 0.35)
 	{
 		position--;
-		atlas->setSpot(position, 0);
+		atlas->setSpot(0, position);
+		timer = 0;
 	}
-	atlas->incSpotR();
+
+	if (time > incrememnt)
+	{
+		atlas->incSpotR();
+		time = 0;
+	}
 }
 //returns a number based on who pressed a key. returns 0 if no key pressed
 int allPress(int button)
@@ -61,21 +86,30 @@ int allPress(int button)
 
 void MainMenu::draw()
 {
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.3, 0.0, 0.0, 1.0));
 	atlas->draw();
 }
 
 MainMenu::MainMenu(std::shared_ptr<Menu> _atlas)
 {
 	atlas = _atlas;
-	position = 0;
+	position = 14;
 	frame = 0;
+	atlas->setSpot(0, position);
+	time = 0;
+	timer = 0;
+	incrememnt = 0.3;
+	accept = 1;
 }
 
-void MainMenu::setPaused(bool _state)
+void MainMenu::setPaused(int _state)
 {
 	m_isPaused = _state;
 	if (!_state)
-		atlas->setSpot(glm::vec2(0, 0));
+	{
+		atlas->setSpot(glm::vec2(0, position));
+		accept = 0;
+	}
 }
 Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
@@ -108,11 +142,6 @@ void Game::setPaused(int a_paused)
 	if (a_paused == 0)
 	{
 		float count = 0.0f;
-		for (auto it : *players)
-		{
-			it.second->reset(glm::vec3(20.0f * count, 40.0f, 0.0f));
-			count++;
-		}
 		m_isPaused = false;
 	}
 	else if (a_paused == 1)
@@ -121,15 +150,14 @@ void Game::setPaused(int a_paused)
 	{
 		m_isPaused = false;
 		// Reset all players
-		if (KEYBOARD_INPUT->CheckPressEvent('r') || KEYBOARD_INPUT->CheckPressEvent('R'))
+
+		float count = 0.0f;
+		for (auto it : *players)
 		{
-			float count = 0.0f;
-			for (auto it : *players)
-			{
-				it.second->reset(glm::vec3(20.0f * count, 40.0f, 0.0f));
-				count++;
-			}
+			it.second->reset(glm::vec3(20.0f * count, 40.0f, 0.0f));
+			count++;
 		}
+
 	}
 }
 
@@ -185,8 +213,8 @@ void Game::update(float dt)
 	if (!lifeCheck())
 	{
 		this->m_isPaused = true;
-		score->m_isPaused = false;
 		score->active = &menus1;
+		m_parent->getGameState("score")->setPaused(0);
 	}
 
 }
@@ -343,17 +371,52 @@ Pause::Pause(std::shared_ptr<Menu> _atlas)
 
 void Pause::update(float dt)
 {
-	pauseTimer += dt;
-	if (active->conButton(XINPUT_GAMEPAD_START) && pauseTimer > 1.0)
+	time += dt;
+	timer += dt;
+
+	switch (position)
 	{
-		setPaused(true);
-		m_parent->getGameState("game")->setPaused(false);
-		pauseTimer = 0;
+	case 2:
+		if (menus1.conButton(XINPUT_GAMEPAD_A))
+		{
+			setPaused(true);
+			m_parent->getGameState("MainMenu")->setPaused(0);
+		}
+		break;
+	case 0:
+		if (menus1.conButton(XINPUT_GAMEPAD_A))
+		{
+			setPaused(true);
+			m_parent->getGameState("game")->setPaused(0); // resets the players by passing in -1.
+		}
+		break;
 	}
+
+	Coords rStick = menus1.getLeftStick();
+	if (rStick.y > 0 && position < 2 && timer > 0.35)
+	{
+		position++;
+		atlas->setSpot(0, position);
+		timer = 0;
+	}
+	else if (rStick.y < 0 && position > 0 && timer > 0.35)
+	{
+		position--;
+		atlas->setSpot(0, position);
+		timer = 0;
+	}
+
+	if (time > 0.30)
+	{
+		atlas->incSpotR();
+		time = 0;
+	}
+
 
 }
 void Pause::draw()
 {
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.3, 0.0, 0.0, 1.0));
 	atlas->draw();
 }
 void Pause::setActive(Controller* _con)
@@ -361,11 +424,14 @@ void Pause::setActive(Controller* _con)
 	active = _con;
 }
 
-void Pause::setPaused(bool _state)
+void Pause::setPaused(int _state)
 {
 	m_isPaused = _state;
 	if (!_state)
-		atlas->setSpot(glm::vec2(1, 1));
+	{
+		position = 2;
+		atlas->setSpot(glm::vec2(0, position));
+	}
 }
 
 Score::Score(std::shared_ptr<Menu> _atlas)
@@ -373,23 +439,39 @@ Score::Score(std::shared_ptr<Menu> _atlas)
 	atlas = _atlas;
 }
 
-void Score::setPaused(bool _state)
+void Score::setPaused(int _state)
 {
 	m_isPaused = _state;
+	if (_state == 0)
+	{
+		atlas->setSpot(0, 7);
+		accept = 0;
+	}
 }
 
 void Score::draw()
 {
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.3, 0.0, 0.0, 1.0));
 	atlas->draw();
 }
 
 void Score::update(float dt)
 {
 	pauseTimer += dt;
-	if (active->conButton(XINPUT_GAMEPAD_A) && pauseTimer > 1.0)
+	accept += dt;
+	if (accept > 0.45)
 	{
-		setPaused(true);
-		m_parent->getGameState("MainMenu")->setPaused(false);
+		if (active->conButton(XINPUT_GAMEPAD_A))
+		{
+			setPaused(true);
+			m_parent->getGameState("MainMenu")->setPaused(0);
+			pauseTimer = 0;
+		}
+	}
+
+	if (pauseTimer > 0.3)
+	{
+		atlas->incSpotR();
 		pauseTimer = 0;
 	}
 }

@@ -331,7 +331,7 @@ void initializeScene()
 	char boatTex[] = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
-	char menuTex[] = "Assets/img/menu_atlas.png.png";
+	char menuTex[] = "Assets/img/atlas.png";
 	std::shared_ptr<Texture> menuTexMap = std::make_shared<Texture>(menuTex, menuTex, 1.0f);
 
 
@@ -587,7 +587,8 @@ void initializeScene()
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
 
 	// Set menu properties
-	menu = std::make_shared<Menu>(markerTexMap);
+	// find this 
+	menu = std::make_shared<Menu>(menuTexMap, 4, 15);
 	menu->setMaterial(materials["menu"]);
 
 
@@ -679,9 +680,9 @@ void calculateCollisions()
 // This is where we draw stuff
 void DisplayCallbackFunction(void)
 {
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-
-	///////////Shadow Map
+	////Shadow Map
 	//shadowMap.bindFrameBufferForDrawing();
 	//FrameBufferObject::clearFrameBuffer(clearColor);
 
@@ -693,10 +694,6 @@ void DisplayCallbackFunction(void)
 	//shadowMap.unbindFrameBuffer(windowWidth, windowHeight);
 
 	// bind scene FBO
-
-
-
-
 
 	states.draw();
 
