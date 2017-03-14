@@ -100,6 +100,7 @@ public:
 	void update(float dt);//where we do all the updates and controls
 	void draw();// where we do all 
 	void setPaused(int a_paused);
+	void windowReshapeCallbackFunction(int w, int h);
 
 private:
 
@@ -141,8 +142,8 @@ private:
 
 	// Lighting Controls
 	float deskLamp = 0.8;
-	float innerCutOff = 0.42; // Spot Light Size
-	float outerCutOff = 0.47;
+	float innerCutOff = 0.43; // Spot Light Size
+	float outerCutOff = 0.48;
 	glm::vec3 deskForward = glm::vec3(0.2, 1.0, 1.5); // Spot Light Direction
 	float roomLight = 0.4;
 

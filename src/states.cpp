@@ -492,6 +492,25 @@ void Debug::draw()
 		RigidBody::drawDebug(camera->getView(), camera->getProj());
 }
 
+void Game::windowReshapeCallbackFunction(int w, int h)
+{
+	/* Update our Window Properties */
+	windowWidth = w;
+	windowHeight = h;
+
+	// TODO: more needed?
+
+	//// switch to projection because we're changing projection
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	//gluPerspective(45.0f, (float)w / h, 0.1f, 10000.0f);
+	//camera.setProperties(45.0f, float(w / h), 0.1f, 10000.0f, 0.01f);
+	//glViewport(0, 0, w, h);
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
+	camera->setRatio(windowHeight, windowWidth);
+}
+
 
 void Game::updateScene(float dt)
 {
