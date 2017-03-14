@@ -833,7 +833,7 @@ void WindowReshapeCallbackFunction(int w, int h)
 	//glViewport(0, 0, w, h);
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadIdentity();
-
+	states.getGameState("game")->windowReshapeCallbackFunction(w, h);
 	//playerCamera.setRatio(windowHeight, windowWidth);
 }
 
