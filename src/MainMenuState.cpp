@@ -1,92 +1,114 @@
-#include "World.h"
-#include <iostream>
-GameWorld::GameWorld()
-{
-	std::cout << "World created" << std::endl;
-}
+#include "MainMenuState.h"
 
-GameWorld::~GameWorld()
-{
-	//Look into share pointer deconstruction 
-}
+#include "gl\freeglut.h"
+#include "InputManager.h"
+#include "controller.h"
+#include "FrameBufferObject.h"
 
-LoadObject* GameWorld::getModel(std::string fileName)
-{
-	// Check if the model is in the map.
-	auto& it = modelMap.find(fileName);
 
-	// If model isn't in map, create it.
-	if (it == modelMap.end())
+Controller menus1(0);
+Controller menus2(1);
+Controller menus3(2);
+Controller menus4(3);
+
+//returns a number based on who pressed a key. returns 0 if no key pressed
+int allPress(int button)
+{
+	if (menus1.conButton(button))
 	{
-		LoadObject* obj = new LoadObject();
+		return 1;
+	}
+	else if (menus2.conButton(button))
+	{
+		return 2;
+	}
+	else if (menus3.conButton(button))
+	{
+		return 3;
+	}
+	else if (menus4.conButton(button))
+	{
+		return 4;
+	}
+	else
+		return 0;
+}
 
-		bool result = obj->load(fileName.c_str());
-
-		// If loading fails, delete and return nullptr.
-		if (!result)
+void MainMenu::update(float dt)
+{
+	time += dt;
+	timer += dt;
+	accept += dt;
+	if (accept > 0.5)
+	{
+		switch (position)
 		{
-			return nullptr;
+		case 6:
+			if (menus1.conButton(XINPUT_GAMEPAD_A))
+			{
+				setPaused(true);
+				m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
+			}
+			break;
+		case 3:
+			if (menus1.conButton(XINPUT_GAMEPAD_A))
+			{
+				glutLeaveMainLoop();
+			}
+			break;
 		}
-
-		// Add the model to the map, and return it.
-		modelMap.insert({ fileName, obj });
-		return obj;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent(13))
+	{
+		setPaused(true);
+		m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
 	}
 
-	// If model exists, return it.
-	return it->second;
-}
-
-ANILoader* GameWorld::getAniModel(std::string fileName)
-{
-	// Check if the animated model is in the map.
-	auto& it = aniModelMap.find(fileName);
-
-	// If animated model isn't in map, create it.
-	if (it != aniModelMap.end() || aniModelMap.size() == 0)
+	Coords rStick = menus1.getLeftStick();
+	if (rStick.y > 0 && position < 6 && timer > 0.35)
 	{
-		ANILoader* ani = new ANILoader();
-		bool result = ani->loadHTR(fileName);
-		
-		// If loading fails, delete and return nullptr.
-		if (!result)
-		{
-			return nullptr;
-		}
-
-		// Add the animated model to the map, and return it.
-		ani->createNodes();
-		aniModelMap.insert({ fileName, ani });
-		return ani;
+		position++;
+		atlas->setSpot(0, position);
+		timer = 0;
+	}
+	else if (rStick.y < 0 && position > 3 && timer > 0.35)
+	{
+		position--;
+		atlas->setSpot(0, position);
+		timer = 0;
 	}
 
-	// If animated model exists, return it.
-	return it->second;
+	if (time > incrememnt)
+	{
+		atlas->incSpotR();
+		time = 0;
+	}
 }
 
-//Texture* GameWorld::getTexture(std::string fileName)
-//{
-//	// Check if the texture is in the map.
-//	auto& it = textureMap.find(fileName);
-//
-//	// If texture isn't in map, create it.
-//	if (it != textureMap.end())
-//	{
-//		Texture* tex = new Texture()
-//
-//		// If loading fails, delete and return nullptr.
-//		if (!result)
-//		{
-//			delete ani;
-//			return nullptr;
-//		}
-//
-//		// Add the texture to the map, and return it.
-//		ani->createNodes();
-//		textureMap.insert({ fileName, ani });
-//		return ani;
-//	}
-//
-//	// If texture exists, return it.
-//	return it->second;
-//}
+void MainMenu::draw()
+{
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.3, 0.0, 0.0, 1.0));
+	atlas->draw();
+}
+
+MainMenu::MainMenu(std::shared_ptr<Menu> _atlas)
+{
+	atlas = _atlas;
+	position = 6;
+	frame = 0;
+	atlas->setSpot(0, position);
+	time = 0;
+	timer = 0;
+	incrememnt = 0.3;
+	accept = 1;
+}
+
+void MainMenu::setPaused(int _state)
+{
+	m_isPaused = _state;
+	if (!_state)
+	{
+		atlas->setSpot(glm::vec2(0, position));
+		accept = 0;
+	}
+}
