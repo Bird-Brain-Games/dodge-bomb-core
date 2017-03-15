@@ -290,7 +290,14 @@ void Game::draw()
 	drawScene();
 }
 
-
+void Game::windowReshapeCallbackFunction(int w, int h)
+{
+	/* Update our Window Properties */
+	windowWidth = w;
+	windowHeight = h;
+	
+	camera->setRatio(windowHeight, windowWidth);
+}
 
 
 
