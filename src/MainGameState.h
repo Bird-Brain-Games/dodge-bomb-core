@@ -1,32 +1,105 @@
 #pragma once
 
-#include <vector>
-#include <map>
-
-#include "loadObject.h"
-#include "ANILoader.h"
+#include "GameState.h"
 #include <memory>
+#include <map>
+#include "PauseState.h"
+#include "ScoreState.h"
+#include "camera.h"
+#include "Player.h"
+#include "FrameBufferObject.h"
 
-// Handles memory management of textures and models
-// look into shared pointer and deconstruction
-class GameWorld
+//////////////////////////////////////////////////////////////////////
+///////////////////////	Lighting Controls	//////////////////////////
+enum LightingMode
+{
+	NOLIGHT,
+	TOON
+};
+
+
+class Game : public GameState
 {
 public:
-	GameWorld();
-	~GameWorld();
+	Game(std::map<std::string, std::shared_ptr<GameObject>>*,
+		std::map<std::string, std::shared_ptr<Player>>*,
+		std::map<std::string, std::shared_ptr<Material>>*,
+		std::shared_ptr<BombManager>,
+		Pause*, Score*, Camera*);
 
-	LoadObject* getModel(std::string fileName);
-	ANILoader* getAniModel(std::string fileName);
-	//Texture* getTexture(std::string tag);
-
-	//void loadModel(std::string fileName);
-	//void loadAniModel(std::string fileName);
-
-	//// Uses a tag system to identify textures (SHOULD BE CHANGED)
-	//void loadTexture(char* diffuseTex, char* specularTex, float shininess, std::string tag);
+	void update(float dt);//where we do all the updates and controls
+	void draw();// where we do all 
+	void setPaused(int a_paused);
 
 private:
-	std::map<std::string, LoadObject*> modelMap;
-	std::map<std::string, ANILoader*> aniModelMap;
-	//std::map<std::string, Texture*> textureMap;
+
+
+	//secondary functions (called in update and draw)
+	int deathCheck();
+	void updateScene(float dt);
+	void drawScene();
+	void setMaterialForAllGameObjects(std::string materialName);
+	void setMaterialForAllPlayerObjects(std::string materialName);
+	void brightPass();
+	void blurPass(FrameBufferObject fboIn, FrameBufferObject fboOut);
+	void initializeFrameBuffers();
+	void handleKeyboardInput();
+	void handleKeyboardInputShaders();
+
+	FrameBufferObject fboUnlit;
+	FrameBufferObject fboBright;
+	FrameBufferObject fboBlur, fboBlurB;
+	FrameBufferObject shadowMap;
+
+	std::shared_ptr<BombManager> bombManager;
+	std::map<std::string, std::shared_ptr<GameObject>>* scene;
+	std::map<std::string, std::shared_ptr<Player>>* players;
+	std::map<std::string, std::shared_ptr<Material>>* materials;
+	Pause* pause;
+	Score* score;
+	Camera * camera;
+	int pausing;
+	float pauseTimer;
+
+	float outlineWidth = 4.0;
+	bool outlineToggle = true;
+	LightingMode currentLightingMode = TOON;
+
+	float windowWidth = 1920.0;
+	float windowHeight = 1080.0;
+
+
+	// Lighting Controls
+	float deskLamp = 0.8;
+	float innerCutOff = 0.42; // Spot Light Size
+	float outerCutOff = 0.47;
+	glm::vec3 deskForward = glm::vec3(0.2, 1.0, 1.5); // Spot Light Direction
+	float roomLight = 0.4;
+
+	float ambient = 0.1; // Ambient Lighting
+	float diffuse = 1.0f; // Diffuse Lighting
+	float specular = 0.2f; // Specular Lighting
+	float shininess = 2.0f; // Shinniness
+	float rim = 0.5f; // Rim Lighting
+
+	GLuint toonRamp;
+
+	// Bloom Controls
+	glm::vec4 bloomThreshold = glm::vec4(0.6f);
+	int numBlurPasses = 4;
+	bool bloomToggle = false;
+
+	// For Toggling
+	bool  ambientToggle = true;
+	float ka = ambient; // Ambient Lighting
+
+	bool  diffuseToggle = true;
+	float kd = diffuse; // Diffuse Lighting
+
+	bool  specularToggle = true;
+	float ks = specular; // Specular Lighting
+
+	bool  rimToggle = true;
+	float kr = rim; // Rim Lighting
+
 };

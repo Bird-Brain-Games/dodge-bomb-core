@@ -1,92 +1,47 @@
-#include "World.h"
-#include <iostream>
-GameWorld::GameWorld()
+#include "ScoreState.h"
+#include "FrameBufferObject.h"
+
+Score::Score(std::shared_ptr<Menu> _atlas)
 {
-	std::cout << "World created" << std::endl;
+	atlas = _atlas;
 }
 
-GameWorld::~GameWorld()
+void Score::setPaused(int _state)
 {
-	//Look into share pointer deconstruction 
-}
 
-LoadObject* GameWorld::getModel(std::string fileName)
-{
-	// Check if the model is in the map.
-	auto& it = modelMap.find(fileName);
-
-	// If model isn't in map, create it.
-	if (it == modelMap.end())
+	if (_state > 1 || _state == 0)
 	{
-		LoadObject* obj = new LoadObject();
+		m_isPaused = false;
+		atlas->setSpot(0, 7 - _state + 2);
+		accept = 0;
+	}
+	else if (_state == 1)
+		m_isPaused = true;
+}
 
-		bool result = obj->load(fileName.c_str());
+void Score::draw()
+{
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.3, 0.0, 0.0, 1.0));
+	atlas->draw();
+}
 
-		// If loading fails, delete and return nullptr.
-		if (!result)
+void Score::update(float dt)
+{
+	pauseTimer += dt;
+	accept += dt;
+	if (accept > 0.45)
+	{
+		if (active->conButton(XINPUT_GAMEPAD_A))
 		{
-			return nullptr;
+			setPaused(true);
+			m_parent->getGameState("MainMenu")->setPaused(0);
+			pauseTimer = 0;
 		}
-
-		// Add the model to the map, and return it.
-		modelMap.insert({ fileName, obj });
-		return obj;
 	}
 
-	// If model exists, return it.
-	return it->second;
-}
-
-ANILoader* GameWorld::getAniModel(std::string fileName)
-{
-	// Check if the animated model is in the map.
-	auto& it = aniModelMap.find(fileName);
-
-	// If animated model isn't in map, create it.
-	if (it != aniModelMap.end() || aniModelMap.size() == 0)
+	if (pauseTimer > 0.3)
 	{
-		ANILoader* ani = new ANILoader();
-		bool result = ani->loadHTR(fileName);
-		
-		// If loading fails, delete and return nullptr.
-		if (!result)
-		{
-			return nullptr;
-		}
-
-		// Add the animated model to the map, and return it.
-		ani->createNodes();
-		aniModelMap.insert({ fileName, ani });
-		return ani;
+		atlas->incSpotR();
+		pauseTimer = 0;
 	}
-
-	// If animated model exists, return it.
-	return it->second;
 }
-
-//Texture* GameWorld::getTexture(std::string fileName)
-//{
-//	// Check if the texture is in the map.
-//	auto& it = textureMap.find(fileName);
-//
-//	// If texture isn't in map, create it.
-//	if (it != textureMap.end())
-//	{
-//		Texture* tex = new Texture()
-//
-//		// If loading fails, delete and return nullptr.
-//		if (!result)
-//		{
-//			delete ani;
-//			return nullptr;
-//		}
-//
-//		// Add the texture to the map, and return it.
-//		ani->createNodes();
-//		textureMap.insert({ fileName, ani });
-//		return ani;
-//	}
-//
-//	// If texture exists, return it.
-//	return it->second;
-//}

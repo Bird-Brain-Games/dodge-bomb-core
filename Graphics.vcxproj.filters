@@ -43,30 +43,29 @@
     </ClCompile>
     <ClCompile Include="src\Bomb.cpp" />
     <ClCompile Include="src\GameState.cpp">
-      <Filter>states and menu and main</Filter>
+      <Filter>States</Filter>
     </ClCompile>
     <ClCompile Include="src\states.cpp">
-      <Filter>states and menu and main</Filter>
+      <Filter>States</Filter>
     </ClCompile>
     <ClCompile Include="src\menu.cpp">
-      <Filter>states and menu and main</Filter>
+      <Filter>States</Filter>
     </ClCompile>
-    <ClCompile Include="src\particle.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\DebugState.cpp">
+      <Filter>States\States</Filter>
+    </ClCompile>
     <ClCompile Include="src\MainGameState.cpp">
-      <Filter>states and menu\States</Filter>
+      <Filter>States\States</Filter>
     </ClCompile>
     <ClCompile Include="src\MainMenuState.cpp">
-      <Filter>states and menu\States</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DebugState.cpp">
-      <Filter>states and menu\States</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ScoreState.cpp">
-      <Filter>states and menu\States</Filter>
+      <Filter>States\States</Filter>
     </ClCompile>
     <ClCompile Include="src\PauseState.cpp">
-      <Filter>states and menu\States</Filter>
+      <Filter>States\States</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ScoreState.cpp">
+      <Filter>States\States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -121,32 +120,29 @@
     </ClInclude>
     <ClInclude Include="src\Bomb.h" />
     <ClInclude Include="src\GameState.h">
-      <Filter>states and menu and main</Filter>
+      <Filter>States</Filter>
     </ClInclude>
     <ClInclude Include="src\states.h">
-      <Filter>states and menu and main</Filter>
+      <Filter>States</Filter>
     </ClInclude>
     <ClInclude Include="src\menu.h">
-      <Filter>states and menu and main</Filter>
-    </ClInclude>
-
-    <ClInclude Include="src\MainGameState.h">
-      <Filter>states and menu\States</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MainMenuState.h">
-      <Filter>states and menu\States</Filter>
+      <Filter>States</Filter>
     </ClInclude>
     <ClInclude Include="src\DebugState.h">
-      <Filter>states and menu\States</Filter>
+      <Filter>States\States</Filter>
     </ClInclude>
-    <ClInclude Include="src\ScoreState.h">
-      <Filter>states and menu\States</Filter>
+    <ClInclude Include="src\MainGameState.h">
+      <Filter>States\States</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MainMenuState.h">
+      <Filter>States\States</Filter>
     </ClInclude>
     <ClInclude Include="src\PauseState.h">
-      <Filter>states and menu\States</Filter>
+      <Filter>States\States</Filter>
     </ClInclude>
-    <ClInclude Include="src\particle.h" />
-
+    <ClInclude Include="src\ScoreState.h">
+      <Filter>States\States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Graphics">
@@ -161,11 +157,11 @@
     <Filter Include="Graphics\Shaders">
       <UniqueIdentifier>{a7b2ea0f-19fc-40db-9be6-db5d0b683e51}</UniqueIdentifier>
     </Filter>
-    <Filter Include="states and menu and main">
+    <Filter Include="States">
       <UniqueIdentifier>{36414be0-7cee-4fe8-9698-dd44423a735b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="states and menu\States">
-      <UniqueIdentifier>{998bf942-7557-46b7-9145-e2b667f1882e}</UniqueIdentifier>
+    <Filter Include="States\States">
+      <UniqueIdentifier>{9cf76f38-e8bd-4db4-a880-11fc029f3d82}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

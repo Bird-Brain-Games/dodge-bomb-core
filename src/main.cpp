@@ -23,14 +23,12 @@
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "loadObject.h"
-#include "GameObject.h"
-#include "Player.h"
-#include "FrameBufferObject.h"
 #include "InputManager.h"
-#include "menu.h"
 #include "ANILoader.h"
-#include "GameState.h"
-#include "states.h"
+
+#include "MainMenuState.h"
+#include "MainGameState.h"
+
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
 const int FRAME_DELAY = 1000 / FRAMES_PER_SECOND; // Milliseconds per frame
