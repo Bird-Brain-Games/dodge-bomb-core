@@ -30,6 +30,7 @@ public:
 	void update(float dt);//where we do all the updates and controls
 	void draw();// where we do all 
 	void setPaused(int a_paused);
+	void windowReshapeCallbackFunction(int w, int h);
 
 private:
 
