@@ -7,6 +7,7 @@ uniform vec4 u_spotDir;
 uniform vec4 u_controls;
 uniform vec4 u_dimmers;
 uniform vec4 u_shine;
+uniform vec4 u_emissiveLight;
 
 uniform sampler2D u_diffuseTex;
 uniform sampler2D u_specularTex;
@@ -89,7 +90,8 @@ void main()
 	FragColor.rgb = vec3(
 		  vec3(u_controls.x)											        // Ambient
 		+ vec3(lights)
-		+ vec3(smoothstep(0.8, 1.0, rim) * vec3(1.0, 1.0, 1.0) * u_controls.w)  // Rim		   
+		+ vec3(smoothstep(0.8, 1.0, rim) * vec3(1.0, 1.0, 1.0) * u_controls.w)  // Rim	
+		+ u_emissiveLight.xyz	   
 		);		
 	FragColor.w = u_transparency.x;
 }
