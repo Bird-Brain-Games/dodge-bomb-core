@@ -63,6 +63,11 @@ int Player::getHealth()
 	return health;
 }
 
+Controller* Player::getController()
+{
+	return &con;
+}
+
 void Player::update(float dt)
 {
 	// Update the bomb cooldown

@@ -1,11 +1,6 @@
 #include "PauseState.h"
 #include "FrameBufferObject.h"
 
-Controller menus1(0);
-Controller menus2(1);
-Controller menus3(2);
-Controller menus4(3);
-
 Pause::Pause(std::shared_ptr<Menu> _atlas)
 {
 	atlas = _atlas;
@@ -22,14 +17,14 @@ void Pause::update(float dt)
 	switch (position)
 	{
 	case 5:
-		if (menus1.conButton(XINPUT_GAMEPAD_A))
+		if (active->conButton(XINPUT_GAMEPAD_A))
 		{
 			setPaused(true);
 			m_parent->getGameState("MainMenu")->setPaused(0);
 		}
 		break;
 	case 3:
-		if (menus1.conButton(XINPUT_GAMEPAD_A))
+		if (active->conButton(XINPUT_GAMEPAD_A))
 		{
 			setPaused(true);
 			m_parent->getGameState("game")->setPaused(0); // resets the players by passing in -1.
@@ -37,7 +32,7 @@ void Pause::update(float dt)
 		break;
 	}
 
-	Coords rStick = menus1.getLeftStick();
+	Coords rStick = active->getLeftStick();
 	if (rStick.y > 0 && position < 5 && timer > 0.35)
 	{
 		position++;
