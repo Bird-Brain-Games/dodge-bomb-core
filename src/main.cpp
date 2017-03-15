@@ -23,14 +23,12 @@
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "loadObject.h"
-#include "GameObject.h"
-#include "Player.h"
-#include "FrameBufferObject.h"
 #include "InputManager.h"
-#include "menu.h"
 #include "ANILoader.h"
-#include "GameState.h"
-#include "states.h"
+
+#include "MainMenuState.h"
+#include "MainGameState.h"
+
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
 const int FRAME_DELAY = 1000 / FRAMES_PER_SECOND; // Milliseconds per frame
@@ -73,17 +71,12 @@ std::map<std::string, std::shared_ptr<Material>> materials;
 
 // Controls
 bool inMenu = false;
-std::shared_ptr<Menu> menu;
+std::shared_ptr<Menu> startMenu;
+std::shared_ptr<Menu> scoreMenu;
+std::shared_ptr<Menu> scoreMenu2;
+std::shared_ptr<Menu> pauseMenu;
+
 std::shared_ptr<BombManager> bombManager;
-
-
-
-
-
-
-
-
-
 
 void bulletNearCallback(btBroadphasePair& collisionPair,
 	btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo);
@@ -352,9 +345,6 @@ void initializeScene()
 	char boatTex[] = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
-	char menuTex[] = "Assets/img/atlas.png";
-	std::shared_ptr<Texture> menuTexMap = std::make_shared<Texture>(menuTex, menuTex, 1.0f);
-
 
 
 	//Add textures to the map
@@ -381,7 +371,7 @@ void initializeScene()
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
-	textures["menu"] = menuTexMap;
+
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -650,13 +640,67 @@ void initializeScene()
 
 	// Set menu properties
 	// find this 
-	menu = std::make_shared<Menu>(menuTexMap, 4, 15);
-	menu->setMaterial(materials["menu"]);
+
 
 
 	// Set default camera properties (WIP)
 
 
+
+}
+
+void initializeStates()
+{
+	//load textures
+	char startTex[] = "Assets/img/menMain_atlas.png";
+	std::shared_ptr<Texture> startTexMap = std::make_shared<Texture>(startTex, startTex, 1.0f);
+
+	char scoreTex[] = "Assets/img/winScreen_atlas.png";
+	std::shared_ptr<Texture> scoreTexMap = std::make_shared<Texture>(scoreTex, scoreTex, 1.0f);
+
+	char scoreTex2[] = "Assets/img/playerTransLayer_atlas.png";
+	std::shared_ptr<Texture> scoreTex2Map = std::make_shared<Texture>(scoreTex2, scoreTex2, 1.0f);
+
+	char pauseTex[] = "Assets/img/menPause_arlas.png";
+	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
+
+
+	//save them
+	textures["start"] = startTexMap;
+	textures["score"] = scoreTexMap;
+	textures["score2"] = scoreTex2Map;
+	textures["pause"] = pauseTexMap;
+
+	//load up menu's
+	startMenu = std::make_shared<Menu>(startTexMap, 4, 7);
+	startMenu->setMaterial(materials["menu"]);
+
+	scoreMenu = std::make_shared<Menu>(scoreTexMap, 4, 7);
+	scoreMenu->setMaterial(materials["menu"]);
+
+	scoreMenu2 = std::make_shared<Menu>(scoreTex2Map, 4, 7);
+	scoreMenu2->setMaterial(materials["menu"]);
+
+	pauseMenu = std::make_shared<Menu>(pauseTexMap, 4, 7);
+	pauseMenu->setMaterial(materials["menu"]);
+
+	//init states.
+	mainMenu = new MainMenu(startMenu);
+	mainMenu->setPaused(false);
+
+	pause = new Pause(pauseMenu);
+	pause->setPaused(true);
+
+	score = new Score(scoreMenu);
+	score->setPaused(true);
+
+	game = new Game(&gameobjects, &players, &materials, bombManager, pause, score, &playerCamera);
+	game->setPaused(true);
+
+	states.addGameState("MainMenu", mainMenu);
+	states.addGameState("game", game);
+	states.addGameState("pause", pause);
+	states.addGameState("score", score);
 
 }
 
@@ -937,28 +981,12 @@ int main(int argc, char **argv)
 	// Initialize scene
 	initializeShaders();
 	initializeScene();
-
+	initializeStates();
 
 	/* Start Game Loop */
 	deltaTime = glutGet(GLUT_ELAPSED_TIME);
 	deltaTime /= 1000.0f;
 
-	mainMenu = new MainMenu(menu);
-	mainMenu->setPaused(false);
-
-	pause = new Pause(menu);
-	pause->setPaused(true);
-
-	score = new Score(menu);
-	score->setPaused(true);
-
-	game = new Game(&gameobjects, &players, &materials, bombManager, pause, score, &playerCamera);
-	game->setPaused(true);
-
-	states.addGameState("MainMenu", mainMenu);
-	states.addGameState("game", game);
-	states.addGameState("pause", pause);
-	states.addGameState("score", score);
 
 	glutMainLoop();
 	return 0;

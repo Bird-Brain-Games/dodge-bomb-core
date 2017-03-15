@@ -76,7 +76,6 @@ void Menu::draw()
 	//menuMaterial->
 	menuMaterial->shader->sendUniformInt("diffuseTex", 31);
 	menuMaterial->shader->sendUniformVec2("_dim", dim);
-	printf("x: %f, y: %f \n", dim.x, dim.y);
 	menuMaterial->shader->sendUniformVec2("_spot", spot);
 	glDrawArrays(GL_POINTS, 0, 1);
 	//menu.unbind();
