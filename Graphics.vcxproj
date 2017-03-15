@@ -93,6 +93,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\node.cpp" />
+    <ClCompile Include="src\particle.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\Shader.cpp" />
@@ -129,6 +130,7 @@
     <ClInclude Include="src\material.h" />
     <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\node.h" />
+    <ClInclude Include="src\particle.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\RigidBody.h" />
     <ClInclude Include="src\Shader.h" />

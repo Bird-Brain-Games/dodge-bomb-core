@@ -43,17 +43,16 @@
     </ClCompile>
     <ClCompile Include="src\Bomb.cpp" />
     <ClCompile Include="src\GameState.cpp">
-      <Filter>states and menu</Filter>
+      <Filter>states and menu and main</Filter>
     </ClCompile>
     <ClCompile Include="src\states.cpp">
-      <Filter>states and menu</Filter>
+      <Filter>states and menu and main</Filter>
     </ClCompile>
     <ClCompile Include="src\menu.cpp">
-      <Filter>states and menu</Filter>
+      <Filter>states and menu and main</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>states and menu</Filter>
-    </ClCompile>
+    <ClCompile Include="src\particle.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />
@@ -107,14 +106,15 @@
     </ClInclude>
     <ClInclude Include="src\Bomb.h" />
     <ClInclude Include="src\GameState.h">
-      <Filter>states and menu</Filter>
+      <Filter>states and menu and main</Filter>
     </ClInclude>
     <ClInclude Include="src\states.h">
-      <Filter>states and menu</Filter>
+      <Filter>states and menu and main</Filter>
     </ClInclude>
     <ClInclude Include="src\menu.h">
-      <Filter>states and menu</Filter>
+      <Filter>states and menu and main</Filter>
     </ClInclude>
+    <ClInclude Include="src\particle.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Graphics">
@@ -129,7 +129,7 @@
     <Filter Include="Graphics\Shaders">
       <UniqueIdentifier>{a7b2ea0f-19fc-40db-9be6-db5d0b683e51}</UniqueIdentifier>
     </Filter>
-    <Filter Include="states and menu">
+    <Filter Include="states and menu and main">
       <UniqueIdentifier>{36414be0-7cee-4fe8-9698-dd44423a735b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

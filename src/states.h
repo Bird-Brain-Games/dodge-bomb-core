@@ -105,7 +105,7 @@ private:
 
 
 	//secondary functions (called in update and draw)
-	bool lifeCheck();
+	int deathCheck();
 	void updateScene(float dt);
 	void drawScene();
 	void setMaterialForAllGameObjects(std::string materialName);
