@@ -7,33 +7,7 @@
 glm::vec4 lightPos;
 glm::vec4 lightTwo;
 
-Controller menus1(0);
-Controller menus2(1);
-Controller menus3(2);
-Controller menus4(3);
 
-//returns a number based on who pressed a key. returns 0 if no key pressed
-int allPress(int button)
-{
-	if (menus1.conButton(button))
-	{
-		return 1;
-	}
-	else if (menus2.conButton(button))
-	{
-		return 2;
-	}
-	else if (menus3.conButton(button))
-	{
-		return 3;
-	}
-	else if (menus4.conButton(button))
-	{
-		return 4;
-	}
-	else
-		return 0;
-}
 
 void calculateCollisions();
 
@@ -102,7 +76,17 @@ void Game::update(float dt)
 
 	pauseTimer += dt;
 
-	pausing = allPress(XINPUT_GAMEPAD_START);
+	
+
+	int count = 0;
+	for (auto it : *players)
+	{
+
+		if (it.second->getController()->conButton(XINPUT_GAMEPAD_START))
+			pausing = count;
+		count++;
+	}
+
 	if (pausing > 0 && pauseTimer > 1.0)
 	{
 		switch (pausing)
@@ -112,25 +96,25 @@ void Game::update(float dt)
 		case 1:
 			setPaused(true);
 			pause->setPaused(false);
-			pause->active = &menus1;
+			pause->active = players->at("bombot1")->getController();
 			pauseTimer = 0;
 			break;
 		case 2:
 			setPaused(true);
 			pause->setPaused(false);
-			pause->active = &menus2;
+			pause->active = players->at("bombot2")->getController();
 			pauseTimer = 0;
 			break;
 		case 3:
 			setPaused(true);
 			pause->setPaused(false);
-			pause->active = &menus3;
+			pause->active = players->at("bombot3")->getController();
 			pauseTimer = 0;
 			break;
 		case 4:
 			setPaused(true);
 			pause->setPaused(false);
-			pause->active = &menus4;
+			pause->active = players->at("bombot4")->getController();
 			pauseTimer = 0;
 			break;
 		}
@@ -139,7 +123,7 @@ void Game::update(float dt)
 	if (winner > 0)
 	{
 		this->m_isPaused = true;
-		score->active = &menus1;
+		score->active = players->at("bombot1")->getController();
 		m_parent->getGameState("score")->setPaused(winner);
 	}
 
@@ -295,7 +279,7 @@ void Game::windowReshapeCallbackFunction(int w, int h)
 	/* Update our Window Properties */
 	windowWidth = w;
 	windowHeight = h;
-	
+
 	camera->setRatio(windowHeight, windowWidth);
 }
 

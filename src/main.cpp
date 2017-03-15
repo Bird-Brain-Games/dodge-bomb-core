@@ -685,7 +685,7 @@ void initializeStates()
 	pauseMenu->setMaterial(materials["menu"]);
 
 	//init states.
-	mainMenu = new MainMenu(startMenu);
+	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController());
 	mainMenu->setPaused(false);
 
 	pause = new Pause(pauseMenu);

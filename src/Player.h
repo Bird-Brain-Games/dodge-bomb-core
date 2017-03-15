@@ -41,6 +41,9 @@ public:
 
 	void setAnim(std::string);
 	int getHealth();
+
+	Controller* getController();
+
 private:
 	void lookDirectlyAtExplosion(glm::vec3 direction);
 

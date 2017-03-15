@@ -33,8 +33,7 @@ public:
 	void windowReshapeCallbackFunction(int w, int h);
 
 private:
-
-
+	
 	//secondary functions (called in update and draw)
 	int deathCheck();
 	void updateScene(float dt);

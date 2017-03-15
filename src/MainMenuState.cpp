@@ -2,56 +2,27 @@
 
 #include "gl\freeglut.h"
 #include "InputManager.h"
-#include "controller.h"
 #include "FrameBufferObject.h"
-
-
-Controller menus1(0);
-Controller menus2(1);
-Controller menus3(2);
-Controller menus4(3);
-
-//returns a number based on who pressed a key. returns 0 if no key pressed
-int allPress(int button)
-{
-	if (menus1.conButton(button))
-	{
-		return 1;
-	}
-	else if (menus2.conButton(button))
-	{
-		return 2;
-	}
-	else if (menus3.conButton(button))
-	{
-		return 3;
-	}
-	else if (menus4.conButton(button))
-	{
-		return 4;
-	}
-	else
-		return 0;
-}
 
 void MainMenu::update(float dt)
 {
 	time += dt;
 	timer += dt;
 	accept += dt;
+	
 	if (accept > 0.5)
 	{
 		switch (position)
 		{
 		case 6:
-			if (menus1.conButton(XINPUT_GAMEPAD_A))
+			if (con->conButton(XINPUT_GAMEPAD_A))
 			{
 				setPaused(true);
 				m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
 			}
 			break;
 		case 3:
-			if (menus1.conButton(XINPUT_GAMEPAD_A))
+			if (con->conButton(XINPUT_GAMEPAD_A))
 			{
 				glutLeaveMainLoop();
 			}
@@ -64,7 +35,7 @@ void MainMenu::update(float dt)
 		m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
 	}
 
-	Coords rStick = menus1.getLeftStick();
+	Coords rStick = con->getLeftStick();
 	if (rStick.y > 0 && position < 6 && timer > 0.35)
 	{
 		position++;
@@ -91,7 +62,7 @@ void MainMenu::draw()
 	atlas->draw();
 }
 
-MainMenu::MainMenu(std::shared_ptr<Menu> _atlas)
+MainMenu::MainMenu(std::shared_ptr<Menu> _atlas, Controller* _con)
 {
 	atlas = _atlas;
 	position = 6;
@@ -101,6 +72,7 @@ MainMenu::MainMenu(std::shared_ptr<Menu> _atlas)
 	timer = 0;
 	incrememnt = 0.3;
 	accept = 1;
+	con = _con;
 }
 
 void MainMenu::setPaused(int _state)
