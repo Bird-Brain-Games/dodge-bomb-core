@@ -20,6 +20,9 @@ public:
 		std::shared_ptr<Loader> _mesh,
 		std::shared_ptr<Material> _material,
 		std::shared_ptr<Texture> _texture, 
+		std::shared_ptr<Loader> _aimerMesh,
+		std::shared_ptr<Material> _aimerMaterial,
+		std::shared_ptr<Texture> _aimerTexture,
 		int _playerNum);
 	Player(Player&);
 	~Player();
@@ -58,6 +61,12 @@ private:
 	float currentAngle;
 	float bottomAngle; //used for animation rotation.
 	glm::vec3 throwingForce;
+
+	// for the aimer
+	GameObject* aimer;
+	std::shared_ptr<Loader> aimerMesh;
+	std::shared_ptr<Material> aimerMaterial;
+	std::shared_ptr<Texture> aimerTexture;
 
 	// Player stats
 	int health;
