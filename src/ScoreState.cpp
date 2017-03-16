@@ -12,7 +12,25 @@ void Score::setPaused(int _state)
 	if (_state > 1 || _state == 0)
 	{
 		m_isPaused = false;
-		atlas->setSpot(0, 7 - _state + 2);
+		switch (_state)
+		{
+		case 2:
+			atlas->setSpot(0, 5);
+			break;
+			
+		case 3:
+			atlas->setSpot(0, 6);
+			break;
+
+		case 4:
+			atlas->setSpot(0, 4);
+			break;
+
+		case 5:
+			atlas->setSpot(0, 3);
+			break;
+		}
+
 		accept = 0;
 	}
 	else if (_state == 1)
