@@ -27,7 +27,6 @@ bool LUT::load(std::string filePath)
 
 	std::string line;
 	glm::vec3 value;
-	int size;
 	int LUTsize;
 
 	while (!stream.eof())
@@ -42,8 +41,8 @@ bool LUT::load(std::string filePath)
 			continue;
 		}
 
-		if (sscanf(line.c_str(), "LUT_3D_SIZE %d", &size) == 1)
-			LUTsize = size;
+		if (sscanf(line.c_str(), "LUT_3D_SIZE %d", &LUTsize) == 1)
+			size = LUTsize;
 	}
 
 	if (values.size() != pow(LUTsize, 3.0))
@@ -67,7 +66,6 @@ bool LUT::load(std::string filePath)
 	glDisable(GL_TEXTURE_3D);
 
 	handle = texture3D;
-	size = LUTsize;
 	return true;
 }
 
@@ -367,6 +365,7 @@ void Game::draw()
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	Color Correction
 	static auto colorMaterial = materials->at("colorCorrection");
+	static auto unlitMaterial = materials->at("unlitTexture");
 	switch (colorCorrection)
 	{
 	case Game::LUT_OFF:

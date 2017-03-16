@@ -67,6 +67,9 @@
     <ClCompile Include="src\ScoreState.cpp">
       <Filter>States\States</Filter>
     </ClCompile>
+    <ClCompile Include="src\Texture2D.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />
@@ -142,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="src\ScoreState.h">
       <Filter>States\States</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Texture2D.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
