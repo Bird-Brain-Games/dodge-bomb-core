@@ -13,6 +13,9 @@ Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
 	std::shared_ptr<Material> _material,
 	std::shared_ptr<Texture> _texture,
+	std::shared_ptr<Loader> _aimerMesh,
+	std::shared_ptr<Material> _aimerMaterial,
+	std::shared_ptr<Texture> _aimerTexture,
 	int _playerNum)
 	:
 	GameObject(position, _mesh, _material, _texture), 
@@ -23,6 +26,7 @@ Player::Player(glm::vec3 position,
 {
 	reset(position);
 	playerNum = _playerNum;
+	aimer = new GameObject(position, _aimerMesh, _aimerMaterial, _aimerTexture);
 	setScale(glm::vec3(0.75f));
 }
 
@@ -46,6 +50,7 @@ void Player::draw(Camera &camera)
 	if (currentState == P_NORMAL)
 	{
 		GameObject::draw(camera);
+		aimer->draw(camera);
 	}
 	else if (currentState == P_INVINCIBLE)
 	{
@@ -54,6 +59,7 @@ void Player::draw(Camera &camera)
 		if (!isFlashing)
 		{
 			GameObject::draw(camera);
+			aimer->draw(camera);
 		}
 	}
 }
@@ -124,6 +130,7 @@ void Player::update(float dt)
 
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);
+	aimer->update(dt);
 
 	// Make it so they can't rotate through physics
 	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 0.0, 0.0));	
@@ -169,6 +176,7 @@ void Player::handleInput(float dt)
 	{
 		currentAngle = angle;
 		this->setRotationAngleY(currentAngle);
+		aimer->setRotationAngleY(currentAngle);
 	}
 
 	else if (con.leftStickMoved() && !con.rightStickMoved())

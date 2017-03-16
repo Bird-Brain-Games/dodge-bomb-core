@@ -467,6 +467,7 @@ void initializeScene()
 	gameobjects["cannon"] = std::make_shared<GameObject>(
 		glm::vec3(23.f, 43.0f, 10.f), cannonMesh, defaultMaterial, cannonTexMap);
 	gameobjects["cannon"]->setScale(glm::vec3(1.7f));
+	gameobjects["cannon"]->emissiveLight = 0.3f;
 
 	gameobjects["crate"] = std::make_shared<GameObject>(
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
@@ -487,11 +488,11 @@ void initializeScene()
 
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombotTexMap, cannonMesh, defaultMaterial, cannonTexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
 
 	players["bombot2"] = std::make_shared<Player>(
-		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombotTexMap, 1);
+		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombotTexMap, cannonMesh, defaultMaterial, cannonTexMap, 1);
 	gameobjects["bombot2"] = players["bombot2"];
 	/*
 	gameobjects["bombot3"] = std::make_shared<GameObject>(
@@ -987,6 +988,8 @@ int main(int argc, char **argv)
 	deltaTime = glutGet(GLUT_ELAPSED_TIME);
 	deltaTime /= 1000.0f;
 
+	mainMenu->setPaused(true);
+	game->setPaused(false);
 
 	glutMainLoop();
 	return 0;
