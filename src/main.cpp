@@ -473,6 +473,7 @@ void initializeScene()
 	gameobjects["cannon"] = std::make_shared<GameObject>(
 		glm::vec3(23.f, 43.0f, 10.f), cannonMesh, defaultMaterial, cannonTexMap);
 	gameobjects["cannon"]->setScale(glm::vec3(1.7f));
+	gameobjects["cannon"]->emissiveLight = 0.3f;
 
 	gameobjects["crate"] = std::make_shared<GameObject>(
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
