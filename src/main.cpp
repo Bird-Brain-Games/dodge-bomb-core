@@ -14,7 +14,7 @@
 #include <GLEW\glew.h>
 #include "gl\freeglut.h"
 #include <IL/il.h> // for ilInit()
-#include <IL\ilut.h>
+#include <IL\ilu.h>
 #include <glm\vec3.hpp>
 #include <glm\gtx\color_space.hpp>
 //#include "vld.h"
@@ -973,8 +973,8 @@ int main(int argc, char **argv)
 	// Init IL
 	ilInit();
 	iluInit();
-	ilutInit();
-	ilutRenderer(ILUT_OPENGL);
+	//ilutInit();
+	//ilutRenderer(ILUT_OPENGL);
 
 	// Init GL
 	glEnable(GL_CULL_FACE);

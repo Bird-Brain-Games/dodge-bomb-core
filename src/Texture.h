@@ -3,13 +3,14 @@
 #include <memory>
 #include <GL\glew.h>
 #include <GLM\glm.hpp>
+#include "Texture2D.h"
 
 // holds the information necessary to display a texture 
 // using blinn-phong shading
 class Texture
 {
 public:
-	Texture(char* _diffuseTex, char* _specularTex, float _shininess);
+	Texture(std::string _diffuseTex , std::string _specularTex, float _shininess);
 
 	// sends the values to the shader
 	void bind(GLuint diffuseTexUnit, GLuint specularTexUnit);
@@ -18,7 +19,7 @@ public:
 	void setShininess(float);
 
 private:
-	GLuint diffuseTex;
-	GLuint specularTex;
+	TTK::Texture2D diffuseTex;
+	TTK::Texture2D specularTex;
 	float shininess;
 };
