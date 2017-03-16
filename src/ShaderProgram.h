@@ -33,6 +33,8 @@ public:
 	// Useful for sending vector2 to GPU
 	void sendUniformVec2(const std::string& uniformName, glm::vec2& vec4);
 
+	void sendUniformFloat(const std::string& uniformName, float floatVal);
+
 	// Sends a 4x4 matrix stored in an array to GPU
 	// Must have to apply the MVP transform
 	void sendUniformMat4(const std::string& uniformName, glm::mat4& mat4, int _num = 1);

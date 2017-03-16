@@ -153,6 +153,7 @@
     <None Include="shaders\blinnphong_v.glsl" />
     <None Include="shaders\bloomComposite_f.glsl" />
     <None Include="shaders\bright_f.glsl" />
+    <None Include="shaders\color_f.glsl" />
     <None Include="shaders\default_f.glsl" />
     <None Include="shaders\default_v.glsl" />
     <None Include="shaders\gaussianBlur_f.glsl" />
