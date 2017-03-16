@@ -207,6 +207,7 @@ void GameObject::draw(Camera &camera)
 		material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
 		material->vec4Uniforms["u_outlineColour"] = outlineColour;
 		material->vec4Uniforms["u_transparency"] = glm::vec4(transparency);
+		material->vec4Uniforms["u_emissiveLight"] = glm::vec4(emissiveLight);
 
 		// Bind the texture
 		if (texture != nullptr)

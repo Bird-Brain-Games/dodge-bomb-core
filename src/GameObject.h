@@ -68,6 +68,7 @@ public:
 
 	// Other Properties
 	std::string name;
+	float emissiveLight = 0.0f;
 
 private:
 	// Updates the local transform based on the updated variables
