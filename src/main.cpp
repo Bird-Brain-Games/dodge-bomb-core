@@ -28,6 +28,7 @@
 
 #include "MainMenuState.h"
 #include "MainGameState.h"
+#include "particle.h"
 
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
@@ -189,6 +190,7 @@ void initializeShaders()
 	materials["shadow"]->shader->attachShader(v_shadow);
 	materials["shadow"]->shader->attachShader(f_shadow);
 	materials["shadow"]->shader->linkProgram();
+
 }
 
 void initializeScene()

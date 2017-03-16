@@ -67,6 +67,7 @@
     <ClCompile Include="src\ScoreState.cpp">
       <Filter>States\States</Filter>
     </ClCompile>
+    <ClCompile Include="src\particle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />
@@ -77,9 +78,6 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\VAO.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\material.h">
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\FrameBufferObject.h">
@@ -143,6 +141,10 @@
     <ClInclude Include="src\ScoreState.h">
       <Filter>States\States</Filter>
     </ClInclude>
+    <ClInclude Include="src\material.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\particle.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Graphics">
