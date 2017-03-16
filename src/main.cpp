@@ -657,42 +657,42 @@ void initializeScene()
 
 void initializeStates()
 {
-	////load textures
-	//char startTex[] = "Assets/img/menMain_atlas.png";
-	//std::shared_ptr<Texture> startTexMap = std::make_shared<Texture>(startTex, startTex, 1.0f);
+	//load textures
+	char startTex[] = "Assets/img/menMain_atlas.png";
+	std::shared_ptr<Texture> startTexMap = std::make_shared<Texture>(startTex, startTex, 1.0f);
 
-	//char scoreTex[] = "Assets/img/winScreen_atlas.png";
-	//std::shared_ptr<Texture> scoreTexMap = std::make_shared<Texture>(scoreTex, scoreTex, 1.0f);
+	char scoreTex[] = "Assets/img/winScreen_atlas.png";
+	std::shared_ptr<Texture> scoreTexMap = std::make_shared<Texture>(scoreTex, scoreTex, 1.0f);
 
-	//char scoreTex2[] = "Assets/img/playerTransLayer_atlas.png";
-	//std::shared_ptr<Texture> scoreTex2Map = std::make_shared<Texture>(scoreTex2, scoreTex2, 1.0f);
+	char scoreTex2[] = "Assets/img/playerTransLayer_atlas.png";
+	std::shared_ptr<Texture> scoreTex2Map = std::make_shared<Texture>(scoreTex2, scoreTex2, 1.0f);
 
-	//char pauseTex[] = "Assets/img/menPause_arlas.png";
-	//std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
+	char pauseTex[] = "Assets/img/menPause_arlas.png";
+	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
 
 
-	////save them
-	//textures["start"] = startTexMap;
-	//textures["score"] = scoreTexMap;
-	//textures["score2"] = scoreTex2Map;
-	//textures["pause"] = pauseTexMap;
+	//save them
+	textures["start"] = startTexMap;
+	textures["score"] = scoreTexMap;
+	textures["score2"] = scoreTex2Map;
+	textures["pause"] = pauseTexMap;
 
-	////load up menu's
-	//startMenu = std::make_shared<Menu>(startTexMap, 4, 7);
-	//startMenu->setMaterial(materials["menu"]);
+	//load up menu's
+	startMenu = std::make_shared<Menu>(startTexMap, 4, 7);
+	startMenu->setMaterial(materials["menu"]);
 
-	//scoreMenu = std::make_shared<Menu>(scoreTexMap, 4, 7);
-	//scoreMenu->setMaterial(materials["menu"]);
+	scoreMenu = std::make_shared<Menu>(scoreTexMap, 4, 7);
+	scoreMenu->setMaterial(materials["menu"]);
 
-	//scoreMenu2 = std::make_shared<Menu>(scoreTex2Map, 4, 7);
-	//scoreMenu2->setMaterial(materials["menu"]);
+	scoreMenu2 = std::make_shared<Menu>(scoreTex2Map, 4, 7);
+	scoreMenu2->setMaterial(materials["menu"]);
 
-	//pauseMenu = std::make_shared<Menu>(pauseTexMap, 4, 7);
-	//pauseMenu->setMaterial(materials["menu"]);
+	pauseMenu = std::make_shared<Menu>(pauseTexMap, 4, 7);
+	pauseMenu->setMaterial(materials["menu"]);
 
 	//init states.
-	//mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController());
-	//mainMenu->setPaused(true);
+	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController());
+	mainMenu->setPaused(true);
 
 	pause = new Pause(pauseMenu);
 	pause->setPaused(true);
@@ -704,7 +704,7 @@ void initializeStates()
 	game->setPaused(false);
 
 	states.addGameState("game", game);
-	//states.addGameState("MainMenu", mainMenu);
+	states.addGameState("MainMenu", mainMenu);
 	states.addGameState("pause", pause);
 	states.addGameState("score", score);
 
