@@ -4,7 +4,6 @@
 // take in arrays of lookups and add them together
 
 uniform sampler2D u_tex;
-//uniform vec4 u_colorControl;
 
 uniform sampler3D u_lookup;
 uniform float u_lookupSize;
@@ -19,12 +18,13 @@ in VertexData
 	vec3 posEye;
 } vIn;
 
+in vec2 texCoord;	// From Geom shader
+
 layout(location = 0) out vec4 FragColor;
 
 void main()
 {
-	vec2 uv = (vIn.texCoord).xy;
-	vec4 rawColor = texture(u_tex, uv);
+	vec4 rawColor = texture(u_tex, texCoord);
 
 	vec3 scale; 
 	vec3 offset;
@@ -38,9 +38,5 @@ void main()
 
 	// Apply color corrections
 	FragColor.xyz = lookupColor + rawColor.xyz;
-		// + warmColor * u_colorControl.x +
-		//arapahoColor * u_colorControl.y +
-		//sedonaColor * u_colorControl.z +
-		//rawColor.xyz * (1.0 - u_colorControl.x);
 	FragColor.w = 1.0;
 }

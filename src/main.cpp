@@ -134,6 +134,7 @@ void initializeShaders()
 	materials["colorCorrection"] = std::make_shared<Material>("colorCorrection");
 	materials["colorCorrection"]->shader->attachShader(v_passThru);
 	materials["colorCorrection"]->shader->attachShader(f_colorCorrection);
+	materials["colorCorrection"]->shader->attachShader(g_quad);
 	materials["colorCorrection"]->shader->linkProgram();
 
 	//material for our players and there meshes.

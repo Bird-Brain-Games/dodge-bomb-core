@@ -53,8 +53,11 @@ private:
 	void drawScene();
 	void setMaterialForAllGameObjects(std::string materialName);
 	void setMaterialForAllPlayerObjects(std::string materialName);
+
 	void brightPass();
 	void blurPass(FrameBufferObject fboIn, FrameBufferObject fboOut);
+	void colorCorrectionPass(FrameBufferObject fboIn, FrameBufferObject fboOut);
+
 	void initializeFrameBuffers();
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
@@ -72,6 +75,7 @@ private:
 	FrameBufferObject fboBlur, fboBlurB;
 	FrameBufferObject shadowMap;
 	FrameBufferObject fboColorCorrection;
+	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
 
 	std::shared_ptr<BombManager> bombManager;
 	std::map<std::string, std::shared_ptr<GameObject>>* scene;
