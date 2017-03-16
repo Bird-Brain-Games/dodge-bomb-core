@@ -12,9 +12,9 @@ public:
 	void addGameState(std::string a_string, GameState* a_state);//adds a game state to the list of game states
 	void removeGameState(std::string a_string);//removes the specified game state from the list
 	GameState* getGameState(std::string a_string);//returns a pointer to the gamestate that we specifiy
-	virtual void windowReshapeCallbackFunction(int w, int h) {};
 	void update(float dt);//calls the update functions for the game states
 	void draw();
+	
 
 
 private:
@@ -33,6 +33,9 @@ public:
 	virtual void windowReshapeCallbackFunction(int w, int h) {};
 	bool m_isPaused = false;//the variable that controls whether the game state is paused. it starts unpaused
 	GameStateManager* m_parent;// a pointer the the game state manager.
-	
-private:
+
+	//virtual void init();
+protected:
+
+	bool initialized;
 };

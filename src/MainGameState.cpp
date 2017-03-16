@@ -3,6 +3,8 @@
 #include "IL\ilut.h"
 #include "InputManager.h"
 #include "gl\freeglut.h"
+#include <fstream>
+#include <iostream>
 
 glm::vec4 lightPos;
 glm::vec4 lightTwo;
@@ -11,6 +13,63 @@ glm::vec4 lightTwo;
 
 void calculateCollisions();
 
+bool LUT::load(std::string filePath)
+{
+	std::vector<glm::vec3> values;
+	GLuint texture3D;
+
+	std::ifstream stream(filePath);
+	if (!stream)
+	{
+		std::cout << "error: no file at " << filePath << std::endl;
+		return false;
+	}
+
+	std::string line;
+	glm::vec3 value;
+	int size;
+	int LUTsize;
+
+	while (!stream.eof())
+	{
+		getline(stream, line);
+		if (line.empty()) continue;
+
+		if (sscanf(line.c_str(), "%f %f %f",
+			&value.x, &value.y, &value.z) == 3)
+		{
+			values.push_back(value);
+			continue;
+		}
+
+		if (sscanf(line.c_str(), "LUT_3D_SIZE %d", &size) == 1)
+			LUTsize = size;
+	}
+
+	if (values.size() != pow(LUTsize, 3.0))
+	{
+		std::cout << "LUT size is incorrect" << std::endl;
+		return false;
+	}
+
+	glEnable(GL_TEXTURE_3D);
+	glGenTextures(1, &texture3D);
+	glBindTexture(GL_TEXTURE_3D, texture3D);
+
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, LUTsize, LUTsize, LUTsize, 0, GL_RGB, GL_FLOAT, &values[0]);
+
+	glBindTexture(GL_TEXTURE_3D, 0);
+	glDisable(GL_TEXTURE_3D);
+
+	handle = texture3D;
+	size = LUTsize;
+	return true;
+}
 
 Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
@@ -36,6 +95,8 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, toonRamp);
 
+	contrastLUT.load("../../Assets/img/Test1.CUBE");
+	colorCorrection = LUT_OFF;
 }
 
 void Game::setPaused(int a_paused)
@@ -232,7 +293,8 @@ void Game::draw()
 	// Unbind scene FBO
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
 	FrameBufferObject::clearFrameBuffer(clearColor);
-
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Post Processing
 
 	if (bloomToggle)
@@ -269,9 +331,10 @@ void Game::draw()
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
 	}
-	//draw the scene to the fbo
 
-	drawScene();
+	///////////////////////////////////////////////////////////////////////////
+	////////////////////////	Color Correction
+
 }
 
 void Game::windowReshapeCallbackFunction(int w, int h)

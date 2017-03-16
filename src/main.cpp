@@ -34,7 +34,6 @@
 const int FRAME_DELAY = 1000 / FRAMES_PER_SECOND; // Milliseconds per frame
 
 
-
 glm::vec3 mousePosition; // x,y,0
 glm::vec3 mousePositionFlipped; // x, height - y, 0
 
@@ -50,8 +49,6 @@ MainMenu* mainMenu;
 Game* game;
 Score* score;
 Pause* pause;
-
-
 
 glm::vec3 position;
 float movementSpeed = 5.0f;
@@ -96,7 +93,8 @@ void initializeShaders()
 	v_shadow.loadShaderFromFile(shaderPath + "shadowMap_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
-	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, f_noLighting, f_toon, f_sobel, f_shadow;
+	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
+		f_noLighting, f_toon, f_sobel, f_shadow, f_colorCorrection;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
@@ -107,6 +105,7 @@ void initializeShaders()
 	f_toon.loadShaderFromFile(shaderPath + "toon_f.glsl", GL_FRAGMENT_SHADER);
 	f_sobel.loadShaderFromFile(shaderPath + "sobel_f.glsl", GL_FRAGMENT_SHADER);
 	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);
+	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);
 
 	// Geometry Shaders
 	Shader g_quad, g_menu;
@@ -130,6 +129,12 @@ void initializeShaders()
 	materials["toon"]->shader->attachShader(v_default);
 	materials["toon"]->shader->attachShader(f_toon);
 	materials["toon"]->shader->linkProgram();
+
+	// Applies color correction to the scene
+	materials["colorCorrection"] = std::make_shared<Material>("colorCorrection");
+	materials["colorCorrection"]->shader->attachShader(v_passThru);
+	materials["colorCorrection"]->shader->attachShader(f_colorCorrection);
+	materials["colorCorrection"]->shader->linkProgram();
 
 	//material for our players and there meshes.
 	materials["toonPlayer"] = std::make_shared<Material>("toonPlayer");
@@ -686,7 +691,7 @@ void initializeStates()
 
 	//init states.
 	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController());
-	mainMenu->setPaused(false);
+	mainMenu->setPaused(true);
 
 	pause = new Pause(pauseMenu);
 	pause->setPaused(true);
@@ -695,10 +700,10 @@ void initializeStates()
 	score->setPaused(true);
 
 	game = new Game(&gameobjects, &players, &materials, bombManager, pause, score, &playerCamera);
-	game->setPaused(true);
+	game->setPaused(false);
 
-	states.addGameState("MainMenu", mainMenu);
 	states.addGameState("game", game);
+	states.addGameState("MainMenu", mainMenu);
 	states.addGameState("pause", pause);
 	states.addGameState("score", score);
 

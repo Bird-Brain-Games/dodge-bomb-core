@@ -17,6 +17,14 @@ enum LightingMode
 	TOON
 };
 
+struct LUT
+{
+	GLuint handle;
+	float size;
+
+	bool load(std::string filePath);
+};
+
 
 class Game : public GameState
 {
@@ -46,20 +54,33 @@ private:
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
 
+private:
+	enum LUT_MODE
+	{
+		LUT_OFF,
+		LUT_CONTRAST
+	};
+
+private:
 	FrameBufferObject fboUnlit;
 	FrameBufferObject fboBright;
 	FrameBufferObject fboBlur, fboBlurB;
 	FrameBufferObject shadowMap;
+	FrameBufferObject fboColorCorrection;
 
 	std::shared_ptr<BombManager> bombManager;
 	std::map<std::string, std::shared_ptr<GameObject>>* scene;
 	std::map<std::string, std::shared_ptr<Player>>* players;
 	std::map<std::string, std::shared_ptr<Material>>* materials;
+
 	Pause* pause;
 	Score* score;
 	Camera * camera;
 	int pausing;
 	float pauseTimer;
+
+	LUT contrastLUT;
+	LUT_MODE colorCorrection;
 
 	float outlineWidth = 4.0;
 	bool outlineToggle = true;
@@ -67,7 +88,6 @@ private:
 
 	float windowWidth = 1920.0;
 	float windowHeight = 1080.0;
-
 
 	// Lighting Controls
 	float deskLamp = 0.8;
