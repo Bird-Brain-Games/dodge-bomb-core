@@ -17,12 +17,17 @@ enum LightingMode
 	TOON
 };
 
-struct LUT
+class LUT
 {
+public:
+	bool load(std::string filePath);
+	void bind(GLuint);
+	void unbind(GLuint);
+	float getSize() { return size; }
+
+private:
 	GLuint handle;
 	float size;
-
-	bool load(std::string filePath);
 };
 
 

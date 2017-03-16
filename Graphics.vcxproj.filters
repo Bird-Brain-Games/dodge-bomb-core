@@ -225,5 +225,8 @@
     <None Include="shaders\sobel_f.glsl">
       <Filter>Graphics\Shaders</Filter>
     </None>
+    <None Include="shaders\color_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -11,6 +11,7 @@ public:
 	std::map<std::string, glm::vec4> vec4Uniforms;
 	std::map<std::string, glm::mat4> mat4Uniforms;
 	std::map<std::string, int> intUniforms;
+	std::map<std::string, float> floatUniforms;
 	// maps for other uniform types ...
 
 	//the name of our material
@@ -18,7 +19,10 @@ public:
 
 	Material(std::string _name)
 		: shader(std::make_shared<ShaderProgram>(_name))
-	{name = _name;}
+	{
+		name = _name;
+	}
+
 
 	void sendUniforms()
 	{
@@ -33,5 +37,9 @@ public:
 		// Send int uniforms
 		for (auto itr = intUniforms.begin(); itr != intUniforms.end(); itr++)
 			shader->sendUniformInt(itr->first, itr->second);
+
+		// Send float uniforms
+		for (auto itr = floatUniforms.begin(); itr != floatUniforms.end(); itr++)
+			shader->sendUniformFloat(itr->first, itr->second);
 	}
 };

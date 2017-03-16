@@ -61,7 +61,7 @@ int ShaderProgram::linkProgram()
 	}
 	else
 	{
-		std::cout << "Shader "+ name +" program failed to link: handle not set" << std::endl;
+		std::cout << "Shader " + name + " program failed to link: handle not set" << std::endl;
 	}
 }
 
@@ -126,4 +126,10 @@ int ShaderProgram::getUniformLocation(const std::string& uniformName)
 	}
 	return i->second;
 
+}
+
+void ShaderProgram::sendUniformFloat(const std::string& uniformName, float floatVal)
+{
+	int uniformLocation = getUniformLocation(uniformName);
+	glUniform1f(uniformLocation, floatVal);
 }

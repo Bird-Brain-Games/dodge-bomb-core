@@ -71,6 +71,18 @@ bool LUT::load(std::string filePath)
 	return true;
 }
 
+void LUT::bind(GLuint textureUnit)
+{
+	glActiveTexture(textureUnit);
+	glBindTexture(GL_TEXTURE_3D, handle);
+}
+
+void LUT::unbind(GLuint textureUnit)
+{
+	glActiveTexture(textureUnit);
+	glBindTexture(GL_TEXTURE_3D, 0);
+}
+
 Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
 	std::map<std::string, std::shared_ptr<Material>>* _materials,
@@ -91,12 +103,12 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	_camera->update();
 	initializeFrameBuffers();
 
-	toonRamp = ilutGLLoadImage("../../Assets/img/toonRamp.png");
+	toonRamp = ilutGLLoadImage("Assets/img/toonRamp.png");
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, toonRamp);
 
-	contrastLUT.load("../../Assets/img/Test1.CUBE");
-	colorCorrection = LUT_OFF;
+	contrastLUT.load("Assets/img/Test1.CUBE");
+	colorCorrection = LUT_CONTRAST;
 }
 
 void Game::setPaused(int a_paused)
@@ -274,6 +286,7 @@ void Game::draw()
 		materials->at("noLighting")->sendUniforms();
 	}
 	break;
+	// BUG: WILL NEVER BE CALLED
 	setMaterialForAllPlayerObjects("toonPlayer");
 	// Set material properties for all our non player objects
 
@@ -302,11 +315,19 @@ void Game::draw()
 		brightPass();
 		blurPass(fboBright, fboBlur);
 
+		if (colorCorrection != LUT_OFF)
+		{
+			fboColorCorrection.bindFrameBufferForDrawing();
+			FrameBufferObject::clearFrameBuffer(clearColor);
+		}
+		else
+		{
+			FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+			FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+		}
+
 		fboBlur.bindTextureForSampling(0, GL_TEXTURE0);
 		fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
-
-		FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-		FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
 
 		static auto bloomMaterial = materials->at("bloom");
 
@@ -321,6 +342,17 @@ void Game::draw()
 	}
 	else
 	{
+		if (colorCorrection != LUT_OFF)
+		{
+			fboColorCorrection.bindFrameBufferForDrawing();
+			FrameBufferObject::clearFrameBuffer(clearColor);
+		}
+		else
+		{
+			FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+			FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+		}
+
 		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
 		static auto unlitMaterial = materials->at("unlitTexture");
 		unlitMaterial->shader->bind();
@@ -334,7 +366,39 @@ void Game::draw()
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	Color Correction
+	static auto colorMaterial = materials->at("colorCorrection");
+	switch (colorCorrection)
+	{
+	case Game::LUT_OFF:
+		break;
 
+	case Game::LUT_CONTRAST:
+		// Draw the corrected FBO to the screen
+
+		FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		FrameBufferObject::clearFrameBuffer(clearColor);
+
+		fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
+
+		// Bind the LUT
+		contrastLUT.bind(GL_TEXTURE6);
+
+		colorMaterial->shader->bind();
+		colorMaterial->intUniforms["u_tex"] = 0;
+		colorMaterial->intUniforms["u_lookup"] = 6;
+		colorMaterial->floatUniforms["u_mixAmount"] = contrastLUT.getSize();
+		colorMaterial->floatUniforms["u_lookupSize"] = 1.0f;
+		colorMaterial->sendUniforms();
+
+		// Draw a full screen quad using the geometry shader
+		glDrawArrays(GL_POINTS, 0, 1);
+
+		contrastLUT.unbind(GL_TEXTURE6);
+		break;
+
+	default:
+		break;
+	}
 }
 
 void Game::windowReshapeCallbackFunction(int w, int h)
@@ -390,6 +454,7 @@ void Game::initializeFrameBuffers()
 	fboBlur.createFrameBuffer(80, 60, 1, false);
 	fboBlurB.createFrameBuffer(80, 60, 1, false);
 	shadowMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
+	fboColorCorrection.createFrameBuffer(windowWidth, windowHeight, 1, false);
 }
 
 
