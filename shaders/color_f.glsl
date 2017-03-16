@@ -37,6 +37,6 @@ void main()
 	vec3 lookupColor = mix(rawColor.xyz, applyLut, u_mixAmount);
 
 	// Apply color corrections
-	FragColor.xyz = lookupColor + rawColor.xyz;
+	FragColor.xyz = lookupColor; //lookupColor + rawColor.xyz;
 	FragColor.w = 1.0;
 }
