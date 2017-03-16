@@ -314,10 +314,8 @@ void Game::draw()
 
 		if (colorCorrection != LUT_OFF)
 		{
-			colorCorrectionPass(fboUnlit, fboColorCorrection);
-			FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+			fboColorCorrection.bindFrameBufferForDrawing();
 			FrameBufferObject::clearFrameBuffer(clearColor);
-			fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE1);
 		}
 		else
 		{
