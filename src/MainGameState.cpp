@@ -106,7 +106,7 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	glBindTexture(GL_TEXTURE_2D, toonRamp);
 
 	contrastLUT.load("Assets/img/Test1.CUBE");
-	colorCorrection = LUT_CONTRAST;
+	colorCorrection = LUT_OFF;
 }
 
 void Game::setPaused(int a_paused)
@@ -637,6 +637,18 @@ void Game::handleKeyboardInputShaders()
 			bloomToggle = false;
 		else
 			bloomToggle = true;
+	}
+	// Toggle LUT
+	if (KEYBOARD_INPUT->CheckPressEvent('7'))
+	{
+		if (colorCorrection == LUT_OFF)
+		{
+			colorCorrection = LUT_CONTRAST;
+		}
+		else
+		{
+			colorCorrection = LUT_OFF;
+		}
 	}
 
 	// Controls "Dimmers" for lights
