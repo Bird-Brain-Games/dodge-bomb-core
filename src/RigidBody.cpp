@@ -198,6 +198,7 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 				shape = new btCapsuleShape(radius, extents[1]);
 				break;
 			case 7:
+				shapeExtents = btVector3(extents[0], extents[1], extents[2]);
 				shape = new btCylinderShape((shapeExtents / 2.0f));
 				break;
 			default:
