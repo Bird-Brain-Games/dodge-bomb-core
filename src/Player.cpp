@@ -8,6 +8,10 @@ float Player::pauseTime = 0.5f;
 int Player::maxHealth = 2;
 float Player::maxBombCooldown = 1.0f;
 float Player::flashInterval = 0.2f;
+float Player::playerSpeed = 50.0f;
+
+float Player::dashImpulse = 30.0f;
+float Player::dashMinSpeed = Player::playerSpeed - 10.0f;	// when the player reaches this, stop dashing
 
 Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -92,6 +96,8 @@ void Player::update(float dt)
 		{
 			handleInput(dt);
 
+			con.setVibration(0, 0);
+
 			// Handle player flashing when invincible
 			flashTime += dt;
 			if (flashTime >= flashInterval)
@@ -105,7 +111,6 @@ void Player::update(float dt)
 		{
 			invincibleTime = 0.0f;
 			currentState = P_NORMAL;
-			con.setVibration(0, 0);
 		}
 		break;
 
@@ -118,8 +123,18 @@ void Player::update(float dt)
 		break;
 	}
 
+	// Check dashing status
+	if (isDashing)
+	{
+		glm::vec3 currentVelocity = rigidBody->getLinearVelocity();
+		if (glm::length(currentVelocity) <= dashMinSpeed)
+		{
+			isDashing = false;
+		}
+	}
+
 	// Allow player to reset all stats (DEBUG)
-	if (con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER))
+	if (con.conButton(XINPUT_GAMEPAD_BACK))
 		reset(glm::vec3(0.0f, 40.0f, 0.0f));
 
 	if (playerNum == 0)
@@ -154,37 +169,39 @@ void Player::handleInput(float dt)
 	Coords LStick = con.getLeftStick();
 	glm::vec3 trans = glm::vec3(0.0f);
 
-	if (LStick.x < -0.1 || LStick.x > 0.1)
+	if (!isDashing)
 	{
-		mesh->setAnim("walk");
-		trans.x = LStick.x / 2;
-		hasMoved = true;
-	}
-	if (LStick.y < -0.1 || LStick.y > 0.1)
-	{
-		mesh->setAnim("walk");
-		trans.z = -LStick.y / 2;
-		hasMoved = true;
-	}
+		if (LStick.x < -0.1 || LStick.x > 0.1)
+		{
+			mesh->setAnim("walk");
+			trans.x = LStick.x / 2;
+			hasMoved = true;
+		}
+		if (LStick.y < -0.1 || LStick.y > 0.1)
+		{
+			mesh->setAnim("walk");
+			trans.z = -LStick.y / 2;
+			hasMoved = true;
+		}
 
-	
-	if (currentAngle != angle && con.rightStickMoved())
-	{
-		currentAngle = angle;
-		this->setRotationAngleY(currentAngle);
-	}
 
-	else if (con.leftStickMoved() && !con.rightStickMoved())
-	{
-		currentAngle = atan2(-LStick.y, LStick.x) + 270 * degToRad;
-		this->setRotationAngleY(currentAngle);
-	}
-	
-	if (hasMoved)
-	{
-		rigidBody->setLinearVelocity(trans * 50.0f);
-	}
+		if (currentAngle != angle && con.rightStickMoved())
+		{
+			currentAngle = angle;
+			this->setRotationAngleY(currentAngle);
+		}
 
+		else if (con.leftStickMoved() && !con.rightStickMoved())
+		{
+			currentAngle = atan2(-LStick.y, LStick.x) + 270 * degToRad;
+			this->setRotationAngleY(currentAngle);
+		}
+
+		if (hasMoved)
+		{
+			rigidBody->setLinearVelocity(trans * playerSpeed);
+		}
+	}
 
 	// Throw a bomb
 	if ((con.conButton(XINPUT_GAMEPAD_RIGHT_SHOULDER) || con.conRightTrigger())	&& 
@@ -198,7 +215,7 @@ void Player::handleInput(float dt)
 			normalized = glm::vec2(-glm::sin(currentAngle), -glm::cos(currentAngle));
 		
 		glm::vec2 playerVelocity;
-		if (hasMoved)
+		if (hasMoved || isDashing)
 			playerVelocity = glm::vec2(rigidBody->getLinearVelocity().x,
 				-rigidBody->getLinearVelocity().z);
 		else
@@ -207,6 +224,32 @@ void Player::handleInput(float dt)
 		bombManager->throwBomb(this, normalized, playerVelocity, throwingForce);
 		mesh->setAnim("throw");
 		currentCooldown += bombCooldown;
+	}
+
+	// Dash
+	if ((con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER) || con.conLeftTrigger()) && !isDashing)
+	{
+		isDashing = true;
+
+		// Determine what direction to dash
+		glm::vec3 playerDirection;
+
+		if (hasMoved)
+		{
+			playerDirection = glm::normalize(glm::vec3(rigidBody->getLinearVelocity().x, 0.0f,
+				rigidBody->getLinearVelocity().z));
+		}
+		else
+		{
+			playerDirection = glm::normalize(
+				glm::vec3(-glm::sin(currentAngle), 0.0f, glm::cos(currentAngle)));
+		}
+		// tell them to dash as if they're at max speed
+		glm::vec3 currentVelocity = playerDirection * playerSpeed;
+		rigidBody->setLinearVelocity(currentVelocity);
+		
+		// Add the impulse
+		rigidBody->applyCentralImpulse(playerDirection * dashImpulse);
 	}
 		
 
@@ -228,6 +271,7 @@ void Player::checkCollisionWith(Explosion* other)
 		bombParent->getPlayerNum() != playerNum)
 	{
 		takeDamage(1);
+		con.setVibration(32000, 16000);
 		//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 	}
 }
@@ -283,6 +327,8 @@ void Player::takeDamage(int damage)
 	isFlashing = false;
 	currentState = P_INVINCIBLE;
 	std::cout << "Player " << playerNum << " took damage" << std::endl;
+	rigidBody->setLinearVelocity(glm::vec3(0.0f));
+	isDashing = false;
 
 	health--;
 	if (health <= 0)
@@ -300,6 +346,7 @@ void Player::reset(glm::vec3 newPos)
 	currentCooldown = 0.0f;
 	currentState = P_NORMAL;
 	con.setVibration(0, 0);
+	isDashing = false;
 }
 
 glm::vec3 Player::getCurrentVelocity()

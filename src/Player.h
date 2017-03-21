@@ -61,15 +61,28 @@ private:
 
 	// Player stats
 	int health;
-	float invincibleTime;
-	float flashTime;
-	bool isFlashing;
 	PLAYER_STATE currentState;
 
+	// Invincibility variables
+	bool isFlashing;
+	float invincibleTime;
+	float flashTime;
+
+	// Dash variables
+	bool isDashing;
+
 private:
-	static float maxInvincibleTime;
-	static float pauseTime;
+	// Player stats
 	static int maxHealth;
 	static float maxBombCooldown;
+
+	// Invincibility values
+	static float maxInvincibleTime;
+	static float pauseTime;
 	static float flashInterval;
+	static float playerSpeed;
+
+	// Dash values
+	static float dashImpulse;
+	static float dashMinSpeed;	// when the player reaches this, stop dashing
 };
