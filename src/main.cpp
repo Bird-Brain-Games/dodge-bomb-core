@@ -977,6 +977,7 @@ int main(int argc, char **argv)
 	glutInitWindowSize(1920, 1080);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutCreateWindow("Dodge Bomb");
+	//glutFullScreen();
 
 	// Init GLEW
 	GLenum err = glewInit();

@@ -70,6 +70,8 @@ private:
 
 	// Dash variables
 	bool isDashing;
+	float currentDashCooldown;
+	float currentDashDuration;
 
 private:
 	// Player stats
@@ -85,4 +87,6 @@ private:
 	// Dash values
 	static float dashImpulse;
 	static float dashMinSpeed;	// when the player reaches this, stop dashing
+	static float maxDashCooldown;
+	static float maxDashDuration;
 };
