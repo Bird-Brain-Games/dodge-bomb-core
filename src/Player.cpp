@@ -10,8 +10,11 @@ float Player::maxBombCooldown = 1.0f;
 float Player::flashInterval = 0.2f;
 float Player::playerSpeed = 50.0f;
 
+// Dash values
 float Player::dashImpulse = 30.0f;
-float Player::dashMinSpeed = Player::playerSpeed - 10.0f;	// when the player reaches this, stop dashing
+float Player::dashMinSpeed = Player::playerSpeed - 20.0f;	// when the player reaches this, stop dashing
+float Player::maxDashCooldown = 2.0f;
+float Player::maxDashDuration = 0.6f;
 
 Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -82,6 +85,36 @@ void Player::update(float dt)
 			currentCooldown = 0.0f;
 	}
 
+	// Update the dash cooldown
+	if (currentDashCooldown > 0.0f)
+	{
+		currentDashCooldown -= dt;
+		if (currentDashCooldown < 0.0f)
+			currentDashCooldown = 0.0f;
+	}
+
+	// Check dashing status
+	if (isDashing)
+	{
+		// Update the dash duration
+		if (currentDashDuration > 0.0f)
+		{
+			currentDashDuration -= dt;
+			if (currentDashDuration < 0.0f)
+				currentDashDuration = 0.0f;
+		}
+
+		glm::vec3 currentVelocity = rigidBody->getLinearVelocity();
+		if (currentDashDuration <= 0.0f) //|| glm::length(currentVelocity) <= dashMinSpeed)
+		{
+			isDashing = false;
+			rigidBody->setLinearVelocity(glm::vec3(0.0f));
+			//rigidBody->setLinearVelocity(
+				//glm::normalize(glm::vec3(-glm::sin(currentAngle), 0.0f, 
+					//glm::cos(currentAngle))) * playerSpeed);
+		}
+	}
+
 	switch (currentState)
 	{
 	case P_NORMAL:
@@ -121,16 +154,6 @@ void Player::update(float dt)
 
 	default:
 		break;
-	}
-
-	// Check dashing status
-	if (isDashing)
-	{
-		glm::vec3 currentVelocity = rigidBody->getLinearVelocity();
-		if (glm::length(currentVelocity) <= dashMinSpeed)
-		{
-			isDashing = false;
-		}
 	}
 
 	// Allow player to reset all stats (DEBUG)
@@ -227,9 +250,11 @@ void Player::handleInput(float dt)
 	}
 
 	// Dash
-	if ((con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER) || con.conLeftTrigger()) && !isDashing)
+	if ((con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER) || con.conLeftTrigger()) && !isDashing && currentDashCooldown <= 0.0f)
 	{
 		isDashing = true;
+		currentDashCooldown = maxDashCooldown;
+		currentDashDuration = maxDashDuration;
 
 		// Determine what direction to dash
 		glm::vec3 playerDirection;
@@ -347,6 +372,8 @@ void Player::reset(glm::vec3 newPos)
 	currentState = P_NORMAL;
 	con.setVibration(0, 0);
 	isDashing = false;
+	currentDashCooldown = 0.0f;
+	currentDashDuration = 0.0f;
 }
 
 glm::vec3 Player::getCurrentVelocity()
