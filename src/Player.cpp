@@ -176,8 +176,8 @@ void Player::handleInput(float dt)
 
 	else if (con.leftStickMoved() && !con.rightStickMoved())
 	{
-		//currentAngle = atan2(LStick.y, LStick.x) + 180 * degToRad;
-		//this->setRotationAngleY(angle);
+		currentAngle = atan2(-LStick.y, LStick.x) + 270 * degToRad;
+		this->setRotationAngleY(currentAngle);
 	}
 	
 	if (hasMoved)
@@ -186,10 +186,11 @@ void Player::handleInput(float dt)
 	}
 
 
-	// Throw a bomb (crashes my code so im using left shoulder for animation throw)
+	// Throw a bomb
 	if ((con.conButton(XINPUT_GAMEPAD_RIGHT_SHOULDER) || con.conRightTrigger())	&& 
 		currentCooldown == 0.0f)
 	{
+		// Get the direction the player is facing
 		glm::vec2 normalized = glm::vec2(0);
 		if (con.rightStickMoved())
 			normalized = glm::normalize(glm::vec2(RStick.x, RStick.y));
