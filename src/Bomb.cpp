@@ -82,6 +82,8 @@ bool BombManager::init(
 	// Set the bomb outline texture
 	bombTemplates[0]->setOutlineColour(glm::vec4(0.39f, 0.72f, 1.0f, 1.0f));
 	bombTemplates[1]->setOutlineColour(glm::vec4(1.0f, 0.41f, 0.37f, 1.0f));
+	bombTemplates[2]->setOutlineColour(glm::vec4(0.31f, 0.93f, 0.32f, 1.0f));
+	bombTemplates[3]->setOutlineColour(glm::vec4(0.88f, 0.87f, 0.33f, 1.0f));
 
 	initialized = true;
 	return true;
