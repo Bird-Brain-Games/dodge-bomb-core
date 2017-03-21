@@ -279,83 +279,93 @@ void initializeScene()
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
 	// Load textures (WIP)
-	// Has to take char* due to ILUT
+	// Has to take char* due to ILUT (DOESN'T HAVE TO ANYMORE)
 
-	char bombotTex[] = "Assets/img/bombot(diffuse)2-dash.png";
-	char bombotSpec[] = "Assets/img/bombot_specular.png";
-	std::shared_ptr<Texture> bombotTexMap = std::make_shared<Texture>(bombotTex, bombotSpec, 1.0f);
+	std::string bombot1Tex = "Assets/img/bombot(diffuse)1.png";
+	std::string bombot2Tex = "Assets/img/bombot(diffuse)2.png";
+	std::string bombot3Tex = "Assets/img/bombot(diffuse)3.png";
+	std::string bombot4Tex = "Assets/img/bombot(diffuse)4.png";
+	std::string bombotSpec = "Assets/img/bombot(spec)2-dash.png";
 
-	char bombTex1[] = "Assets/img/bombDefault.png";
+	std::shared_ptr<Texture> bombot1TexMap = std::make_shared<Texture>(bombot1Tex, bombotSpec, 1.0f);
+	std::shared_ptr<Texture> bombot2TexMap = std::make_shared<Texture>(bombot2Tex, bombotSpec, 1.0f);
+	std::shared_ptr<Texture> bombot3TexMap = std::make_shared<Texture>(bombot3Tex, bombotSpec, 1.0f);
+	std::shared_ptr<Texture> bombot4TexMap = std::make_shared<Texture>(bombot4Tex, bombotSpec, 1.0f);
+
+	std::string bombTex1 = "Assets/img/bomb1.png";
 	std::shared_ptr<Texture> bombTexMap1 = std::make_shared<Texture>(bombTex1, bombTex1, 1.0f);
 
-	char bombTex2[] = "Assets/img/bombDefault.png";
+	std::string bombTex2 = "Assets/img/bomb2.png";
 	std::shared_ptr<Texture> bombTexMap2 = std::make_shared<Texture>(bombTex2, bombTex2, 1.0f);
 
-	char bombTex3[] = "Assets/img/bombDefault.png";
+	std::string bombTex3 = "Assets/img/bomb3.png";
 	std::shared_ptr<Texture> bombTexMap3 = std::make_shared<Texture>(bombTex3, bombTex3, 1.0f);
 
-	char bombTex4[] = "Assets/img/bombDefault.png";
+	std::string bombTex4 = "Assets/img/bomb4.png";
 	std::shared_ptr<Texture> bombTexMap4 = std::make_shared<Texture>(bombTex4, bombTex4, 1.0f);
 
-	char explosionTex1[] = "Assets/img/ex-1.png";
+	std::string explosionTex1 = "Assets/img/ex-1.png";
 	std::shared_ptr<Texture> explosionTexMap1 = std::make_shared<Texture>(explosionTex1, explosionTex1, 1.0f);
 
-	char explosionTex2[] = "Assets/img/ex-2.png";
+	std::string explosionTex2 = "Assets/img/ex-2.png";
 	std::shared_ptr<Texture> explosionTexMap2 = std::make_shared<Texture>(explosionTex2, explosionTex2, 1.0f);
 
-	char explosionTex3[] = "Assets/img/ex-3.png";
+	std::string explosionTex3 = "Assets/img/ex-3.png";
 	std::shared_ptr<Texture> explosionTexMap3 = std::make_shared<Texture>(explosionTex3, explosionTex3, 1.0f);
 
-	char explosionTex4[] = "Assets/img/ex-4.png";
+	std::string explosionTex4 = "Assets/img/ex-4.png";
 	std::shared_ptr<Texture> explosionTexMap4 = std::make_shared<Texture>(explosionTex4, explosionTex4, 1.0f);
 
-	char diffuseTex[] = "Assets/img/desk (diffuse).png";
+	std::string diffuseTex = "Assets/img/desk (diffuse).png";
 	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
 
-	char corkboardTex[] = "Assets/img/corkboard(diffuse).png";
+	std::string corkboardTex = "Assets/img/corkboard(diffuse).png";
 	std::shared_ptr<Texture> corkboardTexMap = std::make_shared<Texture>(corkboardTex, corkboardTex, 1.0f);
 
-	char organizerTex[] = "Assets/img/organizer(diffuse).png";
+	std::string organizerTex = "Assets/img/organizer(diffuse).png";
 	std::shared_ptr<Texture> organizerTexMap = std::make_shared<Texture>(organizerTex, organizerTex, 1.0f);
 
-	char roomTex[] = "Assets/img/room(diffuse).png";
+	std::string roomTex = "Assets/img/room(diffuse).png";
 	std::shared_ptr<Texture> roomTexMap = std::make_shared<Texture>(roomTex, roomTex, 1.0f);
 
-	char booksTex[] = "Assets/img/books(diffuse).png";
+	std::string booksTex = "Assets/img/books(diffuse).png";
 	std::shared_ptr<Texture> booksTexMap = std::make_shared<Texture>(booksTex, booksTex, 1.0f);
 
-	char mapTex[] = "Assets/img/map(diffuse).png";
+	std::string mapTex = "Assets/img/map(diffuse).png";
 	std::shared_ptr<Texture> mapTexMap = std::make_shared<Texture>(mapTex, mapTex, 1.0f);
 
-	char markerTex[] = "Assets/img/blake.png";
+	std::string markerTex = "Assets/img/blake.png";
 	std::shared_ptr<Texture> markerTexMap = std::make_shared<Texture>(markerTex, markerTex, 1.0f);
 
-	char boulderTex[] = "Assets/img/boulder(diffuse).png";
+	std::string boulderTex = "Assets/img/boulder(diffuse).png";
 	std::shared_ptr<Texture> boulderTexMap = std::make_shared<Texture>(boulderTex, boulderTex, 1.0f);
 
-	char crateTex[] = "Assets/img/crate(diffuse).png";
+	std::string crateTex = "Assets/img/crate(diffuse).png";
 	std::shared_ptr<Texture> crateTexMap = std::make_shared<Texture>(crateTex, crateTex, 1.0f);
 
-	char palmtreeTex[] = "Assets/img/palmtree(diffuse).png";
+	std::string palmtreeTex = "Assets/img/palmtree(diffuse).png";
 	std::shared_ptr<Texture> palmtreeTexMap = std::make_shared<Texture>(palmtreeTex, palmtreeTex, 1.0f);
 
-	char lampcupTex[] = "Assets/img/lampcup(diffuse).png";
+	std::string lampcupTex = "Assets/img/lampcup(diffuse).png";
 	std::shared_ptr<Texture> lampcupTexMap = std::make_shared<Texture>(lampcupTex, lampcupTex, 1.0f);
 
-	char barrelTex[] = "Assets/img/barrel(diffuse).jpg";
+	std::string barrelTex = "Assets/img/barrel(diffuse).jpg";
 	std::shared_ptr<Texture> barrelTexMap = std::make_shared<Texture>(barrelTex, barrelTex, 1.0f);
 
-	char cannonTex[] = "Assets/img/cannon(diffuse).jpg";
+	std::string cannonTex = "Assets/img/cannon(diffuse).jpg";
 	std::shared_ptr<Texture> cannonTexMap = std::make_shared<Texture>(cannonTex, cannonTex, 1.0f);
 
-	char boatTex[] = "Assets/img/boat(diffuse).png";
+	std::string boatTex = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
 
 
 	//Add textures to the map
 	textures["default"] = deskTexMap;
-	textures["bombot"] = bombotTexMap;
+	textures["bombot1"] = bombot1TexMap;
+	textures["bombot2"] = bombot2TexMap;
+	textures["bombot3"] = bombot3TexMap;
+	textures["bombot4"] = bombot4TexMap;
 	textures["corkboard"] = corkboardTexMap;
 	textures["room"] = roomTexMap;
 	textures["bomb1"] = bombTexMap1;
@@ -408,7 +418,7 @@ void initializeScene()
 		glm::vec3(0.0f, 0.0f, 0.0f), mapMesh, defaultMaterial, mapTexMap);
 
 	gameobjects["marker"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), markerMesh, defaultMaterial, markerTexMap);
+		glm::vec3(0.0f, 0.0f, 0.0f), markerMesh, defaultMaterial, lampcupTexMap);
 
 	gameobjects["lampcup"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), lampcupMesh, defaultMaterial, lampcupTexMap);
@@ -494,18 +504,21 @@ void initializeScene()
 
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombotTexMap, 0);
+		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
 	gameobjects["bombot1"] = players["bombot1"];
 
 	players["bombot2"] = std::make_shared<Player>(
-		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombotTexMap, 1);
+		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
 	gameobjects["bombot2"] = players["bombot2"];
-	/*
-	gameobjects["bombot3"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 2);
-	gameobjects["bombot4"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 5.0f, 0.0f), bombotMesh, defaultMaterial, bombotTexMap, 3);
-	*/
+	
+	players["bombot3"] = std::make_shared<Player>(
+		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
+	gameobjects["bombot3"] = players["bombot3"];
+
+	players["bombot4"] = std::make_shared<Player>(
+		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
+	gameobjects["bombot4"] = players["bombot4"];
+	
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	RIGID BODIES	///////////////////////////////
@@ -533,6 +546,8 @@ void initializeScene()
 	std::unique_ptr<RigidBody> tableBody;
 	std::unique_ptr<RigidBody> bombot1Body;
 	std::unique_ptr<RigidBody> bombot2Body;
+	std::unique_ptr<RigidBody> bombot3Body;
+	std::unique_ptr<RigidBody> bombot4Body;
 	std::unique_ptr<RigidBody> sphereBody;
 	std::unique_ptr<RigidBody> barrelBody;
 	std::unique_ptr<RigidBody> barrel1Body;
@@ -554,6 +569,8 @@ void initializeScene()
 	tableBody = std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
 	bombot2Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	bombot3Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
+	bombot4Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
 	sphereBody = std::make_unique<RigidBody>();
 	barrelBody = std::make_unique<RigidBody>();
 	barrel1Body = std::make_unique<RigidBody>();
@@ -576,6 +593,8 @@ void initializeScene()
 	tableBody->load(tableBodyPath);
 	bombot1Body->load(bombotBodyPath);
 	bombot2Body->load(bombotBodyPath);
+	bombot3Body->load(bombotBodyPath);
+	bombot4Body->load(bombotBodyPath);
 	sphereBody->load(sphereBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 	barrelBody->load(barrelBodyPath);
 	barrel1Body->load(barrelBodyPath);
@@ -598,6 +617,8 @@ void initializeScene()
 	gameobjects["table"]->attachRigidBody(tableBody);
 	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
 	gameobjects["bombot2"]->attachRigidBody(bombot2Body);
+	gameobjects["bombot3"]->attachRigidBody(bombot3Body);
+	gameobjects["bombot4"]->attachRigidBody(bombot4Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
 	gameobjects["barrelTR"]->attachRigidBody(barrelBody);
 	gameobjects["barrel1"]->attachRigidBody(barrel1Body);
@@ -637,10 +658,14 @@ void initializeScene()
 
 	players["bombot1"]->attachBombManager(bombManager);
 	players["bombot2"]->attachBombManager(bombManager);
+	players["bombot3"]->attachBombManager(bombManager);
+	players["bombot4"]->attachBombManager(bombManager);
 
 	// Set the outline colors
-	gameobjects["bombot1"]->setOutlineColour(glm::vec4(0.39f, 0.72f, 1.0f, 1.0f));
-	gameobjects["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.41f, 0.37f, 1.0f));
+	players["bombot1"]->setOutlineColour(glm::vec4(0.39f, 0.72f, 1.0f, 1.0f));
+	players["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.41f, 0.37f, 1.0f));
+	players["bombot3"]->setOutlineColour(glm::vec4(0.31f, 0.93f, 0.32f, 1.0f));
+	players["bombot4"]->setOutlineColour(glm::vec4(0.88f, 0.87f, 0.33f, 1.0f));
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
@@ -693,7 +718,7 @@ void initializeStates()
 
 	//init states.
 	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController());
-	mainMenu->setPaused(true);
+	mainMenu->setPaused(false);
 
 	pause = new Pause(pauseMenu);
 	pause->setPaused(true);
@@ -702,7 +727,7 @@ void initializeStates()
 	score->setPaused(true);
 
 	game = new Game(&gameobjects, &players, &materials, bombManager, pause, score, &playerCamera);
-	game->setPaused(false);
+	game->setPaused(true);
 
 	states.addGameState("game", game);
 	states.addGameState("MainMenu", mainMenu);

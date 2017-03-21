@@ -106,6 +106,7 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	glBindTexture(GL_TEXTURE_2D, toonRamp);
 
 	contrastLUT.load("Assets/img/Test1.CUBE");
+	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
 }
 
@@ -124,10 +125,17 @@ void Game::setPaused(int a_paused)
 		// Reset all players
 
 		float count = 0.0f;
-		players->at("bombot1")->reset(glm::vec3(-8.0f, 39.5f, 9.0f));
-		players->at("bombot2")->reset(glm::vec3(50.0f, 39.5f, 5.0f));
+		resetPlayers();
 		bombManager->clearAllBombs();
 	}
+}
+
+void Game::resetPlayers()
+{
+	players->at("bombot1")->reset(glm::vec3(-12.0f, 39.5f, 10.0f));
+	players->at("bombot2")->reset(glm::vec3(0.0f, 39.5f, -16.0f));
+	players->at("bombot3")->reset(glm::vec3(40.0f, 39.5f, -25.0f));
+	players->at("bombot4")->reset(glm::vec3(57.0f, 39.5f, 7.0f));
 }
 
 void Game::update(float dt)
@@ -398,6 +406,28 @@ void Game::draw()
 
 		contrastLUT.unbind(GL_TEXTURE6);
 
+		break;
+
+	case Game::LUT_SEPIA:
+		FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+
+		fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
+
+		// Bind the LUT
+		sepiaLUT.bind(GL_TEXTURE6);
+
+		colorMaterial->shader->bind();
+		colorMaterial->shader->sendUniformInt("u_tex", 0);
+		colorMaterial->shader->sendUniformInt("u_lookup", 6);
+		colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
+		colorMaterial->shader->sendUniformFloat("u_lookupSize", sepiaLUT.getSize());
+		colorMaterial->sendUniforms();
+
+		// Draw a full screen quad using the geometry shader
+		glDrawArrays(GL_POINTS, 0, 1);
+
+		sepiaLUT.unbind(GL_TEXTURE6);
 
 		break;
 
@@ -639,13 +669,25 @@ void Game::handleKeyboardInputShaders()
 	// Toggle LUT
 	if (KEYBOARD_INPUT->CheckPressEvent('7'))
 	{
-		if (colorCorrection == LUT_OFF)
+		if (colorCorrection == LUT_CONTRAST)
 		{
-			colorCorrection = LUT_CONTRAST;
+			colorCorrection = LUT_OFF;
 		}
 		else
 		{
+			colorCorrection = LUT_CONTRAST;
+		}
+	}
+	// Toggle LUT
+	if (KEYBOARD_INPUT->CheckPressEvent('8'))
+	{
+		if (colorCorrection == LUT_SEPIA)
+		{
 			colorCorrection = LUT_OFF;
+		}
+		else
+		{
+			colorCorrection = LUT_SEPIA;
 		}
 	}
 

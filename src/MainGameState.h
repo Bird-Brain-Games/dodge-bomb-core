@@ -49,6 +49,7 @@ private:
 	
 	//secondary functions (called in update and draw)
 	int deathCheck();
+	void resetPlayers();
 	void updateScene(float dt);
 	void drawScene();
 	void setMaterialForAllGameObjects(std::string materialName);
@@ -61,12 +62,12 @@ private:
 	void initializeFrameBuffers();
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
-
 private:
 	enum LUT_MODE
 	{
 		LUT_OFF,
-		LUT_CONTRAST
+		LUT_CONTRAST,
+		LUT_SEPIA
 	};
 
 private:
@@ -89,6 +90,7 @@ private:
 	float pauseTimer;
 
 	LUT contrastLUT;
+	LUT sepiaLUT;
 	LUT_MODE colorCorrection;
 
 	float outlineWidth = 4.0;

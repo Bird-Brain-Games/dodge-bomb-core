@@ -122,6 +122,9 @@ void Player::update(float dt)
 	if (con.conButton(XINPUT_GAMEPAD_LEFT_SHOULDER))
 		reset(glm::vec3(0.0f, 40.0f, 0.0f));
 
+	if (playerNum == 0)
+		std::cout << getWorldPosition().x << " " << getWorldPosition().z << std::endl;
+
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);
 
@@ -184,7 +187,8 @@ void Player::handleInput(float dt)
 
 
 	// Throw a bomb (crashes my code so im using left shoulder for animation throw)
-	if (con.conButton(XINPUT_GAMEPAD_RIGHT_SHOULDER) && currentCooldown == 0.0f)
+	if ((con.conButton(XINPUT_GAMEPAD_RIGHT_SHOULDER) || con.conRightTrigger())	&& 
+		currentCooldown == 0.0f)
 	{
 		glm::vec2 normalized = glm::vec2(0);
 		if (con.rightStickMoved())
