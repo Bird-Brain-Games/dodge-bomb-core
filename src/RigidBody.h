@@ -77,6 +77,8 @@ public:
 	void setLinearVelocity(glm::vec3 newVelocity);
 	glm::vec3 getLinearVelocity();
 
+	void applyCentralImpulse(glm::vec3);
+
 	btRigidBody* getBody() { return body; }
 	std::string getFileName() { return u_fileName; }
 
