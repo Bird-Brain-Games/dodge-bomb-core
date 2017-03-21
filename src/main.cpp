@@ -281,8 +281,8 @@ void initializeScene()
 	// Load textures (WIP)
 	// Has to take char* due to ILUT (DOESN'T HAVE TO ANYMORE)
 
-	std::string bombot1Tex = "Assets/img/bombot(diffuse)1.png";
-	std::string bombot2Tex = "Assets/img/bombot(diffuse)2.png";
+	std::string bombot1Tex = "Assets/img/bombot(diffuse)2.png";
+	std::string bombot2Tex = "Assets/img/bombot(diffuse)1.png";
 	std::string bombot3Tex = "Assets/img/bombot(diffuse)3.png";
 	std::string bombot4Tex = "Assets/img/bombot(diffuse)4.png";
 	std::string bombotSpec = "Assets/img/bombot(spec)2-dash.png";
