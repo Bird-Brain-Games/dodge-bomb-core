@@ -198,6 +198,7 @@ bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 				shape = new btCapsuleShape(radius, extents[1]);
 				break;
 			case 7:
+				// Cylinder model
 				shape = new btCylinderShape((shapeExtents / 2.0f));
 				break;
 			default:
@@ -436,4 +437,9 @@ btVector3 RigidBody::GLMtoBT(glm::vec3 other)
 		other.y,
 		other.z
 	);
+}
+
+void RigidBody::applyCentralImpulse(glm::vec3 impulse)
+{
+	body->applyCentralImpulse(GLMtoBT(impulse));
 }
