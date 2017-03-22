@@ -60,6 +60,7 @@ Camera shadowCamera; // Camera for the shadow map
 // Asset databases
 std::map<std::string, std::shared_ptr<Loader>> meshes;
 std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
+std::vector<std::shared_ptr<GameObject>> obstacles;
 std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
 
@@ -451,6 +452,8 @@ void initializeScene()
 
 	gameobjects["lamp"] = std::make_shared<GameObject>(
 		glm::vec3(67.9f, 38.756f, -31.772f), nullptr, defaultMaterial, nullptr);
+
+	//////////////////////////////////////////////////////////////////////////////
 	// Build the play area
 
 	//gameobjects["barrel"] = std::make_shared<GameObject>(
@@ -459,6 +462,7 @@ void initializeScene()
 	gameobjects["barrelTR"] = std::make_shared<GameObject>(
 		glm::vec3(37.f, -20.0f, -2.0f), barrelMesh, defaultMaterial, barrelTexMap);
 	gameobjects["barrelTR"]->setScale(glm::vec3(1.2));
+	obstacles.push_back(gameobjects["barrelTR"]);
 	//gameobjects["barrelBR"] = std::make_shared<GameObject>(
 	//	glm::vec3(40.f, 42.0f, 25.f), barrelMesh, defaultMaterial, barrelTexMap);
 
@@ -471,37 +475,45 @@ void initializeScene()
 	gameobjects["barrel1"] = std::make_shared<GameObject>(
 		glm::vec3(-2.0f, 42.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
 	gameobjects["barrel1"]->setScale(glm::vec3(1.2));
+	obstacles.push_back(gameobjects["barrel1"]);
 
 	gameobjects["boulder2"] = std::make_shared<GameObject>(
 		glm::vec3(-5.f, 44.0f, 23.f), boulderMesh, defaultMaterial, boulderTexMap);
 	gameobjects["boulder2"]->setScale(glm::vec3(1.3));
+	obstacles.push_back(gameobjects["boulder2"]);
 
 	gameobjects["boulder"] = std::make_shared<GameObject>(
 		glm::vec3(21.0f, 44.0f, -18.0f), boulderMesh, defaultMaterial, boulderTexMap);
 	gameobjects["boulder"]->setScale(glm::vec3(1.6));
+	obstacles.push_back(gameobjects["boulder"]);
 
 	gameobjects["cannon"] = std::make_shared<GameObject>(
 		glm::vec3(23.f, 43.0f, 10.f), cannonMesh, defaultMaterial, cannonTexMap);
 	gameobjects["cannon"]->setScale(glm::vec3(1.7f));
 	gameobjects["cannon"]->emissiveLight = 0.3f;
+	obstacles.push_back(gameobjects["cannon"]);
 
 	gameobjects["crate"] = std::make_shared<GameObject>(
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
 	gameobjects["crate"]->setScale(glm::vec3(1.6));
+	obstacles.push_back(gameobjects["crate"]);
 	
 	gameobjects["crate2"] = std::make_shared<GameObject>(
 		glm::vec3(15.0f, -20.0f, 2.0f), crateMesh, defaultMaterial, crateTexMap);
 	gameobjects["crate2"]->setScale(glm::vec3(1.3));
+	obstacles.push_back(gameobjects["crate2"]);
 
 	gameobjects["boat"] = std::make_shared<GameObject>(
 		glm::vec3(45.0f, 41.0f, 23.0f), boatMesh, defaultMaterial, boatTexMap);
 	gameobjects["boat"]->setRotationAngleY(-45 * degToRad);
+	obstacles.push_back(gameobjects["boat"]);
 
 	//gameobjects["palmtree"] = std::make_shared<GameObject>(
 	//	glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
 
 
-
+	///////////////////////////////////////////////////////////////////////////
+	////////////////	Players
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
@@ -726,7 +738,7 @@ void initializeStates()
 	score = new Score(scoreMenu);
 	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, bombManager, pause, score, &playerCamera);
+	game = new Game(&gameobjects, &players, &materials, &obstacles, bombManager, pause, score, &playerCamera);
 	game->setPaused(true);
 
 	states.addGameState("game", game);

@@ -14,7 +14,7 @@ float Player::playerSpeed = 50.0f;
 float Player::dashImpulse = 30.0f;
 float Player::dashMinSpeed = Player::playerSpeed - 20.0f;	// when the player reaches this, stop dashing
 float Player::maxDashCooldown = 2.0f;
-float Player::maxDashDuration = 0.6f;
+float Player::maxDashDuration = 0.5f;	// max length of dash in seconds
 
 Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,

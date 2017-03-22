@@ -84,8 +84,11 @@ void LUT::unbind(GLuint textureUnit)
 Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
 	std::map<std::string, std::shared_ptr<Material>>* _materials,
+	std::vector<std::shared_ptr<GameObject>>* _obstacles,
 	std::shared_ptr<BombManager> _manager,
 	Pause* _pause, Score* _score, Camera* _camera)
+
+	: obstacles(_obstacles)
 {
 	scene = _scene;
 	players = _player;
@@ -100,6 +103,8 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	_camera->setAngle(3.14159012f, 5.3f);
 	_camera->update();
 	initializeFrameBuffers();
+	currentGameState = MAIN;
+	changeState(READYUP);
 
 	toonRamp = ilutGLLoadImage("Assets/img/toonRamp.png");
 	glActiveTexture(GL_TEXTURE5);
@@ -127,6 +132,7 @@ void Game::setPaused(int a_paused)
 		float count = 0.0f;
 		resetPlayers();
 		bombManager->clearAllBombs();
+		currentGameState = READYUP;
 	}
 }
 
@@ -151,7 +157,14 @@ void Game::update(float dt)
 	// Update all gameobjects
 	updateScene(dt);
 
-
+	for (auto it : *players)
+	{
+		// Ready up
+		if (it.second->getController()->conButton(XINPUT_GAMEPAD_X))
+		{
+			changeState(MAIN);
+		}
+	}
 
 	pauseTimer += dt;
 
@@ -202,6 +215,7 @@ void Game::update(float dt)
 	if (winner > 0)
 	{
 		this->m_isPaused = true;
+		changeState(READYUP);
 		score->active = players->at("bombot1")->getController();
 		m_parent->getGameState("score")->setPaused(winner);
 	}
@@ -824,4 +838,29 @@ void Game::handleKeyboardInput()
 
 	// Clear the keyboard input
 	KEYBOARD_INPUT->WipeEventList();
+}
+
+void Game::changeState(Game::GAME_STATE newState)
+{
+	// Don't apply stuff if they are the same
+	if (currentGameState == newState)	return;
+
+	currentGameState = newState;
+	switch (currentGameState)
+	{
+	case Game::READYUP:
+		for (auto it : *obstacles)
+		{
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
+		}
+		break;
+	case Game::MAIN:
+		for (auto it : *obstacles)
+		{
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
+		}
+		break;
+	default:
+		break;
+	}
 }

@@ -37,6 +37,7 @@ public:
 	Game(std::map<std::string, std::shared_ptr<GameObject>>*,
 		std::map<std::string, std::shared_ptr<Player>>*,
 		std::map<std::string, std::shared_ptr<Material>>*,
+		std::vector<std::shared_ptr<GameObject>>*,
 		std::shared_ptr<BombManager>,
 		Pause*, Score*, Camera*);
 
@@ -70,6 +71,14 @@ private:
 		LUT_SEPIA
 	};
 
+	enum GAME_STATE
+	{
+		READYUP,
+		MAIN
+	};
+	GAME_STATE currentGameState;
+	void changeState(GAME_STATE);
+
 private:
 	FrameBufferObject fboUnlit;
 	FrameBufferObject fboBright;
@@ -82,6 +91,7 @@ private:
 	std::map<std::string, std::shared_ptr<GameObject>>* scene;
 	std::map<std::string, std::shared_ptr<Player>>* players;
 	std::map<std::string, std::shared_ptr<Material>>* materials;
+	std::vector<std::shared_ptr<GameObject>>* obstacles;
 
 	Pause* pause;
 	Score* score;
