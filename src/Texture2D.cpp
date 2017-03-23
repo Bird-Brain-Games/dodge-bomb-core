@@ -1,6 +1,7 @@
 #include "GLEW/glew.h"
 #include "Texture2D.h"
 #include "IL/ilut.h"
+#include <iostream>
 
 TTK::Texture2D::Texture2D()
 {
@@ -31,6 +32,7 @@ int TTK::Texture2D::height()
 
 unsigned int TTK::Texture2D::loadTexture(std::string filename, bool createGLTexture, bool flip)
 {
+	std::cout << "Loading texture " << filename << "...";
 	glEnable(GL_TEXTURE_2D);
 
 	ilGenImages(1, &texID);
@@ -109,6 +111,7 @@ unsigned int TTK::Texture2D::loadTexture(std::string filename, bool createGLText
 	if (flip)
 		delete[] dataPtr;
 
+	std::cout << " success" << std::endl;
 	return texID;
 }
 
