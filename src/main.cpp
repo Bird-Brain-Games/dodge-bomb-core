@@ -223,6 +223,7 @@ void initializeScene()
 	std::shared_ptr<LoadObject> organizerMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> mapMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> ringMesh = std::make_shared<LoadObject>();
 
 	std::shared_ptr<Holder> bombotMesh = std::make_shared<Holder>();
 	std::shared_ptr<Holder> bombotMesh2 = std::make_shared<Holder>();
@@ -265,6 +266,7 @@ void initializeScene()
 	organizerMesh->load(meshPath + "scaledorganizer.obj");
 	mapMesh->load(meshPath + "scaledmap.obj");
 	markerMesh->load(meshPath + "scaledmarker.obj");
+	ringMesh->load(meshPath + "ring.obj");
 
 	// Report mesh load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -290,6 +292,7 @@ void initializeScene()
 	meshes["organizer"] = organizerMesh;
 	meshes["map"] = mapMesh;
 	meshes["marker"] = markerMesh;
+	meshes["ring"] = ringMesh;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
@@ -334,6 +337,9 @@ void initializeScene()
 
 	std::string explosionTex4 = "Assets/img/ex-4.png";
 	std::shared_ptr<Texture> explosionTexMap4 = std::make_shared<Texture>(explosionTex4, explosionTex4, 1.0f);
+
+	std::string ringTex1 = "Assets/img/ring1.png";
+	std::shared_ptr<Texture> ringTexMap1 = std::make_shared<Texture>(ringTex1, ringTex1, 1.0f);
 
 	std::string diffuseTex = "Assets/img/desk (diffuse).png";
 	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
@@ -398,6 +404,7 @@ void initializeScene()
 	textures["explosion2"] = explosionTexMap2;
 	textures["explosion3"] = explosionTexMap3;
 	textures["explosion4"] = explosionTexMap4;
+	textures["ring1"] = ringTexMap1;
 	textures["barrel"] = barrelTexMap;
 	textures["cannon"] = cannonTexMap;
 	textures["boat"] = boatTexMap;
@@ -421,6 +428,9 @@ void initializeScene()
 	// Test gameobject load times
 	std::cout << "Initializing gameObjects...";
 	t1 = std::chrono::high_resolution_clock::now();
+
+	gameobjects["ring1"] = std::make_shared<readyUpRing>(
+		glm::vec3(-12.0f, 39.5f, 10.0f), ringMesh, defaultMaterial, ringTexMap1, 0);
 
 	gameobjects["table"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
@@ -583,6 +593,7 @@ void initializeScene()
 	std::string rightwallBodyPath = "assets\\bullet\\botwall.btdata";
 	std::string topwallBodyPath = "assets\\bullet\\topwall.btdata";
 	std::string lampBodyPath = "assets\\bullet\\lamp.btdata";
+	std::string ringBodyPath = "assets\\bullet\\ring.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
@@ -607,6 +618,7 @@ void initializeScene()
 	std::unique_ptr<RigidBody> botleftBody;
 	std::unique_ptr<RigidBody> topwallBody;
 	std::unique_ptr<RigidBody> lampBody;
+	std::unique_ptr<RigidBody> ring1Body;
 
 	tableBody = std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
@@ -630,6 +642,7 @@ void initializeScene()
 	botleftBody		= std::make_unique<RigidBody>();
 	topwallBody = std::make_unique<RigidBody>();
 	lampBody = std::make_unique<RigidBody>();
+	ring1Body = std::make_unique<RigidBody>();
 
 	// Test gameobject load times
 	std::cout << "loading rigidBodies...";
@@ -658,6 +671,7 @@ void initializeScene()
 	botleftBody->load(botleftBodyPath);
 	topwallBody->load(topwallBodyPath);
 	lampBody->load(lampBodyPath);
+	ring1Body->load(ringBodyPath);
 
 	// Report rigidbody load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -687,6 +701,7 @@ void initializeScene()
 	gameobjects["rightwall"]->attachRigidBody(rightwallBody);
 	gameobjects["topwall"]->attachRigidBody(topwallBody);
 	gameobjects["lamp"]->attachRigidBody(lampBody);
+	gameobjects["ring1"]->attachRigidBody(ring1Body);
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
@@ -827,15 +842,15 @@ void collideWithCorrectType(Player* player, GameObject* object)
 {
 	switch (object->getColliderType())
 	{
-	case COLLIDER_DEFAULT:
+	case GameObject::COLLIDER_DEFAULT:
 		break;
-	case PLAYER:
+	case GameObject::PLAYER:
 		player->checkCollisionWith((Player*)object);
 		break;
-	case BOMB_BASE:
+	case GameObject::BOMB_BASE:
 		player->checkCollisionWith((Bomb*)object);
 		break;
-	case BOMB_EXPLOSION:
+	case GameObject::BOMB_EXPLOSION:
 		player->checkCollisionWith((Explosion*)object);
 		break;
 	default:
