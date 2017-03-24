@@ -90,3 +90,21 @@ private:
 	static float maxDashCooldown;
 	static float maxDashDuration;
 };
+
+class readyUpRing : public GameObject
+{
+public:
+	readyUpRing(glm::vec3 position,
+		std::shared_ptr<Loader> _mesh,
+		std::shared_ptr<Material> _material,
+		std::shared_ptr<Texture> _texture,
+		int _playerNum);
+
+	inline int getPlayerNum() { return playerNum; }
+	inline bool isReady() { return ready; }
+	inline void setReady(bool _ready) { ready = _ready; }
+
+private:
+	int playerNum;
+	bool ready;
+};

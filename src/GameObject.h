@@ -15,16 +15,19 @@
 #include "loadObject.h"
 #include "RigidBody.h"
 
-enum COLLIDER_TYPE
-{
-	COLLIDER_DEFAULT,
-	PLAYER,
-	BOMB_BASE,
-	BOMB_EXPLOSION
-};
 
 class GameObject
 {
+public:
+	enum COLLIDER_TYPE
+	{
+		COLLIDER_DEFAULT,
+		PLAYER,
+		BOMB_BASE,
+		BOMB_EXPLOSION
+	};
+
+
 public:
 	GameObject();
 	GameObject(glm::vec3 position, 

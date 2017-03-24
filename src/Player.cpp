@@ -160,9 +160,6 @@ void Player::update(float dt)
 	if (con.conButton(XINPUT_GAMEPAD_BACK))
 		reset(glm::vec3(0.0f, 40.0f, 0.0f));
 
-	if (playerNum == 0)
-		std::cout << getWorldPosition().x << " " << getWorldPosition().z << std::endl;
-
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);
 
@@ -386,3 +383,18 @@ glm::vec3 Player::getCurrentVelocity()
 //	direction = glm::normalize(direction);
 //	float angleY = 
 //}
+
+
+///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////	Ring class
+
+readyUpRing::readyUpRing(glm::vec3 position,
+	std::shared_ptr<Loader> _mesh,
+	std::shared_ptr<Material> _material,
+	std::shared_ptr<Texture> _texture,
+	int _playerNum)
+	: GameObject(position, _mesh, _material, _texture),
+	playerNum(_playerNum)
+{
+
+}
