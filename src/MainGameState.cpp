@@ -311,7 +311,7 @@ void Game::draw()
 
 		// Tell all game objects to use the outline shading material
 		setMaterialForAllGameObjects("outline");
-		setMaterialForAllPlayerObjects("sobelPlayer");
+		setMaterialForAllPlayerObjects("outline");
 		drawScene();
 
 		glCullFace(GL_BACK); std::map<std::string, std::shared_ptr<Material>> materials;
@@ -325,22 +325,7 @@ void Game::draw()
 	case TOON:
 	{
 		setMaterialForAllGameObjects("toon");
-
-		setMaterialForAllPlayerObjects("toonPlayer");
-		materials->at("toonPlayer");
-		materials->at("toonPlayer")->shader->bind();
-
-		materials->at("toonPlayer")->vec4Uniforms["u_lightPos"] = camera->getView() * lightPos;
-		materials->at("toonPlayer")->intUniforms["u_diffuseTex"] = 31;
-		materials->at("toonPlayer")->intUniforms["u_specularTex"] = 30;
-
-		materials->at("toonPlayer")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-		materials->at("toonPlayer")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
-		materials->at("toonPlayer")->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
-		materials->at("toonPlayer")->vec4Uniforms["u_shine"] = glm::vec4(shininess);
-
-		materials->at("toonPlayer")->sendUniforms();
-		materials->at("toonPlayer")->shader->unbind();
+		setMaterialForAllPlayerObjects("toon");
 
 		materials->at("toon")->shader->bind();
 
@@ -352,6 +337,7 @@ void Game::draw()
 		materials->at("toon")->intUniforms["u_toonRamp"] = 5;
 		materials->at("toon")->intUniforms["u_diffuseTex"] = 31;
 		materials->at("toon")->intUniforms["u_specularTex"] = 30;
+		materials->at("toon")->shader->sendUniformInt("skinning", 0);
 
 		materials->at("toon")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
 		materials->at("toon")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
@@ -577,8 +563,6 @@ void Game::initializeFrameBuffers()
 	fboColorCorrection.createFrameBuffer(windowWidth, windowHeight, 1, false);
 }
 
-
-
 void Game::drawScene()
 {
 	for (auto itr = scene->begin(); itr != scene->end(); ++itr)
@@ -588,10 +572,18 @@ void Game::drawScene()
 		if (gameobject->isRoot())
 			gameobject->draw(*camera);
 	}
-
 	bombManager->draw(*camera);
-}
 
+	players->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 1);
+
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		auto playersObject = itr->second;
+
+		if (playersObject->isRoot())
+			playersObject->draw(*camera);
+	}
+}
 
 int Game::deathCheck()
 {

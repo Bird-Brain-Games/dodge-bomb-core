@@ -97,7 +97,7 @@ void initializeShaders()
 	v_shadow.loadShaderFromFile(shaderPath + "shadowMap_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
-	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
+	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor,
 		f_noLighting, f_toon, f_sobel, f_shadow, f_colorCorrection;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);
@@ -130,7 +130,7 @@ void initializeShaders()
 
 	// Default material that all objects use
 	materials["toon"] = std::make_shared<Material>("toon");
-	materials["toon"]->shader->attachShader(v_default);
+	materials["toon"]->shader->attachShader(v_skinning);
 	materials["toon"]->shader->attachShader(f_toon);
 	materials["toon"]->shader->linkProgram();
 
@@ -142,10 +142,10 @@ void initializeShaders()
 	materials["colorCorrection"]->shader->linkProgram();
 
 	//material for our players and there meshes.
-	materials["toonPlayer"] = std::make_shared<Material>("toonPlayer");
-	materials["toonPlayer"]->shader->attachShader(v_skinning);
-	materials["toonPlayer"]->shader->attachShader(f_toon);
-	materials["toonPlayer"]->shader->linkProgram();
+	//materials["toonPlayer"] = std::make_shared<Material>("toonPlayer");
+	//materials["toonPlayer"]->shader->attachShader(v_skinning);
+	//materials["toonPlayer"]->shader->attachShader(f_toon);
+	//materials["toonPlayer"]->shader->linkProgram();
 
 	// Material used for menu full screen drawing
 	materials["menu"] = std::make_shared<Material>("menu");
@@ -184,15 +184,15 @@ void initializeShaders()
 
 	// Sobel filter material
 	materials["outline"] = std::make_shared<Material>("outline");
-	materials["outline"]->shader->attachShader(v_passThru);
+	materials["outline"]->shader->attachShader(v_skinning);
 	materials["outline"]->shader->attachShader(f_sobel);
 	materials["outline"]->shader->linkProgram();
 
 	// sobel filter for player
-	materials["sobelPlayer"] = std::make_shared<Material>("sobelPlayer");
-	materials["sobelPlayer"]->shader->attachShader(v_skinning);
-	materials["sobelPlayer"]->shader->attachShader(f_sobel);
-	materials["sobelPlayer"]->shader->linkProgram();
+	//materials["sobelPlayer"] = std::make_shared<Material>("sobelPlayer");
+	//materials["sobelPlayer"]->shader->attachShader(v_skinning);
+	//materials["sobelPlayer"]->shader->attachShader(f_sobel);
+	//materials["sobelPlayer"]->shader->linkProgram();
 
 	// Shadow filter material
 	materials["shadow"] = std::make_shared<Material>("shadow");
@@ -558,7 +558,7 @@ void initializeScene()
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
 	gameobjects["crate"]->setScale(glm::vec3(1.6));
 	obstacles.push_back(gameobjects["crate"]);
-	
+
 	gameobjects["crate2"] = std::make_shared<GameObject>(
 		glm::vec3(15.0f, -20.0f, 2.0f), crateMesh, defaultMaterial, crateTexMap);
 	gameobjects["crate2"]->setScale(glm::vec3(1.3));
@@ -578,25 +578,21 @@ void initializeScene()
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
-	gameobjects["bombot1"] = players["bombot1"];
-
+	
 	players["bombot2"] = std::make_shared<Player>(
 		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
-	gameobjects["bombot2"] = players["bombot2"];
-	
+
 	players["bombot3"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
-	gameobjects["bombot3"] = players["bombot3"];
 
 	players["bombot4"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
-	gameobjects["bombot4"] = players["bombot4"];
 
 	// Report gameObject init times
 	t2 = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	std::cout << " success, " << duration << "ms taken" << std::endl;
-	
+
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	RIGID BODIES	///////////////////////////////
@@ -667,8 +663,8 @@ void initializeScene()
 	trumpBody = std::make_unique<RigidBody>();
 	booksBody = std::make_unique<RigidBody>();
 	botwallBody = std::make_unique<RigidBody>();
-	rightwallBody	= std::make_unique<RigidBody>();
-	botleftBody		= std::make_unique<RigidBody>();
+	rightwallBody = std::make_unique<RigidBody>();
+	botleftBody = std::make_unique<RigidBody>();
 	topwallBody = std::make_unique<RigidBody>();
 	lampBody = std::make_unique<RigidBody>();
 	ring1Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
@@ -716,10 +712,10 @@ void initializeScene()
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
-	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
-	gameobjects["bombot2"]->attachRigidBody(bombot2Body);
-	gameobjects["bombot3"]->attachRigidBody(bombot3Body);
-	gameobjects["bombot4"]->attachRigidBody(bombot4Body);
+	players["bombot1"]->attachRigidBody(bombot1Body);
+	players["bombot2"]->attachRigidBody(bombot2Body);
+	players["bombot3"]->attachRigidBody(bombot3Body);
+	players["bombot4"]->attachRigidBody(bombot4Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
 	gameobjects["barrelTR"]->attachRigidBody(barrelBody);
 	gameobjects["barrel1"]->attachRigidBody(barrel1Body);
@@ -1000,7 +996,7 @@ void TimerCallbackFunction(int value)
 	elapsedTimeAtLastTick = totalElapsedTime;
 
 	// Handle all inputs 
-	
+
 
 	// Update the camera's position
 	playerCamera.update();
