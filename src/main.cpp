@@ -62,6 +62,7 @@ Camera shadowCamera; // Camera for the shadow map
 std::map<std::string, std::shared_ptr<Loader>> meshes;
 std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
 std::vector<std::shared_ptr<GameObject>> obstacles;
+std::vector<std::shared_ptr<GameObject>> readyUpRings;
 std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
 
@@ -341,6 +342,15 @@ void initializeScene()
 	std::string ringTex1 = "Assets/img/ring1.png";
 	std::shared_ptr<Texture> ringTexMap1 = std::make_shared<Texture>(ringTex1, ringTex1, 1.0f);
 
+	std::string ringTex2 = "Assets/img/ring1.png";
+	std::shared_ptr<Texture> ringTexMap2 = std::make_shared<Texture>(ringTex2, ringTex2, 1.0f);
+
+	std::string ringTex3 = "Assets/img/ring1.png";
+	std::shared_ptr<Texture> ringTexMap3 = std::make_shared<Texture>(ringTex3, ringTex3, 1.0f);
+
+	std::string ringTex4 = "Assets/img/ring1.png";
+	std::shared_ptr<Texture> ringTexMap4 = std::make_shared<Texture>(ringTex4, ringTex4, 1.0f);
+
 	std::string diffuseTex = "Assets/img/desk (diffuse).png";
 	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
 
@@ -405,6 +415,9 @@ void initializeScene()
 	textures["explosion3"] = explosionTexMap3;
 	textures["explosion4"] = explosionTexMap4;
 	textures["ring1"] = ringTexMap1;
+	textures["ring2"] = ringTexMap2;
+	textures["ring3"] = ringTexMap3;
+	textures["ring4"] = ringTexMap4;
 	textures["barrel"] = barrelTexMap;
 	textures["cannon"] = cannonTexMap;
 	textures["boat"] = boatTexMap;
@@ -430,7 +443,20 @@ void initializeScene()
 	t1 = std::chrono::high_resolution_clock::now();
 
 	gameobjects["ring1"] = std::make_shared<readyUpRing>(
-		glm::vec3(-12.0f, 39.5f, 10.0f), ringMesh, defaultMaterial, ringTexMap1, 0);
+		glm::vec3(-12.0f, 89.5f, 10.0f), ringMesh, defaultMaterial, ringTexMap1, 0);
+	readyUpRings.push_back(gameobjects["ring1"]);
+
+	gameobjects["ring2"] = std::make_shared<readyUpRing>(
+		glm::vec3(0.0f, 89.5f, -16.0f), ringMesh, defaultMaterial, ringTexMap2, 1);
+	readyUpRings.push_back(gameobjects["ring2"]);
+
+	gameobjects["ring3"] = std::make_shared<readyUpRing>(
+		glm::vec3(40.0f, 89.5f, -25.0f), ringMesh, defaultMaterial, ringTexMap3, 2);
+	readyUpRings.push_back(gameobjects["ring3"]);
+
+	gameobjects["ring4"] = std::make_shared<readyUpRing>(
+		glm::vec3(57.0f, 89.5f, 7.0f), ringMesh, defaultMaterial, ringTexMap4, 3);
+	readyUpRings.push_back(gameobjects["ring4"]);
 
 	gameobjects["table"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
@@ -619,6 +645,9 @@ void initializeScene()
 	std::unique_ptr<RigidBody> topwallBody;
 	std::unique_ptr<RigidBody> lampBody;
 	std::unique_ptr<RigidBody> ring1Body;
+	std::unique_ptr<RigidBody> ring2Body;
+	std::unique_ptr<RigidBody> ring3Body;
+	std::unique_ptr<RigidBody> ring4Body;
 
 	tableBody = std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
@@ -643,6 +672,10 @@ void initializeScene()
 	topwallBody = std::make_unique<RigidBody>();
 	lampBody = std::make_unique<RigidBody>();
 	ring1Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+	ring2Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+	ring3Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+	ring4Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+
 
 	// Test gameobject load times
 	std::cout << "loading rigidBodies...";
@@ -672,6 +705,9 @@ void initializeScene()
 	topwallBody->load(topwallBodyPath);
 	lampBody->load(lampBodyPath);
 	ring1Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	ring2Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	ring3Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	ring4Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 	// Report rigidbody load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -702,6 +738,9 @@ void initializeScene()
 	gameobjects["topwall"]->attachRigidBody(topwallBody);
 	gameobjects["lamp"]->attachRigidBody(lampBody);
 	gameobjects["ring1"]->attachRigidBody(ring1Body);
+	gameobjects["ring2"]->attachRigidBody(ring2Body);
+	gameobjects["ring3"]->attachRigidBody(ring3Body);
+	gameobjects["ring4"]->attachRigidBody(ring4Body);
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
@@ -804,7 +843,7 @@ void initializeStates()
 	score = new Score(scoreMenu);
 	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, &obstacles, bombManager, pause, score, &playerCamera);
+	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, pause, score, &playerCamera);
 	game->setPaused(true);
 
 	states.addGameState("game", game);

@@ -31,6 +31,7 @@ Player::Player(glm::vec3 position,
 	reset(position);
 	playerNum = _playerNum;
 	setScale(glm::vec3(0.75f));
+	setActive(false);
 }
 
 Player::Player(Player& other)
@@ -41,6 +42,7 @@ Player::Player(Player& other)
 	throwingForce(other.throwingForce)
 {
 	reset(other.getWorldPosition());
+	setActive(false);
 }
 
 Player::~Player()
@@ -315,10 +317,10 @@ void Player::checkCollisionWith(Bomb* other)
 		{
 			other->explode();
 			takeDamage(1);
-			con.setVibration(32000, 16000);
-			//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
+con.setVibration(32000, 16000);
+//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 		}
-	}	
+	}
 }
 
 void Player::checkCollisionWith(readyUpRing* other)
@@ -411,5 +413,10 @@ readyUpRing::readyUpRing(glm::vec3 position,
 	playerNum(_playerNum)
 {
 	colliderType = COLLIDER_TYPE::READYUP;
-	
+
+}
+
+void readyUpRing::setPosition(glm::vec3 newPos)
+{
+	GameObject::setPosition(newPos);
 }

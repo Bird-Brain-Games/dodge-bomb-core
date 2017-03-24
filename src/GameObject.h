@@ -41,7 +41,7 @@ public:
 
 	void setTexture(std::shared_ptr<Texture> _texture) { texture = _texture; }
 
-	void setPosition(glm::vec3 newPosition);
+	virtual void setPosition(glm::vec3 newPosition);
 	void setRotationAngleX(float newAngle);
 	void setRotationAngleY(float newAngle);
 	void setRotationAngleZ(float newAngle);

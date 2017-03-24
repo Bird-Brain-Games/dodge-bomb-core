@@ -85,10 +85,12 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
 	std::map<std::string, std::shared_ptr<Material>>* _materials,
 	std::vector<std::shared_ptr<GameObject>>* _obstacles,
+	std::vector<std::shared_ptr<GameObject>>* _readyUpRings,
 	std::shared_ptr<BombManager> _manager,
 	Pause* _pause, Score* _score, Camera* _camera)
 
-	: obstacles(_obstacles)
+	: obstacles(_obstacles),
+	readyUpRings(_readyUpRings)
 {
 	scene = _scene;
 	players = _player;
@@ -113,13 +115,17 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
+
+	defaultPlayerPositions.push_back(glm::vec3(-12.0f, 39.5f, 10.0f));
+	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.5f, -16.0f));
+	defaultPlayerPositions.push_back(glm::vec3(40.0f, 39.5f, -25.0f));
+	defaultPlayerPositions.push_back(glm::vec3(57.0f, 39.5f, 7.0f));
 }
 
 void Game::setPaused(int a_paused)
 {
 	if (a_paused == 0)
 	{
-		float count = 0.0f;
 		m_isPaused = false;
 	}
 	else if (a_paused == 1)
@@ -129,25 +135,89 @@ void Game::setPaused(int a_paused)
 		m_isPaused = false;
 		// Reset all players
 
-		float count = 0.0f;
-		resetPlayers();
+		//resetPlayers();
+		makePlayersInactive();
 		bombManager->clearAllBombs();
 		currentGameState = READYUP;
+		menuDelay = 0.3f;
 	}
 }
 
 void Game::resetPlayers()
 {
-	players->at("bombot1")->reset(glm::vec3(-12.0f, 39.5f, 10.0f));
+	for (auto it : *players)
+	{
+		if (it.second->isActive())
+		{
+			it.second->setPosition(defaultPlayerPositions.at(it.second->getPlayerNum()));
+		}
+	}
+	/*players->at("bombot1")->reset(glm::vec3(-12.0f, 39.5f, 10.0f));
 	players->at("bombot2")->reset(glm::vec3(0.0f, 39.5f, -16.0f));
 	players->at("bombot3")->reset(glm::vec3(40.0f, 39.5f, -25.0f));
-	players->at("bombot4")->reset(glm::vec3(57.0f, 39.5f, 7.0f));
+	players->at("bombot4")->reset(glm::vec3(57.0f, 39.5f, 7.0f));*/
+}
+
+void Game::makePlayersInactive()
+{
+	for (auto it : *players)
+	{
+		it.second->setPosition(glm::vec3(-1000.0f));
+		it.second->setActive(false);
+	}
+}
+
+void Game::updateReadyPass(float dt)
+{
+	const int maxNumPlayers = 4;
+	bool activeState[maxNumPlayers];
+	bool readyState[maxNumPlayers];
+	int counter = 0;
+	bool startPressed = false;
+
+	for (auto it : *players)
+	{
+		// Set the player as active if A pressed and not active
+		if (it.second->getController()->conButton(XINPUT_GAMEPAD_A) &&
+			!it.second->isActive())
+		{
+			it.second->setActive(true);
+			it.second->setPosition(glm::vec3(15.0f * it.second->getPlayerNum(), 35.0f, 0.0f));
+		}
+
+		// Ready up checks
+		activeState[counter] = it.second->isActive();
+		readyState[counter] = it.second->isReady();
+		counter++;
+
+		if (it.second->getController()->conButton(XINPUT_GAMEPAD_X))
+		{
+			startPressed = true;
+		}
+	}
+
+	int playerCounter = 0;
+	bool allReady = true;
+	// Check if enough players are in the game, and if they are ready
+	for (unsigned int i = 0; i < maxNumPlayers; i++)
+	{
+		playerCounter += activeState[i];
+		if (activeState[i])
+		{
+			if (!readyState[i])
+				allReady = false;
+		}
+	}
+
+	// If everyone's ready, start the game!
+	if (allReady && startPressed && playerCounter > 1)
+		changeState(MAIN);
+
+
 }
 
 void Game::update(float dt)
 {
-
-
 	// Step through world simulation with Bullet
 	RigidBody::systemUpdate(dt, 10);
 	calculateCollisions();
@@ -155,24 +225,12 @@ void Game::update(float dt)
 	handleKeyboardInput();
 
 	// Change the state if everyone is ready
-	if (currentGameState != MAIN)
+	if (currentGameState == READYUP)
 	{
-		bool allReady = true;
-		bool startPressed = false;
-		for (auto it : *players)
-		{
-			// Ready up
-			if (!it.second->getController()->conButton(XINPUT_GAMEPAD_X))
-			{
-				allReady = false;
-			}
-			if (it.second->getController()->conButton(XINPUT_GAMEPAD_START))
-			{
-				startPressed = true;
-			}
-		}
-		if (allReady && startPressed)
-			changeState(MAIN);
+		if (menuDelay > 0.0f)
+			menuDelay -= dt;
+		else
+			updateReadyPass(dt);
 	}
 
 	// Update all gameobjects
@@ -181,57 +239,58 @@ void Game::update(float dt)
 	pauseTimer += dt;
 
 	
-
-	int count = 0;
-	for (auto it : *players)
+	if (currentGameState == MAIN)
 	{
-
-		if (it.second->getController()->conButton(XINPUT_GAMEPAD_START))
-			pausing = count;
-		count++;
-	}
-
-	if (pausing > 0 && pauseTimer > 1.0)
-	{
-		switch (pausing)
+		int count = 0;
+		for (auto it : *players)
 		{
-		case 0:
-			break;
-		case 1:
-			setPaused(true);
-			pause->setPaused(false);
-			pause->active = players->at("bombot1")->getController();
-			pauseTimer = 0;
-			break;
-		case 2:
-			setPaused(true);
-			pause->setPaused(false);
-			pause->active = players->at("bombot2")->getController();
-			pauseTimer = 0;
-			break;
-		case 3:
-			setPaused(true);
-			pause->setPaused(false);
-			pause->active = players->at("bombot3")->getController();
-			pauseTimer = 0;
-			break;
-		case 4:
-			setPaused(true);
-			pause->setPaused(false);
-			pause->active = players->at("bombot4")->getController();
-			pauseTimer = 0;
-			break;
+
+			if (it.second->getController()->conButton(XINPUT_GAMEPAD_START) && currentGameState == MAIN)
+				pausing = count;
+			count++;
+		}
+
+		if (pausing > 0 && pauseTimer > 1.0)
+		{
+			switch (pausing)
+			{
+			case 0:
+				break;
+			case 1:
+				setPaused(true);
+				pause->setPaused(false);
+				pause->active = players->at("bombot1")->getController();
+				pauseTimer = 0;
+				break;
+			case 2:
+				setPaused(true);
+				pause->setPaused(false);
+				pause->active = players->at("bombot2")->getController();
+				pauseTimer = 0;
+				break;
+			case 3:
+				setPaused(true);
+				pause->setPaused(false);
+				pause->active = players->at("bombot3")->getController();
+				pauseTimer = 0;
+				break;
+			case 4:
+				setPaused(true);
+				pause->setPaused(false);
+				pause->active = players->at("bombot4")->getController();
+				pauseTimer = 0;
+				break;
+			}
+		}
+		int winner = deathCheck();
+		if (winner > 0)
+		{
+			this->m_isPaused = true;
+			changeState(READYUP);
+			score->active = players->at("bombot1")->getController();
+			m_parent->getGameState("score")->setPaused(winner);
 		}
 	}
-	int winner = deathCheck();
-	if (winner > 0)
-	{
-		this->m_isPaused = true;
-		changeState(READYUP);
-		score->active = players->at("bombot1")->getController();
-		m_parent->getGameState("score")->setPaused(winner);
-	}
-
 }
 
 
@@ -542,7 +601,7 @@ int Game::deathCheck()
 	{
 		auto gameobject = itr->second;
 
-		if (gameobject->getHealth() > 0)
+		if (gameobject->getHealth() > 0 && gameobject->isActive())
 		{
 			counter++;
 			winner = gameobject->getPlayerNum() + 1;
@@ -865,9 +924,17 @@ void Game::changeState(Game::GAME_STATE newState)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
 		}
+		for (auto it : *readyUpRings)
+		{
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
+		}
 		break;
 	case Game::MAIN:
 		for (auto it : *obstacles)
+		{
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
+		}
+		for (auto it : *readyUpRings)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
 		}

@@ -14,22 +14,25 @@ public:
 		int _playerNum);
 
 	inline int getPlayerNum() { return playerNum; }
+	void setPosition(glm::vec3);
 
 private:
 	int playerNum;
-};
-
-enum PLAYER_STATE
-{
-	P_NORMAL,
-	P_INVINCIBLE,
-	P_DEAD
 };
 
 // Player class takes in player input and performs movement
 // It also handles collision between players and bombs.
 class Player : public GameObject
 {
+public:
+	enum PLAYER_STATE
+	{
+		P_INACTIVE,
+		P_NORMAL,
+		P_INVINCIBLE,
+		P_DEAD
+	};
+
 public:
 	Player(glm::vec3 position,
 		std::shared_ptr<Loader> _mesh,
@@ -56,6 +59,8 @@ public:
 	glm::vec3 getCurrentVelocity();
 
 	inline bool isReady() { return ready; }
+	inline bool isActive() { return currentState != P_INACTIVE; }
+	inline void setActive(bool active) { currentState = (active) ? P_NORMAL : P_INACTIVE; }
 
 	void setAnim(std::string);
 	int getHealth();

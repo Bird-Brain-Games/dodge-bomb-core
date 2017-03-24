@@ -38,6 +38,7 @@ public:
 		std::map<std::string, std::shared_ptr<Player>>*,
 		std::map<std::string, std::shared_ptr<Material>>*,
 		std::vector<std::shared_ptr<GameObject>>*,
+		std::vector<std::shared_ptr<GameObject>>*,
 		std::shared_ptr<BombManager>,
 		Pause*, Score*, Camera*);
 
@@ -51,7 +52,9 @@ private:
 	//secondary functions (called in update and draw)
 	int deathCheck();
 	void resetPlayers();
+	void makePlayersInactive();
 	void updateScene(float dt);
+	void updateReadyPass(float dt);
 	void drawScene();
 	void setMaterialForAllGameObjects(std::string materialName);
 	void setMaterialForAllPlayerObjects(std::string materialName);
@@ -92,12 +95,15 @@ private:
 	std::map<std::string, std::shared_ptr<Player>>* players;
 	std::map<std::string, std::shared_ptr<Material>>* materials;
 	std::vector<std::shared_ptr<GameObject>>* obstacles;
+	std::vector<std::shared_ptr<GameObject>>* readyUpRings;
+	std::vector<glm::vec3> defaultPlayerPositions;
 
 	Pause* pause;
 	Score* score;
 	Camera * camera;
 	int pausing;
 	float pauseTimer;
+	float menuDelay;
 
 	LUT contrastLUT;
 	LUT sepiaLUT;
