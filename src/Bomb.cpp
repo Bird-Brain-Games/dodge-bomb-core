@@ -51,7 +51,7 @@ bool BombManager::init(
 
 		// Create the explosion rigidBody
 		std::unique_ptr<RigidBody> explosionBody =
-			std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter);
+			std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
 		explosionBody->load(_explosionBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 		explosionObject->attachRigidBody(explosionBody);
 

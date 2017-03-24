@@ -642,7 +642,7 @@ void initializeScene()
 	botleftBody		= std::make_unique<RigidBody>();
 	topwallBody = std::make_unique<RigidBody>();
 	lampBody = std::make_unique<RigidBody>();
-	ring1Body = std::make_unique<RigidBody>();
+	ring1Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
 
 	// Test gameobject load times
 	std::cout << "loading rigidBodies...";
@@ -671,7 +671,7 @@ void initializeScene()
 	botleftBody->load(botleftBodyPath);
 	topwallBody->load(topwallBodyPath);
 	lampBody->load(lampBodyPath);
-	ring1Body->load(ringBodyPath);
+	ring1Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 	// Report rigidbody load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -826,13 +826,13 @@ void bulletNearCallback(btBroadphasePair& collisionPair,
 	// Only dispatch the Bullet collision information if you want the physics to continue
 	// From Bullet user manual
 
-	if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
+	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter ||
 		collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
 	{
 		return;
-	}
+	}*/
 
 	// Tell the dispatcher to do the collision information
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
@@ -852,6 +852,9 @@ void collideWithCorrectType(Player* player, GameObject* object)
 		break;
 	case GameObject::BOMB_EXPLOSION:
 		player->checkCollisionWith((Explosion*)object);
+		break;
+	case GameObject::READYUP:
+		player->checkCollisionWith((readyUpRing*)object);
 		break;
 	default:
 		break;

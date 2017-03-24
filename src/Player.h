@@ -4,6 +4,21 @@
 #include "Bomb.h"
 #include "controller.h"
 
+class readyUpRing : public GameObject
+{
+public:
+	readyUpRing(glm::vec3 position,
+		std::shared_ptr<Loader> _mesh,
+		std::shared_ptr<Material> _material,
+		std::shared_ptr<Texture> _texture,
+		int _playerNum);
+
+	inline int getPlayerNum() { return playerNum; }
+
+private:
+	int playerNum;
+};
+
 enum PLAYER_STATE
 {
 	P_NORMAL,
@@ -36,8 +51,11 @@ public:
 	void checkCollisionWith(GameObject* other);
 	void checkCollisionWith(Bomb* other);
 	void checkCollisionWith(Explosion* other);
+	void checkCollisionWith(readyUpRing* other);
 	int getPlayerNum();
 	glm::vec3 getCurrentVelocity();
+
+	inline bool isReady() { return ready; }
 
 	void setAnim(std::string);
 	int getHealth();
@@ -62,6 +80,7 @@ private:
 	// Player stats
 	int health;
 	PLAYER_STATE currentState;
+	bool ready;	// For ready up
 
 	// Invincibility variables
 	bool isFlashing;
@@ -89,22 +108,4 @@ private:
 	static float dashMinSpeed;	// when the player reaches this, stop dashing
 	static float maxDashCooldown;
 	static float maxDashDuration;
-};
-
-class readyUpRing : public GameObject
-{
-public:
-	readyUpRing(glm::vec3 position,
-		std::shared_ptr<Loader> _mesh,
-		std::shared_ptr<Material> _material,
-		std::shared_ptr<Texture> _texture,
-		int _playerNum);
-
-	inline int getPlayerNum() { return playerNum; }
-	inline bool isReady() { return ready; }
-	inline void setReady(bool _ready) { ready = _ready; }
-
-private:
-	int playerNum;
-	bool ready;
 };
