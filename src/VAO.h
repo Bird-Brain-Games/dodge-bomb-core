@@ -54,11 +54,14 @@ public:
 	~VAO();
 
 	int addAttribute(Attribute attrib);
-	void createVAO();
+	void createVAO(GLenum = GL_STATIC_DRAW);
 	void draw();
 	void drawLines();
 	void destroy();
-
+	void setPrimitive(GLenum);
+	Attribute* getAttribute(AttributeLocations);
+	unsigned int getVAO();
+	unsigned int getVBO(AttributeLocations);
 private:
 
 	//a handle to our VAO. which we use to tell opengl what VBO's to use
@@ -68,4 +71,7 @@ private:
 	std::vector<unsigned int> vboHandles;
 	//Pointer to our arrays of data.
 	std::vector<Attribute> attributes;
+
+	GLenum primitiveType; // defaults to triangles.
+
 };
