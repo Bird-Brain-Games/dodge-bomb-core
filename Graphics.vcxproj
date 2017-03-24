@@ -96,6 +96,7 @@
     <ClCompile Include="src\MainMenuState.cpp" />
     <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\node.cpp" />
+    <ClCompile Include="src\particles.cpp" />
     <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />
@@ -138,6 +139,7 @@
     <ClInclude Include="src\material.h" />
     <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\node.h" />
+    <ClInclude Include="src\particles.h" />
     <ClInclude Include="src\PauseState.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\RigidBody.h" />

@@ -70,6 +70,9 @@
     <ClCompile Include="src\Texture2D.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\particles.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />
@@ -147,6 +150,9 @@
       <Filter>States\States</Filter>
     </ClInclude>
     <ClInclude Include="src\Texture2D.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\particles.h">
       <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
