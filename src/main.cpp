@@ -518,6 +518,11 @@ void initializeScene()
 	gameobjects["cannon"]->emissiveLight = 0.3f;
 	obstacles.push_back(gameobjects["cannon"]);
 
+	gameobjects["cannonbox"] = std::make_shared<GameObject>(
+		glm::vec3(23.f, 43.0f, 10.f), nullptr, defaultMaterial, nullptr);
+	gameobjects["cannonbox"]->setRotationAngleZ(68 * degToRad);
+	gameobjects["cannonbox"]->setScale(glm::vec3(1.7f));
+
 	gameobjects["crate"] = std::make_shared<GameObject>(
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
 	gameobjects["crate"]->setScale(glm::vec3(1.6));
@@ -573,7 +578,7 @@ void initializeScene()
 	std::string barrelBodyPath = "assets\\bullet\\barrel.btdata";
 	std::string boulderBodyPath = "assets\\bullet\\scaledboulder.btdata";
 	std::string crateBodyPath = "assets\\bullet\\scaledcrate.btdata";
-	std::string cannonBodyPath = "assets\\bullet\\scaledcannon.btdata";
+	std::string cannonBodyPath = "assets\\bullet\\cannon.btdata";
 	std::string boatBodyPath = "assets\\bullet\\scaledboat.btdata";
 	std::string sketchBodyPath = "assets\\bullet\\sketch.btdata";
 	std::string trumpBodyPath = "assets\\bullet\\Trumps_wall.btdata";
@@ -677,7 +682,7 @@ void initializeScene()
 	gameobjects["boulder2"]->attachRigidBody(boulder2Body);
 	gameobjects["crate"]->attachRigidBody(crateBody);
 	gameobjects["crate2"]->attachRigidBody(crate2Body);
-	gameobjects["cannon"]->attachRigidBody(cannonBody);
+	gameobjects["cannonbox"]->attachRigidBody(cannonBody);
 	gameobjects["boat"]->attachRigidBody(boatBody);
 	gameobjects["sketch"]->attachRigidBody(sketchBody);
 	gameobjects["trumps_wall"]->attachRigidBody(trumpBody);
