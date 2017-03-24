@@ -166,6 +166,9 @@ void Player::update(float dt)
 	// Make it so they can't rotate through physics
 	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 0.0, 0.0));	
 	rigidBody->getBody()->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
+
+	// Set the ready status to false if not colliding with ring
+	ready = false;
 }
 
 void Player::handleInput(float dt)
@@ -318,6 +321,16 @@ void Player::checkCollisionWith(Bomb* other)
 	}	
 }
 
+void Player::checkCollisionWith(readyUpRing* other)
+{
+	if (other == nullptr) return;
+
+	if (other->getPlayerNum() == playerNum)
+	{
+		ready = true;
+	}
+}
+
 void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
 {
 	GameObject::attachRigidBody(_rb);
@@ -369,6 +382,7 @@ void Player::reset(glm::vec3 newPos)
 	currentState = P_NORMAL;
 	con.setVibration(0, 0);
 	isDashing = false;
+	ready = false;
 	currentDashCooldown = 0.0f;
 	currentDashDuration = 0.0f;
 }
@@ -396,5 +410,6 @@ readyUpRing::readyUpRing(glm::vec3 position,
 	: GameObject(position, _mesh, _material, _texture),
 	playerNum(_playerNum)
 {
-
+	colliderType = COLLIDER_TYPE::READYUP;
+	
 }

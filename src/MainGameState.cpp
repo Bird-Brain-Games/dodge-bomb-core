@@ -154,17 +154,29 @@ void Game::update(float dt)
 
 	handleKeyboardInput();
 
+	// Change the state if everyone is ready
+	if (currentGameState != MAIN)
+	{
+		bool allReady = true;
+		bool startPressed = false;
+		for (auto it : *players)
+		{
+			// Ready up
+			if (!it.second->getController()->conButton(XINPUT_GAMEPAD_X))
+			{
+				allReady = false;
+			}
+			if (it.second->getController()->conButton(XINPUT_GAMEPAD_START))
+			{
+				startPressed = true;
+			}
+		}
+		if (allReady && startPressed)
+			changeState(MAIN);
+	}
+
 	// Update all gameobjects
 	updateScene(dt);
-
-	for (auto it : *players)
-	{
-		// Ready up
-		if (it.second->getController()->conButton(XINPUT_GAMEPAD_X))
-		{
-			changeState(MAIN);
-		}
-	}
 
 	pauseTimer += dt;
 
@@ -859,6 +871,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
 		}
+		resetPlayers();
 		break;
 	default:
 		break;
