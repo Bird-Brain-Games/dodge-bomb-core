@@ -19,6 +19,23 @@
 
 namespace TTK
 {
+	//class TextureManager
+	//{
+	//public:
+	//	TextureManager();
+	//	~TextureManager();
+
+	//	// Description:
+	//	// Loads texture at specified location.
+	//	// file path is relative to the executable.
+	//	// If createGLTexture is true, the texture data will be sent to vram and a handle will be created
+	//	// otherwise, only the data will be loaded (accessible with "data")
+	//	unsigned int loadTexture(std::string fileName, bool createGLTexture, bool flip);
+	//private:
+	//	std::map<std::string, unsigned int> textureNames;
+
+	//};
+
 	class Texture2D
 	{
 	public:

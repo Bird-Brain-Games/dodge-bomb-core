@@ -9,6 +9,7 @@
 #include <math.h>
 #include <map> // for std::map
 #include <memory> // for std::shared_ptr
+#include <chrono> // for time
 
 // 3rd Party Libraries
 #include <GLEW\glew.h>
@@ -66,6 +67,7 @@ std::map<std::string, std::shared_ptr<Texture>> textures;
 
 // Materials
 std::map<std::string, std::shared_ptr<Material>> materials;
+
 
 // Controls
 bool inMenu = false;
@@ -227,13 +229,9 @@ void initializeScene()
 	std::shared_ptr<Holder> bombotMesh3 = std::make_shared<Holder>();
 	std::shared_ptr<Holder> bombotMesh4 = std::make_shared<Holder>();
 
-	//loadAnimations(bombotMesh2);
-
-	// Load all meshes
-	tableMesh->load(meshPath + "translatedtable.obj");
-	barrelMesh->load(meshPath + "barrel.obj");
-	cannonMesh->load(meshPath + "scaledcannon.obj");
-	sphereMesh->load(meshPath + "sphere.obj");
+	// Test animation load times
+	std::cout << "Loading animations...";
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
 	// function wrapper for loading animations. makes less cluttered
 	loadAnimations(bombotMesh);
@@ -241,9 +239,20 @@ void initializeScene()
 	loadAnimations(bombotMesh3);
 	loadAnimations(bombotMesh4);
 
+	// Report animation load times
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << " success, total " << duration << "ms taken" << std::endl;
 
+	// Test mesh load times
+	std::cout << "Loading meshes...";
+	t1 = std::chrono::high_resolution_clock::now();
 
-
+	// Load all meshes
+	tableMesh->load(meshPath + "translatedtable.obj");
+	barrelMesh->load(meshPath + "barrel.obj");
+	cannonMesh->load(meshPath + "scaledcannon.obj");
+	sphereMesh->load(meshPath + "sphere.obj");
 	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
 	bombMesh->load(meshPath + "bomb.obj");
@@ -256,6 +265,11 @@ void initializeScene()
 	organizerMesh->load(meshPath + "scaledorganizer.obj");
 	mapMesh->load(meshPath + "scaledmap.obj");
 	markerMesh->load(meshPath + "scaledmarker.obj");
+
+	// Report mesh load times
+	t2 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << " success, total " << duration << "ms taken" << std::endl << std::endl;
 
 	// Add all meshes to map
 	meshes["table"] = tableMesh;
@@ -281,6 +295,10 @@ void initializeScene()
 	////////////////////////////	TEXTURES	///////////////////////////////
 	// Load textures (WIP)
 	// Has to take char* due to ILUT (DOESN'T HAVE TO ANYMORE)
+
+	// Test texture load times
+	std::cout << "Loading textures..." << std::endl;
+	t1 = std::chrono::high_resolution_clock::now();
 
 	std::string bombot1Tex = "Assets/img/bombot(diffuse)2.png";
 	std::string bombot2Tex = "Assets/img/bombot(diffuse)1.png";
@@ -359,7 +377,10 @@ void initializeScene()
 	std::string boatTex = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
-
+	// Report texture load times
+	t2 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << "success, texture loading took " << duration << "ms" << std::endl << std::endl;
 
 	//Add textures to the map
 	textures["default"] = deskTexMap;
@@ -396,6 +417,10 @@ void initializeScene()
 	auto defaultMaterial = materials["default"];
 
 	// Set the Scene
+
+	// Test gameobject load times
+	std::cout << "Initializing gameObjects...";
+	t1 = std::chrono::high_resolution_clock::now();
 
 	gameobjects["table"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
@@ -530,6 +555,11 @@ void initializeScene()
 	players["bombot4"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
 	gameobjects["bombot4"] = players["bombot4"];
+
+	// Report gameObject init times
+	t2 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << " success, " << duration << "ms taken" << std::endl;
 	
 
 	///////////////////////////////////////////////////////////////////////////
@@ -601,6 +631,10 @@ void initializeScene()
 	topwallBody = std::make_unique<RigidBody>();
 	lampBody = std::make_unique<RigidBody>();
 
+	// Test gameobject load times
+	std::cout << "loading rigidBodies...";
+	t1 = std::chrono::high_resolution_clock::now();
+
 	// Load rigidbodies
 	tableBody->load(tableBodyPath);
 	bombot1Body->load(bombotBodyPath);
@@ -624,6 +658,11 @@ void initializeScene()
 	botleftBody->load(botleftBodyPath);
 	topwallBody->load(topwallBodyPath);
 	lampBody->load(lampBodyPath);
+
+	// Report rigidbody load times
+	t2 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << " success, " << duration << "ms taken" << std::endl << std::endl;
 
 	// Attach rigidbodies
 	gameobjects["table"]->attachRigidBody(tableBody);
@@ -695,6 +734,11 @@ void initializeScene()
 
 void initializeStates()
 {
+
+	// Test atlas load times
+	std::cout << "Loading atlases..." << std::endl;
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+
 	//load textures
 	char startTex[] = "Assets/img/menMain_atlas.png";
 	std::shared_ptr<Texture> startTexMap = std::make_shared<Texture>(startTex, startTex, 1.0f);
@@ -708,6 +752,10 @@ void initializeStates()
 	char pauseTex[] = "Assets/img/menPause_arlas.png";
 	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
 
+	// Report atlas load times
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << "success, total " << duration << "ms taken" << std::endl << std::endl;
 
 	//save them
 	textures["start"] = startTexMap;
@@ -728,6 +776,9 @@ void initializeStates()
 	pauseMenu = std::make_shared<Menu>(pauseTexMap, 4, 7);
 	pauseMenu->setMaterial(materials["menu"]);
 
+	std::cout << "Loading states...";
+	t1 = std::chrono::high_resolution_clock::now();
+
 	//init states.
 	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController());
 	mainMenu->setPaused(false);
@@ -745,6 +796,11 @@ void initializeStates()
 	states.addGameState("MainMenu", mainMenu);
 	states.addGameState("pause", pause);
 	states.addGameState("score", score);
+
+	// Report state load times
+	t2 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << " success, total " << duration << "ms taken" << std::endl;
 
 }
 
@@ -1023,10 +1079,20 @@ int main(int argc, char **argv)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
+	// Load time monitoring
+	std::chrono::high_resolution_clock::time_point totalStart, totalFinish;
+	totalStart = std::chrono::high_resolution_clock::now();
+
 	// Initialize scene
 	initializeShaders();
 	initializeScene();
 	initializeStates();
+
+	totalFinish = std::chrono::high_resolution_clock::now();
+	auto durationMS = std::chrono::duration_cast<std::chrono::milliseconds>(totalFinish - totalStart).count();
+	auto durationS = std::chrono::duration_cast<std::chrono::seconds>(totalFinish - totalStart).count();
+	std::cout << "Total time to initialize: " << durationMS << " ms or " << durationS << " seconds" << std::endl;
+
 
 	/* Start Game Loop */
 	deltaTime = glutGet(GLUT_ELAPSED_TIME);

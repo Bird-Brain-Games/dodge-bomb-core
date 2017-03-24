@@ -2,6 +2,7 @@
 #include "Texture2D.h"
 #include "IL/ilut.h"
 #include <iostream>
+#include <chrono>
 
 TTK::Texture2D::Texture2D()
 {
@@ -32,7 +33,10 @@ int TTK::Texture2D::height()
 
 unsigned int TTK::Texture2D::loadTexture(std::string filename, bool createGLTexture, bool flip)
 {
+	// Recording time taken
 	std::cout << "Loading texture " << filename << "...";
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+
 	glEnable(GL_TEXTURE_2D);
 
 	ilGenImages(1, &texID);
@@ -111,7 +115,9 @@ unsigned int TTK::Texture2D::loadTexture(std::string filename, bool createGLText
 	if (flip)
 		delete[] dataPtr;
 
-	std::cout << " success" << std::endl;
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << " success, " << duration << "ms taken" << std::endl;
 	return texID;
 }
 

@@ -19,7 +19,7 @@ public:
 	void setShininess(float);
 
 private:
-	TTK::Texture2D diffuseTex;
-	TTK::Texture2D specularTex;
+	std::shared_ptr<TTK::Texture2D> diffuseTex;
+	std::shared_ptr<TTK::Texture2D> specularTex;
 	float shininess;
 };
