@@ -96,7 +96,7 @@ Game::Game
 {
 	scene = _scene;
 	players = _player;
-	//materials = _materials;
+	materials = _materials;
 	pause = _pause;
 	score = _score;
 	camera = _camera;
@@ -125,7 +125,7 @@ Game::Game
 	textures = _texture;
 
 	testing.material = materials->at("particles");
-	testing.texture = textures->at("smoke");//may not be right
+	testing.texture = textures->at("particles");
 	testing.initialize(1000);
 	testing.play();
 

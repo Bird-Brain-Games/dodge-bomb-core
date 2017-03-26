@@ -6,6 +6,7 @@
 #include <memory>
 #include "Texture2D.h"
 #include <math.h>
+#include "Texture.h"
 #include "material.h"
 
 class ParticleEmmiter // using soa principle
@@ -46,7 +47,7 @@ public:
 
 	std::shared_ptr<Material> material;
 
-	std::shared_ptr<TTK::Texture2D> texture;
+	std::shared_ptr<Texture> texture;
 
 private:
 	unsigned int numParticles;
