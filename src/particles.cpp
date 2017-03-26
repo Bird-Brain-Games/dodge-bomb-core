@@ -92,7 +92,7 @@ void ParticleEmmiter::draw(Camera* _camera)
 
 	if (texture)
 	{
-		texture->bind(GL_TEXTURE0);
+		texture->bind(GL_TEXTURE0, GL_TEXTURE1);
 	}
 
 	glDepthMask(GL_FALSE);

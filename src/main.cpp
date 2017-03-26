@@ -192,7 +192,7 @@ void initializeShaders()
 	materials["shadow"]->shader->linkProgram();
 
 	// Unlit texture material with point-to-quad geometry shader
-	materials["particles"] = std::make_shared<Material>();
+	materials["particles"] = std::make_shared<Material>("particles");
 	materials["particles"]->shader->attachShader(v_passThru);
 	materials["particles"]->shader->attachShader(g_particles); // Geometry Shader!
 	materials["particles"]->shader->attachShader(f_unlitTex);
