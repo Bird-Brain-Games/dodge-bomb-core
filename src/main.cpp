@@ -1,8 +1,6 @@
 // Graham Watson 100522240
 // Robert Savaglio 100591436
 
-
-
 // Core Libraries
 #include <iostream>
 #include <string>
@@ -57,7 +55,6 @@ float movementSpeed = 5.0f;
 Camera playerCamera; // the camera you move around with wasd
 Camera shadowCamera; // Camera for the shadow map
 
-
 // Asset databases
 std::map<std::string, std::shared_ptr<Loader>> meshes;
 std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
@@ -67,7 +64,6 @@ std::map<std::string, std::shared_ptr<Texture>> textures;
 
 // Materials
 std::map<std::string, std::shared_ptr<Material>> materials;
-
 
 // Controls
 bool inMenu = false;
@@ -804,6 +800,8 @@ void initializeStates()
 
 }
 
+void initializeSounds();
+
 void bulletNearCallback(btBroadphasePair& collisionPair,
 	btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo)
 {
@@ -1087,6 +1085,9 @@ int main(int argc, char **argv)
 	initializeShaders();
 	initializeScene();
 	initializeStates();
+
+	//Initialize Sounds (Handled in SoundDriver.h)
+	initializeSounds();
 
 	totalFinish = std::chrono::high_resolution_clock::now();
 	auto durationMS = std::chrono::duration_cast<std::chrono::milliseconds>(totalFinish - totalStart).count();

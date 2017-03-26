@@ -149,6 +149,9 @@
     <ClInclude Include="src\Texture2D.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\SoundDriver.h">
+      <Filter>External engines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Graphics">

@@ -3,6 +3,7 @@
 #include "gl\freeglut.h"
 #include "InputManager.h"
 #include "FrameBufferObject.h"
+#include "SoundDriver.h"
 
 void MainMenu::update(float dt)
 {
@@ -19,6 +20,7 @@ void MainMenu::update(float dt)
 			{
 				setPaused(true);
 				m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
+				
 			}
 			break;
 		case 3:
@@ -78,9 +80,11 @@ MainMenu::MainMenu(std::shared_ptr<Menu> _atlas, Controller* _con)
 void MainMenu::setPaused(int _state)
 {
 	m_isPaused = _state;
-	if (!_state)
+	if (!_state)// set this state to play
 	{
 		atlas->setSpot(glm::vec2(0, position));
 		accept = 0;
+
+		playSounds(1);
 	}
 }

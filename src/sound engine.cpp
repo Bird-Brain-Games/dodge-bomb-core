@@ -2,7 +2,8 @@
 january 2017
 */
 #include "sound engine.h"
-//initializes our sound engine as a global variables
+
+//initializes our sound engine as a global variable
 SoundEngine Sound::sys;
 
 //checks whether functions returned an error or not
@@ -13,19 +14,22 @@ void checkResult(FMOD_RESULT result)
 		std::string msg = FMOD_ErrorString(result);
 	}
 }
+
 //initializes the sound engine to default variables
 SoundEngine::SoundEngine()
 {
 	initialized = false;
+
 	system = NULL;
 	driverData = NULL;
 
 	forward = { 0.0f, 0.0f, 1.0f };
 	up = { 0.0f, 1.0f, 0.0f };
-	listenerpos = { 0.0f, 0.0f, 0.0f };
-	vel = {0.0f, 0.0f, 0.0f};
+	listenerpos = { 0.0f, 5.0f, 0.0f };
+	vel = { 0.0f, 0.0f, 0.0f };
 
 }
+
 // deconstructs the sound engine
 SoundEngine::~SoundEngine()
 {
@@ -35,6 +39,7 @@ SoundEngine::~SoundEngine()
 		result = system->release(); checkResult(result);
 	}
 }
+
 //Loads all the variables with the correct values
 bool SoundEngine::init()
 {
@@ -50,25 +55,24 @@ bool SoundEngine::init()
 			std::cout << "FMOD lib version does not match. \n";
 			return false;
 		}
+
 		//init the system
 		result = system->init(100, FMOD_INIT_NORMAL, driverData);
+		checkResult(result);//error checking
 
-		//error checking
-		checkResult(result);
 		if (result != FMOD_OK)
 		{
 			std::cout << "Failed to initialize sound card drivers\n";
 			return false;
 		}
 
-
 		//Set the distance unit (meters/feet etc).
 		result = system->set3DSettings(1.0, 1.0, 3.0f);
 		checkResult(result);
 		initialized = true;
 	}
-		return true;
-	
+	return true;
+
 }
 
 //updates the sound engine
@@ -78,16 +82,16 @@ void SoundEngine::update()
 	result = system->set3DListenerAttributes(0, &listenerpos, &vel, &forward, &up);
 	checkResult(result);
 
-	
 	//updates the system
 	result = system->update();
 	checkResult(result);
 }
 
 //Updates the sound's position and calls the engines update function
-void Sound::systemUpdate()
+void Sound::updateSound(FMOD_VECTOR _pos, FMOD_VECTOR _vel)
 {
-	sys.result = channel->set3DAttributes(&pos, &vel); checkResult(sys.result);
+	sys.result = channel->set3DAttributes(&_pos, &_vel);
+	checkResult(sys.result);
 	sys.update();
 }
 
@@ -107,7 +111,7 @@ Sound::~Sound()
 }
 
 //loads the sound from the file path specificied
-bool Sound::load(const char* filename)
+bool Sound::load(char * filename)
 {
 	//initializes the sys
 	sys.init();
@@ -116,17 +120,19 @@ bool Sound::load(const char* filename)
 	sys.result = sys.system->createSound((filename), FMOD_3D, 0, &sound); checkResult(sys.result);
 
 
-	if (sys.result != FMOD_OK)//checks whether the file opened properly or noth
+	if (sys.result != FMOD_OK)//checks whether the file opened properly or not
 	{
 		std::cout << "could not open the file" << filename << std::endl;
 		checkResult(sys.result);
 		return false;
 	}
+
 	//sets how the sound behaves as its position changes
 	sys.result = sound->set3DMinMaxDistance(0.5f, 50.0f); checkResult(sys.result);
+
 	//Sets how the sound will play (loop, single play etc)
 	sys.result = sound->setMode(FMOD_LOOP_NORMAL); checkResult(sys.result);
-	
+
 	//sys.result = channel1->setPaused(false); checkResult(sys.result);
 	return true;
 }

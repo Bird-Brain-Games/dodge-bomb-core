@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>//essentially a vector/array that we have more control over. 
+#include "sound engine.h" //Userdefined sound egine
 
 class GameState;
 

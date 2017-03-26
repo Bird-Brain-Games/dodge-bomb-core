@@ -27,6 +27,7 @@ public:
 	//engine variables
 	FMOD_RESULT		 result;
 	unsigned int     version;
+
 	FMOD::System    *system;
 	void            *driverData;
 
@@ -36,8 +37,6 @@ public:
 	FMOD_VECTOR vel;
 	FMOD_VECTOR listenerpos;
 
-
-	
 private:
 	//whether its been initialized or not
 	bool initialized;
@@ -52,11 +51,11 @@ public:
 	~Sound();
 
 	//loads the specificied file
-	bool load(const char *filename);
+	bool load(char * filename);
 	//plays the sound loaded
 	void play();
 	//updates the sounds position and calls the engines update function
-	void systemUpdate();
+	void updateSound(FMOD_VECTOR _pos, FMOD_VECTOR _vel);
 	//changes what method of rollof is being used.
 	void setRollOff(FMOD_MODE);
 	//pauses the sound

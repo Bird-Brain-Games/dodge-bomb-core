@@ -145,6 +145,7 @@
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\ShaderProgram.h" />
     <ClInclude Include="src\sound engine.h" />
+    <ClInclude Include="src\SoundDriver.h" />
     <ClInclude Include="src\states.h" />
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\Texture2D.h" />
