@@ -51,6 +51,8 @@ Game* game;
 Score* score;
 Pause* pause;
 
+
+
 glm::vec3 position;
 float movementSpeed = 5.0f;
 
@@ -111,9 +113,10 @@ void initializeShaders()
 	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);//
 
 	// Geometry Shaders
-	Shader g_quad, g_menu;
+	Shader g_quad, g_menu, g_particles;
 	g_quad.loadShaderFromFile(shaderPath + "quad.geom", GL_GEOMETRY_SHADER);
 	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
+	g_particles.loadShaderFromFile(shaderPath + "particles.geom", GL_GEOMETRY_SHADER);
 
 	// No Lighting material
 	materials["noLighting"] = std::make_shared<Material>("noLighting");
@@ -187,6 +190,13 @@ void initializeShaders()
 	materials["shadow"]->shader->attachShader(v_shadow);
 	materials["shadow"]->shader->attachShader(f_shadow);
 	materials["shadow"]->shader->linkProgram();
+
+	// Unlit texture material with point-to-quad geometry shader
+	materials["particles"] = std::make_shared<Material>();
+	materials["particles"]->shader->attachShader(v_passThru);
+	materials["particles"]->shader->attachShader(g_particles); // Geometry Shader!
+	materials["particles"]->shader->attachShader(f_unlitTex);
+	materials["particles"]->shader->linkProgram();
 }
 
 void initializeScene()
@@ -790,7 +800,7 @@ void initializeStates()
 	score = new Score(scoreMenu);
 	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, &obstacles, bombManager, pause, score, &playerCamera);
+	game = new Game(&gameobjects, &players, &materials, &obstacles, bombManager, pause, score, &playerCamera, &textures);
 	game->setPaused(true);
 
 	states.addGameState("game", game);

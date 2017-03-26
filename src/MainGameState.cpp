@@ -81,18 +81,22 @@ void LUT::unbind(GLuint textureUnit)
 	glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
+Game::Game
+(
+	std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
 	std::map<std::string, std::shared_ptr<Material>>* _materials,
 	std::vector<std::shared_ptr<GameObject>>* _obstacles,
 	std::shared_ptr<BombManager> _manager,
-	Pause* _pause, Score* _score, Camera* _camera)
+	Pause* _pause, Score* _score, Camera* _camera,
+	std::map<std::string, std::shared_ptr<Texture>>* _texture
+)
 
 	: obstacles(_obstacles)
 {
 	scene = _scene;
 	players = _player;
-	materials = _materials;
+	//materials = _materials;
 	pause = _pause;
 	score = _score;
 	camera = _camera;
@@ -109,10 +113,22 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	toonRamp = ilutGLLoadImage("Assets/img/toonRamp.png");
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, toonRamp);
-
+	
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
+
+	testing.lifeRange = glm::vec3(1.0, 3.0, 0.0);
+	testing.initialForceMin = glm::vec3(-3.0, 5.0, -4.0);
+	testing.initialForceMin = glm::vec3(3.0, 15.0, -10.0);
+
+	textures = _texture;
+
+	testing.material = materials->at("particles");
+	testing.texture = textures->at("smoke");//may not be right
+	testing.initialize(1000);
+	testing.play();
+
 }
 
 void Game::setPaused(int a_paused)
