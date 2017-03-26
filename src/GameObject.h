@@ -68,7 +68,8 @@ public:
 	virtual void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	virtual void checkCollisionWith(GameObject* other);
 
-	void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
+	inline void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
+	inline std::shared_ptr<Material> getMaterial() { return material; }
 
 	// Other Properties
 	std::string name;
