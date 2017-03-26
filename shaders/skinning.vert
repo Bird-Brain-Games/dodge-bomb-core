@@ -10,7 +10,7 @@ layout (location = 9) in vec4 weights; //The weights for the bones we are using.
 uniform mat4 u_mvp; // model view projection matrix
 uniform mat4 u_mv; // model view matrix
 uniform int skinning; // used to control whether we skin or not
-
+uniform mat4 u_lmvp; // main light MVP matrix
 
 uniform int boneCount;
 uniform highp mat4 BoneMatrixArray[28];
@@ -21,7 +21,8 @@ out VertexData
 	vec3 normal;
 	vec2 texCoord;
 	vec4 colour;
-	vec3 posEye;
+	vec3 posEye; // eye space
+	vec3 posInLight; // light space (shadow map)
 } vOut;
 
 
@@ -30,10 +31,6 @@ out VertexData
 
 void main()
 {
-
-	vOut.texCoord = vIn_uv;
-	vOut.colour = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 	vec4 normalM = vec4(vIn_normal, 0.0);
 	highp vec4 position = vec4(vIn_vertex, 1.0);
 
@@ -60,9 +57,12 @@ void main()
 			boneWeights = boneWeights.yzwx;
 		}
 	}
-
+	
+	vOut.texCoord = vIn_uv;
+	vOut.colour = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	vOut.normal = (u_mv * normalM).xyz;
 	vOut.posEye = (u_mv * position).xyz;
+	vOut.posInLight =  (u_lmvp * vec4(vIn_vertex, 1.0)).xyz;
 	
 	gl_Position = u_mvp * position;
 	//colour = vec3(0.0, 0.0, 1.0);

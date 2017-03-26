@@ -52,7 +52,8 @@ private:
 	int deathCheck();
 	void resetPlayers();
 	void updateScene(float dt);
-	void drawScene();
+	void drawScene(Camera* _camera, Camera* _shadow);
+
 	void setMaterialForAllGameObjects(std::string materialName);
 	void setMaterialForAllPlayerObjects(std::string materialName);
 
@@ -83,7 +84,6 @@ private:
 	FrameBufferObject fboUnlit;
 	FrameBufferObject fboBright;
 	FrameBufferObject fboBlur, fboBlurB;
-	FrameBufferObject shadowMap;
 	FrameBufferObject fboColorCorrection;
 	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
 
@@ -116,6 +116,8 @@ private:
 	float outerCutOff = 0.47;
 	glm::vec3 deskForward = glm::vec3(0.2, 1.0, 1.5); // Spot Light Direction
 	float roomLight = 0.4;
+	Camera shadowCamera;
+	FrameBufferObject shadowMap;
 
 	float ambient = 0.1; // Ambient Lighting
 	float diffuse = 1.0f; // Diffuse Lighting

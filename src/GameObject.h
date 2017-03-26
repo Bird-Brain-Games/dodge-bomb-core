@@ -48,8 +48,8 @@ public:
 	void setScale(glm::vec3 newScale);
 	void setOutlineColour(glm::vec4 colour);
 
-	virtual void update(float dt);	
-	virtual void draw(Camera &camera);
+	virtual void update(float dt);
+	virtual void draw(Camera &camera, Camera &shadow);
 
 	// Forward Kinematics
 	// Pass in null to make game object a root node

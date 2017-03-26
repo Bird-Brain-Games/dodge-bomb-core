@@ -237,10 +237,22 @@ void Game::update(float dt)
 
 void Game::draw()
 {
-	fboUnlit.bindFrameBufferForDrawing();
+
+	///////////////////////////// zero pass: shadows.
+	//note up vector maybe wrong.
+
+	shadowCamera.shadowCam(lightPos, -lightPos, glm::vec3(0.0, 1.0, 0.0), 0.01f, 100.01f);
+	setMaterialForAllGameObjects("shadow");
+	setMaterialForAllPlayerObjects("shadow");
+
+	shadowMap.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(clearColor);
+	drawScene(&shadowCamera, &shadowCamera);
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 
 	///////////////////////////// First Pass: Outlines
+	fboUnlit.bindFrameBufferForDrawing();
+	FrameBufferObject::clearFrameBuffer(clearColor);
 	if (outlineToggle)
 	{
 		glCullFace(GL_FRONT);
@@ -254,8 +266,7 @@ void Game::draw()
 		setMaterialForAllGameObjects("outline");
 		setMaterialForAllPlayerObjects("outline");
 		materials->at("outline")->shader->bind();
-		materials->at("outline")->shader->sendUniformInt("skinning", 0);
-		drawScene();
+		drawScene(camera, &shadowCamera);
 
 		glCullFace(GL_BACK); std::map<std::string, std::shared_ptr<Material>> materials;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -281,7 +292,9 @@ void Game::draw()
 		materials->at("toon")->intUniforms["u_toonRamp"] = 5;
 		materials->at("toon")->intUniforms["u_diffuseTex"] = 31;
 		materials->at("toon")->intUniforms["u_specularTex"] = 30;
-		materials->at("toon")->shader->sendUniformInt("skinning", 0);
+
+		shadowMap.bindTextureForSampling(0, GL_TEXTURE29);
+		materials->at("toon")->intUniforms["u_shadowMap"] = 29;
 
 		materials->at("toon")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
 		materials->at("toon")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
@@ -316,7 +329,7 @@ void Game::draw()
 
 
 	}
-	drawScene();
+	drawScene(camera, &shadowCamera);
 
 
 	// Draw the debug (if on)
@@ -385,7 +398,7 @@ void Game::draw()
 		unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
 		unlitMaterial->shader->sendUniformInt("u_tex", 0);
 		unlitMaterial->sendUniforms();
-
+		
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
 	}
@@ -518,16 +531,15 @@ void Game::initializeFrameBuffers()
 	fboColorCorrection.createFrameBuffer(windowWidth, windowHeight, 1, false);
 }
 
-
-
-void Game::drawScene()
+void Game::drawScene(Camera* _camera, Camera* _shadow)
 {
+	scene->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
 	for (auto itr = scene->begin(); itr != scene->end(); ++itr)
 	{
 		auto gameobject = itr->second;
 
 		if (gameobject->isRoot())
-			gameobject->draw(*camera);
+			gameobject->draw(*_camera, *_shadow);
 	}
 
 	players->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 1);
@@ -536,11 +548,11 @@ void Game::drawScene()
 		auto playersObject = itr->second;
 
 		if (playersObject->isRoot())
-			playersObject->draw(*camera);
+			playersObject->draw(*_camera, *_shadow);
 	}
-	bombManager->draw(*camera);
+	scene->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
+	bombManager->draw(*_camera, *_shadow);
 }
-
 
 int Game::deathCheck()
 {
