@@ -89,27 +89,26 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru, v_null, v_skinning, v_shadow;
+	Shader v_default, v_passThru, v_null, v_skinning;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
 	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
-	v_shadow.loadShaderFromFile(shaderPath + "shadowMap_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
-		f_noLighting, f_toon, f_sobel, f_shadow, f_colorCorrection;
-	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);
-	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);
+		f_noLighting, f_toon, f_outline, f_shadow, f_colorCorrection;
+	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);//
+	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);//
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
-	f_composite.loadShaderFromFile(shaderPath + "bloomComposite_f.glsl", GL_FRAGMENT_SHADER);
-	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER);
-	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);
-	f_noLighting.loadShaderFromFile(shaderPath + "noLighting_f.glsl", GL_FRAGMENT_SHADER);
-	f_toon.loadShaderFromFile(shaderPath + "toon_f.glsl", GL_FRAGMENT_SHADER);
-	f_sobel.loadShaderFromFile(shaderPath + "sobel_f.glsl", GL_FRAGMENT_SHADER);
-	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);
-	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);
+	f_composite.loadShaderFromFile(shaderPath + "bloomComposite_f.glsl", GL_FRAGMENT_SHADER);//
+	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER); // not being used right now
+	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);//
+	f_noLighting.loadShaderFromFile(shaderPath + "noLighting_f.glsl", GL_FRAGMENT_SHADER);//
+	f_toon.loadShaderFromFile(shaderPath + "toon_f.glsl", GL_FRAGMENT_SHADER);//
+	f_outline.loadShaderFromFile(shaderPath + "outline_f.glsl", GL_FRAGMENT_SHADER);//
+	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);//
+	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);//
 
 	// Geometry Shaders
 	Shader g_quad, g_menu;
@@ -130,7 +129,7 @@ void initializeShaders()
 
 	// Default material that all objects use
 	materials["toon"] = std::make_shared<Material>("toon");
-	materials["toon"]->shader->attachShader(v_default);
+	materials["toon"]->shader->attachShader(v_skinning);
 	materials["toon"]->shader->attachShader(f_toon);
 	materials["toon"]->shader->linkProgram();
 
@@ -141,11 +140,6 @@ void initializeShaders()
 	materials["colorCorrection"]->shader->attachShader(g_quad);
 	materials["colorCorrection"]->shader->linkProgram();
 
-	//material for our players and there meshes.
-	materials["toonPlayer"] = std::make_shared<Material>("toonPlayer");
-	materials["toonPlayer"]->shader->attachShader(v_skinning);
-	materials["toonPlayer"]->shader->attachShader(f_toon);
-	materials["toonPlayer"]->shader->linkProgram();
 
 	// Material used for menu full screen drawing
 	materials["menu"] = std::make_shared<Material>("menu");
@@ -184,19 +178,13 @@ void initializeShaders()
 
 	// Sobel filter material
 	materials["outline"] = std::make_shared<Material>("outline");
-	materials["outline"]->shader->attachShader(v_passThru);
-	materials["outline"]->shader->attachShader(f_sobel);
+	materials["outline"]->shader->attachShader(v_skinning);
+	materials["outline"]->shader->attachShader(f_outline);
 	materials["outline"]->shader->linkProgram();
-
-	// sobel filter for player
-	materials["sobelPlayer"] = std::make_shared<Material>("sobelPlayer");
-	materials["sobelPlayer"]->shader->attachShader(v_skinning);
-	materials["sobelPlayer"]->shader->attachShader(f_sobel);
-	materials["sobelPlayer"]->shader->linkProgram();
 
 	// Shadow filter material
 	materials["shadow"] = std::make_shared<Material>("shadow");
-	materials["shadow"]->shader->attachShader(v_shadow);
+	materials["shadow"]->shader->attachShader(v_skinning);
 	materials["shadow"]->shader->attachShader(f_shadow);
 	materials["shadow"]->shader->linkProgram();
 }
@@ -465,7 +453,7 @@ void initializeScene()
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["corkboard"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
+		glm::vec3(-5000.0f, -5000.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
 
 	gameobjects["organizer"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), organizerMesh, defaultMaterial, organizerTexMap);
@@ -578,19 +566,15 @@ void initializeScene()
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
-	gameobjects["bombot1"] = players["bombot1"];
 
 	players["bombot2"] = std::make_shared<Player>(
 		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
-	gameobjects["bombot2"] = players["bombot2"];
 	
 	players["bombot3"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
-	gameobjects["bombot3"] = players["bombot3"];
 
 	players["bombot4"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
-	gameobjects["bombot4"] = players["bombot4"];
 
 	// Report gameObject init times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -715,11 +699,12 @@ void initializeScene()
 	std::cout << " success, " << duration << "ms taken" << std::endl << std::endl;
 
 	// Attach rigidbodies
+	players["bombot1"]->attachRigidBody(bombot1Body);
+	players["bombot2"]->attachRigidBody(bombot2Body);
+	players["bombot3"]->attachRigidBody(bombot3Body);
+	players["bombot4"]->attachRigidBody(bombot4Body);
+
 	gameobjects["table"]->attachRigidBody(tableBody);
-	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
-	gameobjects["bombot2"]->attachRigidBody(bombot2Body);
-	gameobjects["bombot3"]->attachRigidBody(bombot3Body);
-	gameobjects["bombot4"]->attachRigidBody(bombot4Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
 	gameobjects["barrelTR"]->attachRigidBody(barrelBody);
 	gameobjects["barrel1"]->attachRigidBody(barrel1Body);
