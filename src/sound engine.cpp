@@ -154,7 +154,8 @@ void Sound::pause()
 }
 
 //changes how the sound rolloff works
-void Sound::setRollOff(FMOD_MODE mode)
+void Sound::switchSoundMode(FMOD_MODE mode)
 {
-	sys.result = channel->setMode(mode); checkResult(sys.result);
+	sys.result = sound->setMode(mode);
+	checkResult(sys.result);
 }

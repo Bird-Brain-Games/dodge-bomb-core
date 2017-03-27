@@ -1,27 +1,31 @@
 #pragma once
 #include "sound engine.h"
 
-//Sound Stuff
-Sound bg_music;
+//Music Declarations
 
-void initializeSounds()
+
+class SoundDriver
 {
-	char* mediaPath = new char[100];
-	mediaPath = "../DODGEBOMB_REP/assets/media/MenuTheme.wav";
-	bg_music.load(mediaPath);
-}
+public:
+	SoundDriver();
+	~SoundDriver();
 
-void playSounds(int _id)
-{
-	int soundID = _id;
+	void loadSounds();//Loads sounds into the engine
 
-	switch (soundID)
-	{
-	case 1: 
-		bg_music.updateSound({ 0.0f, 4.0f, 0.0f }, { 0.0f, 0.0f, 0.0f });
-		bg_music.play();
-		break;
-	default:
-		break;
-	}
-}
+	void playSounds(int _id);//Plays sound as denoted by referenced value
+
+	void pauseSounds(int _id);//Plays sound as denoted by referenced value
+
+	Sound menuTheme_music;
+
+	//FX Declarations
+	Sound menuSelect_fx;
+	Sound menuSwitch_fx;
+
+private:
+	bool audio_init;
+
+};
+
+
+

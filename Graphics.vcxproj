@@ -103,6 +103,7 @@
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
     <ClCompile Include="src\sound engine.cpp" />
+    <ClCompile Include="src\SoundDriver.cpp" />
     <ClCompile Include="src\states.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\Texture2D.cpp" />

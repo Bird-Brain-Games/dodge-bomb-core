@@ -3,7 +3,9 @@
 #include "gl\freeglut.h"
 #include "InputManager.h"
 #include "FrameBufferObject.h"
-#include "SoundDriver.h"
+
+
+bool isPlaying = false;
 
 void MainMenu::update(float dt)
 {
@@ -11,6 +13,7 @@ void MainMenu::update(float dt)
 	timer += dt;
 	accept += dt;
 	
+
 	if (accept > 0.5)
 	{
 		switch (position)
@@ -18,6 +21,13 @@ void MainMenu::update(float dt)
 		case 6:
 			if (con->conButton(XINPUT_GAMEPAD_A))
 			{
+				audio->playSounds(3); //Play select sound
+
+				isPlaying = false;
+				audio->pauseSounds(1); //Turns off Music
+
+				
+
 				setPaused(true);
 				m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
 				
@@ -26,6 +36,7 @@ void MainMenu::update(float dt)
 		case 3:
 			if (con->conButton(XINPUT_GAMEPAD_A))
 			{
+				audio->playSounds(3); //Play select sound
 				glutLeaveMainLoop();
 			}
 			break;
@@ -33,6 +44,9 @@ void MainMenu::update(float dt)
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent(13))
 	{
+		isPlaying = false;
+		audio->pauseSounds(1); //Turns off Music
+
 		setPaused(true);
 		m_parent->getGameState("game")->setPaused(-1); // resets the players by passing in two.
 	}
@@ -43,12 +57,14 @@ void MainMenu::update(float dt)
 		position++;
 		atlas->setSpot(0, position);
 		timer = 0;
+		audio->playSounds(2); //Play switch sound
 	}
 	else if (rStick.y < 0 && position > 3 && timer > 0.35)
 	{
 		position--;
 		atlas->setSpot(0, position);
 		timer = 0;
+		audio->playSounds(2); //Play switch sound
 	}
 
 	if (time > incrememnt)
@@ -64,7 +80,7 @@ void MainMenu::draw()
 	atlas->draw();
 }
 
-MainMenu::MainMenu(std::shared_ptr<Menu> _atlas, Controller* _con)
+MainMenu::MainMenu(std::shared_ptr<Menu> _atlas, Controller* _con, SoundDriver* _audio)
 {
 	atlas = _atlas;
 	position = 6;
@@ -75,6 +91,7 @@ MainMenu::MainMenu(std::shared_ptr<Menu> _atlas, Controller* _con)
 	incrememnt = 0.3;
 	accept = 1;
 	con = _con;
+	audio = _audio;
 }
 
 void MainMenu::setPaused(int _state)
@@ -85,6 +102,6 @@ void MainMenu::setPaused(int _state)
 		atlas->setSpot(glm::vec2(0, position));
 		accept = 0;
 
-		playSounds(1);
+		audio->playSounds(1);
 	}
 }

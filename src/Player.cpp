@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <iostream>
+#include "SoundDriver.h"
 
 const float degToRad = 3.14159f / 180.0f;
 
