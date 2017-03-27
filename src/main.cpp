@@ -62,6 +62,7 @@ Camera shadowCamera; // Camera for the shadow map
 std::map<std::string, std::shared_ptr<Loader>> meshes;
 std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
 std::vector<std::shared_ptr<GameObject>> obstacles;
+std::vector<std::shared_ptr<GameObject>> readyUpRings;
 std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
 
@@ -88,27 +89,26 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru, v_null, v_skinning, v_shadow;
+	Shader v_default, v_passThru, v_null, v_skinning;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
 	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
-	v_shadow.loadShaderFromFile(shaderPath + "shadowMap_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
-		f_noLighting, f_toon, f_sobel, f_shadow, f_colorCorrection;
-	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);
-	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);
+		f_noLighting, f_toon, f_outline, f_shadow, f_colorCorrection;
+	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);//
+	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);//
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
-	f_composite.loadShaderFromFile(shaderPath + "bloomComposite_f.glsl", GL_FRAGMENT_SHADER);
-	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER);
-	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);
-	f_noLighting.loadShaderFromFile(shaderPath + "noLighting_f.glsl", GL_FRAGMENT_SHADER);
-	f_toon.loadShaderFromFile(shaderPath + "toon_f.glsl", GL_FRAGMENT_SHADER);
-	f_sobel.loadShaderFromFile(shaderPath + "sobel_f.glsl", GL_FRAGMENT_SHADER);
-	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);
-	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);
+	f_composite.loadShaderFromFile(shaderPath + "bloomComposite_f.glsl", GL_FRAGMENT_SHADER);//
+	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER); // not being used right now
+	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);//
+	f_noLighting.loadShaderFromFile(shaderPath + "noLighting_f.glsl", GL_FRAGMENT_SHADER);//
+	f_toon.loadShaderFromFile(shaderPath + "toon_f.glsl", GL_FRAGMENT_SHADER);//
+	f_outline.loadShaderFromFile(shaderPath + "outline_f.glsl", GL_FRAGMENT_SHADER);//
+	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);//
+	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);//
 
 	// Geometry Shaders
 	Shader g_quad, g_menu;
@@ -129,7 +129,7 @@ void initializeShaders()
 
 	// Default material that all objects use
 	materials["toon"] = std::make_shared<Material>("toon");
-	materials["toon"]->shader->attachShader(v_default);
+	materials["toon"]->shader->attachShader(v_skinning);
 	materials["toon"]->shader->attachShader(f_toon);
 	materials["toon"]->shader->linkProgram();
 
@@ -140,11 +140,6 @@ void initializeShaders()
 	materials["colorCorrection"]->shader->attachShader(g_quad);
 	materials["colorCorrection"]->shader->linkProgram();
 
-	//material for our players and there meshes.
-	materials["toonPlayer"] = std::make_shared<Material>("toonPlayer");
-	materials["toonPlayer"]->shader->attachShader(v_skinning);
-	materials["toonPlayer"]->shader->attachShader(f_toon);
-	materials["toonPlayer"]->shader->linkProgram();
 
 	// Material used for menu full screen drawing
 	materials["menu"] = std::make_shared<Material>("menu");
@@ -183,19 +178,13 @@ void initializeShaders()
 
 	// Sobel filter material
 	materials["outline"] = std::make_shared<Material>("outline");
-	materials["outline"]->shader->attachShader(v_passThru);
-	materials["outline"]->shader->attachShader(f_sobel);
+	materials["outline"]->shader->attachShader(v_skinning);
+	materials["outline"]->shader->attachShader(f_outline);
 	materials["outline"]->shader->linkProgram();
-
-	// sobel filter for player
-	materials["sobelPlayer"] = std::make_shared<Material>("sobelPlayer");
-	materials["sobelPlayer"]->shader->attachShader(v_skinning);
-	materials["sobelPlayer"]->shader->attachShader(f_sobel);
-	materials["sobelPlayer"]->shader->linkProgram();
 
 	// Shadow filter material
 	materials["shadow"] = std::make_shared<Material>("shadow");
-	materials["shadow"]->shader->attachShader(v_shadow);
+	materials["shadow"]->shader->attachShader(v_skinning);
 	materials["shadow"]->shader->attachShader(f_shadow);
 	materials["shadow"]->shader->linkProgram();
 }
@@ -223,6 +212,7 @@ void initializeScene()
 	std::shared_ptr<LoadObject> organizerMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> mapMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> ringMesh = std::make_shared<LoadObject>();
 
 	std::shared_ptr<Holder> bombotMesh = std::make_shared<Holder>();
 	std::shared_ptr<Holder> bombotMesh2 = std::make_shared<Holder>();
@@ -265,6 +255,7 @@ void initializeScene()
 	organizerMesh->load(meshPath + "scaledorganizer.obj");
 	mapMesh->load(meshPath + "scaledmap.obj");
 	markerMesh->load(meshPath + "scaledmarker.obj");
+	ringMesh->load(meshPath + "ring.obj");
 
 	// Report mesh load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -290,6 +281,7 @@ void initializeScene()
 	meshes["organizer"] = organizerMesh;
 	meshes["map"] = mapMesh;
 	meshes["marker"] = markerMesh;
+	meshes["ring"] = ringMesh;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
@@ -334,6 +326,18 @@ void initializeScene()
 
 	std::string explosionTex4 = "Assets/img/ex-4.png";
 	std::shared_ptr<Texture> explosionTexMap4 = std::make_shared<Texture>(explosionTex4, explosionTex4, 1.0f);
+
+	std::string ringTex1 = "Assets/img/ring1.png";
+	std::shared_ptr<Texture> ringTexMap1 = std::make_shared<Texture>(ringTex1, ringTex1, 1.0f);
+
+	std::string ringTex2 = "Assets/img/ring2.png";
+	std::shared_ptr<Texture> ringTexMap2 = std::make_shared<Texture>(ringTex2, ringTex2, 1.0f);
+
+	std::string ringTex3 = "Assets/img/ring3.png";
+	std::shared_ptr<Texture> ringTexMap3 = std::make_shared<Texture>(ringTex3, ringTex3, 1.0f);
+
+	std::string ringTex4 = "Assets/img/ring4.png";
+	std::shared_ptr<Texture> ringTexMap4 = std::make_shared<Texture>(ringTex4, ringTex4, 1.0f);
 
 	std::string diffuseTex = "Assets/img/desk (diffuse).png";
 	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
@@ -398,6 +402,10 @@ void initializeScene()
 	textures["explosion2"] = explosionTexMap2;
 	textures["explosion3"] = explosionTexMap3;
 	textures["explosion4"] = explosionTexMap4;
+	textures["ring1"] = ringTexMap1;
+	textures["ring2"] = ringTexMap2;
+	textures["ring3"] = ringTexMap3;
+	textures["ring4"] = ringTexMap4;
 	textures["barrel"] = barrelTexMap;
 	textures["cannon"] = cannonTexMap;
 	textures["boat"] = boatTexMap;
@@ -422,6 +430,22 @@ void initializeScene()
 	std::cout << "Initializing gameObjects...";
 	t1 = std::chrono::high_resolution_clock::now();
 
+	gameobjects["ring1"] = std::make_shared<readyUpRing>(
+		glm::vec3(-12.0f, 89.5f, 10.0f), ringMesh, defaultMaterial, ringTexMap1, 0);
+	readyUpRings.push_back(gameobjects["ring1"]);
+
+	gameobjects["ring2"] = std::make_shared<readyUpRing>(
+		glm::vec3(0.0f, 89.5f, -16.0f), ringMesh, defaultMaterial, ringTexMap2, 1);
+	readyUpRings.push_back(gameobjects["ring2"]);
+
+	gameobjects["ring3"] = std::make_shared<readyUpRing>(
+		glm::vec3(40.0f, 89.5f, -25.0f), ringMesh, defaultMaterial, ringTexMap3, 2);
+	readyUpRings.push_back(gameobjects["ring3"]);
+
+	gameobjects["ring4"] = std::make_shared<readyUpRing>(
+		glm::vec3(57.0f, 89.5f, 7.0f), ringMesh, defaultMaterial, ringTexMap4, 3);
+	readyUpRings.push_back(gameobjects["ring4"]);
+
 	gameobjects["table"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
 
@@ -429,7 +453,7 @@ void initializeScene()
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["corkboard"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
+		glm::vec3(-5000.0f, -5000.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
 
 	gameobjects["organizer"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), organizerMesh, defaultMaterial, organizerTexMap);
@@ -547,19 +571,15 @@ void initializeScene()
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
-	gameobjects["bombot1"] = players["bombot1"];
 
 	players["bombot2"] = std::make_shared<Player>(
 		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
-	gameobjects["bombot2"] = players["bombot2"];
 	
 	players["bombot3"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
-	gameobjects["bombot3"] = players["bombot3"];
 
 	players["bombot4"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
-	gameobjects["bombot4"] = players["bombot4"];
 
 	// Report gameObject init times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -588,6 +608,7 @@ void initializeScene()
 	std::string rightwallBodyPath = "assets\\bullet\\botwall.btdata";
 	std::string topwallBodyPath = "assets\\bullet\\topwall.btdata";
 	std::string lampBodyPath = "assets\\bullet\\lamp.btdata";
+	std::string ringBodyPath = "assets\\bullet\\ring.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
@@ -612,6 +633,10 @@ void initializeScene()
 	std::unique_ptr<RigidBody> botleftBody;
 	std::unique_ptr<RigidBody> topwallBody;
 	std::unique_ptr<RigidBody> lampBody;
+	std::unique_ptr<RigidBody> ring1Body;
+	std::unique_ptr<RigidBody> ring2Body;
+	std::unique_ptr<RigidBody> ring3Body;
+	std::unique_ptr<RigidBody> ring4Body;
 
 	tableBody = std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
@@ -635,6 +660,11 @@ void initializeScene()
 	botleftBody		= std::make_unique<RigidBody>();
 	topwallBody = std::make_unique<RigidBody>();
 	lampBody = std::make_unique<RigidBody>();
+	ring1Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+	ring2Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+	ring3Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+	ring4Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+
 
 	// Test gameobject load times
 	std::cout << "loading rigidBodies...";
@@ -663,6 +693,10 @@ void initializeScene()
 	botleftBody->load(botleftBodyPath);
 	topwallBody->load(topwallBodyPath);
 	lampBody->load(lampBodyPath);
+	ring1Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+	ring2Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+	ring3Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+	ring4Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
 
 	// Report rigidbody load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -670,11 +704,12 @@ void initializeScene()
 	std::cout << " success, " << duration << "ms taken" << std::endl << std::endl;
 
 	// Attach rigidbodies
+	players["bombot1"]->attachRigidBody(bombot1Body);
+	players["bombot2"]->attachRigidBody(bombot2Body);
+	players["bombot3"]->attachRigidBody(bombot3Body);
+	players["bombot4"]->attachRigidBody(bombot4Body);
+
 	gameobjects["table"]->attachRigidBody(tableBody);
-	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
-	gameobjects["bombot2"]->attachRigidBody(bombot2Body);
-	gameobjects["bombot3"]->attachRigidBody(bombot3Body);
-	gameobjects["bombot4"]->attachRigidBody(bombot4Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
 	gameobjects["barrelTR"]->attachRigidBody(barrelBody);
 	gameobjects["barrel1"]->attachRigidBody(barrel1Body);
@@ -692,6 +727,10 @@ void initializeScene()
 	gameobjects["rightwall"]->attachRigidBody(rightwallBody);
 	gameobjects["topwall"]->attachRigidBody(topwallBody);
 	gameobjects["lamp"]->attachRigidBody(lampBody);
+	gameobjects["ring1"]->attachRigidBody(ring1Body);
+	gameobjects["ring2"]->attachRigidBody(ring2Body);
+	gameobjects["ring3"]->attachRigidBody(ring3Body);
+	gameobjects["ring4"]->attachRigidBody(ring4Body);
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
@@ -794,7 +833,7 @@ void initializeStates()
 	score = new Score(scoreMenu);
 	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, &obstacles, bombManager, pause, score, &playerCamera);
+	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, pause, score, &playerCamera);
 	game->setPaused(true);
 
 	states.addGameState("game", game);
@@ -816,13 +855,13 @@ void bulletNearCallback(btBroadphasePair& collisionPair,
 	// Only dispatch the Bullet collision information if you want the physics to continue
 	// From Bullet user manual
 
-	if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
+	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter ||
 		collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
 	{
 		return;
-	}
+	}*/
 
 	// Tell the dispatcher to do the collision information
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
@@ -832,16 +871,19 @@ void collideWithCorrectType(Player* player, GameObject* object)
 {
 	switch (object->getColliderType())
 	{
-	case COLLIDER_DEFAULT:
+	case GameObject::COLLIDER_DEFAULT:
 		break;
-	case PLAYER:
+	case GameObject::PLAYER:
 		player->checkCollisionWith((Player*)object);
 		break;
-	case BOMB_BASE:
+	case GameObject::BOMB_BASE:
 		player->checkCollisionWith((Bomb*)object);
 		break;
-	case BOMB_EXPLOSION:
+	case GameObject::BOMB_EXPLOSION:
 		player->checkCollisionWith((Explosion*)object);
+		break;
+	case GameObject::READYUP:
+		player->checkCollisionWith((readyUpRing*)object);
 		break;
 	default:
 		break;

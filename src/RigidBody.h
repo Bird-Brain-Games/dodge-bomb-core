@@ -66,7 +66,7 @@ public:
 	~RigidBody();
 
 	bool load(std::string fileName);
-	bool load(std::string fileName, btCollisionObject::CollisionFlags flags);
+	bool load(std::string fileName, short flags);
 	glm::mat4x4 getWorldTransform();
 	void setWorldTransform(glm::vec3 pos);
 	void setWorldTransform(glm::vec3 pos, glm::vec3 quat);

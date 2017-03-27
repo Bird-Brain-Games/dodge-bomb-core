@@ -12,6 +12,7 @@ uniform vec4 u_emissiveLight;
 uniform sampler2D u_diffuseTex;
 uniform sampler2D u_specularTex;
 uniform sampler2D u_toonRamp;
+uniform sampler2D u_shadowMap;
 
 uniform vec4 u_transparency;
 
@@ -21,6 +22,7 @@ in VertexData
 	vec2 texCoord;
 	vec4 colour;
 	vec3 posEye;
+	vec3 posInLight; // light space (shadow map)
 } vIn;
 
 layout(location = 0) out vec4 FragColor;
@@ -47,27 +49,40 @@ void main()
 
 	// Toon Lighting
 	if (diffuse <= 0) specular = 0;
-	//else if (diffuse <= 0.15) diffuse = 0.15;
 	else if (diffuse <= 0.30) diffuse = 0.30;
-	//else if (diffuse <= 0.50) diffuse = 0.5;
-	//else if (diffuse <= 0.50) diffuse = 0.50;
 	else if (diffuse <= 0.60) diffuse = 0.60;
-	//else if (diffuse <= 0.70) diffuse = 0.70;
-	//else if (diffuse <= 0.80) diffuse = 0.80;
-	//else if (diffuse <= 0.90) diffuse = 0.90;
-	//else diffuse = 1.00;
 
 	vec3 deskLamp = vec3(
 		+ vec3(diffuse * diffuseColour.rgb * u_controls.y)                      // Diffuse for Desk Lamp
 		+ vec3(specular * specColour.rgb * u_controls.z)				        // Specular for Desk Lamp
 		);
 
-	// Calculations for Spot Light
+	//Calculations for Spot Light
 	vec3 spotDirection = normalize(u_spotDir.xyz);
 	float cosDirection = max(dot(L, spotDirection), 0.0);
 
-	deskLamp = vec3(deskLamp * smoothstep(u_dimmers.z, u_dimmers.w, cosDirection));
+	deskLamp = vec3(deskLamp * smoothstep(u_dimmers.z, u_dimmers.w, cosDirection)); // spotlight calculations
 
+	//shadow component (desk lamp)
+	vec3 shadowCoord = vIn.posInLight;
+	shadowCoord = shadowCoord * 0.5 + 0.5;
+	float bias = 0.007;
+	vec2 texelSize = 1.0 / textureSize(u_shadowMap, 0);
+	
+	float shadow = 0;
+
+	//calculate and blur the shadows
+	for (int x = -1; x <= 1; ++x)
+	{
+		for (int y = -1; y <= 1; ++y)
+		{
+			float pcfDepth = texture(u_shadowMap, shadowCoord.xy + vec2(x, y) * texelSize).r;
+			shadow += shadowCoord.z - bias < pcfDepth ? 1.0 : 0.4;
+		}
+	}
+	shadow /= 9.0;
+
+	deskLamp *= shadow;
 
 	//Diffuse Component for Room Light
 	vec3 L2 = normalize(u_lightTwo.xyz - vIn.posEye);

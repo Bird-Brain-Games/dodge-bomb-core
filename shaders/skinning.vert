@@ -9,8 +9,8 @@ layout (location = 9) in vec4 weights; //The weights for the bones we are using.
 
 uniform mat4 u_mvp; // model view projection matrix
 uniform mat4 u_mv; // model view matrix
-
-
+uniform int skinning; // used to control whether we skin or not
+uniform mat4 u_lmvp; // main light MVP matrix
 
 uniform int boneCount;
 uniform highp mat4 BoneMatrixArray[28];
@@ -21,7 +21,8 @@ out VertexData
 	vec3 normal;
 	vec2 texCoord;
 	vec4 colour;
-	vec3 posEye;
+	vec3 posEye; // eye space
+	vec3 posInLight; // light space (shadow map)
 } vOut;
 
 
@@ -30,35 +31,38 @@ out VertexData
 
 void main()
 {
+	vec4 normalM = vec4(vIn_normal, 0.0);
+	highp vec4 position = vec4(vIn_vertex, 1.0);
 
-	vOut.texCoord = vIn_uv;
-	vOut.colour = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	
-
-	mediump ivec4 boneIndex = ivec4(bones);
-	mediump vec4 boneWeights = weights;
-	vec4 normalM = vec4(0.0, 0.0, 0.0, 0.0);
-	
-	highp vec4 position = vec4(0.0, 0.0, 0.0, 0.0);
-	for (lowp int i = 0; i < 4; i++)
+	if (skinning == 1)
 	{
-		if (boneIndex.x < boneCount && boneIndex.x >= 0)
+		normalM = vec4(0.0, 0.0, 0.0, 0.0);
+		position = vec4(0.0, 0.0, 0.0, 0.0);
+
+		mediump ivec4 boneIndex = ivec4(bones);
+		mediump vec4 boneWeights = weights;
+		for (lowp int i = 0; i < 4; i++)
 		{
-			if (boneWeights.x > 0)
+			if (boneIndex.x < boneCount && boneIndex.x >= 0)
 			{
-				highp mat4 boneMatrix = BoneMatrixArray[boneIndex.x];
+				if (boneWeights.x > 0)
+				{
+					highp mat4 boneMatrix = BoneMatrixArray[boneIndex.x];
 				
-				position += boneMatrix * vec4(vIn_vertex, 1.0) * boneWeights.x;
-				normalM += boneMatrix * vec4(vIn_normal, 0.0) * boneWeights.x;
+					position += boneMatrix * vec4(vIn_vertex, 1.0) * boneWeights.x;
+					normalM += boneMatrix * vec4(vIn_normal, 0.0) * boneWeights.x;
+				}
 			}
+			boneIndex = boneIndex.yzwx;
+			boneWeights = boneWeights.yzwx;
 		}
-		boneIndex = boneIndex.yzwx;
-		boneWeights = boneWeights.yzwx;
 	}
 	
-	vOut.normal = (u_mv* normalM).xyz;
-	vOut.posEye = (u_mv* position).xyz;
+	vOut.texCoord = vIn_uv;
+	vOut.colour = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	vOut.normal = (u_mv * normalM).xyz;
+	vOut.posEye = (u_mv * position).xyz;
+	vOut.posInLight =  (u_lmvp * vec4(vIn_vertex, 1.0)).xyz;
 	
 	gl_Position = u_mvp * position;
 	//colour = vec3(0.0, 0.0, 1.0);
