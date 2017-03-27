@@ -14,7 +14,7 @@ float Player::playerSpeed = 50.0f;
 float Player::dashImpulse = 30.0f;
 float Player::dashMinSpeed = Player::playerSpeed - 20.0f;	// when the player reaches this, stop dashing
 float Player::maxDashCooldown = 2.0f;
-float Player::maxDashDuration = 0.5f;	// max length of dash in seconds
+float Player::maxDashDuration = 0.35f;	// max length of dash in seconds
 
 Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
@@ -289,7 +289,7 @@ void Player::checkCollisionWith(GameObject* other)
 	std::cout << "GameObject collided with player" << std::endl;
 }
 
-void Player::checkCollisionWith(Explosion* other)
+void Player::checkCollisionWith(Explosion* other, bool inReadyUp)
 {
 	if (other->getBombParent() == nullptr) return;
 	Bomb* bombParent = other->getBombParent();
@@ -299,11 +299,14 @@ void Player::checkCollisionWith(Explosion* other)
 	{
 		takeDamage(1);
 		con.setVibration(32000, 16000);
+
+		// If in ready up, don't take damage
+		if (inReadyUp) health++;
 		//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 	}
 }
 
-void Player::checkCollisionWith(Bomb* other)
+void Player::checkCollisionWith(Bomb* other, bool inReadyUp)
 {
 	if (other == nullptr) return;
 	// If the player is colliding with their own bomb
@@ -317,8 +320,12 @@ void Player::checkCollisionWith(Bomb* other)
 		{
 			other->explode();
 			takeDamage(1);
-con.setVibration(32000, 16000);
-//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
+			con.setVibration(32000, 16000);
+
+			// If in ready up, don't take damage
+			if (inReadyUp) health++;
+
+			//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 		}
 	}
 }
@@ -330,6 +337,7 @@ void Player::checkCollisionWith(readyUpRing* other)
 	if (other->getPlayerNum() == playerNum)
 	{
 		ready = true;
+		other->setReady(ready);
 	}
 }
 
@@ -413,10 +421,23 @@ readyUpRing::readyUpRing(glm::vec3 position,
 	playerNum(_playerNum)
 {
 	colliderType = COLLIDER_TYPE::READYUP;
-
+	isReady = false;
 }
 
 void readyUpRing::setPosition(glm::vec3 newPos)
 {
 	GameObject::setPosition(newPos);
 }
+
+void readyUpRing::update(float dt)
+{
+	GameObject::update(dt);
+}
+
+void readyUpRing::setReady(bool ready)
+{
+	// If there is a change, change the emissive value
+	isReady = ready;
+	emissiveLight = (isReady) ? 0.5f : 0.0f;
+}
+

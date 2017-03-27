@@ -15,9 +15,12 @@ public:
 
 	inline int getPlayerNum() { return playerNum; }
 	void setPosition(glm::vec3);
+	void update(float dt);
+	void setReady(bool ready);
 
 private:
 	int playerNum;
+	bool isReady;
 };
 
 // Player class takes in player input and performs movement
@@ -52,8 +55,8 @@ public:
 	void reset(glm::vec3 newPos);	// Reset values and positions
 
 	void checkCollisionWith(GameObject* other);
-	void checkCollisionWith(Bomb* other);
-	void checkCollisionWith(Explosion* other);
+	void checkCollisionWith(Bomb* other, bool inReadyUp);
+	void checkCollisionWith(Explosion* other, bool inReadyUp);
 	void checkCollisionWith(readyUpRing* other);
 	int getPlayerNum();
 	glm::vec3 getCurrentVelocity();

@@ -318,7 +318,7 @@ void Bomb::setMaterial(std::shared_ptr<Material> _material)
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////	EXPLOOOOSION	///////////////////////////////////
 float Explosion::timeToExpand = 0.15f;
-float Explosion::maxScale = 7.5f;
+float Explosion::maxScale = 8.5f;
 float Explosion::minScale = 0.5f;
 
 Explosion::Explosion(glm::vec3 position,
