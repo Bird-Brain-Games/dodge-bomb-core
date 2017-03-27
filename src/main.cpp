@@ -330,13 +330,13 @@ void initializeScene()
 	std::string ringTex1 = "Assets/img/ring1.png";
 	std::shared_ptr<Texture> ringTexMap1 = std::make_shared<Texture>(ringTex1, ringTex1, 1.0f);
 
-	std::string ringTex2 = "Assets/img/ring1.png";
+	std::string ringTex2 = "Assets/img/ring2.png";
 	std::shared_ptr<Texture> ringTexMap2 = std::make_shared<Texture>(ringTex2, ringTex2, 1.0f);
 
-	std::string ringTex3 = "Assets/img/ring1.png";
+	std::string ringTex3 = "Assets/img/ring3.png";
 	std::shared_ptr<Texture> ringTexMap3 = std::make_shared<Texture>(ringTex3, ringTex3, 1.0f);
 
-	std::string ringTex4 = "Assets/img/ring1.png";
+	std::string ringTex4 = "Assets/img/ring4.png";
 	std::shared_ptr<Texture> ringTexMap4 = std::make_shared<Texture>(ringTex4, ringTex4, 1.0f);
 
 	std::string diffuseTex = "Assets/img/desk (diffuse).png";
