@@ -4,17 +4,38 @@
 #include "Bomb.h"
 #include "controller.h"
 
-enum PLAYER_STATE
+class readyUpRing : public GameObject
 {
-	P_NORMAL,
-	P_INVINCIBLE,
-	P_DEAD
+public:
+	readyUpRing(glm::vec3 position,
+		std::shared_ptr<Loader> _mesh,
+		std::shared_ptr<Material> _material,
+		std::shared_ptr<Texture> _texture,
+		int _playerNum);
+
+	inline int getPlayerNum() { return playerNum; }
+	void setPosition(glm::vec3);
+	void update(float dt);
+	void setReady(bool ready);
+
+private:
+	int playerNum;
+	bool isReady;
 };
 
 // Player class takes in player input and performs movement
 // It also handles collision between players and bombs.
 class Player : public GameObject
 {
+public:
+	enum PLAYER_STATE
+	{
+		P_INACTIVE,
+		P_NORMAL,
+		P_INVINCIBLE,
+		P_DEAD
+	};
+
 public:
 	Player(glm::vec3 position,
 		std::shared_ptr<Loader> _mesh,
@@ -27,17 +48,22 @@ public:
 	void handleInput(float dt);
 
 	void update(float deltaT);
-	void draw(Camera &camera);
+	void draw(Camera &camera, Camera& shadow);
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	void attachBombManager(std::shared_ptr<BombManager> _manager);
 	void takeDamage(int damage);
 	void reset(glm::vec3 newPos);	// Reset values and positions
 
 	void checkCollisionWith(GameObject* other);
-	void checkCollisionWith(Bomb* other);
-	void checkCollisionWith(Explosion* other);
+	void checkCollisionWith(Bomb* other, bool inReadyUp);
+	void checkCollisionWith(Explosion* other, bool inReadyUp);
+	void checkCollisionWith(readyUpRing* other);
 	int getPlayerNum();
 	glm::vec3 getCurrentVelocity();
+
+	inline bool isReady() { return ready; }
+	inline bool isActive() { return currentState != P_INACTIVE; }
+	inline void setActive(bool active) { currentState = (active) ? P_NORMAL : P_INACTIVE; }
 
 	void setAnim(std::string);
 	int getHealth();
@@ -62,6 +88,7 @@ private:
 	// Player stats
 	int health;
 	PLAYER_STATE currentState;
+	bool ready;	// For ready up
 
 	// Invincibility variables
 	bool isFlashing;

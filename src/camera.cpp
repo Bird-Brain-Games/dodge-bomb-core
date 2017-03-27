@@ -102,11 +102,12 @@ void Camera::update()
 	projectionMatrix = glm::perspective(FOV, windowRatio, minRange, maxRange);
 	viewProjMatrix = projectionMatrix * viewMatrix;
 }
-void Camera::shadowCam()
+
+void Camera::shadowCam(glm::vec3 _pos, glm::vec3 _forward, glm::vec3 _up, float _minRange, float _maxRange)
 {
-	GLfloat near_plane = 1.0f, far_plane = 50.0f;
-	viewMatrix = glm::lookAt(pos, pos + forward, up);
-	projectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+	viewMatrix = glm::lookAt(_pos, _pos + _forward, _up);
+	projectionMatrix = glm::ortho(-70.0f, 60.0f, -100.0f, 80.0f, _minRange, _maxRange);
+
 	viewProjMatrix = projectionMatrix * viewMatrix;
 }
 
