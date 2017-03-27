@@ -33,7 +33,7 @@ public:
 	~Bomb();
 
 	void attachPlayerPtr(Player* _playerPtr);
-	void draw(Camera& camera);
+	void draw(Camera& camera, Camera& shadow);
 	void update(float dt);
 	void setMaterial(std::shared_ptr<Material> _material);
 
@@ -120,7 +120,7 @@ public:
 
 	void update(float dt);
 	void checkIfExploded(Camera& camera);
-	void draw(Camera& camera);
+	void draw(Camera& camera, Camera& shadow);
 	void setMaterialForAllBombs(std::shared_ptr<Material> mat);
 	void clearAllBombs();
 

@@ -96,6 +96,7 @@
     <ClCompile Include="src\MainMenuState.cpp" />
     <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\node.cpp" />
+    <ClCompile Include="src\particles.cpp" />
     <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />
@@ -138,6 +139,7 @@
     <ClInclude Include="src\material.h" />
     <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\node.h" />
+    <ClInclude Include="src\particles.h" />
     <ClInclude Include="src\PauseState.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\RigidBody.h" />
@@ -167,9 +169,9 @@
     <None Include="shaders\quad.geom" />
     <None Include="shaders\shader_texture.frag" />
     <None Include="shaders\shadowMap_f.glsl" />
-    <None Include="shaders\shadowMap_v.glsl" />
     <None Include="shaders\skinning.vert" />
-    <None Include="shaders\sobel_f.glsl" />
+    <None Include="shaders\outline_f.glsl" />
+    <None Include="shaders\sobel_f.glsl.orig" />
     <None Include="shaders\toon_f.glsl" />
     <None Include="shaders\unlitTexture_f.glsl" />
   </ItemGroup>

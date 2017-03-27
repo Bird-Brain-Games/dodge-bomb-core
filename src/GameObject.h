@@ -48,8 +48,8 @@ public:
 	void setScale(glm::vec3 newScale);
 	void setOutlineColour(glm::vec4 colour);
 
-	virtual void update(float dt);	
-	virtual void draw(Camera &camera);
+	virtual void update(float dt);
+	virtual void draw(Camera &camera, Camera &shadow);
 
 	// Forward Kinematics
 	// Pass in null to make game object a root node
@@ -68,7 +68,8 @@ public:
 	virtual void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	virtual void checkCollisionWith(GameObject* other);
 
-	void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
+	inline void setMaterial(std::shared_ptr<Material> _material) { material = _material; }
+	inline std::shared_ptr<Material> getMaterial() { return material; }
 
 	// Other Properties
 	std::string name;

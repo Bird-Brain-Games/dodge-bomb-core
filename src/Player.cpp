@@ -50,11 +50,11 @@ Player::~Player()
 
 }
 
-void Player::draw(Camera &camera)
+void Player::draw(Camera &camera, Camera &shadow)
 {
 	if (currentState == P_NORMAL)
 	{
-		GameObject::draw(camera);
+		GameObject::draw(camera, shadow);
 	}
 	else if (currentState == P_INVINCIBLE)
 	{
@@ -62,7 +62,7 @@ void Player::draw(Camera &camera)
 		// And if they're invincible make them flash
 		if (!isFlashing)
 		{
-			GameObject::draw(camera);
+			GameObject::draw(camera, shadow);
 		}
 	}
 }

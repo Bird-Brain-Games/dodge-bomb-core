@@ -13,6 +13,7 @@ in VertexData
 	vec2 texCoord;
 	vec4 colour;
 	vec3 posEye;
+	vec3 posInLight;
 } vIn;
 
 layout(location = 0) out vec4 FragColor;

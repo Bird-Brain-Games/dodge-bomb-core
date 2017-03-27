@@ -18,6 +18,7 @@ Attribute::Attribute(AttributeLocations _attribLocation, GLenum _element, unsign
 VAO::VAO()
 {
 	vaoHandle = 0;
+	primitiveType = GL_TRIANGLES;
 }
 VAO::~VAO()
 {
@@ -30,7 +31,7 @@ int  VAO::addAttribute(Attribute attrib)
 	return 1;
 }
 
-void VAO::createVAO()
+void VAO::createVAO(GLenum vboUsage)
 {
 	if (vaoHandle) destroy();
 
@@ -47,7 +48,7 @@ void VAO::createVAO()
 		Attribute* attrib = &attributes[i];
 		glEnableVertexAttribArray(attrib->getAttribLocation());
 		glBindBuffer(GL_ARRAY_BUFFER, vboHandles[i]);
-		glBufferData(GL_ARRAY_BUFFER, attrib->getNumElements() * attrib->getDataSize(), attrib->data, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, attrib->getNumElements() * attrib->getDataSize(), attrib->data, vboUsage);
 		glVertexAttribPointer(attrib->getAttribLocation(), attrib->getElementsPerAttrib(), attrib->getElement(), GL_FALSE, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
@@ -59,7 +60,7 @@ void VAO::draw()
 	{
 		glBindVertexArray(vaoHandle);
 
-		glDrawArrays(GL_TRIANGLES, 0, attributes[0].getNumElements());
+		glDrawArrays(primitiveType, 0, attributes[0].getNumElements());
 
 		glBindVertexArray(0);
 	}
@@ -88,6 +89,35 @@ void VAO::destroy()
 
 	vboHandles.clear();
 	attributes.clear();
+}
+
+void VAO::setPrimitive(GLenum type)
+{
+	primitiveType = type;
+}
+
+Attribute* VAO::getAttribute(AttributeLocations location)
+{
+	for (int i = 0; i < attributes.size(); i++)
+	{
+		if (attributes[i].getAttribLocation() == location)
+			return &attributes[i];
+	}
+}
+
+unsigned int VAO::getVBO(AttributeLocations location)
+{
+	for (int i = 0; i < attributes.size(); i++)
+	{
+		if (attributes[i].getAttribLocation() == location)
+			return vboHandles[i];
+	}
+	return 0;
+}
+
+unsigned int VAO::getVAO()
+{
+	return vaoHandle;
 }
 
 AttributeLocations		Attribute::getAttribLocation() { return attribLocation; }

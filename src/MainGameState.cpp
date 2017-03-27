@@ -6,10 +6,6 @@
 #include <fstream>
 #include <iostream>
 
-glm::vec4 lightPos;
-glm::vec4 lightTwo;
-
-
 
 void calculateCollisions();
 
@@ -296,10 +292,22 @@ void Game::update(float dt)
 
 void Game::draw()
 {
-	fboUnlit.bindFrameBufferForDrawing();
+
+	///////////////////////////// zero pass: shadows.
+	//note up vector maybe wrong.
+
+	shadowCamera.shadowCam(glm::vec3(30.0f, 70.0f, -10.0f), glm::vec3(-2.0f, -6.0f, 1.5f), glm::vec3(0.0, 1.0, 0.0), 0.01f, 100.01f);
+	setMaterialForAllGameObjects("shadow");
+	setMaterialForAllPlayerObjects("shadow");
+
+	shadowMap.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(clearColor);
+	drawScene(&shadowCamera, &shadowCamera);
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 
 	///////////////////////////// First Pass: Outlines
+	fboUnlit.bindFrameBufferForDrawing();
+	FrameBufferObject::clearFrameBuffer(clearColor);
 	if (outlineToggle)
 	{
 		glCullFace(GL_FRONT);
@@ -311,8 +319,9 @@ void Game::draw()
 
 		// Tell all game objects to use the outline shading material
 		setMaterialForAllGameObjects("outline");
-		setMaterialForAllPlayerObjects("sobelPlayer");
-		drawScene();
+		setMaterialForAllPlayerObjects("outline");
+		materials->at("outline")->shader->bind();
+		drawScene(camera, &shadowCamera);
 
 		glCullFace(GL_BACK); std::map<std::string, std::shared_ptr<Material>> materials;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -325,22 +334,8 @@ void Game::draw()
 	case TOON:
 	{
 		setMaterialForAllGameObjects("toon");
+		setMaterialForAllPlayerObjects("toon");
 
-		setMaterialForAllPlayerObjects("toonPlayer");
-		materials->at("toonPlayer");
-		materials->at("toonPlayer")->shader->bind();
-
-		materials->at("toonPlayer")->vec4Uniforms["u_lightPos"] = camera->getView() * lightPos;
-		materials->at("toonPlayer")->intUniforms["u_diffuseTex"] = 31;
-		materials->at("toonPlayer")->intUniforms["u_specularTex"] = 30;
-
-		materials->at("toonPlayer")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-		materials->at("toonPlayer")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
-		materials->at("toonPlayer")->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
-		materials->at("toonPlayer")->vec4Uniforms["u_shine"] = glm::vec4(shininess);
-
-		materials->at("toonPlayer")->sendUniforms();
-		materials->at("toonPlayer")->shader->unbind();
 
 		materials->at("toon")->shader->bind();
 
@@ -352,6 +347,9 @@ void Game::draw()
 		materials->at("toon")->intUniforms["u_toonRamp"] = 5;
 		materials->at("toon")->intUniforms["u_diffuseTex"] = 31;
 		materials->at("toon")->intUniforms["u_specularTex"] = 30;
+
+		shadowMap.bindTextureForSampling(0, GL_TEXTURE29);
+		materials->at("toon")->intUniforms["u_shadowMap"] = 29;
 
 		materials->at("toon")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
 		materials->at("toon")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
@@ -386,7 +384,7 @@ void Game::draw()
 
 
 	}
-	drawScene();
+	drawScene(camera, &shadowCamera);
 
 
 	// Draw the debug (if on)
@@ -455,7 +453,7 @@ void Game::draw()
 		unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
 		unlitMaterial->shader->sendUniformInt("u_tex", 0);
 		unlitMaterial->sendUniforms();
-
+		
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
 	}
@@ -538,15 +536,6 @@ void Game::updateScene(float dt)
 	static float ang = 1.0f;
 
 	ang += dt; // comment out to pause light
-	lightPos.x = 40.0f;
-	lightPos.y = 65.0f;
-	lightPos.z = 0.0f;
-	lightPos.w = 1.0f;
-
-	lightTwo.x = 0.0f;
-	lightTwo.y = 80.0f;
-	lightTwo.z = 100.0f;
-	lightTwo.w = 1.0f;
 
 	camera->update();
 
@@ -562,6 +551,17 @@ void Game::updateScene(float dt)
 		if (gameobject->isRoot())
 			gameobject->update(dt);
 	}
+	// Update all player objects
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		auto player = itr->second;
+
+		// Remember: root nodes are responsible for updating all of its children
+		// So we need to make sure to only invoke update() for the root nodes.
+		// Otherwise some objects would get updated twice in a frame!
+		if (player->isRoot())
+			player->update(dt);
+	}
 
 	bombManager->update(dt);
 	bombManager->checkIfExploded(*camera);
@@ -573,25 +573,32 @@ void Game::initializeFrameBuffers()
 	fboBright.createFrameBuffer(80, 60, 1, false);
 	fboBlur.createFrameBuffer(80, 60, 1, false);
 	fboBlurB.createFrameBuffer(80, 60, 1, false);
-	shadowMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
+	shadowMap.createFrameBuffer(windowWidth * 2, windowHeight * 2, 1, true);
 	fboColorCorrection.createFrameBuffer(windowWidth, windowHeight, 1, false);
 }
 
-
-
-void Game::drawScene()
+void Game::drawScene(Camera* _camera, Camera* _shadow)
 {
+	scene->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
 	for (auto itr = scene->begin(); itr != scene->end(); ++itr)
 	{
 		auto gameobject = itr->second;
 
 		if (gameobject->isRoot())
-			gameobject->draw(*camera);
+			gameobject->draw(*_camera, *_shadow);
 	}
 
-	bombManager->draw(*camera);
-}
+	players->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 1);
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		auto playersObject = itr->second;
 
+		if (playersObject->isRoot())
+			playersObject->draw(*_camera, *_shadow);
+	}
+	scene->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
+	bombManager->draw(*_camera, *_shadow);
+}
 
 int Game::deathCheck()
 {
