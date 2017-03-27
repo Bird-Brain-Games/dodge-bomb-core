@@ -70,6 +70,9 @@
     <ClCompile Include="src\Texture2D.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\SoundDriver.cpp">
+      <Filter>External engines</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />

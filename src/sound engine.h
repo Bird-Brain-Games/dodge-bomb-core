@@ -11,7 +11,6 @@ january 2017
 
 void checkResult(FMOD_RESULT result);
 
-
 class SoundEngine
 {
 public:
@@ -57,7 +56,7 @@ public:
 	//updates the sounds position and calls the engines update function
 	void updateSound(FMOD_VECTOR _pos, FMOD_VECTOR _vel);
 	//changes what method of rollof is being used.
-	void setRollOff(FMOD_MODE);
+	void switchSoundMode(FMOD_MODE);
 	//pauses the sound
 	void pause();
 	//sound variables
@@ -69,3 +68,4 @@ public:
 	//a variable that allows us to access the sound engine
 	static SoundEngine sys;
 };
+

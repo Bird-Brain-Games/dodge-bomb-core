@@ -4,12 +4,12 @@
 #include <memory>
 #include "menu.h"
 #include "controller.h"
+#include "SoundDriver.h"
+
 class MainMenu : public GameState
 {
 public:
-	MainMenu(std::shared_ptr<Menu>, Controller*);
-
-	
+	MainMenu(std::shared_ptr<Menu>, Controller*, SoundDriver*);
 
 	void update(float dt);
 	void draw();
@@ -23,4 +23,5 @@ private:
 	float incrememnt;
 	int position, frame;
 	std::shared_ptr<Menu> atlas;
+	SoundDriver* audio;
 };

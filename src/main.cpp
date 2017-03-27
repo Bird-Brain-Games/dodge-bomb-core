@@ -27,6 +27,7 @@
 
 #include "MainMenuState.h"
 #include "MainGameState.h"
+#include "SoundDriver.h"
 
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
@@ -61,6 +62,9 @@ std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
 std::vector<std::shared_ptr<GameObject>> obstacles;
 std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
+
+//Sound Stuff
+SoundDriver* audio_Driver;
 
 // Materials
 std::map<std::string, std::shared_ptr<Material>> materials;
@@ -730,7 +734,6 @@ void initializeScene()
 
 void initializeStates()
 {
-
 	// Test atlas load times
 	std::cout << "Loading atlases..." << std::endl;
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
@@ -776,7 +779,7 @@ void initializeStates()
 	t1 = std::chrono::high_resolution_clock::now();
 
 	//init states.
-	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController());
+	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController(), audio_Driver);
 	mainMenu->setPaused(false);
 
 	pause = new Pause(pauseMenu);
@@ -800,7 +803,11 @@ void initializeStates()
 
 }
 
-void initializeSounds();
+void initializeSoundEngine()
+{
+	audio_Driver = new SoundDriver();
+	audio_Driver->loadSounds();
+}
 
 void bulletNearCallback(btBroadphasePair& collisionPair,
 	btCollisionDispatcher& dispatcher, btDispatcherInfo& dispatchInfo)
@@ -1084,10 +1091,10 @@ int main(int argc, char **argv)
 	// Initialize scene
 	initializeShaders();
 	initializeScene();
-	initializeStates();
 
-	//Initialize Sounds (Handled in SoundDriver.h)
-	initializeSounds();
+	initializeSoundEngine();
+
+	initializeStates();
 
 	totalFinish = std::chrono::high_resolution_clock::now();
 	auto durationMS = std::chrono::duration_cast<std::chrono::milliseconds>(totalFinish - totalStart).count();
