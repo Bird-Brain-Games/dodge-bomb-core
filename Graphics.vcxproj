@@ -171,6 +171,7 @@
     <None Include="shaders\shadowMap_f.glsl" />
     <None Include="shaders\skinning.vert" />
     <None Include="shaders\outline_f.glsl" />
+    <None Include="shaders\sobel_f.glsl.orig" />
     <None Include="shaders\toon_f.glsl" />
     <None Include="shaders\unlitTexture_f.glsl" />
   </ItemGroup>
