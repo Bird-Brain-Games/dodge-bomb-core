@@ -149,7 +149,7 @@ void Game::resetPlayers()
 	{
 		if (it.second->isActive())
 		{
-			it.second->setPosition(defaultPlayerPositions.at(it.second->getPlayerNum()));
+			it.second->reset(defaultPlayerPositions.at(it.second->getPlayerNum()));
 		}
 	}
 	/*players->at("bombot1")->reset(glm::vec3(-12.0f, 39.5f, 10.0f));
@@ -162,7 +162,7 @@ void Game::makePlayersInactive()
 {
 	for (auto it : *players)
 	{
-		it.second->setPosition(glm::vec3(-1000.0f));
+		it.second->reset(glm::vec3(-1000.0f));
 		it.second->setActive(false);
 	}
 }

@@ -704,10 +704,10 @@ void initializeScene()
 	botleftBody->load(botleftBodyPath);
 	topwallBody->load(topwallBodyPath);
 	lampBody->load(lampBodyPath);
-	ring1Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE);
-	ring2Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE);
-	ring3Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE);
-	ring4Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	ring1Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+	ring2Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+	ring3Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+	ring4Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
 
 	// Report rigidbody load times
 	t2 = std::chrono::high_resolution_clock::now();
