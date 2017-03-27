@@ -539,13 +539,14 @@ void initializeScene()
 	gameobjects["cannon"] = std::make_shared<GameObject>(
 		glm::vec3(23.f, 43.0f, 10.f), cannonMesh, defaultMaterial, cannonTexMap);
 	gameobjects["cannon"]->setScale(glm::vec3(1.7f));
-	gameobjects["cannon"]->emissiveLight = 0.3f;
+	//gameobjects["cannon"]->emissiveLight = 0.3f;
 	obstacles.push_back(gameobjects["cannon"]);
 
 	gameobjects["cannonbox"] = std::make_shared<GameObject>(
 		glm::vec3(23.f, 43.0f, 10.f), nullptr, defaultMaterial, nullptr);
 	gameobjects["cannonbox"]->setRotationAngleZ(68 * degToRad);
 	gameobjects["cannonbox"]->setScale(glm::vec3(1.7f));
+	obstacles.push_back(gameobjects["cannonbox"]);
 
 	gameobjects["crate"] = std::make_shared<GameObject>(
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
@@ -877,10 +878,10 @@ void collideWithCorrectType(Player* player, GameObject* object)
 		player->checkCollisionWith((Player*)object);
 		break;
 	case GameObject::BOMB_BASE:
-		player->checkCollisionWith((Bomb*)object);
+		player->checkCollisionWith((Bomb*)object, game->getCurrentState() == Game::GAME_STATE::READYUP);
 		break;
 	case GameObject::BOMB_EXPLOSION:
-		player->checkCollisionWith((Explosion*)object);
+		player->checkCollisionWith((Explosion*)object, game->getCurrentState() == Game::GAME_STATE::READYUP);
 		break;
 	case GameObject::READYUP:
 		player->checkCollisionWith((readyUpRing*)object);

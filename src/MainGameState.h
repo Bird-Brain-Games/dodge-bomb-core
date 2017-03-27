@@ -34,6 +34,25 @@ private:
 class Game : public GameState
 {
 public:
+	enum LUT_MODE
+	{
+		LUT_OFF,
+		LUT_CONTRAST,
+		LUT_SEPIA
+	};
+
+	enum GAME_STATE
+	{
+		READYUP,
+		MAIN
+	};
+
+private:
+	GAME_STATE currentGameState;
+	void changeState(GAME_STATE);
+
+
+public:
 	Game(std::map<std::string, std::shared_ptr<GameObject>>*,
 		std::map<std::string, std::shared_ptr<Player>>*,
 		std::map<std::string, std::shared_ptr<Material>>*,
@@ -46,6 +65,7 @@ public:
 	void draw();// where we do all 
 	void setPaused(int a_paused);
 	void windowReshapeCallbackFunction(int w, int h);
+	GAME_STATE getCurrentState() { return currentGameState; }
 
 private:
 	
@@ -68,21 +88,6 @@ private:
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
 
-private:
-	enum LUT_MODE
-	{
-		LUT_OFF,
-		LUT_CONTRAST,
-		LUT_SEPIA
-	};
-
-	enum GAME_STATE
-	{
-		READYUP,
-		MAIN
-	};
-	GAME_STATE currentGameState;
-	void changeState(GAME_STATE);
 
 private:
 	FrameBufferObject fboUnlit;

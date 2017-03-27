@@ -214,6 +214,15 @@ void Game::updateReadyPass(float dt)
 
 void Game::update(float dt)
 {
+	if (currentGameState == READYUP)
+	{
+		for (auto it : *readyUpRings)
+		{
+			((readyUpRing*)it.get())->setReady(false);
+		}
+	}
+	
+
 	// Step through world simulation with Bullet
 	RigidBody::systemUpdate(dt, 10);
 	calculateCollisions();
