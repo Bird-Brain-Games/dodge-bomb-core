@@ -51,7 +51,7 @@ bool BombManager::init(
 
 		// Create the explosion rigidBody
 		std::unique_ptr<RigidBody> explosionBody =
-			std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter);
+			std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
 		explosionBody->load(_explosionBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 		explosionObject->attachRigidBody(explosionBody);
 
@@ -116,13 +116,13 @@ void BombManager::update(float dt)
 	}
 }
 
-void BombManager::draw(Camera& camera)
+void BombManager::draw(Camera& camera, Camera& shadow)
 {
 	for (auto it : activeBombs)
 	{
 		if (it->getCurrentState() != BOMB_STATE::OFF ||
 			it->getCurrentState() != BOMB_STATE::DONE)
-			it->draw(camera);
+			it->draw(camera, shadow);
 	}
 }
 
@@ -232,17 +232,17 @@ void Bomb::throwBomb(glm::vec2 direction, glm::vec3 force)
 
 
 
-void Bomb::draw(Camera& camera)
+void Bomb::draw(Camera& camera, Camera& shadow)
 {
 	switch (currentState)
 	{
 	case OFF:
 		break;
 	case THROWN:
-		GameObject::draw(camera);
+		GameObject::draw(camera, shadow);
 		break;
 	case EXPLODING:
-		explosion->draw(camera);
+		explosion->draw(camera, shadow);
 		break;
 	case DONE:
 		break;

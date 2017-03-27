@@ -6,10 +6,6 @@
 #include <fstream>
 #include <iostream>
 
-glm::vec4 lightPos;
-glm::vec4 lightTwo;
-
-
 
 void calculateCollisions();
 
@@ -85,10 +81,12 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
 	std::map<std::string, std::shared_ptr<Material>>* _materials,
 	std::vector<std::shared_ptr<GameObject>>* _obstacles,
+	std::vector<std::shared_ptr<GameObject>>* _readyUpRings,
 	std::shared_ptr<BombManager> _manager,
 	Pause* _pause, Score* _score, Camera* _camera)
 
-	: obstacles(_obstacles)
+	: obstacles(_obstacles),
+	readyUpRings(_readyUpRings)
 {
 	scene = _scene;
 	players = _player;
@@ -113,13 +111,17 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
+
+	defaultPlayerPositions.push_back(glm::vec3(-12.0f, 39.5f, 10.0f));
+	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.5f, -16.0f));
+	defaultPlayerPositions.push_back(glm::vec3(40.0f, 39.5f, -25.0f));
+	defaultPlayerPositions.push_back(glm::vec3(57.0f, 39.5f, 7.0f));
 }
 
 void Game::setPaused(int a_paused)
 {
 	if (a_paused == 0)
 	{
-		float count = 0.0f;
 		m_isPaused = false;
 	}
 	else if (a_paused == 1)
@@ -129,106 +131,183 @@ void Game::setPaused(int a_paused)
 		m_isPaused = false;
 		// Reset all players
 
-		float count = 0.0f;
-		resetPlayers();
+		//resetPlayers();
+		makePlayersInactive();
 		bombManager->clearAllBombs();
 		currentGameState = READYUP;
+		menuDelay = 0.3f;
 	}
 }
 
 void Game::resetPlayers()
 {
-	players->at("bombot1")->reset(glm::vec3(-12.0f, 39.5f, 10.0f));
+	for (auto it : *players)
+	{
+		if (it.second->isActive())
+		{
+			it.second->reset(defaultPlayerPositions.at(it.second->getPlayerNum()));
+		}
+	}
+	/*players->at("bombot1")->reset(glm::vec3(-12.0f, 39.5f, 10.0f));
 	players->at("bombot2")->reset(glm::vec3(0.0f, 39.5f, -16.0f));
 	players->at("bombot3")->reset(glm::vec3(40.0f, 39.5f, -25.0f));
-	players->at("bombot4")->reset(glm::vec3(57.0f, 39.5f, 7.0f));
+	players->at("bombot4")->reset(glm::vec3(57.0f, 39.5f, 7.0f));*/
+}
+
+void Game::makePlayersInactive()
+{
+	for (auto it : *players)
+	{
+		it.second->reset(glm::vec3(-1000.0f));
+		it.second->setActive(false);
+	}
+}
+
+void Game::updateReadyPass(float dt)
+{
+	const int maxNumPlayers = 4;
+	bool activeState[maxNumPlayers];
+	bool readyState[maxNumPlayers];
+	int counter = 0;
+	bool startPressed = false;
+
+	for (auto it : *players)
+	{
+		// Set the player as active if A pressed and not active
+		if (it.second->getController()->conButton(XINPUT_GAMEPAD_A) &&
+			!it.second->isActive())
+		{
+			it.second->setActive(true);
+			it.second->setPosition(glm::vec3(15.0f * it.second->getPlayerNum(), 35.0f, 0.0f));
+		}
+
+		// Ready up checks
+		activeState[counter] = it.second->isActive();
+		readyState[counter] = it.second->isReady();
+		counter++;
+
+		if (it.second->getController()->conButton(XINPUT_GAMEPAD_X))
+		{
+			startPressed = true;
+		}
+	}
+
+	int playerCounter = 0;
+	bool allReady = true;
+	// Check if enough players are in the game, and if they are ready
+	for (unsigned int i = 0; i < maxNumPlayers; i++)
+	{
+		playerCounter += activeState[i];
+		if (activeState[i])
+		{
+			if (!readyState[i])
+				allReady = false;
+		}
+	}
+
+	// If everyone's ready, start the game!
+	if (allReady && startPressed && playerCounter > 1)
+		changeState(MAIN);
+
+
 }
 
 void Game::update(float dt)
 {
-
-
 	// Step through world simulation with Bullet
 	RigidBody::systemUpdate(dt, 10);
 	calculateCollisions();
 
 	handleKeyboardInput();
 
+	// Change the state if everyone is ready
+	if (currentGameState == READYUP)
+	{
+		if (menuDelay > 0.0f)
+			menuDelay -= dt;
+		else
+			updateReadyPass(dt);
+	}
+
 	// Update all gameobjects
 	updateScene(dt);
-
-	for (auto it : *players)
-	{
-		// Ready up
-		if (it.second->getController()->conButton(XINPUT_GAMEPAD_X))
-		{
-			changeState(MAIN);
-		}
-	}
 
 	pauseTimer += dt;
 
 	
-
-	int count = 0;
-	for (auto it : *players)
+	if (currentGameState == MAIN)
 	{
-
-		if (it.second->getController()->conButton(XINPUT_GAMEPAD_START))
-			pausing = count;
-		count++;
-	}
-
-	if (pausing > 0 && pauseTimer > 1.0)
-	{
-		switch (pausing)
+		int count = 0;
+		for (auto it : *players)
 		{
-		case 0:
-			break;
-		case 1:
-			setPaused(true);
-			pause->setPaused(false);
-			pause->active = players->at("bombot1")->getController();
-			pauseTimer = 0;
-			break;
-		case 2:
-			setPaused(true);
-			pause->setPaused(false);
-			pause->active = players->at("bombot2")->getController();
-			pauseTimer = 0;
-			break;
-		case 3:
-			setPaused(true);
-			pause->setPaused(false);
-			pause->active = players->at("bombot3")->getController();
-			pauseTimer = 0;
-			break;
-		case 4:
-			setPaused(true);
-			pause->setPaused(false);
-			pause->active = players->at("bombot4")->getController();
-			pauseTimer = 0;
-			break;
+
+			if (it.second->getController()->conButton(XINPUT_GAMEPAD_START) && currentGameState == MAIN)
+				pausing = count;
+			count++;
+		}
+
+		if (pausing > 0 && pauseTimer > 1.0)
+		{
+			switch (pausing)
+			{
+			case 0:
+				break;
+			case 1:
+				setPaused(true);
+				pause->setPaused(false);
+				pause->active = players->at("bombot1")->getController();
+				pauseTimer = 0;
+				break;
+			case 2:
+				setPaused(true);
+				pause->setPaused(false);
+				pause->active = players->at("bombot2")->getController();
+				pauseTimer = 0;
+				break;
+			case 3:
+				setPaused(true);
+				pause->setPaused(false);
+				pause->active = players->at("bombot3")->getController();
+				pauseTimer = 0;
+				break;
+			case 4:
+				setPaused(true);
+				pause->setPaused(false);
+				pause->active = players->at("bombot4")->getController();
+				pauseTimer = 0;
+				break;
+			}
+		}
+		int winner = deathCheck();
+		if (winner > 0)
+		{
+			this->m_isPaused = true;
+			changeState(READYUP);
+			score->active = players->at("bombot1")->getController();
+			m_parent->getGameState("score")->setPaused(winner);
 		}
 	}
-	int winner = deathCheck();
-	if (winner > 0)
-	{
-		this->m_isPaused = true;
-		changeState(READYUP);
-		score->active = players->at("bombot1")->getController();
-		m_parent->getGameState("score")->setPaused(winner);
-	}
-
 }
 
 
 void Game::draw()
 {
-	fboUnlit.bindFrameBufferForDrawing();
+
+	///////////////////////////// zero pass: shadows.
+	//note up vector maybe wrong.
+
+	shadowCamera.shadowCam(glm::vec3(30.0f, 70.0f, -10.0f), glm::vec3(-2.0f, -6.0f, 1.5f), glm::vec3(0.0, 1.0, 0.0), 0.01f, 100.01f);
+	setMaterialForAllGameObjects("shadow");
+	setMaterialForAllPlayerObjects("shadow");
+
+	shadowMap.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(clearColor);
+	drawScene(&shadowCamera, &shadowCamera);
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 
 	///////////////////////////// First Pass: Outlines
+	fboUnlit.bindFrameBufferForDrawing();
+	FrameBufferObject::clearFrameBuffer(clearColor);
 	if (outlineToggle)
 	{
 		glCullFace(GL_FRONT);
@@ -240,8 +319,9 @@ void Game::draw()
 
 		// Tell all game objects to use the outline shading material
 		setMaterialForAllGameObjects("outline");
-		setMaterialForAllPlayerObjects("sobelPlayer");
-		drawScene();
+		setMaterialForAllPlayerObjects("outline");
+		materials->at("outline")->shader->bind();
+		drawScene(camera, &shadowCamera);
 
 		glCullFace(GL_BACK); std::map<std::string, std::shared_ptr<Material>> materials;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -254,22 +334,8 @@ void Game::draw()
 	case TOON:
 	{
 		setMaterialForAllGameObjects("toon");
+		setMaterialForAllPlayerObjects("toon");
 
-		setMaterialForAllPlayerObjects("toonPlayer");
-		materials->at("toonPlayer");
-		materials->at("toonPlayer")->shader->bind();
-
-		materials->at("toonPlayer")->vec4Uniforms["u_lightPos"] = camera->getView() * lightPos;
-		materials->at("toonPlayer")->intUniforms["u_diffuseTex"] = 31;
-		materials->at("toonPlayer")->intUniforms["u_specularTex"] = 30;
-
-		materials->at("toonPlayer")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
-		materials->at("toonPlayer")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
-		materials->at("toonPlayer")->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
-		materials->at("toonPlayer")->vec4Uniforms["u_shine"] = glm::vec4(shininess);
-
-		materials->at("toonPlayer")->sendUniforms();
-		materials->at("toonPlayer")->shader->unbind();
 
 		materials->at("toon")->shader->bind();
 
@@ -281,6 +347,9 @@ void Game::draw()
 		materials->at("toon")->intUniforms["u_toonRamp"] = 5;
 		materials->at("toon")->intUniforms["u_diffuseTex"] = 31;
 		materials->at("toon")->intUniforms["u_specularTex"] = 30;
+
+		shadowMap.bindTextureForSampling(0, GL_TEXTURE29);
+		materials->at("toon")->intUniforms["u_shadowMap"] = 29;
 
 		materials->at("toon")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
 		materials->at("toon")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
@@ -315,7 +384,7 @@ void Game::draw()
 
 
 	}
-	drawScene();
+	drawScene(camera, &shadowCamera);
 
 
 	// Draw the debug (if on)
@@ -384,7 +453,7 @@ void Game::draw()
 		unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
 		unlitMaterial->shader->sendUniformInt("u_tex", 0);
 		unlitMaterial->sendUniforms();
-
+		
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
 	}
@@ -467,15 +536,6 @@ void Game::updateScene(float dt)
 	static float ang = 1.0f;
 
 	ang += dt; // comment out to pause light
-	lightPos.x = 40.0f;
-	lightPos.y = 65.0f;
-	lightPos.z = 0.0f;
-	lightPos.w = 1.0f;
-
-	lightTwo.x = 0.0f;
-	lightTwo.y = 80.0f;
-	lightTwo.z = 100.0f;
-	lightTwo.w = 1.0f;
 
 	camera->update();
 
@@ -491,6 +551,17 @@ void Game::updateScene(float dt)
 		if (gameobject->isRoot())
 			gameobject->update(dt);
 	}
+	// Update all player objects
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		auto player = itr->second;
+
+		// Remember: root nodes are responsible for updating all of its children
+		// So we need to make sure to only invoke update() for the root nodes.
+		// Otherwise some objects would get updated twice in a frame!
+		if (player->isRoot())
+			player->update(dt);
+	}
 
 	bombManager->update(dt);
 	bombManager->checkIfExploded(*camera);
@@ -502,25 +573,32 @@ void Game::initializeFrameBuffers()
 	fboBright.createFrameBuffer(80, 60, 1, false);
 	fboBlur.createFrameBuffer(80, 60, 1, false);
 	fboBlurB.createFrameBuffer(80, 60, 1, false);
-	shadowMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
+	shadowMap.createFrameBuffer(windowWidth * 2, windowHeight * 2, 1, true);
 	fboColorCorrection.createFrameBuffer(windowWidth, windowHeight, 1, false);
 }
 
-
-
-void Game::drawScene()
+void Game::drawScene(Camera* _camera, Camera* _shadow)
 {
+	scene->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
 	for (auto itr = scene->begin(); itr != scene->end(); ++itr)
 	{
 		auto gameobject = itr->second;
 
 		if (gameobject->isRoot())
-			gameobject->draw(*camera);
+			gameobject->draw(*_camera, *_shadow);
 	}
 
-	bombManager->draw(*camera);
-}
+	players->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 1);
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		auto playersObject = itr->second;
 
+		if (playersObject->isRoot())
+			playersObject->draw(*_camera, *_shadow);
+	}
+	scene->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
+	bombManager->draw(*_camera, *_shadow);
+}
 
 int Game::deathCheck()
 {
@@ -530,7 +608,7 @@ int Game::deathCheck()
 	{
 		auto gameobject = itr->second;
 
-		if (gameobject->getHealth() > 0)
+		if (gameobject->getHealth() > 0 && gameobject->isActive())
 		{
 			counter++;
 			winner = gameobject->getPlayerNum() + 1;
@@ -853,12 +931,21 @@ void Game::changeState(Game::GAME_STATE newState)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
 		}
+		for (auto it : *readyUpRings)
+		{
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
+		}
 		break;
 	case Game::MAIN:
 		for (auto it : *obstacles)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
 		}
+		for (auto it : *readyUpRings)
+		{
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
+		}
+		resetPlayers();
 		break;
 	default:
 		break;

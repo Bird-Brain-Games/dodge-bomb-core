@@ -303,7 +303,7 @@ bool RigidBody::load(std::string fileName)
 
 }
 
-bool RigidBody::load(std::string fileName, btCollisionObject::CollisionFlags flags)
+bool RigidBody::load(std::string fileName, short flags)
 {
 	if (!Sys.init()) return false;
 

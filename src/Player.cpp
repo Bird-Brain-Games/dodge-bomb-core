@@ -31,6 +31,7 @@ Player::Player(glm::vec3 position,
 	reset(position);
 	playerNum = _playerNum;
 	setScale(glm::vec3(0.75f));
+	setActive(false);
 }
 
 Player::Player(Player& other)
@@ -41,6 +42,7 @@ Player::Player(Player& other)
 	throwingForce(other.throwingForce)
 {
 	reset(other.getWorldPosition());
+	setActive(false);
 }
 
 Player::~Player()
@@ -48,11 +50,11 @@ Player::~Player()
 
 }
 
-void Player::draw(Camera &camera)
+void Player::draw(Camera &camera, Camera &shadow)
 {
 	if (currentState == P_NORMAL)
 	{
-		GameObject::draw(camera);
+		GameObject::draw(camera, shadow);
 	}
 	else if (currentState == P_INVINCIBLE)
 	{
@@ -60,7 +62,7 @@ void Player::draw(Camera &camera)
 		// And if they're invincible make them flash
 		if (!isFlashing)
 		{
-			GameObject::draw(camera);
+			GameObject::draw(camera, shadow);
 		}
 	}
 }
@@ -160,15 +162,15 @@ void Player::update(float dt)
 	if (con.conButton(XINPUT_GAMEPAD_BACK))
 		reset(glm::vec3(0.0f, 40.0f, 0.0f));
 
-	if (playerNum == 0)
-		std::cout << getWorldPosition().x << " " << getWorldPosition().z << std::endl;
-
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);
 
 	// Make it so they can't rotate through physics
 	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 0.0, 0.0));	
 	rigidBody->getBody()->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
+
+	// Set the ready status to false if not colliding with ring
+	ready = false;
 }
 
 void Player::handleInput(float dt)
@@ -315,10 +317,20 @@ void Player::checkCollisionWith(Bomb* other)
 		{
 			other->explode();
 			takeDamage(1);
-			con.setVibration(32000, 16000);
-			//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
+con.setVibration(32000, 16000);
+//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 		}
-	}	
+	}
+}
+
+void Player::checkCollisionWith(readyUpRing* other)
+{
+	if (other == nullptr) return;
+
+	if (other->getPlayerNum() == playerNum)
+	{
+		ready = true;
+	}
 }
 
 void Player::attachRigidBody(std::unique_ptr<RigidBody> &_rb)
@@ -372,6 +384,7 @@ void Player::reset(glm::vec3 newPos)
 	currentState = P_NORMAL;
 	con.setVibration(0, 0);
 	isDashing = false;
+	ready = false;
 	currentDashCooldown = 0.0f;
 	currentDashDuration = 0.0f;
 }
@@ -386,3 +399,24 @@ glm::vec3 Player::getCurrentVelocity()
 //	direction = glm::normalize(direction);
 //	float angleY = 
 //}
+
+
+///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////	Ring class
+
+readyUpRing::readyUpRing(glm::vec3 position,
+	std::shared_ptr<Loader> _mesh,
+	std::shared_ptr<Material> _material,
+	std::shared_ptr<Texture> _texture,
+	int _playerNum)
+	: GameObject(position, _mesh, _material, _texture),
+	playerNum(_playerNum)
+{
+	colliderType = COLLIDER_TYPE::READYUP;
+
+}
+
+void readyUpRing::setPosition(glm::vec3 newPos)
+{
+	GameObject::setPosition(newPos);
+}

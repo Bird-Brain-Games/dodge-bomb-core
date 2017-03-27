@@ -38,6 +38,7 @@ public:
 		std::map<std::string, std::shared_ptr<Player>>*,
 		std::map<std::string, std::shared_ptr<Material>>*,
 		std::vector<std::shared_ptr<GameObject>>*,
+		std::vector<std::shared_ptr<GameObject>>*,
 		std::shared_ptr<BombManager>,
 		Pause*, Score*, Camera*);
 
@@ -51,8 +52,11 @@ private:
 	//secondary functions (called in update and draw)
 	int deathCheck();
 	void resetPlayers();
+	void makePlayersInactive();
 	void updateScene(float dt);
-	void drawScene();
+	void updateReadyPass(float dt);
+	void drawScene(Camera* _camera, Camera* _shadow);
+
 	void setMaterialForAllGameObjects(std::string materialName);
 	void setMaterialForAllPlayerObjects(std::string materialName);
 
@@ -63,6 +67,7 @@ private:
 	void initializeFrameBuffers();
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
+
 private:
 	enum LUT_MODE
 	{
@@ -83,7 +88,6 @@ private:
 	FrameBufferObject fboUnlit;
 	FrameBufferObject fboBright;
 	FrameBufferObject fboBlur, fboBlurB;
-	FrameBufferObject shadowMap;
 	FrameBufferObject fboColorCorrection;
 	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
 
@@ -92,12 +96,15 @@ private:
 	std::map<std::string, std::shared_ptr<Player>>* players;
 	std::map<std::string, std::shared_ptr<Material>>* materials;
 	std::vector<std::shared_ptr<GameObject>>* obstacles;
+	std::vector<std::shared_ptr<GameObject>>* readyUpRings;
+	std::vector<glm::vec3> defaultPlayerPositions;
 
 	Pause* pause;
 	Score* score;
 	Camera * camera;
 	int pausing;
 	float pauseTimer;
+	float menuDelay;
 
 	LUT contrastLUT;
 	LUT sepiaLUT;
@@ -111,11 +118,17 @@ private:
 	float windowHeight = 1080.0;
 
 	// Lighting Controls
-	float deskLamp = 0.8;
-	float innerCutOff = 0.42; // Spot Light Size
-	float outerCutOff = 0.47;
-	glm::vec3 deskForward = glm::vec3(0.2, 1.0, 1.5); // Spot Light Direction
-	float roomLight = 0.4;
+	float innerCutOff = 0.78; // Spot Light Size
+	float outerCutOff = 0.81;
+	glm::vec3 deskForward = glm::vec3(0.47f, 1.0f, 0.99f); // Spot Light Direction
+	glm::vec4 lightPos = glm::vec4(60.0f, 94.0, -15.0f, 1.0f); // Spot Light
+
+	glm::vec4 lightTwo = glm::vec4(0.0f, 80.0, 100.0f, 1.0f); // Room Light
+
+	float deskLamp = 0.5;
+	float roomLight = 0.5;
+	Camera shadowCamera;
+	FrameBufferObject shadowMap;
 
 	float ambient = 0.1; // Ambient Lighting
 	float diffuse = 1.0f; // Diffuse Lighting
