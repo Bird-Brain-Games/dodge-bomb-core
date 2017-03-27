@@ -6,10 +6,6 @@
 #include <fstream>
 #include <iostream>
 
-glm::vec4 lightPos;
-glm::vec4 lightTwo;
-
-
 
 void calculateCollisions();
 
@@ -241,7 +237,7 @@ void Game::draw()
 	///////////////////////////// zero pass: shadows.
 	//note up vector maybe wrong.
 
-	shadowCamera.shadowCam(lightPos, -lightPos, glm::vec3(0.0, 1.0, 0.0), 0.01f, 100.01f);
+	shadowCamera.shadowCam(glm::vec3(30.0f, 70.0f, -10.0f), glm::vec3(-2.0f, -6.0f, 1.5f), glm::vec3(0.0, 1.0, 0.0), 0.01f, 100.01f);
 	setMaterialForAllGameObjects("shadow");
 	setMaterialForAllPlayerObjects("shadow");
 
@@ -481,15 +477,6 @@ void Game::updateScene(float dt)
 	static float ang = 1.0f;
 
 	ang += dt; // comment out to pause light
-	lightPos.x = 40.0f;
-	lightPos.y = 65.0f;
-	lightPos.z = 0.0f;
-	lightPos.w = 1.0f;
-
-	lightTwo.x = 0.0f;
-	lightTwo.y = 80.0f;
-	lightTwo.z = 100.0f;
-	lightTwo.w = 1.0f;
 
 	camera->update();
 
@@ -527,7 +514,7 @@ void Game::initializeFrameBuffers()
 	fboBright.createFrameBuffer(80, 60, 1, false);
 	fboBlur.createFrameBuffer(80, 60, 1, false);
 	fboBlurB.createFrameBuffer(80, 60, 1, false);
-	shadowMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
+	shadowMap.createFrameBuffer(windowWidth * 2, windowHeight * 2, 1, true);
 	fboColorCorrection.createFrameBuffer(windowWidth, windowHeight, 1, false);
 }
 

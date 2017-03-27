@@ -427,7 +427,7 @@ void initializeScene()
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["corkboard"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
+		glm::vec3(-5000.0f, -5000.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
 
 	gameobjects["organizer"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), organizerMesh, defaultMaterial, organizerTexMap);

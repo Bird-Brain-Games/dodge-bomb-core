@@ -111,11 +111,15 @@ private:
 	float windowHeight = 1080.0;
 
 	// Lighting Controls
-	float deskLamp = 0.8;
-	float innerCutOff = 0.42; // Spot Light Size
-	float outerCutOff = 0.47;
-	glm::vec3 deskForward = glm::vec3(0.2, 1.0, 1.5); // Spot Light Direction
-	float roomLight = 0.4;
+	float innerCutOff = 0.78; // Spot Light Size
+	float outerCutOff = 0.81;
+	glm::vec3 deskForward = glm::vec3(0.47f, 1.0f, 0.99f); // Spot Light Direction
+	glm::vec4 lightPos = glm::vec4(60.0f, 94.0, -15.0f, 1.0f); // Spot Light
+
+	glm::vec4 lightTwo = glm::vec4(0.0f, 80.0, 100.0f, 1.0f); // Room Light
+
+	float deskLamp = 0.5;
+	float roomLight = 0.5;
 	Camera shadowCamera;
 	FrameBufferObject shadowMap;
 

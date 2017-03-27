@@ -106,7 +106,7 @@ void Camera::update()
 void Camera::shadowCam(glm::vec3 _pos, glm::vec3 _forward, glm::vec3 _up, float _minRange, float _maxRange)
 {
 	viewMatrix = glm::lookAt(_pos, _pos + _forward, _up);
-	projectionMatrix = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, _minRange, _maxRange);
+	projectionMatrix = glm::ortho(-70.0f, 60.0f, -100.0f, 80.0f, _minRange, _maxRange);
 
 	viewProjMatrix = projectionMatrix * viewMatrix;
 }

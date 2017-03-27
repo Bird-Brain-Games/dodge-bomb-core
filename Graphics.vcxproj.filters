@@ -237,5 +237,8 @@
     <None Include="shaders\outline_f.glsl">
       <Filter>Graphics\Shaders</Filter>
     </None>
+    <None Include="shaders\sobel_f.glsl.orig">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
