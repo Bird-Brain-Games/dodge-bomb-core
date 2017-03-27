@@ -66,6 +66,7 @@ private:
 	void initializeFrameBuffers();
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
+
 private:
 	enum LUT_MODE
 	{
