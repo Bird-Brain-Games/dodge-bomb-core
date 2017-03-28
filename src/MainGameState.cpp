@@ -3,6 +3,7 @@
 #include "IL\ilut.h"
 #include "InputManager.h"
 #include "gl\freeglut.h"
+#include "Texture.h"
 #include <fstream>
 #include <iostream>
 
@@ -83,10 +84,12 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::vector<std::shared_ptr<GameObject>>* _obstacles,
 	std::vector<std::shared_ptr<GameObject>>* _readyUpRings,
 	std::shared_ptr<BombManager> _manager,
+	std::shared_ptr<Menu> _countdown,
 	Pause* _pause, Score* _score, Camera* _camera)
 
 	: obstacles(_obstacles),
-	readyUpRings(_readyUpRings)
+	readyUpRings(_readyUpRings),
+	countdown(_countdown)
 {
 	scene = _scene;
 	players = _player;
@@ -107,6 +110,7 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	toonRamp = ilutGLLoadImage("Assets/img/toonRamp.png");
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, toonRamp);
+
 
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
@@ -207,7 +211,7 @@ void Game::updateReadyPass(float dt)
 
 	// If everyone's ready, start the game!
 	if (allReady && startPressed && playerCounter > 1)
-		changeState(MAIN);
+		changeState(COUNTDOWN);
 
 
 }
@@ -236,6 +240,22 @@ void Game::update(float dt)
 			menuDelay -= dt;
 		else
 			updateReadyPass(dt);
+	}
+
+	// Update the countdown if in countdown
+	if (currentGameState == COUNTDOWN)
+	{
+		currentCountdown -= dt;
+		if (currentCountdown < 0.0f)
+			changeState(MAIN);
+		else if (currentCountdown < 1.0f)
+			countdown->setSpot(glm::vec2(1.0, 0.0));
+		else if (currentCountdown < 2.0f)
+			countdown->setSpot(glm::vec2(0.0, 0.0));
+		else if (currentCountdown < 3.0f)
+			countdown->setSpot(glm::vec2(1.0, 1.0));
+		else if (currentCountdown <= 4.0f)
+			countdown->setSpot(glm::vec2(0.0, 1.0));
 	}
 
 	// Update all gameobjects
@@ -569,7 +589,7 @@ void Game::updateScene(float dt)
 		// So we need to make sure to only invoke update() for the root nodes.
 		// Otherwise some objects would get updated twice in a frame!
 		if (player->isRoot())
-			player->update(dt);
+			player->update(dt, currentGameState != COUNTDOWN);
 	}
 
 	bombManager->update(dt);
@@ -607,6 +627,12 @@ void Game::drawScene(Camera* _camera, Camera* _shadow)
 	}
 	scene->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
 	bombManager->draw(*_camera, *_shadow);
+
+	// If in countdown, draw countdown
+	if (currentGameState == COUNTDOWN)
+	{
+		countdown->draw();
+	}
 }
 
 int Game::deathCheck()
@@ -913,7 +939,14 @@ void Game::handleKeyboardInput()
 	//}
 	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
 	{
-		camera->shakeScreen(1.0f);
+		changeState(COUNTDOWN);
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
+	{
+		this->m_isPaused = true;
+		changeState(READYUP);
+		score->active = players->at("bombot1")->getController();
+		m_parent->getGameState("score")->setPaused(1);
 	}
 	// Reset all players
 
@@ -945,7 +978,8 @@ void Game::changeState(Game::GAME_STATE newState)
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
 		}
 		break;
-	case Game::MAIN:
+	case Game::COUNTDOWN:
+		currentCountdown = 4.0f;
 		for (auto it : *obstacles)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));

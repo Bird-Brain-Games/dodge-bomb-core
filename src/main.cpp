@@ -796,6 +796,10 @@ void initializeStates()
 	char pauseTex[] = "Assets/img/menPause_arlas.png";
 	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
 
+
+	std::string countdownTex = "Assets/img/countdown.png";
+	std::shared_ptr<Texture> countdownTexMap = std::make_shared<Texture>(countdownTex, countdownTex, 1.0f);
+
 	// Report atlas load times
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
@@ -820,6 +824,9 @@ void initializeStates()
 	pauseMenu = std::make_shared<Menu>(pauseTexMap, 4, 7);
 	pauseMenu->setMaterial(materials["menu"]);
 
+	std::shared_ptr<Menu> countdown = std::make_shared<Menu>(countdownTexMap, 2, 2);
+	countdown->setMaterial(materials["menu"]);
+
 	std::cout << "Loading states...";
 	t1 = std::chrono::high_resolution_clock::now();
 
@@ -833,7 +840,7 @@ void initializeStates()
 	score = new Score(scoreMenu);
 	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, pause, score, &playerCamera);
+	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, countdown, pause, score, &playerCamera);
 	game->setPaused(true);
 
 	states.addGameState("game", game);

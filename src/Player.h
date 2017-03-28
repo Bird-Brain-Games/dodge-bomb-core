@@ -47,7 +47,7 @@ public:
 
 	void handleInput(float dt);
 
-	void update(float deltaT);
+	void update(float deltaT, bool canMove);
 	void draw(Camera &camera, Camera& shadow);
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	void attachBombManager(std::shared_ptr<BombManager> _manager);
