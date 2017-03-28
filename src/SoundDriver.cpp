@@ -10,10 +10,10 @@ SoundDriver::~SoundDriver() {
 
 void SoundDriver::loadSounds()//Loads sounds into the engine
 {
-	menuTheme_music.load("../DODGEBOMB_REP/assets/media/MenuTheme.wav");
-	menuSelect_fx.load("../DODGEBOMB_REP/assets/media/select_fx.wav");
+	menuTheme_music.load("assets/media/MenuTheme.wav");
+	menuSelect_fx.load("assets/media/select_fx.wav");
 	menuSelect_fx.switchSoundMode(FMOD_LOOP_OFF);
-	menuSwitch_fx.load("../DODGEBOMB_REP/assets/media/switch_fx.wav");
+	menuSwitch_fx.load("assets/media/switch_fx.wav");
 	menuSwitch_fx.switchSoundMode(FMOD_LOOP_OFF);
 
 }
