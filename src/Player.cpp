@@ -78,7 +78,7 @@ Controller* Player::getController()
 	return &con;
 }
 
-void Player::update(float dt)
+void Player::update(float dt, bool canMove)
 {
 	// Update the bomb cooldown
 	if (currentCooldown > 0.0f)
@@ -121,7 +121,7 @@ void Player::update(float dt)
 	switch (currentState)
 	{
 	case P_NORMAL:
-		handleInput(dt);
+		if (canMove) handleInput(dt);
 		rigidBody->getBody()->setLinearFactor(btVector3(1.0f, 0.5f, 1.0f));
 		break;
 
@@ -130,7 +130,7 @@ void Player::update(float dt)
 		// If they're not in the pause time, let them move
 		if (maxInvincibleTime - invincibleTime > pauseTime)
 		{
-			handleInput(dt);
+			if (canMove) handleInput(dt);
 
 			con.setVibration(0, 0);
 

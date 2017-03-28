@@ -44,6 +44,7 @@ public:
 	enum GAME_STATE
 	{
 		READYUP,
+		COUNTDOWN,
 		MAIN
 	};
 
@@ -59,6 +60,7 @@ public:
 		std::vector<std::shared_ptr<GameObject>>*,
 		std::vector<std::shared_ptr<GameObject>>*,
 		std::shared_ptr<BombManager>,
+		std::shared_ptr<Menu>,
 		Pause*, Score*, Camera*);
 
 	void update(float dt);//where we do all the updates and controls
@@ -121,6 +123,10 @@ private:
 
 	float windowWidth = 1920.0;
 	float windowHeight = 1080.0;
+
+	// Ready-up controls
+	std::shared_ptr<Menu> countdown;
+	float currentCountdown = 0.0f;
 
 	// Lighting Controls
 	float innerCutOff = 0.78; // Spot Light Size
