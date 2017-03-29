@@ -5,6 +5,7 @@ january 2017
 #include "FMOD\fmod.hpp"
 #include "Windows.h"
 #include "iostream"
+#include <glm\vec3.hpp>
 #include "FMOD\fmod_errors.h"
 // 50ms update for interface
 // Units per meter.  I.e feet would = 3.28.  centimeters would = 100.
@@ -50,13 +51,20 @@ public:
 	~Sound();
 
 	//loads the specificied file
-	bool load(char * filename);
+	bool load(char * filename, bool isLoop = true);
+
 	//plays the sound loaded
 	void play();
+
+
 	//updates the sounds position and calls the engines update function
-	void updateSound(FMOD_VECTOR _pos, FMOD_VECTOR _vel);
+	void setPosition(FMOD_VECTOR _pos, FMOD_VECTOR _vel);
+	void setPosition(glm::vec3 _pos, glm::vec3 _vel);
+
 	//changes what method of rollof is being used.
-	void switchSoundMode(FMOD_MODE);
+	void setRolloff(bool isLinear, float min, float max);
+	//void switchSoundMode(FMOD_MODE);
+
 	//pauses the sound
 	void pause();
 	//sound variables

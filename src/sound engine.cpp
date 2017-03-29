@@ -111,13 +111,13 @@ Sound::~Sound()
 }
 
 //loads the sound from the file path specificied
-bool Sound::load(char * filename)
+bool Sound::load(char * filename, bool isLoop)
 {
 	//initializes the sys
 	sys.init();
 
 	//creates the sound from the given filename
-	sys.result = sys.system->createSound((filename), FMOD_3D, 0, &sound); checkResult(sys.result);
+	sys.result = sys.system->createSound(filename, FMOD_3D, 0, &sound); checkResult(sys.result);
 
 
 	if (sys.result != FMOD_OK)//checks whether the file opened properly or not
@@ -131,9 +131,17 @@ bool Sound::load(char * filename)
 	sys.result = sound->set3DMinMaxDistance(0.5f, 50.0f); checkResult(sys.result);
 
 	//Sets how the sound will play (loop, single play etc)
-	sys.result = sound->setMode(FMOD_LOOP_NORMAL); checkResult(sys.result);
-
-	//sys.result = channel1->setPaused(false); checkResult(sys.result);
+	if (isLoop)
+	{
+		sys.result = sound->setMode(FMOD_LOOP_NORMAL); 
+		checkResult(sys.result);
+	}
+	else
+	{
+		sys.result = sound->setMode(FMOD_LOOP_OFF);
+		checkResult(sys.result);
+	}
+	
 	return true;
 }
 
@@ -154,8 +162,12 @@ void Sound::pause()
 }
 
 //changes how the sound rolloff works
-void Sound::switchSoundMode(FMOD_MODE mode)
+void Sound::setRolloff(bool isLinear, float min, float max)
 {
-	sys.result = sound->setMode(mode);
-	checkResult(sys.result);
+	channel->set3DMinMaxDistance(min, max);
+
+	if (isLinear)
+		channel->setMode(FMOD_3D_LINEARROLLOFF);
+	else
+		channel->setMode(FMOD_3D_INVERSEROLLOFF);
 }
