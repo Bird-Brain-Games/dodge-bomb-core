@@ -371,6 +371,9 @@ void initializeScene()
 	std::string boatTex = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
+	/*std::string dirtMask = "Assets/img/dirtMask.jpg";
+	std::shared_ptr<Texture> dirtMask = std::make_shared<Texture>(dirtMask, dirtMask, 1.0f);*/
+
 	// Report texture load times
 	t2 = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
@@ -404,8 +407,6 @@ void initializeScene()
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
-
-
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////

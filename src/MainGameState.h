@@ -8,6 +8,7 @@
 #include "camera.h"
 #include "Player.h"
 #include "FrameBufferObject.h"
+#include "Texture2D.h"
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////	Lighting Controls	//////////////////////////
@@ -132,7 +133,8 @@ private:
 	GLuint toonRamp;
 
 	// Bloom Controls
-	glm::vec4 bloomThreshold = glm::vec4(0.6f);
+	TTK::Texture2D dirtMask;
+	glm::vec4 bloomThreshold = glm::vec4(0.5f);
 	int numBlurPasses = 4;
 	bool bloomToggle = false;
 
