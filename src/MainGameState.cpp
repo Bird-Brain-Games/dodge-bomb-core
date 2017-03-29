@@ -599,13 +599,14 @@ void Game::brightPass()
 	fboBright.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
 	fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-
+	dirtMask.bind(GL_TEXTURE2);
 	static auto brightMaterial = materials->at("bright");
 	brightMaterial->shader->bind();
 
 
 	brightMaterial->vec4Uniforms["u_bloomThreshold"] = bloomThreshold;
 	brightMaterial->intUniforms["u_tex"] = 0;
+	brightMaterial->intUniforms["u_dirt"] = 2;
 	brightMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
 
 	brightMaterial->sendUniforms();

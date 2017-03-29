@@ -22,10 +22,10 @@ void main()
 	// COMPOSITE BLOOM HERE
 	////////////////////////////////////////////////////////////////////////// 
 	vec4 bright = texture(u_bright, texCoord);
-	vec4 dirt = texture(u_dirt, texCoord);
+	//vec4 dirt = texture(u_dirt, texCoord);
 	vec4 scene = texture(u_scene, texCoord);
 
-	vec4 composite =  (bright * dirt ) + (scene);
+	vec4 composite =  (bright * 0.3) + (scene);
 	FragColor = composite;
 	FragColor.a = 1.0;
 }
