@@ -3,7 +3,7 @@
 #include "GameObject.h"
 #include "Bomb.h"
 #include "controller.h"
-
+#include "particles.h"
 class readyUpRing : public GameObject
 {
 public:
@@ -39,6 +39,9 @@ public:
 	Player(Player&);
 	~Player();
 
+	void initParticles(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture);
+
+
 	void handleInput(float dt);
 
 	void update(float deltaT);
@@ -61,6 +64,8 @@ public:
 	int getHealth();
 
 	Controller* getController();
+
+	ParticleEmmiter emitter; // used to show when the player is damaged
 
 private:
 	void lookDirectlyAtExplosion(glm::vec3 direction);
