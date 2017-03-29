@@ -329,7 +329,7 @@ void Game::draw()
 
 	// Unbind scene FBO
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
-	FrameBufferObject::clearFrameBuffer(clearColor);
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Post Processing
@@ -367,21 +367,21 @@ void Game::draw()
 	}
 	else
 	{
-		if (colorCorrection != LUT_OFF)
-		{
-			//colorCorrectionPass(fboUnlit, fboColorCorrection);
-
-			//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-			fboColorCorrection.bindFrameBufferForDrawing();
-			FrameBufferObject::clearFrameBuffer(clearColor);
-			//fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
-		}
-		else
-		{
-			FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-			FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
-			//fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-		}
+		//if (colorCorrection != LUT_OFF)
+		//{
+		//	//colorCorrectionPass(fboUnlit, fboColorCorrection);
+		//
+		//	//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		//	fboColorCorrection.bindFrameBufferForDrawing();
+		//	FrameBufferObject::clearFrameBuffer(clearColor);
+		//	//fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
+		//}
+		//else
+		//{
+		//	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+		//	//fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
+		//}
 
 		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
 		

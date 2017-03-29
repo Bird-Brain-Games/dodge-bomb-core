@@ -53,19 +53,24 @@ Player::~Player()
 
 void Player::initParticles(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture)
 {
-	emitter.lifeRange = glm::vec3(1.0, 3.0, 0.0);
-	emitter.initialForceMin = glm::vec3(-3.0, 5.0, -4.0);
-	emitter.initialForceMax = glm::vec3(3.0, 15.0, -10.0);
+	//make smoker slower. somewhere between 100-250. die faster so not as tall.
+	emitter.lifeRange = glm::vec3(1.0, 4.0, 0.0); // this should be a vec2, rands life from x to y.
+	emitter.initialForceMin = glm::vec3(-0.5, 1.0, -0.5);
+	emitter.initialForceMax = glm::vec3( 0.5, 2.0,  0.5);
 	emitter.initialPosition = glm::vec3(0.0f, 5.0f, 0.0f);
+	emitter.initialGravity = glm::vec3(0.0f, 2.3f, 0.0f);
 
 	emitter.material = _material;
 	emitter.texture = _texture;
-	emitter.initialize(50);
+	emitter.initialize(250);
 	emitter.pause();
+	emitter.dimensions = glm::vec2(5.0f, 2.0f);
+	emitter.max = 5;
 }
 
 void Player::draw(Camera &camera)
 {
+	emitter.draw(camera);
 	if (currentState == P_NORMAL)
 	{
 		GameObject::draw(camera);
@@ -79,7 +84,6 @@ void Player::draw(Camera &camera)
 			GameObject::draw(camera);
 		}
 	}
-	emitter.draw(camera);
 }
 
 int Player::getHealth()

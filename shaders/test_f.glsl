@@ -6,7 +6,7 @@ uniform sampler2D u_tex;
 //in VertexData
 //{
 	//vec3 normal;
-	vec2 texCoord;
+in vec2 texCoord;
 	//vec4 colour;
 	//vec3 posEye;
 //} vIn;
@@ -15,6 +15,6 @@ layout(location = 0) out vec4 FragColor;
 
 void main()
 {
-	vec2 uv = (texCoord).xy;
+	vec2 uv = texCoord.xy;
 	FragColor = texture(u_tex, uv);
 }
