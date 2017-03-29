@@ -8,9 +8,11 @@
 #include "camera.h"
 #include "Player.h"
 #include "FrameBufferObject.h"
+#include "particles.h"
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////	Lighting Controls	//////////////////////////
+
 enum LightingMode
 {
 	NOLIGHT,
@@ -34,12 +36,15 @@ private:
 class Game : public GameState
 {
 public:
-	Game(std::map<std::string, std::shared_ptr<GameObject>>*,
-		std::map<std::string, std::shared_ptr<Player>>*,
-		std::map<std::string, std::shared_ptr<Material>>*,
-		std::vector<std::shared_ptr<GameObject>>*,
-		std::shared_ptr<BombManager>,
-		Pause*, Score*, Camera*);
+	Game::Game
+	(
+		std::map<std::string, std::shared_ptr<GameObject>>* _scene,
+		std::map<std::string, std::shared_ptr<Player>>* _player,
+		std::map<std::string, std::shared_ptr<Material>>* _materials,
+		std::vector<std::shared_ptr<GameObject>>* _obstacles,
+		std::shared_ptr<BombManager> _manager,
+		Pause* _pause, Score* _score, Camera* _camera
+	);
 
 	void update(float dt);//where we do all the updates and controls
 	void draw();// where we do all 
@@ -96,6 +101,9 @@ private:
 	Pause* pause;
 	Score* score;
 	Camera * camera;
+
+	
+
 	int pausing;
 	float pauseTimer;
 

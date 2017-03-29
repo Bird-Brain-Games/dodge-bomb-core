@@ -77,12 +77,15 @@ void LUT::unbind(GLuint textureUnit)
 	glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
+Game::Game
+(
+	std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
 	std::map<std::string, std::shared_ptr<Material>>* _materials,
 	std::vector<std::shared_ptr<GameObject>>* _obstacles,
 	std::shared_ptr<BombManager> _manager,
-	Pause* _pause, Score* _score, Camera* _camera)
+	Pause* _pause, Score* _score, Camera* _camera
+)
 
 	: obstacles(_obstacles)
 {
@@ -105,10 +108,11 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	toonRamp = ilutGLLoadImage("Assets/img/toonRamp.png");
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, toonRamp);
-
+	
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
+
 }
 
 void Game::setPaused(int a_paused)
@@ -274,6 +278,8 @@ void Game::draw()
 		// Our Default is Toon shading
 	case TOON:
 	{
+		
+
 		setMaterialForAllGameObjects("toon");
 		setMaterialForAllPlayerObjects("toon");
 
@@ -299,12 +305,15 @@ void Game::draw()
 
 
 		materials->at("toon")->sendUniforms();
+		drawScene();
+		materials->at("toon")->shader->unbind();
 	}
 	break;
 	// Just displays Textures
 	case NOLIGHT:
 	{
 		setMaterialForAllGameObjects("noLighting");
+		setMaterialForAllPlayerObjects("toon");
 
 		// Set material properties
 		materials->at("noLighting")->shader->bind();
@@ -313,20 +322,16 @@ void Game::draw()
 		materials->at("noLighting")->intUniforms["u_specularTex"] = 30;
 
 		materials->at("noLighting")->sendUniforms();
+		drawScene();
+		materials->at("noLighting")->shader->unbind();
 	}
 	break;
-	// BUG: WILL NEVER BE CALLED
-	setMaterialForAllPlayerObjects("toonPlayer");
-	// Set material properties for all our non player objects
-
-	materials->at("toon")->shader->unbind();
-
-	//sets the material properties for all our player objects
-
-
 	}
-	drawScene(camera, &shadowCamera);
 
+
+	fboUnlit.bindFrameBufferForDrawing();
+	drawScene(camera, &shadowCamera);
+	
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
@@ -334,7 +339,7 @@ void Game::draw()
 
 	// Unbind scene FBO
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
-	FrameBufferObject::clearFrameBuffer(clearColor);
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Post Processing
@@ -374,13 +379,26 @@ void Game::draw()
 
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
-	}
-	else
-	{
 		//if (colorCorrection != LUT_OFF)
 		//{
 		//	//colorCorrectionPass(fboUnlit, fboColorCorrection);
+		
+		//	//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		//	fboColorCorrection.bindFrameBufferForDrawing();
+		//	FrameBufferObject::clearFrameBuffer(clearColor);
+		//	//fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
+		//}
+		//else
+		//{
+			//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+		//	//fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
+		//}
 
+		//if (colorCorrection != LUT_OFF)
+		//{
+		//	//colorCorrectionPass(fboUnlit, fboColorCorrection);
+		//
 		//	//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 		//	fboColorCorrection.bindFrameBufferForDrawing();
 		//	FrameBufferObject::clearFrameBuffer(clearColor);
@@ -393,7 +411,6 @@ void Game::draw()
 		//	//fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
 		//}
 
-
 		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
 
 		static auto unlitMaterial = materials->at("unlitTexture");
@@ -404,6 +421,8 @@ void Game::draw()
 
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
+
+	
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -693,10 +712,7 @@ void Game::handleKeyboardInputShaders()
 	// Toggle Outlines
 	if (KEYBOARD_INPUT->CheckPressEvent('5'))
 	{
-		if (outlineToggle)
-			outlineToggle = false;
-		else
-			outlineToggle = true;
+		outlineToggle = !outlineToggle;
 	}
 	// Toggle Bloom
 	if (KEYBOARD_INPUT->CheckPressEvent('6'))

@@ -51,6 +51,8 @@ Game* game;
 Score* score;
 Pause* pause;
 
+
+
 glm::vec3 position;
 float movementSpeed = 5.0f;
 
@@ -96,11 +98,12 @@ void initializeShaders()
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
-		f_noLighting, f_toon, f_outline, f_shadow, f_colorCorrection;
+		f_noLighting, f_toon, f_outline, f_sobel, f_shadow, f_colorCorrection, f_particles;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);//
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);//
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
 	f_composite.loadShaderFromFile(shaderPath + "pls.glsl", GL_FRAGMENT_SHADER);//
+	f_particles.loadShaderFromFile(shaderPath + "test_f.glsl", GL_FRAGMENT_SHADER);
 	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER); //a
 	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);//
 	f_noLighting.loadShaderFromFile(shaderPath + "noLighting_f.glsl", GL_FRAGMENT_SHADER);//
@@ -110,9 +113,10 @@ void initializeShaders()
 	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);//
 
 	// Geometry Shaders
-	Shader g_quad, g_menu;
+	Shader g_quad, g_menu, g_particles;
 	g_quad.loadShaderFromFile(shaderPath + "quad.geom", GL_GEOMETRY_SHADER);
 	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
+	g_particles.loadShaderFromFile(shaderPath + "particles.geom", GL_GEOMETRY_SHADER);
 
 	// No Lighting material
 	materials["noLighting"] = std::make_shared<Material>("noLighting");
@@ -186,6 +190,13 @@ void initializeShaders()
 	materials["shadow"]->shader->attachShader(v_skinning);
 	materials["shadow"]->shader->attachShader(f_shadow);
 	materials["shadow"]->shader->linkProgram();
+
+	// Unlit texture material with point-to-quad geometry shader
+	materials["particles"] = std::make_shared<Material>("particles");
+	materials["particles"]->shader->attachShader(v_passThru);
+	materials["particles"]->shader->attachShader(g_particles); // Geometry Shader!
+	materials["particles"]->shader->attachShader(f_particles);
+	materials["particles"]->shader->linkProgram();
 }
 
 void initializeScene()
@@ -371,6 +382,9 @@ void initializeScene()
 	std::string boatTex = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
+	std::string particle = "Assets/img/smoke.png";
+	std::shared_ptr<Texture> particleTexMap = std::make_shared<Texture>(particle, particle, 1.0f);
+
 	// Report texture load times
 	t2 = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
@@ -404,7 +418,7 @@ void initializeScene()
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
-
+	textures["particles"] = particleTexMap;
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -540,15 +554,19 @@ void initializeScene()
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
+	players["bombot1"]->initParticles(materials["particles"], particleTexMap);
 
 	players["bombot2"] = std::make_shared<Player>(
 		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
+	players["bombot2"]->initParticles(materials["particles"], particleTexMap);
 	
 	players["bombot3"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
+	players["bombot3"]->initParticles(materials["particles"], particleTexMap);
 
 	players["bombot4"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
+	players["bombot4"]->initParticles(materials["particles"], particleTexMap);
 
 	// Report gameObject init times
 	t2 = std::chrono::high_resolution_clock::now();
