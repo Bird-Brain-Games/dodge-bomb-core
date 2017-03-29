@@ -417,7 +417,6 @@ void Game::draw()
 
 
 	fboUnlit.bindFrameBufferForDrawing();
-	drawScene(camera, &shadowCamera);
 	
 
 	// Draw the debug (if on)

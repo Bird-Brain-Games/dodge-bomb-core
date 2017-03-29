@@ -72,7 +72,6 @@ void Player::initParticles(std::shared_ptr<Material> _material, std::shared_ptr<
 
 void Player::draw(Camera &camera, Camera& shadow)
 {
-	emitter.draw(camera);
 	if (currentState == P_NORMAL)
 	{
 		GameObject::draw(camera, shadow);
