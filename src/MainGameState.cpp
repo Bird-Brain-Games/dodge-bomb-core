@@ -363,7 +363,7 @@ void Game::draw()
 
 		//FrameBufferObject::clearFrameBuffer(clearColor);
 		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-		fboBlurB.bindTextureForSampling(0, GL_TEXTURE1);
+		fboBlurA.bindTextureForSampling(0, GL_TEXTURE1);
 
 		static auto sunlitMaterial = materials->at("bloom");
 		sunlitMaterial->shader->bind();
@@ -634,7 +634,7 @@ void Game::blurBrightPass()
 
 	glDrawArrays(GL_POINTS, 0, 1);
 
-	static int numBlurPasses = 4;
+	static int numBlurPasses = 10;
 	for (int i = 0; i < numBlurPasses; i++)
 	{
 		if (i % 2 == 0)

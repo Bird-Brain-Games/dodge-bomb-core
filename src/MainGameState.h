@@ -132,7 +132,7 @@ private:
 	GLuint toonRamp;
 
 	// Bloom Controls
-	glm::vec4 bloomThreshold = glm::vec4(0.3f);
+	glm::vec4 bloomThreshold = glm::vec4(0.6f);
 	int numBlurPasses = 4;
 	bool bloomToggle = false;
 
