@@ -305,7 +305,7 @@ void Game::draw()
 
 
 		materials->at("toon")->sendUniforms();
-		drawScene();
+		drawScene(camera, &shadowCamera);
 		materials->at("toon")->shader->unbind();
 	}
 	break;
@@ -322,7 +322,7 @@ void Game::draw()
 		materials->at("noLighting")->intUniforms["u_specularTex"] = 30;
 
 		materials->at("noLighting")->sendUniforms();
-		drawScene();
+		drawScene(camera, &shadowCamera);
 		materials->at("noLighting")->shader->unbind();
 	}
 	break;
@@ -343,7 +343,6 @@ void Game::draw()
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Post Processing
-
 
 	if (bloomToggle)
 	{
@@ -379,26 +378,13 @@ void Game::draw()
 
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
+	}
+	else
+	{
 		//if (colorCorrection != LUT_OFF)
 		//{
 		//	//colorCorrectionPass(fboUnlit, fboColorCorrection);
-		
-		//	//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-		//	fboColorCorrection.bindFrameBufferForDrawing();
-		//	FrameBufferObject::clearFrameBuffer(clearColor);
-		//	//fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
-		//}
-		//else
-		//{
-			//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-		//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
-		//	//fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-		//}
 
-		//if (colorCorrection != LUT_OFF)
-		//{
-		//	//colorCorrectionPass(fboUnlit, fboColorCorrection);
-		//
 		//	//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 		//	fboColorCorrection.bindFrameBufferForDrawing();
 		//	FrameBufferObject::clearFrameBuffer(clearColor);
@@ -411,6 +397,7 @@ void Game::draw()
 		//	//fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
 		//}
 
+
 		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
 
 		static auto unlitMaterial = materials->at("unlitTexture");
@@ -421,8 +408,6 @@ void Game::draw()
 
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
-
-	
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -484,6 +469,7 @@ void Game::draw()
 	//default:
 	//	break;
 	//}
+
 }
 
 void Game::windowReshapeCallbackFunction(int w, int h)

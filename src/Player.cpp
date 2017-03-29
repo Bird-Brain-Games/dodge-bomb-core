@@ -68,7 +68,7 @@ void Player::initParticles(std::shared_ptr<Material> _material, std::shared_ptr<
 	emitter.max = 5;
 }
 
-void Player::draw(Camera &camera)
+void Player::draw(Camera &camera, Camera& shadow)
 {
 	emitter.draw(camera);
 	if (currentState == P_NORMAL)
