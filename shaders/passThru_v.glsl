@@ -1,4 +1,4 @@
- #version 400
+#version 400
 
 // Vertex Shader Inputs
 // These are the attributes of the vertex
@@ -26,5 +26,5 @@ void main()
 {
 	vOut.texCoord = vIn_uv;
 	vOut.normal = vIn_normal;
-	gl_Position = u_mvp * vec4(vIn_vertex, 1.0);
+	gl_Position = vec4(vIn_vertex, 1.0);
 }
