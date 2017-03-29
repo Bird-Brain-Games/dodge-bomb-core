@@ -2,6 +2,7 @@
 
 uniform sampler2D u_scene;
 uniform sampler2D u_bright;
+uniform sampler2D u_dirt;
 
 // Fragment Shader Inputs
 in VertexData
@@ -20,7 +21,11 @@ void main()
 	//////////////////////////////////////////////////////////////////////////
 	// COMPOSITE BLOOM HERE
 	////////////////////////////////////////////////////////////////////////// 
-	vec4 composite =  (texture(u_bright, texCoord) * 0.4) + (texture(u_scene, texCoord));
+	vec4 bright = texture(u_bright, texCoord);
+	vec4 dirt = texture(u_dirt, texCoord);
+	vec4 scene = texture(u_scene, texCoord);
+
+	vec4 composite =  (bright * dirt ) + (scene);
 	FragColor = composite;
 	FragColor.a = 1.0;
 }

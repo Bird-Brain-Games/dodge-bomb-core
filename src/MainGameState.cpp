@@ -109,6 +109,7 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
+	dirtMask.loadTexture("Assets/img/dirtMask.png");
 }
 
 void Game::setPaused(int a_paused)
@@ -364,12 +365,15 @@ void Game::draw()
 		//FrameBufferObject::clearFrameBuffer(clearColor);
 		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
 		fboBlurA.bindTextureForSampling(0, GL_TEXTURE1);
+		dirtMask.bind(GL_TEXTURE2);
 
 		static auto sunlitMaterial = materials->at("bloom");
 		sunlitMaterial->shader->bind();
+
 		sunlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
 		sunlitMaterial->shader->sendUniformInt("u_scene", 0);
 		sunlitMaterial->shader->sendUniformInt("u_bright", 1);
+		sunlitMaterial->shader->sendUniformInt("u_dirt", 2);
 		sunlitMaterial->sendUniforms();
 
 		// Draw a full screen quad using the geometry shader
@@ -634,7 +638,7 @@ void Game::blurBrightPass()
 
 	glDrawArrays(GL_POINTS, 0, 1);
 
-	static int numBlurPasses = 10;
+	static int numBlurPasses = 4;
 	for (int i = 0; i < numBlurPasses; i++)
 	{
 		if (i % 2 == 0)
