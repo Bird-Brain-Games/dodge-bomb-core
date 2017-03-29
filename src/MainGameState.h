@@ -58,7 +58,7 @@ private:
 	void setMaterialForAllPlayerObjects(std::string materialName);
 
 	void brightPass();
-	void blurPass(FrameBufferObject fboIn, FrameBufferObject fboOut);
+	void blurBrightPass();
 	void colorCorrectionPass(FrameBufferObject fboIn, FrameBufferObject fboOut);
 
 	void initializeFrameBuffers();
@@ -83,7 +83,7 @@ private:
 private:
 	FrameBufferObject fboUnlit;
 	FrameBufferObject fboBright;
-	FrameBufferObject fboBlur, fboBlurB;
+	FrameBufferObject fboBlurA, fboBlurB;
 	FrameBufferObject fboColorCorrection;
 	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
 
@@ -132,7 +132,7 @@ private:
 	GLuint toonRamp;
 
 	// Bloom Controls
-	glm::vec4 bloomThreshold = glm::vec4(0.6f);
+	glm::vec4 bloomThreshold = glm::vec4(0.3f);
 	int numBlurPasses = 4;
 	bool bloomToggle = false;
 
