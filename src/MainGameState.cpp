@@ -731,7 +731,7 @@ void Game::blurBrightPass()
 
 	glDrawArrays(GL_POINTS, 0, 1);
 
-	static int numBlurPasses = 10;
+	static int numBlurPasses = 4;
 	for (int i = 0; i < numBlurPasses; i++)
 	{
 		if (i % 2 == 0)
