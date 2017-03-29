@@ -240,5 +240,8 @@
     <None Include="shaders\sobel_f.glsl.orig">
       <Filter>Graphics\Shaders</Filter>
     </None>
+    <None Include="shaders\pls.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

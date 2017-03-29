@@ -166,6 +166,7 @@
     <None Include="shaders\null.vert" />
     <None Include="shaders\passThru_f.glsl" />
     <None Include="shaders\passThru_v.glsl" />
+    <None Include="shaders\pls.glsl" />
     <None Include="shaders\quad.geom" />
     <None Include="shaders\shader_texture.frag" />
     <None Include="shaders\shadowMap_f.glsl" />
