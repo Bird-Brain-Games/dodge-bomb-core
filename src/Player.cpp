@@ -1,3 +1,4 @@
+
 #include "Player.h"
 #include <iostream>
 #include "SoundDriver.h"
@@ -51,8 +52,27 @@ Player::~Player()
 
 }
 
-void Player::draw(Camera &camera, Camera &shadow)
+
+void Player::initParticles(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture)
 {
+	//make smoker slower. somewhere between 100-250. die faster so not as tall.
+	emitter.lifeRange = glm::vec3(1.0, 4.0, 0.0); // this should be a vec2, rands life from x to y.
+	emitter.initialForceMin = glm::vec3(-0.5, 1.0, -0.5);
+	emitter.initialForceMax = glm::vec3( 0.5, 2.0,  0.5);
+	emitter.initialPosition = glm::vec3(0.0f, 5.0f, 0.0f);
+	emitter.initialGravity = glm::vec3(0.0f, 2.3f, 0.0f);
+
+	emitter.material = _material;
+	emitter.texture = _texture;
+	emitter.initialize(250);
+	emitter.pause();
+	emitter.dimensions = glm::vec2(5.0f, 2.0f);
+	emitter.max = 5;
+}
+
+void Player::draw(Camera &camera, Camera& shadow)
+{
+	emitter.draw(camera);
 	if (currentState == P_NORMAL)
 	{
 		GameObject::draw(camera, shadow);
@@ -81,6 +101,8 @@ Controller* Player::getController()
 void Player::update(float dt, bool canMove)
 {
 	// Update the bomb cooldown
+	emitter.initialPosition = getWorldPosition();
+	emitter.update(dt);
 	if (currentCooldown > 0.0f)
 	{
 		currentCooldown -= dt;
@@ -382,6 +404,10 @@ void Player::takeDamage(int damage)
 		std::cout << "Player " << playerNum << " is dead" << std::endl;
 		currentState = P_DEAD;
 		setPosition(glm::vec3(0.0f, -15.0f, 0.0f));
+	}
+	else if (health == 1)
+	{
+		emitter.play();
 	}
 }
 
