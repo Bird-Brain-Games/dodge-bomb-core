@@ -383,8 +383,8 @@ void initializeScene()
 	std::string boatTex = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
-	//std::string particle = "Assets/img/smoke.png";
-	//std::shared_ptr<Texture> particleTexMap = std::make_shared<Texture>(particle, particle, 1.0f);
+	std::string particle = "Assets/img/smoke.png";
+	std::shared_ptr<Texture> particleTexMap = std::make_shared<Texture>(particle, particle, 1.0f);
 
 	// Report texture load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -419,7 +419,7 @@ void initializeScene()
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
-	textures["particles"] = boatTexMap;
+	textures["particles"] = particleTexMap;
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -555,19 +555,19 @@ void initializeScene()
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
-	players["bombot1"]->initParticles(materials["particles"], boatTexMap);
+	players["bombot1"]->initParticles(materials["particles"], particleTexMap);
 
 	players["bombot2"] = std::make_shared<Player>(
 		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
-	players["bombot2"]->initParticles(materials["particles"], boatTexMap);
+	players["bombot2"]->initParticles(materials["particles"], particleTexMap);
 	
 	players["bombot3"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
-	players["bombot3"]->initParticles(materials["particles"], boatTexMap);
+	players["bombot3"]->initParticles(materials["particles"], particleTexMap);
 
 	players["bombot4"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
-	players["bombot4"]->initParticles(materials["particles"], boatTexMap);
+	players["bombot4"]->initParticles(materials["particles"], particleTexMap);
 
 	// Report gameObject init times
 	t2 = std::chrono::high_resolution_clock::now();
