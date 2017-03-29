@@ -1,4 +1,5 @@
 // billboard geometry shader
+
 #version 400
 
 layout(points) in;
@@ -12,19 +13,19 @@ uniform mat4 u_proj;
 in VertexData
 {
 	vec3 normal;
-	vec3 texCoord;
+	vec2 texCoord;
 	vec4 colour;
 	vec3 posEye;
 } vIn[]; // array size = num vertices in primitve
 
 // Output from geometry shader
-out VertexData
-{
-	vec3 normal;
-	vec3 texCoord;
-	vec4 colour;
-	vec3 posEye;
-} vOut; // array size depends on max_vertices
+//out VertexData
+//{
+//	vec3 normal;
+	vec2 texCoord;
+//	vec4 colour;
+//	vec3 posEye;
+//} vOut; // array size depends on max_vertices
 
 
 // Creates a quad of specified size around point p
@@ -38,30 +39,28 @@ void PointToQuadBillboarded(vec4 p, float size)
 	vec4 topRight = vec4(pEye.xy + vec2(halfSize, halfSize), pEye.z, 1.0);
 	vec4 botRight = vec4(pEye.xy + vec2(halfSize, -halfSize), pEye.z, 1.0);
 
-	gl_Position = u_proj * botLeft;
-	vOut.texCoord = vec3(0.0, 0.0, 0.0);
-	EmitVertex();
-
-	gl_Position = u_proj * topLeft;
-	vOut.texCoord = vec3(0.0, 1.0, 0.0);
-	EmitVertex();
-
-	gl_Position = u_proj * botRight;
-	vOut.texCoord = vec3(1.0, 0.0, 0.0);
-	EmitVertex();
-
 	gl_Position = u_proj * topRight;
-	vOut.texCoord = vec3(1.0, 1.0, 0.0);
+	texCoord = vec2(1.0, 1.0);
+	EmitVertex();
+	
+	gl_Position = u_proj * topLeft;
+	texCoord = vec2(0.0, 1.0);
+	EmitVertex();
+	
+	gl_Position = u_proj * botRight;
+	texCoord = vec2(1.0, 0.0);
+	EmitVertex();
+
+	
+	gl_Position = u_proj * botLeft;
+	texCoord = vec2(0.0, 0.0);
 	EmitVertex();
 
 	EndPrimitive();
+	
 }
 
 void main()
 {
 	PointToQuadBillboarded(gl_in[0].gl_Position, 1.0);
 }
-
-
-
-

@@ -99,10 +99,11 @@ void initializeShaders()
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
-		f_noLighting, f_toon, f_sobel, f_shadow, f_colorCorrection;
+		f_noLighting, f_toon, f_sobel, f_shadow, f_colorCorrection, f_particles;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);//
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);//
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
+	f_particles.loadShaderFromFile(shaderPath + "test_f.glsl", GL_FRAGMENT_SHADER);
 	f_composite.loadShaderFromFile(shaderPath + "bloomComposite_f.glsl", GL_FRAGMENT_SHADER);//
 	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER); // not being used right now
 	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);//
@@ -195,7 +196,7 @@ void initializeShaders()
 	materials["particles"] = std::make_shared<Material>("particles");
 	materials["particles"]->shader->attachShader(v_passThru);
 	materials["particles"]->shader->attachShader(g_particles); // Geometry Shader!
-	materials["particles"]->shader->attachShader(f_unlitTex);
+	materials["particles"]->shader->attachShader(f_particles);
 	materials["particles"]->shader->linkProgram();
 }
 
@@ -382,8 +383,8 @@ void initializeScene()
 	std::string boatTex = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
-	std::string particle = "Assets/img/smoke.png";
-	std::shared_ptr<Texture> particleTexMap = std::make_shared<Texture>(particle, particle, 1.0f);
+	//std::string particle = "Assets/img/smoke.png";
+	//std::shared_ptr<Texture> particleTexMap = std::make_shared<Texture>(particle, particle, 1.0f);
 
 	// Report texture load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -418,7 +419,7 @@ void initializeScene()
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
-	textures["particles"] = particleTexMap;
+	textures["particles"] = boatTexMap;
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -554,15 +555,19 @@ void initializeScene()
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
+	players["bombot1"]->initParticles(materials["particles"], boatTexMap);
 
 	players["bombot2"] = std::make_shared<Player>(
 		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
+	players["bombot2"]->initParticles(materials["particles"], boatTexMap);
 	
 	players["bombot3"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
+	players["bombot3"]->initParticles(materials["particles"], boatTexMap);
 
 	players["bombot4"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
+	players["bombot4"]->initParticles(materials["particles"], boatTexMap);
 
 	// Report gameObject init times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -803,7 +808,7 @@ void initializeStates()
 	score = new Score(scoreMenu);
 	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, &obstacles, bombManager, pause, score, &playerCamera, &textures);
+	game = new Game(&gameobjects, &players, &materials, &obstacles, bombManager, pause, score, &playerCamera);
 	game->setPaused(true);
 
 	states.addGameState("game", game);

@@ -12,6 +12,7 @@
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////	Lighting Controls	//////////////////////////
+
 enum LightingMode
 {
 	NOLIGHT,
@@ -42,8 +43,7 @@ public:
 		std::map<std::string, std::shared_ptr<Material>>* _materials,
 		std::vector<std::shared_ptr<GameObject>>* _obstacles,
 		std::shared_ptr<BombManager> _manager,
-		Pause* _pause, Score* _score, Camera* _camera,
-		std::map<std::string, std::shared_ptr<Texture>>* _texture
+		Pause* _pause, Score* _score, Camera* _camera
 	);
 
 	void update(float dt);//where we do all the updates and controls
@@ -97,13 +97,12 @@ private:
 	std::map<std::string, std::shared_ptr<Player>>* players;
 	std::map<std::string, std::shared_ptr<Material>>* materials;
 	std::vector<std::shared_ptr<GameObject>>* obstacles;
-	std::map<std::string, std::shared_ptr<Texture>>* textures;
 
 	Pause* pause;
 	Score* score;
 	Camera * camera;
 
-	ParticleEmmiter testing;
+	
 
 	int pausing;
 	float pauseTimer;
