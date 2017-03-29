@@ -1,7 +1,7 @@
 #include "particles.h"
 #include <algorithm>
 #include "GLM\gtc\random.hpp"
-
+#include <iostream>
 ParticleEmmiter::ParticleEmmiter()
 {
 	particles.position = nullptr;
@@ -17,24 +17,31 @@ ParticleEmmiter::ParticleEmmiter()
 
 ParticleEmmiter::~ParticleEmmiter() { freeMemory(); }
 
-void ParticleEmmiter::initialize(unsigned int numParticles)
+void ParticleEmmiter::initialize(unsigned int _numParticles)
 {
 	if (allocated) freeMemory();
 
-	if (numParticles)
+	if (_numParticles)
 	{
-		particles.position = new glm::vec3[numParticles];
-		particles.velocities = new glm::vec3[numParticles];
-		particles.lives = new float[numParticles];
-		particles.acceleration = new glm::vec3[numParticles];
-		particles.masses = new float[numParticles];
-		memset(particles.lives, 0, sizeof(float) * numParticles);
+		particles.position = new glm::vec3[_numParticles];
+		particles.velocities = new glm::vec3[_numParticles];
+		particles.location = new glm::ivec2[_numParticles];
+		particles.lives = new float[_numParticles];
+		particles.duration = new float[_numParticles];
+		particles.acceleration = new glm::vec3[_numParticles];
+		particles.masses = new float[_numParticles];
+		memset(particles.lives, 0, sizeof(float) * _numParticles);
 
-		numParticles = numParticles;
+		numParticles = _numParticles;
 		allocated = true;
 
-		Attribute posAttrib(AttributeLocations::VERTEX, GL_FLOAT, sizeof(float), 3, numParticles, "particles", particles.position);
+			Attribute posAttrib(AttributeLocations::VERTEX, GL_FLOAT, sizeof(glm::vec3), 3, _numParticles, "particles", particles.position);
 		vao.addAttribute(posAttrib);
+
+		Attribute uvAttrib(AttributeLocations::TEX_COORD, GL_INT, sizeof(glm::ivec2), 2, _numParticles, "location", particles.location);
+		vao.addAttribute(uvAttrib);
+
+
 		vao.setPrimitive(GL_POINTS);
 		vao.createVAO(GL_DYNAMIC_DRAW);
 
@@ -44,56 +51,74 @@ void ParticleEmmiter::initialize(unsigned int numParticles)
 void ParticleEmmiter::play() { playing = true; }
 void ParticleEmmiter::pause() { playing = false; }
 
-void ParticleEmmiter::update(float dt)
+void ParticleEmmiter::update(float dt, glm::vec3 velocity)
 {
 	if (allocated && playing)
 	{
 		for (int i = 0; i < numParticles; i++)
 		{
-			glm::vec3* pos = particles.position;
-			glm::vec3* vel = particles.velocities;
-			glm::vec3* accel = particles.acceleration;
-			float* life = particles.lives;
-			float* mass = particles.masses;
+			glm::vec3* pos = particles.position + i;
+			glm::vec3* vel = particles.velocities + i;
+			glm::vec3* accel = particles.acceleration + i;
+			glm::ivec2* loc = particles.location + i;
+			float* life = particles.lives + i;
+			float* mass = particles.masses + i;
+			float* dur = particles.duration + i;
 
 			if (*life <= 0)
 			{
 				*pos = initialPosition;
-				(*vel).x = glm::mix(initialForceMin.x, initialForceMax.x, glm::linearRand(0.0f, 1.0f));
-				(*vel).y = glm::mix(initialForceMin.y, initialForceMax.y, glm::linearRand(0.0f, 1.0f));
-				(*vel).z = glm::mix(initialForceMin.z, initialForceMax.z, glm::linearRand(0.0f, 1.0f));
+				(*vel).x = glm::mix(initialForceMin.x, initialForceMax.x, glm::linearRand(0.0f, 1.0f)) + velocity.x;
+				(*vel).y = glm::mix(initialForceMin.y, initialForceMax.y, glm::linearRand(0.0f, 1.0f)) + velocity.y;
+				(*vel).z = glm::mix(initialForceMin.z, initialForceMax.z, glm::linearRand(0.0f, 1.0f)) + velocity.z;
 
 				*life = glm::linearRand(lifeRange.x, lifeRange.y);
+				*dur = *life;
 				*mass = glm::linearRand(0.05f, 1.0f);
 				*accel = *vel / *mass;
+				*loc = glm::vec2(0, 1);
+				
 			}
-			*pos += *vel * dt + *accel * 0.5f * (dt*dt);
+			if (*dur - *life > (*dur / max) * (loc->x+1))
+			{
+				loc->x++;
+			}
+			*pos += (*vel * dt) + (*accel * 0.5f * (dt*dt)) + (initialGravity * 0.5f * (dt*dt));
 			*vel += dt;
 			*life -= dt;
+			
 		}
 	}
 }
 
-void ParticleEmmiter::draw(Camera* _camera)
+void ParticleEmmiter::draw(Camera _camera)
 {
-	Attribute* attrib = vao.getAttribute(AttributeLocations::VERTEX);
+	Attribute* points = vao.getAttribute(AttributeLocations::VERTEX);
+	Attribute* cycle = vao.getAttribute(AttributeLocations::TEX_COORD);
 
 	glBindVertexArray(vao.getVAO());
-	glEnableVertexAttribArray(attrib->getAttribLocation());
+	glEnableVertexAttribArray(points->getAttribLocation());
 	glBindBuffer(GL_ARRAY_BUFFER, vao.getVBO(VERTEX));
-	glBufferSubData(GL_ARRAY_BUFFER, 0, attrib->getNumElements() * attrib->getDataSize(), attrib->data);
+	points->data = particles.position;
+	glBufferSubData(GL_ARRAY_BUFFER, 0, points->getNumElements() * points->getDataSize(), points->data);
 
-	material->shader->bind();
-	material->mat4Uniforms["u_mvp"] = _camera->getViewProj();
-	material->mat4Uniforms["u_mv"] = _camera->getView();
-	material->mat4Uniforms["u_proj"] = _camera->getProj();
-	material->intUniforms["u_tex"] = 0;
-	material->sendUniforms();
+	glEnableVertexAttribArray(cycle->getAttribLocation());
+	glBindBuffer(GL_ARRAY_BUFFER, vao.getVBO(TEX_COORD));
+	cycle->data = particles.location;
+	glBufferSubData(GL_ARRAY_BUFFER, 0, cycle->getNumElements() * cycle->getDataSize(), cycle->data);
 
 	if (texture)
 	{
-		texture->bind(GL_TEXTURE0);
+		texture->bind(GL_TEXTURE0, GL_TEXTURE1);
 	}
+
+	material->shader->bind();
+	material->vec2Uniforms["dimensions"] = dimensions;
+	material->mat4Uniforms["u_mvp"] = _camera.getViewProj();
+	material->mat4Uniforms["u_mv"] = _camera.getView();
+	material->mat4Uniforms["u_proj"] = _camera.getProj();
+	material->intUniforms["u_tex"] = 0;
+	material->sendUniforms();
 
 	glDepthMask(GL_FALSE);
 	vao.draw();

@@ -78,14 +78,17 @@ void LUT::unbind(GLuint textureUnit)
 	glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
+Game::Game
+(
+	std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
 	std::map<std::string, std::shared_ptr<Material>>* _materials,
 	std::vector<std::shared_ptr<GameObject>>* _obstacles,
 	std::vector<std::shared_ptr<GameObject>>* _readyUpRings,
 	std::shared_ptr<BombManager> _manager,
 	std::shared_ptr<Menu> _countdown,
-	Pause* _pause, Score* _score, Camera* _camera)
+	Pause* _pause, Score* _score, Camera* _camera
+)
 
 	: obstacles(_obstacles),
 	readyUpRings(_readyUpRings),
@@ -110,7 +113,7 @@ Game::Game(std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	toonRamp = ilutGLLoadImage("Assets/img/toonRamp.png");
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, toonRamp);
-
+	
 
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
@@ -263,7 +266,7 @@ void Game::update(float dt)
 
 	pauseTimer += dt;
 
-	
+
 	if (currentGameState == MAIN)
 	{
 		int count = 0;
@@ -362,6 +365,8 @@ void Game::draw()
 		// Our Default is Toon shading
 	case TOON:
 	{
+		
+
 		setMaterialForAllGameObjects("toon");
 		setMaterialForAllPlayerObjects("toon");
 
@@ -387,12 +392,15 @@ void Game::draw()
 
 
 		materials->at("toon")->sendUniforms();
+		drawScene(camera, &shadowCamera);
+		materials->at("toon")->shader->unbind();
 	}
 	break;
 	// Just displays Textures
 	case NOLIGHT:
 	{
 		setMaterialForAllGameObjects("noLighting");
+		setMaterialForAllPlayerObjects("toon");
 
 		// Set material properties
 		materials->at("noLighting")->shader->bind();
@@ -401,20 +409,16 @@ void Game::draw()
 		materials->at("noLighting")->intUniforms["u_specularTex"] = 30;
 
 		materials->at("noLighting")->sendUniforms();
+		drawScene(camera, &shadowCamera);
+		materials->at("noLighting")->shader->unbind();
 	}
 	break;
-	// BUG: WILL NEVER BE CALLED
-	setMaterialForAllPlayerObjects("toonPlayer");
-	// Set material properties for all our non player objects
-
-	materials->at("toon")->shader->unbind();
-
-	//sets the material properties for all our player objects
-
-
 	}
-	drawScene(camera, &shadowCamera);
 
+
+	fboUnlit.bindFrameBufferForDrawing();
+	drawScene(camera, &shadowCamera);
+	
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
@@ -422,130 +426,137 @@ void Game::draw()
 
 	// Unbind scene FBO
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
-	FrameBufferObject::clearFrameBuffer(clearColor);
-	
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Post Processing
 
 	if (bloomToggle)
 	{
-		brightPass();
-		blurPass(fboBright, fboBlur);
 
-		if (colorCorrection != LUT_OFF)
-		{
-			fboColorCorrection.bindFrameBufferForDrawing();
-			FrameBufferObject::clearFrameBuffer(clearColor);
-		}
-		else
-		{
-			FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-			FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
-			fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
-		}
+		//if (colorCorrection != LUT_OFF)
+		//{
+		//	fboColorCorrection.bindFrameBufferForDrawing();
+		//	FrameBufferObject::clearFrameBuffer(clearColor);
+		//}
+		//else
+		//{
+		//	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+		//	fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
+		//}
 
-		fboBlur.bindTextureForSampling(0, GL_TEXTURE0);
+		brightPass(); // Output FBO: fboBright
+		blurBrightPass(); // Output FBO: fboBlurB
 
-		static auto bloomMaterial = materials->at("bloom");
+		FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		FrameBufferObject::clearFrameBuffer(glm::vec4(0, 0, 1, 1));
 
-		bloomMaterial->shader->bind();
-		bloomMaterial->shader->sendUniformInt("u_bright", 0);
-		bloomMaterial->shader->sendUniformInt("u_scene", 1);
-		bloomMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-		bloomMaterial->sendUniforms();
+		//FrameBufferObject::clearFrameBuffer(clearColor);
+		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
+		fboBlurA.bindTextureForSampling(0, GL_TEXTURE1);
+
+		static auto sunlitMaterial = materials->at("bloom");
+		sunlitMaterial->shader->bind();
+		sunlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+		sunlitMaterial->shader->sendUniformInt("u_scene", 0);
+		sunlitMaterial->shader->sendUniformInt("u_bright", 1);
+		sunlitMaterial->sendUniforms();
 
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
 	}
 	else
 	{
-		if (colorCorrection != LUT_OFF)
-		{
-			//colorCorrectionPass(fboUnlit, fboColorCorrection);
+		//if (colorCorrection != LUT_OFF)
+		//{
+		//	//colorCorrectionPass(fboUnlit, fboColorCorrection);
 
-			//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-			fboColorCorrection.bindFrameBufferForDrawing();
-			FrameBufferObject::clearFrameBuffer(clearColor);
-			//fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
-		}
-		else
-		{
-			FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-			FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
-			//fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-		}
+		//	//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		//	fboColorCorrection.bindFrameBufferForDrawing();
+		//	FrameBufferObject::clearFrameBuffer(clearColor);
+		//	//fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
+		//}
+		//else
+		//{
+		//	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+		//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+		//	//fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
+		//}
+
 
 		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-		
+
 		static auto unlitMaterial = materials->at("unlitTexture");
 		unlitMaterial->shader->bind();
 		unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
 		unlitMaterial->shader->sendUniformInt("u_tex", 0);
 		unlitMaterial->sendUniforms();
-		
+
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
 	}
 
-	///////////////////////////////////////////////////////////////////////////
-	////////////////////////	Color Correction
-	static auto colorMaterial = materials->at("colorCorrection");
-	switch (colorCorrection)
-	{
-	case Game::LUT_OFF:
-		break;
+	/////////////////////////////////////////////////////////////////////////////
+	//////////////////////////	Color Correction
+	//static auto colorMaterial = materials->at("colorCorrection");
+	//switch (colorCorrection)
+	//{
+	//case Game::LUT_OFF:
+	//	break;
 
-	case Game::LUT_CONTRAST:
-		// Draw the corrected FBO to the screen
+	//case Game::LUT_CONTRAST:
+	//	// Draw the corrected FBO to the screen
 
-		FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-		FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+	//	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+	//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
 
-		fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
+	//	fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
 
-		// Bind the LUT
-		contrastLUT.bind(GL_TEXTURE6);
+	//	// Bind the LUT
+	//	contrastLUT.bind(GL_TEXTURE6);
 
-		colorMaterial->shader->bind();
-		colorMaterial->shader->sendUniformInt("u_tex", 0);
-		colorMaterial->shader->sendUniformInt("u_lookup", 6);
-		colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
-		colorMaterial->shader->sendUniformFloat("u_lookupSize", contrastLUT.getSize());
-		colorMaterial->sendUniforms();
+	//	colorMaterial->shader->bind();
+	//	colorMaterial->shader->sendUniformInt("u_tex", 0);
+	//	colorMaterial->shader->sendUniformInt("u_lookup", 6);
+	//	colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
+	//	colorMaterial->shader->sendUniformFloat("u_lookupSize", contrastLUT.getSize());
+	//	colorMaterial->sendUniforms();
 
-		// Draw a full screen quad using the geometry shader
-		glDrawArrays(GL_POINTS, 0, 1);
+	//	// Draw a full screen quad using the geometry shader
+	//	glDrawArrays(GL_POINTS, 0, 1);
 
-		contrastLUT.unbind(GL_TEXTURE6);
+	//	contrastLUT.unbind(GL_TEXTURE6);
 
-		break;
+	//	break;
 
-	case Game::LUT_SEPIA:
-		FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-		FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
+	//case Game::LUT_SEPIA:
+	//	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+	//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
 
-		fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
+	//	fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
 
-		// Bind the LUT
-		sepiaLUT.bind(GL_TEXTURE6);
+	//	// Bind the LUT
+	//	sepiaLUT.bind(GL_TEXTURE6);
 
-		colorMaterial->shader->bind();
-		colorMaterial->shader->sendUniformInt("u_tex", 0);
-		colorMaterial->shader->sendUniformInt("u_lookup", 6);
-		colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
-		colorMaterial->shader->sendUniformFloat("u_lookupSize", sepiaLUT.getSize());
-		colorMaterial->sendUniforms();
+	//	colorMaterial->shader->bind();
+	//	colorMaterial->shader->sendUniformInt("u_tex", 0);
+	//	colorMaterial->shader->sendUniformInt("u_lookup", 6);
+	//	colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
+	//	colorMaterial->shader->sendUniformFloat("u_lookupSize", sepiaLUT.getSize());
+	//	colorMaterial->sendUniforms();
 
-		// Draw a full screen quad using the geometry shader
-		glDrawArrays(GL_POINTS, 0, 1);
+	//	// Draw a full screen quad using the geometry shader
+	//	glDrawArrays(GL_POINTS, 0, 1);
 
-		sepiaLUT.unbind(GL_TEXTURE6);
+	//	sepiaLUT.unbind(GL_TEXTURE6);
 
-		break;
+	//	break;
 
-	default:
-		break;
-	}
+	//default:
+	//	break;
+	//}
+
 }
 
 void Game::windowReshapeCallbackFunction(int w, int h)
@@ -599,9 +610,9 @@ void Game::updateScene(float dt)
 void Game::initializeFrameBuffers()
 {
 	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 2, true);
-	fboBright.createFrameBuffer(80, 60, 1, false);
-	fboBlur.createFrameBuffer(80, 60, 1, false);
-	fboBlurB.createFrameBuffer(80, 60, 1, false);
+	fboBright.createFrameBuffer(160, 120, 1, false);
+	fboBlurA.createFrameBuffer(160, 120, 1, false);
+	fboBlurB.createFrameBuffer(160, 120, 1, false);
 	shadowMap.createFrameBuffer(windowWidth * 2, windowHeight * 2, 1, true);
 	fboColorCorrection.createFrameBuffer(windowWidth, windowHeight, 1, false);
 }
@@ -696,12 +707,14 @@ void Game::brightPass()
 	glDrawArrays(GL_POINTS, 0, 1);
 }
 
-// Blurs the FBO
-void Game::blurPass(FrameBufferObject fboIn, FrameBufferObject fboOut)
+void Game::blurBrightPass()
 {
-	fboOut.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(clearColor);
-	fboIn.bindTextureForSampling(0, GL_TEXTURE0);
+	//////////////////////////////////////////////////////////////////////////
+	// BLUR BRIGHT PASS HERE
+	////////////////////////////////////////////////////////////////////////// 
+	fboBlurA.bindFrameBufferForDrawing();
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
+	fboBright.bindTextureForSampling(0, GL_TEXTURE0);
 
 	static auto blurMaterial = materials->at("blur");
 
@@ -712,28 +725,26 @@ void Game::blurPass(FrameBufferObject fboIn, FrameBufferObject fboOut)
 
 	blurMaterial->intUniforms["u_tex"] = 0;
 	blurMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-	blurMaterial->vec4Uniforms["u_texelSize"] = glm::vec4(1.0 / 80, 1.0 / 60, 0.0, 0.0);
+	blurMaterial->vec4Uniforms["u_texelSize"] = glm::vec4(1.0 / 160, 1.0 / 120, 0.0, 0.0);
 	blurMaterial->vec4Uniforms["u_kernel"] = kernelWeights;
 
 	blurMaterial->sendUniforms();
 
-	// Draw a full screen quad using the geometry shader
 	glDrawArrays(GL_POINTS, 0, 1);
 
+	static int numBlurPasses = 10;
 	for (int i = 0; i < numBlurPasses; i++)
 	{
 		if (i % 2 == 0)
 		{
 			fboBlurB.bindFrameBufferForDrawing();
-			fboOut.bindTextureForSampling(0, GL_TEXTURE0);
-			// Draw a full screen quad using the geometry shader
+			fboBlurA.bindTextureForSampling(0, GL_TEXTURE0);
 			glDrawArrays(GL_POINTS, 0, 1);
 		}
 		else
 		{
-			fboOut.bindFrameBufferForDrawing();
+			fboBlurA.bindFrameBufferForDrawing();
 			fboBlurB.bindTextureForSampling(0, GL_TEXTURE0);
-			// Draw a full screen quad using the geometry shader
 			glDrawArrays(GL_POINTS, 0, 1);
 		}
 	}
@@ -780,18 +791,12 @@ void Game::handleKeyboardInputShaders()
 	// Toggle Outlines
 	if (KEYBOARD_INPUT->CheckPressEvent('5'))
 	{
-		if (outlineToggle)
-			outlineToggle = false;
-		else
-			outlineToggle = true;
+		outlineToggle = !outlineToggle;
 	}
 	// Toggle Bloom
 	if (KEYBOARD_INPUT->CheckPressEvent('6'))
 	{
-		if (bloomToggle)
-			bloomToggle = false;
-		else
-			bloomToggle = true;
+		bloomToggle = !bloomToggle;
 	}
 	// Toggle LUT
 	if (KEYBOARD_INPUT->CheckPressEvent('7'))

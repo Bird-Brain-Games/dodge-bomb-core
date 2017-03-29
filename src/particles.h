@@ -6,6 +6,7 @@
 #include <memory>
 #include "Texture2D.h"
 #include <math.h>
+#include "Texture.h"
 #include "material.h"
 
 class ParticleEmmiter // using soa principle
@@ -16,7 +17,9 @@ private:
 		glm::vec3* position;
 		glm::vec3* velocities;
 		glm::vec3* acceleration;
-		float* lives;
+		glm::ivec2* location;	// the location in our texture.
+		float* duration;	//The total duration it exists for
+		float* lives;		//controls how long the particle lives
 		float* masses;
 	} particles;
 
@@ -28,9 +31,9 @@ public:
 	void play();
 	void pause();
 
-	void update(float dt);
+	void update(float dt, glm::vec3 velocity = glm::vec3(0.0f));
 
-	void draw(Camera*);
+	void draw(Camera);
 
 	void freeMemory();
 
@@ -39,6 +42,9 @@ public:
 	glm::vec3 lifeRange;
 	glm::vec3 initialForceMin;
 	glm::vec3 initialForceMax;
+	glm::vec3 initialGravity;
+	glm::ivec2 dimensions;	// the dimension of our texture.
+	float max;				// the number of textures to cycle through
 
 	VAO vao;
 
@@ -46,7 +52,7 @@ public:
 
 	std::shared_ptr<Material> material;
 
-	std::shared_ptr<TTK::Texture2D> texture;
+	std::shared_ptr<Texture> texture;
 
 private:
 	unsigned int numParticles;

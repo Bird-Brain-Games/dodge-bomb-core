@@ -9,6 +9,7 @@ public:
 	std::shared_ptr<ShaderProgram> shader;
 
 	std::map<std::string, glm::vec4> vec4Uniforms;
+	std::map<std::string, glm::vec2> vec2Uniforms;
 	std::map<std::string, glm::mat4> mat4Uniforms;
 	std::map<std::string, int> intUniforms;
 	std::map<std::string, float> floatUniforms;
@@ -29,6 +30,10 @@ public:
 		// Send vector4 uniforms
 		for (auto itr = vec4Uniforms.begin(); itr != vec4Uniforms.end(); itr++)
 			shader->sendUniformVec4(itr->first, itr->second);
+
+		// Send vector2 uniforms
+		for (auto itr = vec2Uniforms.begin(); itr != vec2Uniforms.end(); itr++)
+			shader->sendUniformVec2(itr->first, itr->second);
 
 		// Send mat4 uniforms
 		for (auto itr = mat4Uniforms.begin(); itr != mat4Uniforms.end(); itr++)

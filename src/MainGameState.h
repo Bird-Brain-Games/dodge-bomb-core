@@ -8,9 +8,11 @@
 #include "camera.h"
 #include "Player.h"
 #include "FrameBufferObject.h"
+#include "particles.h"
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////	Lighting Controls	//////////////////////////
+
 enum LightingMode
 {
 	NOLIGHT,
@@ -83,7 +85,7 @@ private:
 	void setMaterialForAllPlayerObjects(std::string materialName);
 
 	void brightPass();
-	void blurPass(FrameBufferObject fboIn, FrameBufferObject fboOut);
+	void blurBrightPass();
 	void colorCorrectionPass(FrameBufferObject fboIn, FrameBufferObject fboOut);
 
 	void initializeFrameBuffers();
@@ -94,7 +96,7 @@ private:
 private:
 	FrameBufferObject fboUnlit;
 	FrameBufferObject fboBright;
-	FrameBufferObject fboBlur, fboBlurB;
+	FrameBufferObject fboBlurA, fboBlurB;
 	FrameBufferObject fboColorCorrection;
 	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
 
@@ -109,6 +111,9 @@ private:
 	Pause* pause;
 	Score* score;
 	Camera * camera;
+
+	
+
 	int pausing;
 	float pauseTimer;
 	float menuDelay;
