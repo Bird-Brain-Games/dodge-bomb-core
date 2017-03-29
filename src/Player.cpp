@@ -1,3 +1,4 @@
+
 #include "Player.h"
 #include <iostream>
 
@@ -31,6 +32,7 @@ Player::Player(glm::vec3 position,
 	reset(position);
 	playerNum = _playerNum;
 	setScale(glm::vec3(0.75f));
+
 }
 
 Player::Player(Player& other)
@@ -48,6 +50,20 @@ Player::~Player()
 
 }
 
+
+void Player::initParticles(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture)
+{
+	emitter.lifeRange = glm::vec3(1.0, 3.0, 0.0);
+	emitter.initialForceMin = glm::vec3(-3.0, 5.0, -4.0);
+	emitter.initialForceMax = glm::vec3(3.0, 15.0, -10.0);
+	emitter.initialPosition = glm::vec3(0.0f, 5.0f, 0.0f);
+
+	emitter.material = _material;
+	emitter.texture = _texture;
+	emitter.initialize(50);
+	emitter.pause();
+}
+
 void Player::draw(Camera &camera)
 {
 	if (currentState == P_NORMAL)
@@ -63,6 +79,7 @@ void Player::draw(Camera &camera)
 			GameObject::draw(camera);
 		}
 	}
+	emitter.draw(camera);
 }
 
 int Player::getHealth()
@@ -78,6 +95,8 @@ Controller* Player::getController()
 void Player::update(float dt)
 {
 	// Update the bomb cooldown
+	emitter.initialPosition = getWorldPosition();
+	emitter.update(dt);
 	if (currentCooldown > 0.0f)
 	{
 		currentCooldown -= dt;
@@ -371,6 +390,10 @@ void Player::takeDamage(int damage)
 		std::cout << "Player " << playerNum << " is dead" << std::endl;
 		currentState = P_DEAD;
 		setPosition(glm::vec3(0.0f, -15.0f, 0.0f));
+	}
+	else if (health == 1)
+	{
+		emitter.play();
 	}
 }
 

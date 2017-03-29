@@ -31,7 +31,7 @@ public:
 
 	void update(float dt);
 
-	void draw(Camera*);
+	void draw(Camera);
 
 	void freeMemory();
 

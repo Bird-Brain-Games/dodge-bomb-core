@@ -164,6 +164,8 @@
     <None Include="shaders\menu.geom" />
     <None Include="shaders\noLighting_f.glsl" />
     <None Include="shaders\null.vert" />
+    <None Include="shaders\particles.geom" />
+    <None Include="shaders\particles_f.glsl" />
     <None Include="shaders\passThru_f.glsl" />
     <None Include="shaders\passThru_v.glsl" />
     <None Include="shaders\quad.geom" />

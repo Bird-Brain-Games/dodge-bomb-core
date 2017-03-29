@@ -88,8 +88,7 @@ Game::Game
 	std::map<std::string, std::shared_ptr<Material>>* _materials,
 	std::vector<std::shared_ptr<GameObject>>* _obstacles,
 	std::shared_ptr<BombManager> _manager,
-	Pause* _pause, Score* _score, Camera* _camera,
-	std::map<std::string, std::shared_ptr<Texture>>* _texture
+	Pause* _pause, Score* _score, Camera* _camera
 )
 
 	: obstacles(_obstacles)
@@ -117,17 +116,6 @@ Game::Game
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
-
-	testing.lifeRange = glm::vec3(1.0, 3.0, 0.0);
-	testing.initialForceMin = glm::vec3(-3.0, 5.0, -4.0);
-	testing.initialForceMin = glm::vec3(3.0, 15.0, -10.0);
-
-	textures = _texture;
-
-	testing.material = materials->at("particles");
-	testing.texture = textures->at("particles");
-	testing.initialize(1000);
-	testing.play();
 
 }
 
@@ -283,6 +271,8 @@ void Game::draw()
 		// Our Default is Toon shading
 	case TOON:
 	{
+		
+
 		setMaterialForAllGameObjects("toon");
 		setMaterialForAllPlayerObjects("toon");
 
@@ -306,12 +296,15 @@ void Game::draw()
 
 
 		materials->at("toon")->sendUniforms();
+		drawScene();
+		materials->at("toon")->shader->unbind();
 	}
 	break;
 	// Just displays Textures
 	case NOLIGHT:
 	{
 		setMaterialForAllGameObjects("noLighting");
+		setMaterialForAllPlayerObjects("toon");
 
 		// Set material properties
 		materials->at("noLighting")->shader->bind();
@@ -320,20 +313,15 @@ void Game::draw()
 		materials->at("noLighting")->intUniforms["u_specularTex"] = 30;
 
 		materials->at("noLighting")->sendUniforms();
+		drawScene();
+		materials->at("noLighting")->shader->unbind();
 	}
 	break;
-	// BUG: WILL NEVER BE CALLED
-	setMaterialForAllPlayerObjects("toonPlayer");
-	// Set material properties for all our non player objects
-
-	materials->at("toon")->shader->unbind();
-
-	//sets the material properties for all our player objects
-
-
 	}
-	drawScene();
 
+
+	fboUnlit.bindFrameBufferForDrawing();
+	
 
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
@@ -375,6 +363,7 @@ void Game::draw()
 
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
+		
 	}
 	else
 	{
@@ -404,6 +393,8 @@ void Game::draw()
 
 		// Draw a full screen quad using the geometry shader
 		glDrawArrays(GL_POINTS, 0, 1);
+
+	
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -703,18 +694,12 @@ void Game::handleKeyboardInputShaders()
 	// Toggle Outlines
 	if (KEYBOARD_INPUT->CheckPressEvent('5'))
 	{
-		if (outlineToggle)
-			outlineToggle = false;
-		else
-			outlineToggle = true;
+		outlineToggle = !outlineToggle;
 	}
 	// Toggle Bloom
 	if (KEYBOARD_INPUT->CheckPressEvent('6'))
 	{
-		if (bloomToggle)
-			bloomToggle = false;
-		else
-			bloomToggle = true;
+		bloomToggle = !bloomToggle;
 	}
 	// Toggle LUT
 	if (KEYBOARD_INPUT->CheckPressEvent('7'))
