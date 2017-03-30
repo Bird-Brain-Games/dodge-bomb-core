@@ -27,7 +27,6 @@
 
 #include "MainMenuState.h"
 #include "MainGameState.h"
-#include "SoundDriver.h"
 
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
@@ -67,7 +66,8 @@ std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
 
 //Sound Stuff
-SoundDriver* audio_Driver;
+//SoundDriver* audio_Driver;
+std::map<std::string, Sound> soundTemplates;
 
 // Materials
 std::map<std::string, std::shared_ptr<Material>> materials;
@@ -433,6 +433,22 @@ void initializeScene()
 	textures["marker"] = markerTexMap;
 	textures["particles"] = particleTexMap;
 
+	///////////////////////////////////////////////////////////////////////////
+	////////////////////////		SOUNDS		///////////////////////////////
+
+	// Test sound  load times
+	std::cout << "Initializing sounds...";
+	t1 = std::chrono::high_resolution_clock::now();
+
+
+	soundTemplates["m_mainMenu"] = Sound("assets/media/MenuTheme.wav");
+	soundTemplates["s_menuSelect"] = Sound("assets/media/select_fx.wav", false);
+	soundTemplates["s_menuSwitch"] = Sound("assets/media/switch_fx.wav", false);
+
+	// Report sound init times
+	t2 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << " success, " << duration << "ms taken" << std::endl;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
@@ -849,7 +865,7 @@ void initializeStates()
 	t1 = std::chrono::high_resolution_clock::now();
 
 	//init states.
-	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController(), audio_Driver);
+	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController(), &soundTemplates);
 	mainMenu->setPaused(false);
 
 	pause = new Pause(pauseMenu);
@@ -871,12 +887,6 @@ void initializeStates()
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	std::cout << " success, total " << duration << "ms taken" << std::endl;
 
-}
-
-void initializeSoundEngine()
-{
-	audio_Driver = new SoundDriver();
-	audio_Driver->loadSounds();
 }
 
 void bulletNearCallback(btBroadphasePair& collisionPair,
@@ -1100,7 +1110,10 @@ void InitErrorFuncCallbackFunction(const char *fmt, va_list ap)
 void CloseCallbackFunction()
 {
 	KEYBOARD_INPUT->Destroy();
-
+	for (auto it : soundTemplates)
+	{
+		it.second.release();
+	}
 }
 
 /* function main()
@@ -1164,8 +1177,6 @@ int main(int argc, char **argv)
 	// Initialize scene
 	initializeShaders();
 	initializeScene();
-
-	initializeSoundEngine();
 
 	initializeStates();
 

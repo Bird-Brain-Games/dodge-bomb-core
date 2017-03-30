@@ -73,9 +73,6 @@
     <ClCompile Include="src\MainGameState.cpp">
       <Filter>States</Filter>
     </ClCompile>
-    <ClCompile Include="src\SoundDriver.cpp">
-      <Filter>External engines</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />
@@ -151,9 +148,6 @@
     </ClInclude>
     <ClInclude Include="src\Texture2D.h">
       <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\SoundDriver.h">
-      <Filter>External engines</Filter>
     </ClInclude>
     <ClInclude Include="src\particles.h">
       <Filter>Graphics</Filter>

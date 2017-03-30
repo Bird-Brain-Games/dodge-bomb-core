@@ -87,12 +87,30 @@ void SoundEngine::update()
 	checkResult(result);
 }
 
-//Updates the sound's position and calls the engines update function
-void Sound::updateSound(FMOD_VECTOR _pos, FMOD_VECTOR _vel)
+void Sound::setPosition(FMOD_VECTOR _pos)
 {
-	sys.result = channel->set3DAttributes(&_pos, &_vel);
+	setPosition(_pos, vel);
+}
+
+void Sound::setPosition(FMOD_VECTOR _pos, FMOD_VECTOR _vel)
+{
+	pos = _pos;
+	vel = _vel;
+	sys.result = channel->set3DAttributes(&pos, &vel);
 	checkResult(sys.result);
-	sys.update();
+}
+
+void Sound::setPosition(glm::vec3 _pos)
+{
+	setPosition(_pos, glm::vec3(vel.x, vel.y, vel.z));
+}
+
+void Sound::setPosition(glm::vec3 _pos, glm::vec3 _vel)
+{
+	FMOD_VECTOR _fPos, _fVel;
+	_fPos = { _pos.x, _pos.y, _pos.z };
+	_fVel = { _vel.x, _vel.y, _vel.z };
+	setPosition(_fPos, _fVel);
 }
 
 //Initializes sound variables to the default values
@@ -104,8 +122,31 @@ Sound::Sound()
 	vel = { 0.0f, 0.0f, 0.0f };
 }
 
+Sound::Sound(char * filename, bool isLoop)
+{
+	Sound();
+	load(filename, isLoop);
+}
+
+Sound::Sound(const Sound& other)
+	: sound(other.sound),
+	channel(NULL)
+{
+	pos = { 0.0f, 0.0f, 0.0f };
+	vel = { 0.0f, 0.0f, 0.0f };
+}
+
+
+
 //deconstructs the sound
 Sound::~Sound()
+{
+	sound = nullptr;
+	channel = nullptr;
+}
+
+// releases the sound
+void Sound::release()
 {
 	sys.result = sound->release(); checkResult(sys.result);
 }
