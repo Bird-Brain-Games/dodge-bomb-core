@@ -440,10 +440,34 @@ void initializeScene()
 	std::cout << "Initializing sounds...";
 	t1 = std::chrono::high_resolution_clock::now();
 
+	std::string soundPath = "assets/media/";
 
-	soundTemplates["m_mainMenu"] = Sound("assets/media/MenuTheme.wav");
-	soundTemplates["s_menuSelect"] = Sound("assets/media/select_fx.wav", false);
-	soundTemplates["s_menuSwitch"] = Sound("assets/media/switch_fx.wav", false);
+	// Menu sounds
+	soundTemplates["m_mainMenu"] = Sound(soundPath + "MenuTheme.wav");
+	soundTemplates["s_menuSelect"] = Sound(soundPath + "select_fx.wav", false);
+	soundTemplates["s_menuSwitch"] = Sound(soundPath + "switch_fx.wav", false);
+
+	// Battle music
+	soundTemplates["m_gameMusic"] = Sound(soundPath + "GameTheme.wav");
+
+	// Battle SFX
+	soundTemplates["s_bombExplosion1"] = Sound(soundPath + "bomb_1.wav", false);
+	soundTemplates["s_bombExplosion2"] = Sound(soundPath + "bomb_2.wav", false);
+	soundTemplates["s_bombExplosion3"] = Sound(soundPath + "bomb_3.wav", false);
+	soundTemplates["s_bombExplosion4"] = Sound(soundPath + "bomb_4.wav", false);
+	soundTemplates["s_damage1"] = Sound(soundPath + "bothit_fx.wav", false);
+	soundTemplates["s_damage2"] = Sound(soundPath + "bothit2_fx.wav", false);
+	soundTemplates["s_damage3"] = Sound(soundPath + "bothit3_fx.wav", false);
+	soundTemplates["s_damage4"] = Sound(soundPath + "bothit4_fx.wav", false);
+
+	
+	
+	//soundTemplates[""] = Sound(soundPath + ".wav", false);
+
+
+
+	Sound::sys.update();
+
 
 	// Report sound init times
 	t2 = std::chrono::high_resolution_clock::now();
