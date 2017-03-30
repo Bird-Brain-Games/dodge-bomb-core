@@ -2,6 +2,8 @@
 january 2017
 */
 #include "sound engine.h"
+#include <iostream>
+#include "FMOD\fmod_errors.h"
 
 //initializes our sound engine as a global variable
 SoundEngine Sound::sys;
@@ -23,10 +25,10 @@ SoundEngine::SoundEngine()
 	system = NULL;
 	driverData = NULL;
 
-	forward = { 0.0f, 0.0f, 1.0f };
-	up = { 0.0f, 1.0f, 0.0f };
-	listenerpos = { 0.0f, 5.0f, 0.0f };
-	vel = { 0.0f, 0.0f, 0.0f };
+	forward			= { 0.0f, 0.0f, 1.0f };
+	up				= { 0.0f, 1.0f, 0.0f };
+	listenerpos		= { 0.0f, 0.0f, 0.0f };
+	vel				= { 0.0f, 0.0f, 0.0f };
 
 }
 
@@ -67,7 +69,7 @@ bool SoundEngine::init()
 		}
 
 		//Set the distance unit (meters/feet etc).
-		result = system->set3DSettings(1.0, 1.0, 3.0f);
+		result = system->set3DSettings(1.0, 1.0, 1.0f);
 		checkResult(result);
 		initialized = true;
 	}
@@ -122,7 +124,7 @@ Sound::Sound()
 	vel = { 0.0f, 0.0f, 0.0f };
 }
 
-Sound::Sound(char * filename, bool isLoop)
+Sound::Sound(std::string filename, bool isLoop)
 {
 	Sound();
 	load(filename, isLoop);
@@ -152,24 +154,24 @@ void Sound::release()
 }
 
 //loads the sound from the file path specificied
-bool Sound::load(char * filename, bool isLoop)
+bool Sound::load(std::string filename, bool isLoop)
 {
 	//initializes the sys
 	sys.init();
 
 	//creates the sound from the given filename
-	sys.result = sys.system->createSound(filename, FMOD_3D, 0, &sound); checkResult(sys.result);
+	sys.result = sys.system->createSound(filename.c_str(), FMOD_3D, 0, &sound); checkResult(sys.result);
 
 
 	if (sys.result != FMOD_OK)//checks whether the file opened properly or not
 	{
-		std::cout << "could not open the file" << filename << std::endl;
+		std::cout << "could not open the sound file: " << filename << std::endl;
 		checkResult(sys.result);
 		return false;
 	}
 
 	//sets how the sound behaves as its position changes
-	sys.result = sound->set3DMinMaxDistance(0.5f, 50.0f); checkResult(sys.result);
+	setRolloff(false, 3.0f, 100.0f);
 
 	//Sets how the sound will play (loop, single play etc)
 	if (isLoop)
@@ -205,10 +207,11 @@ void Sound::pause()
 //changes how the sound rolloff works
 void Sound::setRolloff(bool isLinear, float min, float max)
 {
-	channel->set3DMinMaxDistance(min, max);
+	sys.result = channel->set3DMinMaxDistance(min, max); checkResult(sys.result);
 
 	if (isLinear)
-		channel->setMode(FMOD_3D_LINEARROLLOFF);
+		sys.result = channel->setMode(FMOD_3D_LINEARROLLOFF);
 	else
-		channel->setMode(FMOD_3D_INVERSEROLLOFF);
+		sys.result = channel->setMode(FMOD_3D_INVERSEROLLOFF);
+	checkResult(sys.result);
 }

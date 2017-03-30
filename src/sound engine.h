@@ -3,10 +3,9 @@
 january 2017
 */
 #include "FMOD\fmod.hpp"
-#include "Windows.h"
-#include "iostream"
 #include <glm\vec3.hpp>
-#include "FMOD\fmod_errors.h"
+#include <string>
+
 // 50ms update for interface
 // Units per meter.  I.e feet would = 3.28.  centimeters would = 100.
 
@@ -48,13 +47,13 @@ class Sound
 public:
 	//the sound 
 	Sound();
-	Sound(char * filename, bool loops = true);
+	Sound(std::string fileName, bool loops = true);
 	Sound(const Sound&);
 
 	~Sound();
 
 	//loads the specificied file
-	bool load(char * filename, bool loops = true);
+	bool load(std::string fileName, bool loops = true);
 
 	//plays the sound loaded
 	void play();

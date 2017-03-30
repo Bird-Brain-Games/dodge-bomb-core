@@ -12,6 +12,7 @@ void MainMenu::update(float dt)
 	time += dt;
 	timer += dt;
 	accept += dt;
+	Sound::sys.update();
 	
 
 	if (accept > 0.5)
@@ -94,8 +95,11 @@ MainMenu::MainMenu(std::shared_ptr<Menu> _atlas, Controller* _con, std::map<std:
 	soundTemplates = _soundTemplates;
 
 	m_mainMenu = Sound(soundTemplates->at("m_mainMenu"));
+	m_mainMenu.setPosition(glm::vec3(0.0f, 0.0f, 5.0f));
 	s_menuSelect = Sound(soundTemplates->at("s_menuSelect"));
+	s_menuSelect.setPosition(glm::vec3(0.0f, 0.0f, 5.0f));
 	s_menuSwitch = Sound(soundTemplates->at("s_menuSwitch"));
+	s_menuSwitch.setPosition(glm::vec3(0.0f, 0.0f, 5.0f));
 }
 
 void MainMenu::setPaused(int _state)
