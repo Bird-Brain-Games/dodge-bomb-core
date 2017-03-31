@@ -415,7 +415,7 @@ void Game::draw()
 	break;
 	}
 
-
+	drawParticles(camera);
 	fboUnlit.bindFrameBufferForDrawing();
 	
 
@@ -642,6 +642,19 @@ void Game::drawScene(Camera* _camera, Camera* _shadow)
 	if (currentGameState == COUNTDOWN)
 	{
 		countdown->draw();
+	}
+}
+
+//draws our particles to the screen.
+void Game::drawParticles(Camera* _camera)
+{
+	players->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		auto playersObject = itr->second;
+
+		if (playersObject->isRoot())
+			playersObject->drawParticles(*_camera);
 	}
 }
 

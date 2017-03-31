@@ -80,6 +80,7 @@ private:
 	void updateScene(float dt);
 	void updateReadyPass(float dt);
 	void drawScene(Camera* _camera, Camera* _shadow);
+	void drawParticles(Camera*);
 
 	void setMaterialForAllGameObjects(std::string materialName);
 	void setMaterialForAllPlayerObjects(std::string materialName);

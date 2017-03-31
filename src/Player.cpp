@@ -87,6 +87,11 @@ void Player::draw(Camera &camera, Camera& shadow)
 	}
 }
 
+void Player::drawParticles(Camera& camera)
+{
+	void drawParticles(Camera& camera);
+}
+
 int Player::getHealth()
 {
 	return health;
