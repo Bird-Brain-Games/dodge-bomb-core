@@ -23,7 +23,8 @@ bool BombManager::init(
 	std::shared_ptr<Texture> _explosionTex4,
 	std::string _explosionBodyPath,
 	std::shared_ptr<Material> _material,
-	std::string bodyPath)
+	std::string bodyPath,
+	std::map<std::string, Sound>* soundTemplates)
 {
 	if (initialized) return false;
 
@@ -47,7 +48,8 @@ bool BombManager::init(
 			explosionMesh,
 			material,
 			textures[i + 4],
-			nullptr);
+			nullptr,
+			soundTemplates->at("s_bombExplosion" + std::to_string(i + 1)));
 
 		// Create the explosion rigidBody
 		std::unique_ptr<RigidBody> explosionBody =
@@ -325,10 +327,12 @@ Explosion::Explosion(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
 	std::shared_ptr<Material> _material,
 	std::shared_ptr<Texture> _texture,
-	Bomb* _parent)
+	Bomb* _parent,
+	Sound& _s_explosion)
 	: GameObject(position, _mesh, _material, _texture),
 	expandTimer(timeToExpand),
-	parent(_parent)
+	parent(_parent),
+	s_explosion(_s_explosion)
 {
 	colliderType = COLLIDER_TYPE::BOMB_EXPLOSION;
 	//setScale(glm::vec3(maxScale));
@@ -340,6 +344,7 @@ Explosion::Explosion(Explosion& other)
 	parent(nullptr)
 {
 	colliderType = COLLIDER_TYPE::BOMB_EXPLOSION;
+	s_explosion = Sound(other.s_explosion);
 	//setScale(glm::vec3(maxScale));
 }
 
@@ -358,6 +363,7 @@ void Explosion::update(float dt)
 	}
 
 	GameObject::update(dt);
+	s_explosion.setPosition(getWorldPosition());
 }
 
 void Explosion::setBombParent(Bomb* newParent)
@@ -369,4 +375,6 @@ void Explosion::explode()
 {
 	expandTimer = 0.0f;
 	rigidBody->setDeactivationMode(ISLAND_SLEEPING);
+	s_explosion.setPosition(getWorldPosition());
+	s_explosion.play();
 }
