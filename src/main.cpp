@@ -813,7 +813,8 @@ void initializeScene()
 		explosionTexMap4,	// Explosion texture 4
 		sphereBodyPath,	// Explosion rigidbody
 		defaultMaterial,
-		bombBodyPath);
+		bombBodyPath,
+		&soundTemplates);
 
 	players["bombot1"]->attachBombManager(bombManager);
 	players["bombot2"]->attachBombManager(bombManager);

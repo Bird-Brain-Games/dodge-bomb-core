@@ -998,6 +998,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
 		}
+		bombManager->clearAllBombs();
 		resetPlayers();
 		break;
 	default:
