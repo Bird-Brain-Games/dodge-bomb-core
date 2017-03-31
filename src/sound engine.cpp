@@ -27,7 +27,7 @@ SoundEngine::SoundEngine()
 
 	forward			= { 0.0f, 0.0f, 1.0f };
 	up				= { 0.0f, 1.0f, 0.0f };
-	listenerpos		= { 0.0f, 0.0f, 0.0f };
+	listenerpos		= { 23.0f, 45.0f, 0.0f };
 	vel				= { 0.0f, 0.0f, 0.0f };
 
 }
@@ -69,10 +69,15 @@ bool SoundEngine::init()
 		}
 
 		//Set the distance unit (meters/feet etc).
-		result = system->set3DSettings(1.0, 1.0, 1.0f);
+		result = system->set3DSettings(1.0, 10.0, 1.0f);
 		checkResult(result);
 		initialized = true;
+
+		
 	}
+	FMOD_SPEAKERMODE* speakerMode = nullptr;
+	result = system->getSoftwareFormat(NULL, speakerMode, NULL);
+	checkResult(result);
 	return true;
 
 }
@@ -171,7 +176,7 @@ bool Sound::load(std::string filename, bool isLoop)
 	}
 
 	//sets how the sound behaves as its position changes
-	setRolloff(false, 3.0f, 100.0f);
+	setRolloff(false, 0.5f, 100.0f);
 
 	//Sets how the sound will play (loop, single play etc)
 	if (isLoop)
