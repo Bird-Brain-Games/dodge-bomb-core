@@ -24,6 +24,7 @@ public:
 	void setPosition(glm::vec3 _pos);
 	void setForward(glm::vec3 _for);
 	void setAngle(float, float);
+	glm::vec3 getForward() { return forward; }
 
 	//returns view matrix
 	glm::mat4x4 getView();

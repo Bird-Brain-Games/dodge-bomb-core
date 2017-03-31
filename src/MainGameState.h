@@ -48,7 +48,8 @@ public:
 	{
 		READYUP,
 		COUNTDOWN,
-		MAIN
+		MAIN,
+		WIN
 	};
 
 private:
@@ -121,6 +122,24 @@ private:
 	float pauseTimer;
 	float menuDelay;
 
+	// Win state controls
+	int winner;
+
+	glm::vec3 winPlayerPosition = glm::vec3(0.0f, 43.0f, 0.0f);
+	glm::vec3 winCameraPosition = glm::vec3(20.0f, 53.0f, 30.0f);
+	glm::vec3 winCameraForward = glm::vec3(0.01f, -2.0f, -5.0f);
+	glm::vec3 cameraDefaultPosition = glm::vec3(23.0f, 90.0f, 40.0f);
+	glm::vec2 cameraDefaultAngle = glm::vec2(3.14159012f, 5.3f);
+	glm::vec3 cameraDefaultForward;
+	float innerDefault = 0.78;
+	float outerDefault = 0.81;
+	float innerWin = 0.1;
+	float outerWin = 0.2;
+
+	float playerMoveLerp;	// to be replaced with A*
+	glm::vec3 playerStartPosition; // to be replaced with A*
+	float cameraMoveLerp;
+
 	LUT contrastLUT;
 	LUT sepiaLUT;
 	LUT_MODE colorCorrection;
@@ -174,5 +193,8 @@ private:
 
 	bool  rimToggle = true;
 	float kr = rim; // Rim Lighting
+
+private:
+	//static 
 
 };

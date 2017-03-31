@@ -59,6 +59,7 @@ public:
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	void attachBombManager(std::shared_ptr<BombManager> _manager);
 	void takeDamage(int damage);
+	void setHealth(int newHealth) { health = newHealth; }
 	void reset(glm::vec3 newPos);	// Reset values and positions
 
 	void checkCollisionWith(GameObject* other);

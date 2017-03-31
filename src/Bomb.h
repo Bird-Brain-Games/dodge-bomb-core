@@ -127,6 +127,7 @@ public:
 	void draw(Camera& camera, Camera& shadow);
 	void setMaterialForAllBombs(std::shared_ptr<Material> mat);
 	void clearAllBombs();
+	bool isEmpty() { return activeBombs.empty(); }
 
 	// Create the new bomb, add it to the active list,
 	// and tell it to throw in the given direction.

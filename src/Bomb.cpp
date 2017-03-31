@@ -162,7 +162,7 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 	// direction of bomb * bomb force + direction of player * player force
 	force = glm::vec3(direction.x, 0.0f, -direction.y) * force +
 		glm::vec3(playerForce.x, 2.0f, -playerForce.y) * 0.5f;
-	std::cout << "Force vector: " << force.x << " " << force.z << std::endl;
+	//std::cout << "Force vector: " << force.x << " " << force.z << std::endl;
 
 	newBomb->throwBomb(direction, glm::vec3(force.x, impulseY, force.z));
 }
@@ -293,7 +293,7 @@ void Bomb::explode()
 	currentFuseTime = 0.0f;
 	currentExplodeTime = maxExplodeTime;
 	currentState = EXPLODING;
-	std::cout << "Bomb " << playerNum << " exploded" << std::endl;
+	//std::cout << "Bomb " << playerNum << " exploded" << std::endl;
 
 	// Swap the bomb and the explosion's position
 	explosion->setPosition(getWorldPosition());
@@ -306,7 +306,7 @@ void Bomb::destroy()
 {
 	currentExplodeTime = 0.0f;
 	currentState = DONE;
-	std::cout << "Bomb " << playerNum << " destroyed" << std::endl;
+	//std::cout << "Bomb " << playerNum << " destroyed" << std::endl;
 	explosion->setPosition(glm::vec3(-100.0f));
 	explosion->setBombParent(nullptr);
 }

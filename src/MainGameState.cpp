@@ -105,9 +105,10 @@ Game::Game
 	pausing = 0;
 	pauseTimer = 2.0f;
 	bombManager = _manager;
-	_camera->setPosition(glm::vec3(23.0f, 90.0f, 40.0f));
-	_camera->setAngle(3.14159012f, 5.3f);
+	_camera->setPosition(cameraDefaultPosition);
+	_camera->setAngle(cameraDefaultAngle.x, cameraDefaultAngle.y);
 	_camera->update();
+	cameraDefaultForward = _camera->getForward();
 	initializeFrameBuffers();
 	currentGameState = MAIN;
 	changeState(READYUP);
@@ -272,7 +273,7 @@ void Game::update(float dt)
 
 	pauseTimer += dt;
 
-
+	// Update main state
 	if (currentGameState == MAIN)
 	{
 		int count = 0;
@@ -316,14 +317,53 @@ void Game::update(float dt)
 				break;
 			}
 		}
-		int winner = deathCheck();
+		winner = deathCheck();
 		if (winner > 0)
 		{
-			this->m_isPaused = true;
+			winner--;
+			changeState(WIN);
+			/*this->m_isPaused = true;
 			changeState(READYUP);
 			score->active = players->at("bombot1")->getController();
-			m_parent->getGameState("score")->setPaused(winner);
+			m_parent->getGameState("score")->setPaused(winner);*/
 		}
+	}
+
+	// Update win state
+	if (currentGameState == WIN)
+	{
+		std::shared_ptr<Player> winPlayer = players->at("bombot" + std::to_string(winner));
+		// If the player is going to die from a bomb, set their health to 1.
+		if (winPlayer->getHealth() == 0)
+			winPlayer->setHealth(1);
+
+		if (!bombManager->isEmpty()) return;	// DANGER
+		// When all the bombs have finished exploding, 
+		// move player to designated position
+
+		// Move the player to the space
+		if (playerMoveLerp >= 0.0f && playerMoveLerp != 1.0f)
+		{
+			playerMoveLerp += dt;
+			if (playerMoveLerp > 1.0f)
+				playerMoveLerp = 1.0f;
+			
+			winPlayer->setPosition(glm::mix(playerStartPosition, winPlayerPosition, playerMoveLerp));
+			
+		}
+		// Move the camera once the player has moved to the space
+		else if (playerMoveLerp == 1.0f && cameraMoveLerp >= 0.0f && cameraMoveLerp != 1.0f)
+		{
+			cameraMoveLerp += dt / 2.0f;
+			if (cameraMoveLerp > 1.0f)
+				cameraMoveLerp = 1.0f;
+
+			camera->setPosition(glm::mix(cameraDefaultPosition, winCameraPosition, cameraMoveLerp));
+			camera->setForward(glm::mix(cameraDefaultForward, winCameraForward, cameraMoveLerp));
+			innerCutOff = glm::mix(innerDefault, innerWin, cameraMoveLerp);
+			outerCutOff = glm::mix(outerDefault, outerWin, cameraMoveLerp);
+		}
+
 	}
 }
 
@@ -666,7 +706,7 @@ int Game::deathCheck()
 		}
 	}
 	if (counter > 1)
-		return false; //returns 0 if no winner
+		return 0; //returns 0 if no winner
 	else
 		return winner + 1;
 }
@@ -979,6 +1019,12 @@ void Game::changeState(Game::GAME_STATE newState)
 	switch (currentGameState)
 	{
 	case Game::READYUP:
+		// reset the camera
+		camera->setPosition(cameraDefaultPosition);
+		camera->setAngle(cameraDefaultAngle.x, cameraDefaultAngle.y);
+		innerCutOff = innerDefault;
+		outerCutOff = outerDefault;
+
 		for (auto it : *obstacles)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
@@ -988,6 +1034,7 @@ void Game::changeState(Game::GAME_STATE newState)
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
 		}
 		break;
+
 	case Game::COUNTDOWN:
 		currentCountdown = 4.0f;
 		for (auto it : *obstacles)
@@ -1001,6 +1048,13 @@ void Game::changeState(Game::GAME_STATE newState)
 		bombManager->clearAllBombs();
 		resetPlayers();
 		break;
+
+	case Game::WIN:
+		playerMoveLerp = 0.0f;
+		cameraMoveLerp = 0.0f;
+		playerStartPosition = players->at("bombot" + std::to_string(winner))->getWorldPosition();
+		break;
+
 	default:
 		break;
 	}

@@ -188,7 +188,7 @@ void Player::update(float dt, bool canMove)
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);
 
-	if (playerNum == 0) std::cout << getWorldPosition().x << std::endl;
+	//if (playerNum == 0) std::cout << getWorldPosition().x << std::endl;
 
 	// Update sounds
 	s_damage.setPosition(getWorldPosition());
@@ -399,7 +399,7 @@ void Player::takeDamage(int damage)
 	flashTime = 0.0f;
 	isFlashing = false;
 	currentState = P_INVINCIBLE;
-	std::cout << "Player " << playerNum << " took damage" << std::endl;
+	//std::cout << "Player " << playerNum << " took damage" << std::endl;
 	rigidBody->setLinearVelocity(glm::vec3(0.0f));
 	isDashing = false;
 
@@ -408,7 +408,7 @@ void Player::takeDamage(int damage)
 
 	if (health <= 0)
 	{
-		std::cout << "Player " << playerNum << " is dead" << std::endl;
+		//std::cout << "Player " << playerNum << " is dead" << std::endl;
 		currentState = P_DEAD;
 		setPosition(glm::vec3(0.0f, -15.0f, 0.0f));
 	}
