@@ -563,9 +563,14 @@ void initializeScene()
 	//	glm::vec3(15.f, 42.0f, 10.f), barrelMesh, defaultMaterial, barrelTexMap);
 
 	gameobjects["barrelTR"] = std::make_shared<GameObject>(
+		//glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
 		glm::vec3(37.f, -20.0f, -2.0f), barrelMesh, defaultMaterial, barrelTexMap);
 	gameobjects["barrelTR"]->setScale(glm::vec3(1.2));
 	obstacles.push_back(gameobjects["barrelTR"]);
+
+	gameobjects["listener"] = std::make_shared<GameObject>(
+		glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
+
 	//gameobjects["barrelBR"] = std::make_shared<GameObject>(
 	//	glm::vec3(40.f, 42.0f, 25.f), barrelMesh, defaultMaterial, barrelTexMap);
 
@@ -625,19 +630,19 @@ void initializeScene()
 	////////////////	Players
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
+		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0, &soundTemplates);
 	players["bombot1"]->initParticles(materials["particles"], particleTexMap);
 
 	players["bombot2"] = std::make_shared<Player>(
-		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
+		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1, &soundTemplates);
 	players["bombot2"]->initParticles(materials["particles"], particleTexMap);
 	
 	players["bombot3"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
+		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2, &soundTemplates);
 	players["bombot3"]->initParticles(materials["particles"], particleTexMap);
 
 	players["bombot4"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
+		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3, &soundTemplates);
 	players["bombot4"]->initParticles(materials["particles"], particleTexMap);
 
 	// Report gameObject init times
@@ -898,7 +903,7 @@ void initializeStates()
 	score = new Score(scoreMenu);
 	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, countdown, pause, score, &playerCamera);
+	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, countdown, &soundTemplates, pause, score, &playerCamera);
 	game->setPaused(true);
 
 	states.addGameState("game", game);
