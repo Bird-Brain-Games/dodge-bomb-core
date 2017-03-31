@@ -9,6 +9,7 @@
 #include "Player.h"
 #include "FrameBufferObject.h"
 #include "particles.h"
+#include "sound engine.h"
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////	Lighting Controls	//////////////////////////
@@ -63,6 +64,7 @@ public:
 		std::vector<std::shared_ptr<GameObject>>*,
 		std::shared_ptr<BombManager>,
 		std::shared_ptr<Menu>,
+		std::map<std::string, Sound>* _soundTemplates,
 		Pause*, Score*, Camera*);
 
 	void update(float dt);//where we do all the updates and controls
@@ -107,12 +109,13 @@ private:
 	std::vector<std::shared_ptr<GameObject>>* obstacles;
 	std::vector<std::shared_ptr<GameObject>>* readyUpRings;
 	std::vector<glm::vec3> defaultPlayerPositions;
+	std::map<std::string, Sound>* soundTemplates;
 
 	Pause* pause;
 	Score* score;
 	Camera * camera;
 
-	
+	Sound m_gameMusic;
 
 	int pausing;
 	float pauseTimer;

@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include <btBulletDynamicsCommon.h>
 #include <queue>
+#include "sound engine.h"
 
 // Bomb emitter class tracks active bombs
 // And assigns bomb properties upon creation
@@ -71,7 +72,8 @@ public:
 		std::shared_ptr<Loader> _mesh,
 		std::shared_ptr<Material> _material,
 		std::shared_ptr<Texture> _texture,
-		Bomb* _parent);
+		Bomb* _parent,
+		Sound& _s_explosion);
 	Explosion(Explosion&);
 	//~Explosion();
 
@@ -86,6 +88,7 @@ private:
 	Bomb* parent;
 	float expandTimer;
 	bool isExpanding;
+	Sound s_explosion;
 
 private:
 	static float timeToExpand;
@@ -116,7 +119,8 @@ public:
 		std::shared_ptr<Texture> _explosionTex4,
 		std::string _explosionBodyPath,
 		std::shared_ptr<Material> _material,
-		std::string bodyPath);
+		std::string bodyPath,
+		std::map<std::string, Sound>* soundTemplates);
 
 	void update(float dt);
 	void checkIfExploded(Camera& camera);

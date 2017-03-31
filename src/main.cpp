@@ -27,7 +27,6 @@
 
 #include "MainMenuState.h"
 #include "MainGameState.h"
-#include "SoundDriver.h"
 
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
@@ -67,7 +66,8 @@ std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
 
 //Sound Stuff
-SoundDriver* audio_Driver;
+//SoundDriver* audio_Driver;
+std::map<std::string, Sound> soundTemplates;
 
 // Materials
 std::map<std::string, std::shared_ptr<Material>> materials;
@@ -433,6 +433,46 @@ void initializeScene()
 	textures["marker"] = markerTexMap;
 	textures["particles"] = particleTexMap;
 
+	///////////////////////////////////////////////////////////////////////////
+	////////////////////////		SOUNDS		///////////////////////////////
+
+	// Test sound  load times
+	std::cout << "Initializing sounds...";
+	t1 = std::chrono::high_resolution_clock::now();
+
+	std::string soundPath = "assets/media/";
+
+	// Menu sounds
+	soundTemplates["m_mainMenu"] = Sound(soundPath + "MenuTheme.wav");
+	soundTemplates["s_menuSelect"] = Sound(soundPath + "select_fx.wav", false);
+	soundTemplates["s_menuSwitch"] = Sound(soundPath + "switch_fx.wav", false);
+
+	// Battle music
+	soundTemplates["m_gameMusic"] = Sound(soundPath + "GameTheme.wav");
+
+	// Battle SFX
+	soundTemplates["s_bombExplosion1"] = Sound(soundPath + "bomb_1.wav", false);
+	soundTemplates["s_bombExplosion2"] = Sound(soundPath + "bomb_2.wav", false);
+	soundTemplates["s_bombExplosion3"] = Sound(soundPath + "bomb_3.wav", false);
+	soundTemplates["s_bombExplosion4"] = Sound(soundPath + "bomb_4.wav", false);
+	soundTemplates["s_damage1"] = Sound(soundPath + "bothit_fx.wav", false);
+	soundTemplates["s_damage2"] = Sound(soundPath + "bothit2_fx.wav", false);
+	soundTemplates["s_damage3"] = Sound(soundPath + "bothit3_fx.wav", false);
+	soundTemplates["s_damage4"] = Sound(soundPath + "bothit4_fx.wav", false);
+
+	
+	
+	//soundTemplates[""] = Sound(soundPath + ".wav", false);
+
+
+
+	Sound::sys.update();
+
+
+	// Report sound init times
+	t2 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << " success, " << duration << "ms taken" << std::endl;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
@@ -523,9 +563,14 @@ void initializeScene()
 	//	glm::vec3(15.f, 42.0f, 10.f), barrelMesh, defaultMaterial, barrelTexMap);
 
 	gameobjects["barrelTR"] = std::make_shared<GameObject>(
+		//glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
 		glm::vec3(37.f, -20.0f, -2.0f), barrelMesh, defaultMaterial, barrelTexMap);
 	gameobjects["barrelTR"]->setScale(glm::vec3(1.2));
 	obstacles.push_back(gameobjects["barrelTR"]);
+
+	gameobjects["listener"] = std::make_shared<GameObject>(
+		glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
+
 	//gameobjects["barrelBR"] = std::make_shared<GameObject>(
 	//	glm::vec3(40.f, 42.0f, 25.f), barrelMesh, defaultMaterial, barrelTexMap);
 
@@ -585,19 +630,19 @@ void initializeScene()
 	////////////////	Players
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
+		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0, &soundTemplates);
 	players["bombot1"]->initParticles(materials["particles"], particleTexMap);
 
 	players["bombot2"] = std::make_shared<Player>(
-		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
+		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1, &soundTemplates);
 	players["bombot2"]->initParticles(materials["particles"], particleTexMap);
 	
 	players["bombot3"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
+		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2, &soundTemplates);
 	players["bombot3"]->initParticles(materials["particles"], particleTexMap);
 
 	players["bombot4"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
+		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3, &soundTemplates);
 	players["bombot4"]->initParticles(materials["particles"], particleTexMap);
 
 	// Report gameObject init times
@@ -768,7 +813,8 @@ void initializeScene()
 		explosionTexMap4,	// Explosion texture 4
 		sphereBodyPath,	// Explosion rigidbody
 		defaultMaterial,
-		bombBodyPath);
+		bombBodyPath,
+		&soundTemplates);
 
 	players["bombot1"]->attachBombManager(bombManager);
 	players["bombot2"]->attachBombManager(bombManager);
@@ -849,7 +895,7 @@ void initializeStates()
 	t1 = std::chrono::high_resolution_clock::now();
 
 	//init states.
-	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController(), audio_Driver);
+	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController(), &soundTemplates);
 	mainMenu->setPaused(false);
 
 	pause = new Pause(pauseMenu);
@@ -858,7 +904,7 @@ void initializeStates()
 	score = new Score(scoreMenu);
 	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, countdown, pause, score, &playerCamera);
+	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, countdown, &soundTemplates, pause, score, &playerCamera);
 	game->setPaused(true);
 
 	states.addGameState("game", game);
@@ -871,12 +917,6 @@ void initializeStates()
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	std::cout << " success, total " << duration << "ms taken" << std::endl;
 
-}
-
-void initializeSoundEngine()
-{
-	audio_Driver = new SoundDriver();
-	audio_Driver->loadSounds();
 }
 
 void bulletNearCallback(btBroadphasePair& collisionPair,
@@ -1100,7 +1140,10 @@ void InitErrorFuncCallbackFunction(const char *fmt, va_list ap)
 void CloseCallbackFunction()
 {
 	KEYBOARD_INPUT->Destroy();
-
+	for (auto it : soundTemplates)
+	{
+		it.second.release();
+	}
 }
 
 /* function main()
@@ -1164,8 +1207,6 @@ int main(int argc, char **argv)
 	// Initialize scene
 	initializeShaders();
 	initializeScene();
-
-	initializeSoundEngine();
 
 	initializeStates();
 

@@ -87,12 +87,14 @@ Game::Game
 	std::vector<std::shared_ptr<GameObject>>* _readyUpRings,
 	std::shared_ptr<BombManager> _manager,
 	std::shared_ptr<Menu> _countdown,
+	std::map<std::string, Sound>* _soundTemplates,
 	Pause* _pause, Score* _score, Camera* _camera
 )
 
 	: obstacles(_obstacles),
 	readyUpRings(_readyUpRings),
-	countdown(_countdown)
+	countdown(_countdown),
+	soundTemplates(_soundTemplates)
 {
 	scene = _scene;
 	players = _player;
@@ -123,6 +125,10 @@ Game::Game
 	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.5f, -16.0f));
 	defaultPlayerPositions.push_back(glm::vec3(40.0f, 39.5f, -25.0f));
 	defaultPlayerPositions.push_back(glm::vec3(57.0f, 39.5f, 7.0f));
+
+	// Initialize sounds
+	m_gameMusic = Sound(soundTemplates->at("m_gameMusic"));
+	m_gameMusic.setPosition(glm::vec3(23.0f, 45.0f, 25.0f));
 }
 
 void Game::setPaused(int a_paused)
@@ -992,6 +998,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
 		}
+		bombManager->clearAllBombs();
 		resetPlayers();
 		break;
 	default:
