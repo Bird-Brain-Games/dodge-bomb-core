@@ -249,5 +249,11 @@
     <None Include="shaders\particles_f.glsl">
       <Filter>Graphics\Shaders</Filter>
     </None>
+    <None Include="shaders\bokeh_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\bokehComposite_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

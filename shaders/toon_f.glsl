@@ -26,6 +26,32 @@ in VertexData
 } vIn;
 
 layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec4 FragDepth;
+
+
+float calculateCircleOfConfusion()
+{
+	// S2 is the distance this pixel is from the camera
+	// This value is computed for you in the default_v vertex shader
+	
+	float depthEye = vIn.posEye.z;
+	float S2 = abs(depthEye);
+
+	//// CALCULATE PIXEL BLURRINESS HERE (SEE LAB DOCUMENT PART 1)
+	float A = 0.7062;
+	float f = 0.0303;
+	float S1 = 20.0;
+
+	float c = A * (abs(S2 - S1) / S2) * (f / (S1 - f));
+
+	float sensorHeight = 0.024;
+
+	float percentOfSensor = c / sensorHeight;
+
+	float blurFactor = clamp(percentOfSensor, 0.0, 1.0);
+	
+	return blurFactor;
+}
 
 void main()
 {
@@ -109,4 +135,7 @@ void main()
 		+ u_emissiveLight.xyz	   
 		);		
 	FragColor.w = u_transparency.x;
+
+	FragDepth = vec4(calculateCircleOfConfusion());
+
 }

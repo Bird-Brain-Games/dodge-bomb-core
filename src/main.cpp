@@ -98,8 +98,8 @@ void initializeShaders()
 	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
-	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
-		f_noLighting, f_toon, f_outline, f_sobel, f_shadow, f_colorCorrection, f_particles;
+	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor,
+		f_noLighting, f_toon, f_outline, f_sobel, f_shadow, f_colorCorrection, f_particles, f_bokeh, f_bokehComp;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);//
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);//
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
@@ -112,6 +112,8 @@ void initializeShaders()
 	f_outline.loadShaderFromFile(shaderPath + "outline_f.glsl", GL_FRAGMENT_SHADER);//
 	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);//
 	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);//
+	f_bokeh.loadShaderFromFile(shaderPath + "bokeh_f.glsl", GL_FRAGMENT_SHADER);//
+	f_bokehComp.loadShaderFromFile(shaderPath + "bokehComposite_f.glsl", GL_FRAGMENT_SHADER);//
 
 	// Geometry Shaders
 	Shader g_quad, g_menu, g_particles;
@@ -198,6 +200,19 @@ void initializeShaders()
 	materials["particles"]->shader->attachShader(g_particles); // Geometry Shader!
 	materials["particles"]->shader->attachShader(f_particles);
 	materials["particles"]->shader->linkProgram();
+
+	materials["bokeh"] = std::make_shared<Material>("bokeh");
+	materials["bokeh"]->shader->attachShader(v_passThru);
+	materials["bokeh"]->shader->attachShader(g_quad); // Geometry Shader!
+	materials["bokeh"]->shader->attachShader(f_bokeh);
+	materials["bokeh"]->shader->linkProgram();
+
+	materials["bokehComp"] = std::make_shared<Material>("bokehComp");
+	materials["bokehComp"]->shader->attachShader(v_passThru);
+	materials["bokehComp"]->shader->attachShader(g_quad); // Geometry Shader!
+	materials["bokehComp"]->shader->attachShader(f_bokehComp);
+	materials["bokehComp"]->shader->linkProgram();
+
 }
 
 void initializeScene()

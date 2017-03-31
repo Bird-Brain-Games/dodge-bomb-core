@@ -46,6 +46,8 @@ public:
 	// Allows us to sample textures in a shader
 	void bindTextureForSampling(int textureIndex, GLenum textureUnit);
 	void unbindTexture(GLenum textureUnit);
+	void bindDepthTextureForSampling(GLenum textureUnit);
+
 
 	unsigned int getWidth() { return width; }
 	unsigned int getHeight() { return height; }

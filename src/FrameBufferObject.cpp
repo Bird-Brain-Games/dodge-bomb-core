@@ -108,6 +108,17 @@ void FrameBufferObject::createFrameBuffer(unsigned int fboWidth, unsigned int fb
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void FrameBufferObject::bindDepthTextureForSampling(GLenum textureUnit)
+{
+	if (depthTexHandle)
+	{
+		glActiveTexture(textureUnit);
+		glBindTexture(GL_TEXTURE_2D, depthTexHandle);
+	}
+	else
+		std::cout << "FBO does not have a depth texture!" << std::endl;
+}
+
 void FrameBufferObject::bindFrameBufferForDrawing()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, handle);
