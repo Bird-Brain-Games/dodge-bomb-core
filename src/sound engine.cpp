@@ -2,6 +2,8 @@
 january 2017
 */
 #include "sound engine.h"
+#include <iostream>
+#include "FMOD\fmod_errors.h"
 
 //initializes our sound engine as a global variable
 SoundEngine Sound::sys;
@@ -23,10 +25,10 @@ SoundEngine::SoundEngine()
 	system = NULL;
 	driverData = NULL;
 
-	forward = { 0.0f, 0.0f, 1.0f };
-	up = { 0.0f, 1.0f, 0.0f };
-	listenerpos = { 0.0f, 5.0f, 0.0f };
-	vel = { 0.0f, 0.0f, 0.0f };
+	forward			= { 0.0f, 0.0f, 1.0f };
+	up				= { 0.0f, 1.0f, 0.0f };
+	listenerpos		= { 23.0f, 45.0f, 0.0f };
+	vel				= { 0.0f, 0.0f, 0.0f };
 
 }
 
@@ -67,10 +69,15 @@ bool SoundEngine::init()
 		}
 
 		//Set the distance unit (meters/feet etc).
-		result = system->set3DSettings(1.0, 1.0, 3.0f);
+		result = system->set3DSettings(1.0, 10.0, 1.0f);
 		checkResult(result);
 		initialized = true;
+
+		
 	}
+	FMOD_SPEAKERMODE* speakerMode = nullptr;
+	result = system->getSoftwareFormat(NULL, speakerMode, NULL);
+	checkResult(result);
 	return true;
 
 }
@@ -87,12 +94,30 @@ void SoundEngine::update()
 	checkResult(result);
 }
 
-//Updates the sound's position and calls the engines update function
-void Sound::updateSound(FMOD_VECTOR _pos, FMOD_VECTOR _vel)
+void Sound::setPosition(FMOD_VECTOR _pos)
 {
-	sys.result = channel->set3DAttributes(&_pos, &_vel);
+	setPosition(_pos, vel);
+}
+
+void Sound::setPosition(FMOD_VECTOR _pos, FMOD_VECTOR _vel)
+{
+	pos = _pos;
+	vel = _vel;
+	sys.result = channel->set3DAttributes(&pos, &vel);
 	checkResult(sys.result);
-	sys.update();
+}
+
+void Sound::setPosition(glm::vec3 _pos)
+{
+	setPosition(_pos, glm::vec3(vel.x, vel.y, vel.z));
+}
+
+void Sound::setPosition(glm::vec3 _pos, glm::vec3 _vel)
+{
+	FMOD_VECTOR _fPos, _fVel;
+	_fPos = { _pos.x, _pos.y, _pos.z };
+	_fVel = { _vel.x, _vel.y, _vel.z };
+	setPosition(_fPos, _fVel);
 }
 
 //Initializes sound variables to the default values
@@ -104,36 +129,67 @@ Sound::Sound()
 	vel = { 0.0f, 0.0f, 0.0f };
 }
 
+Sound::Sound(std::string filename, bool isLoop)
+{
+	Sound();
+	load(filename, isLoop);
+}
+
+Sound::Sound(const Sound& other)
+	: sound(other.sound),
+	channel(NULL)
+{
+	pos = { 0.0f, 0.0f, 0.0f };
+	vel = { 0.0f, 0.0f, 0.0f };
+}
+
+
+
 //deconstructs the sound
 Sound::~Sound()
+{
+	sound = nullptr;
+	channel = nullptr;
+}
+
+// releases the sound
+void Sound::release()
 {
 	sys.result = sound->release(); checkResult(sys.result);
 }
 
 //loads the sound from the file path specificied
-bool Sound::load(char * filename)
+bool Sound::load(std::string filename, bool isLoop)
 {
 	//initializes the sys
 	sys.init();
 
 	//creates the sound from the given filename
-	sys.result = sys.system->createSound((filename), FMOD_3D, 0, &sound); checkResult(sys.result);
+	sys.result = sys.system->createSound(filename.c_str(), FMOD_3D, 0, &sound); checkResult(sys.result);
 
 
 	if (sys.result != FMOD_OK)//checks whether the file opened properly or not
 	{
-		std::cout << "could not open the file" << filename << std::endl;
+		std::cout << "could not open the sound file: " << filename << std::endl;
 		checkResult(sys.result);
 		return false;
 	}
 
 	//sets how the sound behaves as its position changes
-	sys.result = sound->set3DMinMaxDistance(0.5f, 50.0f); checkResult(sys.result);
+	setRolloff(false, 0.5f, 100.0f);
 
 	//Sets how the sound will play (loop, single play etc)
-	sys.result = sound->setMode(FMOD_LOOP_NORMAL); checkResult(sys.result);
-
-	//sys.result = channel1->setPaused(false); checkResult(sys.result);
+	if (isLoop)
+	{
+		sys.result = sound->setMode(FMOD_LOOP_NORMAL); 
+		checkResult(sys.result);
+	}
+	else
+	{
+		sys.result = sound->setMode(FMOD_LOOP_OFF);
+		checkResult(sys.result);
+	}
+	
 	return true;
 }
 
@@ -154,8 +210,13 @@ void Sound::pause()
 }
 
 //changes how the sound rolloff works
-void Sound::switchSoundMode(FMOD_MODE mode)
+void Sound::setRolloff(bool isLinear, float min, float max)
 {
-	sys.result = sound->setMode(mode);
+	sys.result = channel->set3DMinMaxDistance(min, max); checkResult(sys.result);
+
+	if (isLinear)
+		sys.result = channel->setMode(FMOD_3D_LINEARROLLOFF);
+	else
+		sys.result = channel->setMode(FMOD_3D_INVERSEROLLOFF);
 	checkResult(sys.result);
 }

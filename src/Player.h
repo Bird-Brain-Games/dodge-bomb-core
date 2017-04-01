@@ -4,6 +4,9 @@
 #include "Bomb.h"
 #include "controller.h"
 #include "particles.h"
+#include "sound engine.h"
+#include <map>
+
 class readyUpRing : public GameObject
 {
 public:
@@ -41,7 +44,8 @@ public:
 		std::shared_ptr<Loader> _mesh,
 		std::shared_ptr<Material> _material,
 		std::shared_ptr<Texture> _texture, 
-		int _playerNum);
+		int _playerNum,
+		std::map<std::string, Sound>* soundTemplates);
 	Player(Player&);
 	~Player();
 
@@ -106,6 +110,10 @@ private:
 	bool isDashing;
 	float currentDashCooldown;
 	float currentDashDuration;
+
+	// Sounds
+	Sound s_damage;
+
 
 private:
 	// Player stats

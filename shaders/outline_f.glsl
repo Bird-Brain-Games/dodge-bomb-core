@@ -17,12 +17,14 @@ in VertexData
 } vIn;
 
 layout(location = 0) out vec4 FragColor;
-
+layout(location = 1) out vec4 FragDepth;
 void main()
 {
 	//////////////////////////////////////
 	/// SET FRAGCOLOR TO UNIFORM COLOR ///
 	//////////////////////////////////////
 	FragColor = u_outlineColour;
-	FragColor.w = u_transparency.x;
+	FragColor.w = 1.0;
+
+	FragDepth = vec4(0.0);
 }

@@ -87,12 +87,14 @@ Game::Game
 	std::vector<std::shared_ptr<GameObject>>* _readyUpRings,
 	std::shared_ptr<BombManager> _manager,
 	std::shared_ptr<Menu> _countdown,
+	std::map<std::string, Sound>* _soundTemplates,
 	Pause* _pause, Score* _score, Camera* _camera
 )
 
 	: obstacles(_obstacles),
 	readyUpRings(_readyUpRings),
-	countdown(_countdown)
+	countdown(_countdown),
+	soundTemplates(_soundTemplates)
 {
 	scene = _scene;
 	players = _player;
@@ -123,6 +125,10 @@ Game::Game
 	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.5f, -16.0f));
 	defaultPlayerPositions.push_back(glm::vec3(40.0f, 39.5f, -25.0f));
 	defaultPlayerPositions.push_back(glm::vec3(57.0f, 39.5f, 7.0f));
+
+	// Initialize sounds
+	m_gameMusic = Sound(soundTemplates->at("m_gameMusic"));
+	m_gameMusic.setPosition(glm::vec3(23.0f, 45.0f, 25.0f));
 }
 
 void Game::setPaused(int a_paused)
@@ -324,7 +330,8 @@ void Game::update(float dt)
 
 void Game::draw()
 {
-
+	camera->setPosition(glm::vec3(20.0f, 53.0f, 30.0f));
+	camera->setForward(glm::vec3(0.01, -2.0, -5.0));
 	///////////////////////////// zero pass: shadows.
 	//note up vector maybe wrong.
 
@@ -337,6 +344,7 @@ void Game::draw()
 	drawScene(&shadowCamera, &shadowCamera);
 	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 
+
 	///////////////////////////// First Pass: Outlines
 	fboUnlit.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(clearColor);
@@ -344,10 +352,11 @@ void Game::draw()
 	{
 		glCullFace(GL_FRONT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glDepthMask(GL_FALSE);
 		glLineWidth(outlineWidth);
 
 		// Clear back buffer
-		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
+		//FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
 
 		// Tell all game objects to use the outline shading material
 		setMaterialForAllGameObjects("outline");
@@ -357,6 +366,7 @@ void Game::draw()
 
 		glCullFace(GL_BACK); std::map<std::string, std::shared_ptr<Material>> materials;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glDepthMask(GL_TRUE);
 	}
 
 	///////////////////////////// Second Pass: Lighting
@@ -369,7 +379,6 @@ void Game::draw()
 
 		setMaterialForAllGameObjects("toon");
 		setMaterialForAllPlayerObjects("toon");
-
 
 		materials->at("toon")->shader->bind();
 
@@ -385,10 +394,12 @@ void Game::draw()
 		shadowMap.bindTextureForSampling(0, GL_TEXTURE29);
 		materials->at("toon")->intUniforms["u_shadowMap"] = 29;
 
+		materials->at("toon")->vec4Uniforms["u_bokehControls"] = glm::vec4(A, f, S1, 1.0);
 		materials->at("toon")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
 		materials->at("toon")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
 		materials->at("toon")->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
 		materials->at("toon")->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+		
 
 
 		materials->at("toon")->sendUniforms();
@@ -425,136 +436,24 @@ void Game::draw()
 
 	// Unbind scene FBO
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////// Post Processing
+	//////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////// Post Processing /////////////////////////////
 
 	if (bloomToggle)
 	{
-
-		//if (colorCorrection != LUT_OFF)
-		//{
-		//	fboColorCorrection.bindFrameBufferForDrawing();
-		//	FrameBufferObject::clearFrameBuffer(clearColor);
-		//}
-		//else
-		//{
-		//	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-		//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
-		//	fboUnlit.bindTextureForSampling(0, GL_TEXTURE1);
-		//}
-
-		brightPass(); // Output FBO: fboBright
-		blurBrightPass(); // Output FBO: fboBlurB
-
-		FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-		FrameBufferObject::clearFrameBuffer(glm::vec4(0, 0, 1, 1));
-
-		//FrameBufferObject::clearFrameBuffer(clearColor);
-		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-		fboBlurA.bindTextureForSampling(0, GL_TEXTURE1);
-
-		static auto sunlitMaterial = materials->at("bloom");
-		sunlitMaterial->shader->bind();
-		sunlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-		sunlitMaterial->shader->sendUniformInt("u_scene", 0);
-		sunlitMaterial->shader->sendUniformInt("u_bright", 1);
-		sunlitMaterial->sendUniforms();
-
-		// Draw a full screen quad using the geometry shader
-		glDrawArrays(GL_POINTS, 0, 1);
+		bloomPass(fboUnlit, fboBloomed);
+		depthOfField(fboBloomed, fboWithBokeh);
+		fboToScreen(fboWithBokeh);
 	}
 	else
 	{
-		//if (colorCorrection != LUT_OFF)
-		//{
-		//	//colorCorrectionPass(fboUnlit, fboColorCorrection);
-
-		//	//FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-		//	fboColorCorrection.bindFrameBufferForDrawing();
-		//	FrameBufferObject::clearFrameBuffer(clearColor);
-		//	//fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
-		//}
-		//else
-		//{
-		//	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-		//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
-		//	//fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-		//}
-
-
-		fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
-
-		static auto unlitMaterial = materials->at("unlitTexture");
-		unlitMaterial->shader->bind();
-		unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
-		unlitMaterial->shader->sendUniformInt("u_tex", 0);
-		unlitMaterial->sendUniforms();
-
-		// Draw a full screen quad using the geometry shader
-		glDrawArrays(GL_POINTS, 0, 1);
+		bloomPass(fboUnlit, fboBloomed);
+		fboToScreen(fboBloomed);
 	}
 
-	/////////////////////////////////////////////////////////////////////////////
-	//////////////////////////	Color Correction
-	//static auto colorMaterial = materials->at("colorCorrection");
-	//switch (colorCorrection)
-	//{
-	//case Game::LUT_OFF:
-	//	break;
-
-	//case Game::LUT_CONTRAST:
-	//	// Draw the corrected FBO to the screen
-
-	//	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-	//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
-
-	//	fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
-
-	//	// Bind the LUT
-	//	contrastLUT.bind(GL_TEXTURE6);
-
-	//	colorMaterial->shader->bind();
-	//	colorMaterial->shader->sendUniformInt("u_tex", 0);
-	//	colorMaterial->shader->sendUniformInt("u_lookup", 6);
-	//	colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
-	//	colorMaterial->shader->sendUniformFloat("u_lookupSize", contrastLUT.getSize());
-	//	colorMaterial->sendUniforms();
-
-	//	// Draw a full screen quad using the geometry shader
-	//	glDrawArrays(GL_POINTS, 0, 1);
-
-	//	contrastLUT.unbind(GL_TEXTURE6);
-
-	//	break;
-
-	//case Game::LUT_SEPIA:
-	//	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
-	//	FrameBufferObject::clearFrameBuffer(glm::vec4(1, 0, 0, 1));
-
-	//	fboColorCorrection.bindTextureForSampling(0, GL_TEXTURE0);
-
-	//	// Bind the LUT
-	//	sepiaLUT.bind(GL_TEXTURE6);
-
-	//	colorMaterial->shader->bind();
-	//	colorMaterial->shader->sendUniformInt("u_tex", 0);
-	//	colorMaterial->shader->sendUniformInt("u_lookup", 6);
-	//	colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
-	//	colorMaterial->shader->sendUniformFloat("u_lookupSize", sepiaLUT.getSize());
-	//	colorMaterial->sendUniforms();
-
-	//	// Draw a full screen quad using the geometry shader
-	//	glDrawArrays(GL_POINTS, 0, 1);
-
-	//	sepiaLUT.unbind(GL_TEXTURE6);
-
-	//	break;
-
-	//default:
-	//	break;
-	//}
+	
 
 }
 
@@ -609,11 +508,20 @@ void Game::updateScene(float dt)
 void Game::initializeFrameBuffers()
 {
 	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 2, true);
+	spunkMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
 	fboBright.createFrameBuffer(160, 120, 1, false);
 	fboBlurA.createFrameBuffer(160, 120, 1, false);
 	fboBlurB.createFrameBuffer(160, 120, 1, false);
 	shadowMap.createFrameBuffer(windowWidth * 2, windowHeight * 2, 1, true);
 	fboColorCorrection.createFrameBuffer(windowWidth, windowHeight, 1, false);
+	
+	fboBloomed.createFrameBuffer(windowWidth, windowHeight, 1, false);
+
+	bokehHorizontalfbo.createFrameBuffer(windowWidth, windowHeight, 1, true);
+	bokehAfbo.createFrameBuffer(windowWidth, windowHeight, 1, true);
+	bokehBfbo.createFrameBuffer(windowWidth, windowHeight, 1, true);
+	fboWithBokeh.createFrameBuffer(windowWidth, windowHeight, 1, true);
+
 }
 
 void Game::drawScene(Camera* _camera, Camera* _shadow)
@@ -686,16 +594,17 @@ void Game::setMaterialForAllPlayerObjects(std::string materialName)
 }
 
 
-// Only takes the highest brightness from the FBO
-void Game::brightPass()
+void Game::bloomPass(FrameBufferObject& input, FrameBufferObject& fboToDrawTo)
 {
+	//////////////////////////////////////////////////////////////////////////
+	// BRIGHT PASS
+	////////////////////////////////////////////////////////////////////////// 
 	fboBright.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
-	fboUnlit.bindTextureForSampling(0, GL_TEXTURE0);
+	FrameBufferObject::clearFrameBuffer(clearColor);
+	input.bindTextureForSampling(0, GL_TEXTURE0);
 
 	static auto brightMaterial = materials->at("bright");
 	brightMaterial->shader->bind();
-
 
 	brightMaterial->vec4Uniforms["u_bloomThreshold"] = bloomThreshold;
 	brightMaterial->intUniforms["u_tex"] = 0;
@@ -704,15 +613,12 @@ void Game::brightPass()
 	brightMaterial->sendUniforms();
 
 	glDrawArrays(GL_POINTS, 0, 1);
-}
 
-void Game::blurBrightPass()
-{
 	//////////////////////////////////////////////////////////////////////////
 	// BLUR BRIGHT PASS HERE
 	////////////////////////////////////////////////////////////////////////// 
 	fboBlurA.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
+	FrameBufferObject::clearFrameBuffer(clearColor);
 	fboBright.bindTextureForSampling(0, GL_TEXTURE0);
 
 	static auto blurMaterial = materials->at("blur");
@@ -747,12 +653,115 @@ void Game::blurBrightPass()
 			glDrawArrays(GL_POINTS, 0, 1);
 		}
 	}
+	//////////////////////////////////////////////////////////////////////////
+	// FINAL BLOOM COMP PASS HERE
+	////////////////////////////////////////////////////////////////////////// 
+
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+	fboToDrawTo.bindFrameBufferForDrawing();
+	FrameBufferObject::clearFrameBuffer(clearColor);
+
+	input.bindTextureForSampling(0, GL_TEXTURE0);
+	fboBlurA.bindTextureForSampling(0, GL_TEXTURE1);
+
+	static auto sunlitMaterial = materials->at("bloom");
+	sunlitMaterial->shader->bind();
+	sunlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+	sunlitMaterial->shader->sendUniformInt("u_scene", 0);
+	sunlitMaterial->shader->sendUniformInt("u_bright", 1);
+
+	sunlitMaterial->sendUniforms();
+
+	glDrawArrays(GL_POINTS, 0, 1);
+
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 }
 
-void Game::colorCorrectionPass(FrameBufferObject fboIn, FrameBufferObject fboOut)
+void Game::fboToScreen(FrameBufferObject& input)
+{
+	input.bindTextureForSampling(0, GL_TEXTURE0);
+
+	static auto unlitMaterial = materials->at("unlitTexture");
+	unlitMaterial->shader->bind();
+	unlitMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+	unlitMaterial->shader->sendUniformInt("u_tex", 0);
+	unlitMaterial->sendUniforms();
+
+	// Draw a full screen quad using the geometry shader
+	glDrawArrays(GL_POINTS, 0, 1);
+}
+
+// This function is fully implemented!
+void Game::bokehPass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDrawTo, float filterAngleDeg)
+{
+	fboToDrawTo.bindFrameBufferForDrawing();
+	fboToDrawTo.clearFrameBuffer(clearColor);
+
+	// Bind FBO texture to texture unit zero
+	/// TODO: bind scene fbo's depth texture to texture unit 0
+	fboUnlit.bindDepthTextureForSampling(GL_TEXTURE0);
+
+	fboToSample.bindTextureForSampling(0, GL_TEXTURE1);
+	fboUnlit.bindTextureForSampling(1, GL_TEXTURE2);
+
+	static auto bokehMaterial = materials->at("bokeh");
+
+	// Tell opengl which shader we want it to use
+	bokehMaterial->shader->bind();
+
+	// set material uniforms
+	bokehMaterial->intUniforms["u_depth"] = 0;
+	bokehMaterial->intUniforms["u_tex"] = 1;
+	bokehMaterial->intUniforms["u_texD"] = 2;
+
+
+	bokehMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+	bokehMaterial->vec4Uniforms["u_cameraParams"] = glm::vec4(filterAngleDeg * degToRad, aspectRatio, 0.0f, 0.0f);
+
+	// Send uniform variables to GPU
+	bokehMaterial->sendUniforms();
+
+	// Draw fullscreen quad
+	glDrawArrays(GL_POINTS, 0, 1);
+}
+
+void Game::depthOfField(FrameBufferObject& input, FrameBufferObject& output)
+{
+	// Bokeh Blur Passes
+	bokehPass(input, bokehHorizontalfbo, 0.0);
+	bokehPass(bokehHorizontalfbo, bokehAfbo, 120.0);
+	bokehPass(bokehHorizontalfbo, bokehBfbo, -120.0);
+
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+	output.bindFrameBufferForDrawing();
+	FrameBufferObject::clearFrameBuffer(clearColor);
+
+	static auto bokehCompositeMaterial = materials->at("bokehComp");
+
+	// Tell opengl which shader we want it to use
+	bokehCompositeMaterial->shader->bind();
+
+
+	bokehAfbo.bindTextureForSampling(0, GL_TEXTURE0);
+	bokehBfbo.bindTextureForSampling(0, GL_TEXTURE1);
+
+	// TODO: Set sampler values for the two textures
+	bokehCompositeMaterial->shader->sendUniformInt("u_bokehA", 0);
+	bokehCompositeMaterial->shader->sendUniformInt("u_bokehB", 1);
+	bokehCompositeMaterial->mat4Uniforms["u_mvp"] = glm::mat4();
+
+	// Send uniform varibles to GPU
+	bokehCompositeMaterial->sendUniforms();
+
+	// Draw fullscreen quad
+	glDrawArrays(GL_POINTS, 0, 1);
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
+}
+
+void Game::colorCorrectionPass(FrameBufferObject& fboIn, FrameBufferObject& fboOut)
 {
 	fboOut.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(glm::vec4(clearColor));
+	FrameBufferObject::clearFrameBuffer(clearColor);
 	fboIn.bindTextureForSampling(0, GL_TEXTURE0);
 
 	static auto colorMaterial = materials->at("colorCorrection");
@@ -841,6 +850,34 @@ void Game::handleKeyboardInputShaders()
 		if (roomLight > 0)
 			roomLight -= 0.1;
 	}
+
+	// Bokeh Controls
+	if (KEYBOARD_INPUT->CheckPressEvent('n'))
+	{
+		A -= 0.05;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('m'))
+	{
+		A += 0.05;
+	}
+
+	if (KEYBOARD_INPUT->CheckPressEvent(','))
+	{
+		f -= 0.005;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('.'))
+	{
+		f += 0.005;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('l'))
+	{
+		S1 -= 0.5;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent(';'))
+	{
+		S1 += 0.5;
+	}
+
 
 	// Toggles for each lighting component
 	if (KEYBOARD_INPUT->CheckPressEvent('z')) // ambient
@@ -992,6 +1029,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
 		}
+		bombManager->clearAllBombs();
 		resetPlayers();
 		break;
 	default:
