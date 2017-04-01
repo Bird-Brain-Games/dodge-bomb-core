@@ -107,8 +107,9 @@ private:
 	FrameBufferObject bokehBfbo;
 	FrameBufferObject fboBloomed;
 	FrameBufferObject fboWithBokeh;
+	FrameBufferObject spunkMap;
 
-	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
+	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 0.0);
 
 	std::shared_ptr<BombManager> bombManager;
 	std::map<std::string, std::shared_ptr<GameObject>>* scene;
@@ -189,4 +190,8 @@ private:
 	const float radToDeg = 180.0f / 3.14159f;
 
 	float aspectRatio = windowWidth / windowHeight;
+
+	float A = 0.4062;
+	float f = 0.0453;
+	float S1 = 11.5;
 };

@@ -15,6 +15,7 @@ uniform sampler2D u_toonRamp;
 uniform sampler2D u_shadowMap;
 
 uniform vec4 u_transparency;
+uniform vec4 u_bokehControls;
 
 in VertexData
 {
@@ -38,9 +39,9 @@ float calculateCircleOfConfusion()
 	float S2 = abs(depthEye);
 
 	//// CALCULATE PIXEL BLURRINESS HERE (SEE LAB DOCUMENT PART 1)
-	float A = 0.7062;
-	float f = 0.0303;
-	float S1 = 20.0;
+	float A = u_bokehControls.x;
+	float f = u_bokehControls.y;
+	float S1 = u_bokehControls.z;
 
 	float c = A * (abs(S2 - S1) / S2) * (f / (S1 - f));
 
@@ -137,5 +138,6 @@ void main()
 	FragColor.w = u_transparency.x;
 
 	FragDepth = vec4(calculateCircleOfConfusion());
+	//FragDepth.a = 1.0;
 
 }

@@ -25,4 +25,5 @@ void main()
 	vec4 c = texture(u_tex, texCoord);
 
 	FragColor = clamp((c - u_bloomThreshold.x) / (1.0 - u_bloomThreshold.x), 0.0, 1.0);
+	FragColor.a = 1.0;
 }

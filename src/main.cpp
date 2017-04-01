@@ -98,7 +98,7 @@ void initializeShaders()
 	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
-	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor,
+	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, f_coc,
 		f_noLighting, f_toon, f_outline, f_sobel, f_shadow, f_colorCorrection, f_particles, f_bokeh, f_bokehComp;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);//
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);//
@@ -114,6 +114,7 @@ void initializeShaders()
 	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);//
 	f_bokeh.loadShaderFromFile(shaderPath + "bokeh_f.glsl", GL_FRAGMENT_SHADER);//
 	f_bokehComp.loadShaderFromFile(shaderPath + "bokehComposite_f.glsl", GL_FRAGMENT_SHADER);//
+	f_coc.loadShaderFromFile(shaderPath + "coc_f.glsl", GL_FRAGMENT_SHADER);//
 
 	// Geometry Shaders
 	Shader g_quad, g_menu, g_particles;
@@ -212,6 +213,11 @@ void initializeShaders()
 	materials["bokehComp"]->shader->attachShader(g_quad); // Geometry Shader!
 	materials["bokehComp"]->shader->attachShader(f_bokehComp);
 	materials["bokehComp"]->shader->linkProgram();
+
+	materials["coc"] = std::make_shared<Material>("coc");
+	materials["coc"]->shader->attachShader(v_skinning);
+	materials["coc"]->shader->attachShader(f_coc);
+	materials["coc"]->shader->linkProgram();
 
 }
 
@@ -583,8 +589,8 @@ void initializeScene()
 	gameobjects["barrelTR"]->setScale(glm::vec3(1.2));
 	obstacles.push_back(gameobjects["barrelTR"]);
 
-	gameobjects["listener"] = std::make_shared<GameObject>(
-		glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
+	//gameobjects["listener"] = std::make_shared<GameObject>(
+	//	glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
 
 	//gameobjects["barrelBR"] = std::make_shared<GameObject>(
 	//	glm::vec3(40.f, 42.0f, 25.f), barrelMesh, defaultMaterial, barrelTexMap);
