@@ -13,13 +13,15 @@ in VertexData
 	vec3 posEye;
 } vIn;
 
+in vec2 texCoord;
+
 layout(location = 0) out vec4 FragColor;
 
 void main()
 {
 	///	TODO: Composite Bokehs here
-	vec4 A = texture(u_bokehA, vIn.texCoord.st);
-	vec4 B = texture(u_bokehB, vIn.texCoord.st);
+	vec4 A = texture(u_bokehA, texCoord);
+	vec4 B = texture(u_bokehB, texCoord);
 
 	FragColor = min(A, B);
 }

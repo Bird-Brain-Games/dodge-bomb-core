@@ -41,7 +41,7 @@ public:
 	static void unbindFrameBuffer(int backBufferWidth, int backBufferHeight);
 
 	static void clearFrameBuffer(glm::vec4 clearColour);
-
+	static void clearDepthBuffer(glm::vec4 clearColour);
 	// Bind specific textures
 	// Allows us to sample textures in a shader
 	void bindTextureForSampling(int textureIndex, GLenum textureUnit);

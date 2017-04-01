@@ -6,18 +6,16 @@ uniform sampler2D u_tex;
 uniform sampler2D u_texD;
 uniform vec4 u_cameraParams;	// x = filterAngle, y = aspect ratio
 
-
 // Fragment Shader Inputs
 in VertexData
 {
 	vec3 normal;
-	vec2 texCoord;
+	vec3 texCoord;
 	vec4 colour;
 	vec3 posEye;
 } vIn;
 
 in vec2 texCoord;
-
 
 layout(location = 0) out vec4 FragColor;
 
@@ -46,10 +44,11 @@ vec4 bokeh(vec2 offsets[NUM_SAMPLES])
 {
 	/// TODO: Implement Bokeh filter here (SEE LAB DOCUMENT PART 2)
 	float bleedingBias = 0.02;
-	float bleedingMult = 30.0;
+	float bleedingMult = 1.0;
 
 	vec4 centerPixel = texture(u_tex, texCoord);
 	vec4 centerDepth = texture(u_depth, texCoord);
+	vec4 centerCircle = texture(u_texD, texCoord);
 
 	vec4 colour = vec4(0.0, 0.0, 0.0, 0.0);
 	float totalWeight = 0.0;
@@ -57,13 +56,14 @@ vec4 bokeh(vec2 offsets[NUM_SAMPLES])
 	for(int t = 0; t < NUM_SAMPLES; t++)
 	{
 	vec2 offset = offsets[t];
-			vec2 sampleCoords = texCoord + offset * centerPixel.a;
+			vec2 sampleCoords = texCoord + offset * centerCircle.a;
 
 			vec4 samplePixel = texture(u_tex, sampleCoords);
 			vec4 sampleDepth = texture(u_depth, sampleCoords);
+			vec4 sampleCircle = texture(u_texD, sampleCoords);
 
-			float weight = sampleDepth.a < centerDepth.a ? samplePixel.a * bleedingMult : 1.0;
-			weight = (centerPixel.a > samplePixel.a + bleedingBias) ? weight : 1.0;
+			float weight = sampleDepth.a < centerDepth.a ? sampleCircle.a * bleedingMult : 1.0;
+			weight = (centerCircle.a > sampleCircle.a + bleedingBias) ? weight : 1.0;
 			weight = clamp(weight, 0.0, 1.0);
 
 			colour += samplePixel * weight;
@@ -84,4 +84,5 @@ void main()
 
 	// Perform Bokeh filter
 	FragColor = bokeh(offsets);
+//	FragColor.a = 1.0;
 }

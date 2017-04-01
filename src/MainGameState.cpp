@@ -344,6 +344,7 @@ void Game::draw()
 	drawScene(&shadowCamera, &shadowCamera);
 	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 
+
 	///////////////////////////// First Pass: Outlines
 	fboUnlit.bindFrameBufferForDrawing();
 	FrameBufferObject::clearFrameBuffer(clearColor);
@@ -351,10 +352,11 @@ void Game::draw()
 	{
 		glCullFace(GL_FRONT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glDepthMask(GL_FALSE);
 		glLineWidth(outlineWidth);
 
 		// Clear back buffer
-		FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
+		//FrameBufferObject::clearFrameBuffer(glm::vec4(0.8f, 0.8f, 0.8f, 0.0f));
 
 		// Tell all game objects to use the outline shading material
 		setMaterialForAllGameObjects("outline");
@@ -364,6 +366,7 @@ void Game::draw()
 
 		glCullFace(GL_BACK); std::map<std::string, std::shared_ptr<Material>> materials;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glDepthMask(GL_TRUE);
 	}
 
 	///////////////////////////// Second Pass: Lighting
@@ -376,7 +379,6 @@ void Game::draw()
 
 		setMaterialForAllGameObjects("toon");
 		setMaterialForAllPlayerObjects("toon");
-
 
 		materials->at("toon")->shader->bind();
 
@@ -392,10 +394,12 @@ void Game::draw()
 		shadowMap.bindTextureForSampling(0, GL_TEXTURE29);
 		materials->at("toon")->intUniforms["u_shadowMap"] = 29;
 
+		materials->at("toon")->vec4Uniforms["u_bokehControls"] = glm::vec4(A, f, S1, 1.0);
 		materials->at("toon")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
 		materials->at("toon")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
 		materials->at("toon")->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
 		materials->at("toon")->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+		
 
 
 		materials->at("toon")->sendUniforms();
@@ -432,7 +436,7 @@ void Game::draw()
 
 	// Unbind scene FBO
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
 
 	//////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Post Processing /////////////////////////////
@@ -445,7 +449,8 @@ void Game::draw()
 	}
 	else
 	{
-		fboToScreen(bokehAfbo);
+		bloomPass(fboUnlit, fboBloomed);
+		fboToScreen(fboBloomed);
 	}
 
 	
@@ -503,6 +508,7 @@ void Game::updateScene(float dt)
 void Game::initializeFrameBuffers()
 {
 	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 2, true);
+	spunkMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
 	fboBright.createFrameBuffer(160, 120, 1, false);
 	fboBlurA.createFrameBuffer(160, 120, 1, false);
 	fboBlurB.createFrameBuffer(160, 120, 1, false);
@@ -594,7 +600,7 @@ void Game::bloomPass(FrameBufferObject& input, FrameBufferObject& fboToDrawTo)
 	// BRIGHT PASS
 	////////////////////////////////////////////////////////////////////////// 
 	fboBright.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
+	FrameBufferObject::clearFrameBuffer(clearColor);
 	input.bindTextureForSampling(0, GL_TEXTURE0);
 
 	static auto brightMaterial = materials->at("bright");
@@ -612,7 +618,7 @@ void Game::bloomPass(FrameBufferObject& input, FrameBufferObject& fboToDrawTo)
 	// BLUR BRIGHT PASS HERE
 	////////////////////////////////////////////////////////////////////////// 
 	fboBlurA.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
+	FrameBufferObject::clearFrameBuffer(clearColor);
 	fboBright.bindTextureForSampling(0, GL_TEXTURE0);
 
 	static auto blurMaterial = materials->at("blur");
@@ -653,7 +659,7 @@ void Game::bloomPass(FrameBufferObject& input, FrameBufferObject& fboToDrawTo)
 
 	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 	fboToDrawTo.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(glm::vec4(1.0, 0.0, 0.0, 1.0));
+	FrameBufferObject::clearFrameBuffer(clearColor);
 
 	input.bindTextureForSampling(0, GL_TEXTURE0);
 	fboBlurA.bindTextureForSampling(0, GL_TEXTURE1);
@@ -689,14 +695,14 @@ void Game::fboToScreen(FrameBufferObject& input)
 void Game::bokehPass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDrawTo, float filterAngleDeg)
 {
 	fboToDrawTo.bindFrameBufferForDrawing();
-	fboToDrawTo.clearFrameBuffer(glm::vec4(1.0));
+	fboToDrawTo.clearFrameBuffer(clearColor);
 
 	// Bind FBO texture to texture unit zero
 	/// TODO: bind scene fbo's depth texture to texture unit 0
-	fboToSample.bindDepthTextureForSampling(GL_TEXTURE0);
+	fboUnlit.bindDepthTextureForSampling(GL_TEXTURE0);
 
 	fboToSample.bindTextureForSampling(0, GL_TEXTURE1);
-	fboToSample.bindTextureForSampling(1, GL_TEXTURE2);
+	fboUnlit.bindTextureForSampling(1, GL_TEXTURE2);
 
 	static auto bokehMaterial = materials->at("bokeh");
 
@@ -721,6 +727,7 @@ void Game::bokehPass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDra
 
 void Game::depthOfField(FrameBufferObject& input, FrameBufferObject& output)
 {
+	// Bokeh Blur Passes
 	bokehPass(input, bokehHorizontalfbo, 0.0);
 	bokehPass(bokehHorizontalfbo, bokehAfbo, 120.0);
 	bokehPass(bokehHorizontalfbo, bokehBfbo, -120.0);
@@ -754,7 +761,7 @@ void Game::depthOfField(FrameBufferObject& input, FrameBufferObject& output)
 void Game::colorCorrectionPass(FrameBufferObject& fboIn, FrameBufferObject& fboOut)
 {
 	fboOut.bindFrameBufferForDrawing();
-	FrameBufferObject::clearFrameBuffer(glm::vec4(clearColor));
+	FrameBufferObject::clearFrameBuffer(clearColor);
 	fboIn.bindTextureForSampling(0, GL_TEXTURE0);
 
 	static auto colorMaterial = materials->at("colorCorrection");
@@ -843,6 +850,34 @@ void Game::handleKeyboardInputShaders()
 		if (roomLight > 0)
 			roomLight -= 0.1;
 	}
+
+	// Bokeh Controls
+	if (KEYBOARD_INPUT->CheckPressEvent('n'))
+	{
+		A -= 0.05;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('m'))
+	{
+		A += 0.05;
+	}
+
+	if (KEYBOARD_INPUT->CheckPressEvent(','))
+	{
+		f -= 0.005;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('.'))
+	{
+		f += 0.005;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('l'))
+	{
+		S1 -= 0.5;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent(';'))
+	{
+		S1 += 0.5;
+	}
+
 
 	// Toggles for each lighting component
 	if (KEYBOARD_INPUT->CheckPressEvent('z')) // ambient

@@ -255,5 +255,8 @@
     <None Include="shaders\bokehComposite_f.glsl">
       <Filter>Graphics\Shaders</Filter>
     </None>
+    <None Include="shaders\coc_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
