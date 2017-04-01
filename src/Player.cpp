@@ -57,18 +57,21 @@ Player::~Player()
 void Player::initParticles(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture)
 {
 	//make smoker slower. somewhere between 100-250. die faster so not as tall.
-	emitter.lifeRange = glm::vec3(1.0, 4.0, 0.0); // this should be a vec2, rands life from x to y.
-	emitter.initialForceMin = glm::vec3(-0.5, 1.0, -0.5);
-	emitter.initialForceMax = glm::vec3( 0.5, 2.0,  0.5);
-	emitter.initialPosition = glm::vec3(0.0f, 5.0f, 0.0f);
-	emitter.initialGravity = glm::vec3(0.0f, 2.3f, 0.0f);
+	smoke.lifeRange = glm::vec3(0.5, 0.85, 0.0); // this should be a vec2, rands life from x to y.
+	smoke.initialForceMin = glm::vec3(-1.5, 3.0, -1.5);
+	smoke.initialForceMax = glm::vec3( 1.5, 5.0,  1.5);
+	smoke.initialPosition = glm::vec3(0.0f, 5.0f, 0.0f);
 
-	emitter.material = _material;
-	emitter.texture = _texture;
-	emitter.initialize(250);
-	emitter.pause();
-	emitter.dimensions = glm::vec2(5.0f, 2.0f);
-	emitter.max = 5;
+	smoke.size = 2.5f;
+	smoke.initialGravity = glm::vec3(0.0f, 2.3f, 0.0f);
+	smoke.colour = glm::vec3(GameObject::outlineColour);
+
+	smoke.material = _material;
+	smoke.texture = _texture;
+	smoke.initialize(250);
+	smoke.play();
+	smoke.dimensions = glm::vec2(5.0f, 2.0f);
+	smoke.max = 5;
 }
 
 void Player::draw(Camera &camera, Camera& shadow)
@@ -88,6 +91,11 @@ void Player::draw(Camera &camera, Camera& shadow)
 	}
 }
 
+void Player::drawParticles(Camera& camera)
+{
+	smoke.draw(camera);
+}
+
 int Player::getHealth()
 {
 	return health;
@@ -101,8 +109,10 @@ Controller* Player::getController()
 void Player::update(float dt, bool canMove)
 {
 	// Update the bomb cooldown
-	emitter.initialPosition = getWorldPosition();
-	emitter.update(dt);
+	smoke.initialPosition = getWorldPosition() + glm::vec3(0.0, 2.2, 0.0);
+
+	glm::vec3 velocity = rigidBody->getLinearVelocity() * glm::vec3(0.3);
+	smoke.update(dt, velocity);
 	if (currentCooldown > 0.0f)
 	{
 		currentCooldown -= dt;
@@ -414,7 +424,7 @@ void Player::takeDamage(int damage)
 	}
 	else if (health == 1)
 	{
-		emitter.play();
+		smoke.play();
 	}
 }
 

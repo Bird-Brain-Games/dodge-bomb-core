@@ -88,9 +88,11 @@ private:
 	void setMaterialForAllGameObjects(std::string materialName);
 	void setMaterialForAllPlayerObjects(std::string materialName);
 
-	void brightPass();
-	void blurBrightPass();
-	void colorCorrectionPass(FrameBufferObject fboIn, FrameBufferObject fboOut);
+	void fboToScreen(FrameBufferObject& input);
+	void depthOfField(FrameBufferObject& input, FrameBufferObject& output);
+	void bloomPass(FrameBufferObject& input, FrameBufferObject& fboToDrawTo);
+	void colorCorrectionPass(FrameBufferObject& fboIn, FrameBufferObject& fboOut);
+	void bokehPass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDrawTo, float filterAngleDeg);
 
 	void initializeFrameBuffers();
 	void handleKeyboardInput();
@@ -102,7 +104,14 @@ private:
 	FrameBufferObject fboBright;
 	FrameBufferObject fboBlurA, fboBlurB;
 	FrameBufferObject fboColorCorrection;
-	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 1.0);
+	FrameBufferObject bokehHorizontalfbo;
+	FrameBufferObject bokehAfbo;
+	FrameBufferObject bokehBfbo;
+	FrameBufferObject fboBloomed;
+	FrameBufferObject fboWithBokeh;
+	FrameBufferObject spunkMap;
+
+	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 0.0);
 
 	std::shared_ptr<BombManager> bombManager;
 	std::map<std::string, std::shared_ptr<GameObject>>* scene;
@@ -159,8 +168,8 @@ private:
 	float currentCountdown = 0.0f;
 
 	// Lighting Controls
-	float innerCutOff = 0.78; // Spot Light Size
-	float outerCutOff = 0.81;
+	float innerCutOff = 0.1; // Spot Light Size
+	float outerCutOff = 0.2;
 	glm::vec3 deskForward = glm::vec3(0.47f, 1.0f, 0.99f); // Spot Light Direction
 	glm::vec4 lightPos = glm::vec4(60.0f, 94.0, -15.0f, 1.0f); // Spot Light
 
@@ -170,6 +179,7 @@ private:
 	float roomLight = 0.5;
 	Camera shadowCamera;
 	FrameBufferObject shadowMap;
+
 
 	float ambient = 0.1; // Ambient Lighting
 	float diffuse = 1.0f; // Diffuse Lighting
@@ -200,4 +210,13 @@ private:
 private:
 	//static 
 
+	// A few conversions to know
+	const float degToRad = 3.14159f / 180.0f;
+	const float radToDeg = 180.0f / 3.14159f;
+
+	float aspectRatio = windowWidth / windowHeight;
+
+	float A = 0.4062;
+	float f = 0.0453;
+	float S1 = 11.5;
 };

@@ -45,6 +45,9 @@ public:
 	glm::vec3 initialGravity;
 	glm::ivec2 dimensions;	// the dimension of our texture.
 	float max;				// the number of textures to cycle through
+	float size; // the size of the particles
+
+	glm::vec3 colour;
 
 	VAO vao;
 

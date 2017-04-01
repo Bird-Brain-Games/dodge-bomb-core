@@ -20,7 +20,7 @@ void main()
 	//////////////////////////////////////////////////////////////////////////
 	// COMPOSITE BLOOM HERE
 	////////////////////////////////////////////////////////////////////////// 
-	vec4 composite =  (texture(u_bright, texCoord) * 0.4) + (texture(u_scene, texCoord));
+	vec4 composite =  (texture(u_bright, texCoord) * 0.3) + (texture(u_scene, texCoord));
 	FragColor = composite;
 	FragColor.a = 1.0;
 }
