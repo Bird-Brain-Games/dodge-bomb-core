@@ -415,7 +415,7 @@ void Game::draw()
 	break;
 	}
 
-	drawParticles(camera);
+
 	fboUnlit.bindFrameBufferForDrawing();
 	
 
@@ -645,19 +645,6 @@ void Game::drawScene(Camera* _camera, Camera* _shadow)
 	}
 }
 
-//draws our particles to the screen.
-void Game::drawParticles(Camera* _camera)
-{
-	players->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
-	for (auto itr = players->begin(); itr != players->end(); ++itr)
-	{
-		auto playersObject = itr->second;
-
-		if (playersObject->isRoot())
-			playersObject->drawParticles(*_camera);
-	}
-}
-
 int Game::deathCheck()
 {
 	int counter = 0;
@@ -744,7 +731,7 @@ void Game::blurBrightPass()
 
 	glDrawArrays(GL_POINTS, 0, 1);
 
-	static int numBlurPasses = 10;
+	static int numBlurPasses = 4;
 	for (int i = 0; i < numBlurPasses; i++)
 	{
 		if (i % 2 == 0)

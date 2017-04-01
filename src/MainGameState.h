@@ -80,7 +80,6 @@ private:
 	void updateScene(float dt);
 	void updateReadyPass(float dt);
 	void drawScene(Camera* _camera, Camera* _shadow);
-	void drawParticles(Camera*);
 
 	void setMaterialForAllGameObjects(std::string materialName);
 	void setMaterialForAllPlayerObjects(std::string materialName);
@@ -156,9 +155,9 @@ private:
 	GLuint toonRamp;
 
 	// Bloom Controls
-	glm::vec4 bloomThreshold = glm::vec4(0.6f);
+	glm::vec4 bloomThreshold = glm::vec4(0.4f);
 	int numBlurPasses = 4;
-	bool bloomToggle = false;
+	bool bloomToggle = true;
 
 	// For Toggling
 	bool  ambientToggle = true;
