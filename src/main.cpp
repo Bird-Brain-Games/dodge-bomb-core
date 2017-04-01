@@ -223,7 +223,8 @@ void initializeScene()
 	std::shared_ptr<LoadObject> organizerMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> mapMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
-	std::shared_ptr<LoadObject> ringMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> readyTopMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> readyBottomMesh = std::make_shared<LoadObject>();
 
 	std::shared_ptr<Holder> bombotMesh = std::make_shared<Holder>();
 	std::shared_ptr<Holder> bombotMesh2 = std::make_shared<Holder>();
@@ -266,7 +267,8 @@ void initializeScene()
 	organizerMesh->load(meshPath + "scaledorganizer.obj");
 	mapMesh->load(meshPath + "scaledmap.obj");
 	markerMesh->load(meshPath + "scaledmarker.obj");
-	ringMesh->load(meshPath + "ring.obj");
+	readyTopMesh->load(meshPath + "topLeft.obj");
+	readyBottomMesh->load(meshPath + "bottomLeft.obj");
 
 	// Report mesh load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -292,7 +294,8 @@ void initializeScene()
 	meshes["organizer"] = organizerMesh;
 	meshes["map"] = mapMesh;
 	meshes["marker"] = markerMesh;
-	meshes["ring"] = ringMesh;
+	meshes["readyTop"] = readyTopMesh;
+	meshes["readyBottom"] = readyBottomMesh;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
@@ -338,20 +341,17 @@ void initializeScene()
 	std::string explosionTex4 = "Assets/img/ex-4.png";
 	std::shared_ptr<Texture> explosionTexMap4 = std::make_shared<Texture>(explosionTex4, explosionTex4, 1.0f);
 
-	std::string ringTex1 = "Assets/img/ring1.png";
-	std::shared_ptr<Texture> ringTexMap1 = std::make_shared<Texture>(ringTex1, ringTex1, 1.0f);
+	std::string readyTex1 = "Assets/img/left.png";
+	std::shared_ptr<Texture> readyTexMap1 = std::make_shared<Texture>(readyTex1, readyTex1, 1.0f);
 
-	std::string ringTex2 = "Assets/img/ring2.png";
-	std::shared_ptr<Texture> ringTexMap2 = std::make_shared<Texture>(ringTex2, ringTex2, 1.0f);
+	std::string readyTex2 = "Assets/img/right.png";
+	std::shared_ptr<Texture> readyTexMap2 = std::make_shared<Texture>(readyTex2, readyTex2, 1.0f);
 
-	std::string ringTex3 = "Assets/img/ring3.png";
-	std::shared_ptr<Texture> ringTexMap3 = std::make_shared<Texture>(ringTex3, ringTex3, 1.0f);
+	std::string deskTex = "Assets/img/desk (diffuse).png";
+	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(deskTex, deskTex, 1.0f);
 
-	std::string ringTex4 = "Assets/img/ring4.png";
-	std::shared_ptr<Texture> ringTexMap4 = std::make_shared<Texture>(ringTex4, ringTex4, 1.0f);
-
-	std::string diffuseTex = "Assets/img/desk (diffuse).png";
-	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
+	std::string deskReadyTex = "Assets/img/deskReady (diffuse).png";
+	std::shared_ptr<Texture> deskReadyTexMap = std::make_shared<Texture>(deskReadyTex, deskReadyTex, 1.0f);
 
 	std::string corkboardTex = "Assets/img/corkboard(diffuse).png";
 	std::shared_ptr<Texture> corkboardTexMap = std::make_shared<Texture>(corkboardTex, corkboardTex, 1.0f);
@@ -401,7 +401,8 @@ void initializeScene()
 	std::cout << "success, texture loading took " << duration << "ms" << std::endl << std::endl;
 
 	//Add textures to the map
-	textures["default"] = deskTexMap;
+	textures["table"] = deskTexMap;
+	textures["readyTable"] = deskReadyTexMap;
 	textures["bombot1"] = bombot1TexMap;
 	textures["bombot2"] = bombot2TexMap;
 	textures["bombot3"] = bombot3TexMap;
@@ -416,10 +417,8 @@ void initializeScene()
 	textures["explosion2"] = explosionTexMap2;
 	textures["explosion3"] = explosionTexMap3;
 	textures["explosion4"] = explosionTexMap4;
-	textures["ring1"] = ringTexMap1;
-	textures["ring2"] = ringTexMap2;
-	textures["ring3"] = ringTexMap3;
-	textures["ring4"] = ringTexMap4;
+	textures["readyL"] = readyTexMap1;
+	textures["readyR"] = readyTexMap2;
 	textures["barrel"] = barrelTexMap;
 	textures["cannon"] = cannonTexMap;
 	textures["boat"] = boatTexMap;
@@ -484,21 +483,23 @@ void initializeScene()
 	std::cout << "Initializing gameObjects...";
 	t1 = std::chrono::high_resolution_clock::now();
 
-	gameobjects["ring1"] = std::make_shared<readyUpRing>(
-		glm::vec3(-12.0f, 89.5f, 10.0f), ringMesh, defaultMaterial, ringTexMap1, 0);
-	readyUpRings.push_back(gameobjects["ring1"]);
+	gameobjects["readyBlue"] = std::make_shared<readyUpRing>(
+		glm::vec3(-12.0f, 89.5f, 10.0f), readyBottomMesh, defaultMaterial, readyTexMap2, 0);
+	readyUpRings.push_back(gameobjects["readyBlue"]);
 
-	gameobjects["ring2"] = std::make_shared<readyUpRing>(
-		glm::vec3(0.0f, 89.5f, -16.0f), ringMesh, defaultMaterial, ringTexMap2, 1);
-	readyUpRings.push_back(gameobjects["ring2"]);
+	gameobjects["readyRed"] = std::make_shared<readyUpRing>(
+		glm::vec3(0.0f, 89.5f, -16.0f), readyTopMesh, defaultMaterial, readyTexMap1, 1);
+	readyUpRings.push_back(gameobjects["readyRed"]);
 
-	gameobjects["ring3"] = std::make_shared<readyUpRing>(
-		glm::vec3(40.0f, 89.5f, -25.0f), ringMesh, defaultMaterial, ringTexMap3, 2);
-	readyUpRings.push_back(gameobjects["ring3"]);
+	gameobjects["readyGreen"] = std::make_shared<readyUpRing>(
+		glm::vec3(40.0f, 89.5f, -25.0f), readyBottomMesh, defaultMaterial, readyTexMap1, 2);
+	gameobjects["readyGreen"]->setRotationAngleY(180.0f * degToRad);
+	readyUpRings.push_back(gameobjects["readyGreen"]);
 
-	gameobjects["ring4"] = std::make_shared<readyUpRing>(
-		glm::vec3(57.0f, 89.5f, 7.0f), ringMesh, defaultMaterial, ringTexMap4, 3);
-	readyUpRings.push_back(gameobjects["ring4"]);
+	gameobjects["readyYellow"] = std::make_shared<readyUpRing>(
+		glm::vec3(57.0f, 89.5f, 7.0f), readyTopMesh, defaultMaterial, readyTexMap2, 3);
+	gameobjects["readyYellow"]->setRotationAngleY(180.0f * degToRad);
+	readyUpRings.push_back(gameobjects["readyYellow"]);
 
 	gameobjects["table"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
@@ -568,8 +569,8 @@ void initializeScene()
 	gameobjects["barrelTR"]->setScale(glm::vec3(1.2));
 	obstacles.push_back(gameobjects["barrelTR"]);
 
-	gameobjects["listener"] = std::make_shared<GameObject>(
-		glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
+	//gameobjects["listener"] = std::make_shared<GameObject>(
+		//glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
 
 	//gameobjects["barrelBR"] = std::make_shared<GameObject>(
 	//	glm::vec3(40.f, 42.0f, 25.f), barrelMesh, defaultMaterial, barrelTexMap);
@@ -672,7 +673,7 @@ void initializeScene()
 	std::string rightwallBodyPath = "assets\\bullet\\botwall.btdata";
 	std::string topwallBodyPath = "assets\\bullet\\topwall.btdata";
 	std::string lampBodyPath = "assets\\bullet\\lamp.btdata";
-	std::string ringBodyPath = "assets\\bullet\\ring.btdata";
+	std::string ringBodyPath = "assets\\bullet\\readyUp.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
@@ -791,10 +792,10 @@ void initializeScene()
 	gameobjects["rightwall"]->attachRigidBody(rightwallBody);
 	gameobjects["topwall"]->attachRigidBody(topwallBody);
 	gameobjects["lamp"]->attachRigidBody(lampBody);
-	gameobjects["ring1"]->attachRigidBody(ring1Body);
-	gameobjects["ring2"]->attachRigidBody(ring2Body);
-	gameobjects["ring3"]->attachRigidBody(ring3Body);
-	gameobjects["ring4"]->attachRigidBody(ring4Body);
+	gameobjects["readyBlue"]->attachRigidBody(ring1Body);
+	gameobjects["readyRed"]->attachRigidBody(ring2Body);
+	gameobjects["readyGreen"]->attachRigidBody(ring3Body);
+	gameobjects["readyYellow"]->attachRigidBody(ring4Body);
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
@@ -904,7 +905,7 @@ void initializeStates()
 	score = new Score(scoreMenu);
 	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, countdown, &soundTemplates, pause, score, &playerCamera);
+	game = new Game(&gameobjects, &players, &materials, &textures, &obstacles, &readyUpRings, bombManager, countdown, &soundTemplates, pause, score, &playerCamera);
 	game->setPaused(true);
 
 	states.addGameState("game", game);
@@ -1166,7 +1167,7 @@ int main(int argc, char **argv)
 	glutInitWindowSize(1920, 1080);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutCreateWindow("Dodge Bomb");
-	//glutFullScreen();
+	glutFullScreen();
 
 	// Init GLEW
 	GLenum err = glewInit();

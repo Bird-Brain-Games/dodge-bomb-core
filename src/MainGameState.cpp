@@ -83,6 +83,7 @@ Game::Game
 	std::map<std::string, std::shared_ptr<GameObject>>* _scene,
 	std::map<std::string, std::shared_ptr<Player>>* _player,
 	std::map<std::string, std::shared_ptr<Material>>* _materials,
+	std::map<std::string, std::shared_ptr<Texture>>* _textures,
 	std::vector<std::shared_ptr<GameObject>>* _obstacles,
 	std::vector<std::shared_ptr<GameObject>>* _readyUpRings,
 	std::shared_ptr<BombManager> _manager,
@@ -99,6 +100,7 @@ Game::Game
 	scene = _scene;
 	players = _player;
 	materials = _materials;
+	textures = _textures;
 	pause = _pause;
 	score = _score;
 	camera = _camera;
@@ -993,12 +995,9 @@ void Game::handleKeyboardInput()
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
 	{
-		this->m_isPaused = true;
-		changeState(READYUP);
-		score->active = players->at("bombot1")->getController();
-		m_parent->getGameState("score")->setPaused(1);
+		players->at("bombot2")->setActive(true);
+		players->at("bombot2")->setPosition(glm::vec3(15.0f * players->at("bombot2")->getPlayerNum(), 35.0f, 0.0f));
 	}
-	// Reset all players
 
 
 
@@ -1033,6 +1032,9 @@ void Game::changeState(Game::GAME_STATE newState)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
 		}
+
+		// Set the tables texture
+		scene->at("table")->setTexture(textures->at("readyTable"));
 		break;
 
 	case Game::COUNTDOWN:
@@ -1047,6 +1049,8 @@ void Game::changeState(Game::GAME_STATE newState)
 		}
 		bombManager->clearAllBombs();
 		resetPlayers();
+
+		scene->at("table")->setTexture(textures->at("table"));
 		break;
 
 	case Game::WIN:
