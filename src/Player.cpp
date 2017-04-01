@@ -1,7 +1,5 @@
-
 #include "Player.h"
 #include <iostream>
-#include "SoundDriver.h"
 
 const float degToRad = 3.14159f / 180.0f;
 
@@ -22,7 +20,8 @@ Player::Player(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
 	std::shared_ptr<Material> _material,
 	std::shared_ptr<Texture> _texture,
-	int _playerNum)
+	int _playerNum,
+	std::map<std::string, Sound>* soundTemplates)
 	:
 	GameObject(position, _mesh, _material, _texture), 
 	con(_playerNum),
@@ -34,6 +33,8 @@ Player::Player(glm::vec3 position,
 	playerNum = _playerNum;
 	setScale(glm::vec3(0.75f));
 	setActive(false);
+
+	s_damage = Sound(soundTemplates->at("s_damage" + std::to_string(playerNum + 1)));
 }
 
 Player::Player(Player& other)
@@ -196,6 +197,11 @@ void Player::update(float dt, bool canMove)
 
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);
+
+	if (playerNum == 0) std::cout << getWorldPosition().x << std::endl;
+
+	// Update sounds
+	s_damage.setPosition(getWorldPosition());
 
 	// Make it so they can't rotate through physics
 	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 0.0, 0.0));	
@@ -408,6 +414,8 @@ void Player::takeDamage(int damage)
 	isDashing = false;
 
 	health--;
+	s_damage.play();
+
 	if (health <= 0)
 	{
 		std::cout << "Player " << playerNum << " is dead" << std::endl;

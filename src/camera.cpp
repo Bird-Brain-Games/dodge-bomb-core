@@ -20,7 +20,7 @@ Camera::Camera()
 	setPosition(glm::vec3(15.0f));
 	setAngle(0.0f, 0.0f);
 
-	setProperties(45, 1080.0f / 720.0f, 0.1f, 100000.0f, 0.5f);
+	setProperties(45, 1920.0f / 1080.0f, 0.1f, 100000.0f, 0.5f);
 	forward = glm::vec3(0.0f, -10.0f, -10.0f);
 
 	shakeRadius = 0.0f;
