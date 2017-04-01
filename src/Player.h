@@ -75,8 +75,8 @@ public:
 
 	Controller* getController();
 
-	ParticleEmmiter emitter; // used to show when the player is damaged
-
+	ParticleEmmiter smoke;// used to show when the player is damaged
+	ParticleEmmiter sparks;
 private:
 	void lookDirectlyAtExplosion(glm::vec3 direction);
 
@@ -123,4 +123,5 @@ private:
 	static float dashMinSpeed;	// when the player reaches this, stop dashing
 	static float maxDashCooldown;
 	static float maxDashDuration;
+
 };

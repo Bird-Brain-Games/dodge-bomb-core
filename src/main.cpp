@@ -99,7 +99,7 @@ void initializeShaders()
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
-		f_noLighting, f_toon, f_outline, f_sobel, f_shadow, f_colorCorrection, f_particles;
+		f_noLighting, f_toon, f_outline, f_sobel, f_shadow, f_colorCorrection, f_particles, f_combination;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);//
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);//
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
@@ -112,6 +112,7 @@ void initializeShaders()
 	f_outline.loadShaderFromFile(shaderPath + "outline_f.glsl", GL_FRAGMENT_SHADER);//
 	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);//
 	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);//
+	f_combination.loadShaderFromFile(shaderPath + "combinataion_f.glsl", GL_FRAGMENT_SHADER);
 
 	// Geometry Shaders
 	Shader g_quad, g_menu, g_particles;
@@ -198,6 +199,12 @@ void initializeShaders()
 	materials["particles"]->shader->attachShader(g_particles); // Geometry Shader!
 	materials["particles"]->shader->attachShader(f_particles);
 	materials["particles"]->shader->linkProgram();
+
+	materials["particleCombination"] = std::make_shared<Material>("particles");
+	materials["particleCombination"]->shader->attachShader(v_passThru); // Geometry Shader!
+	materials["particleCombination"]->shader->attachShader(g_quad); // Geometry Shader!
+	materials["particleCombination"]->shader->attachShader(f_combination);
+	materials["particleCombination"]->shader->linkProgram();
 }
 
 void initializeScene()
@@ -586,19 +593,18 @@ void initializeScene()
 
 	players["bombot1"] = std::make_shared<Player>(
 		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
-	players["bombot1"]->initParticles(materials["particles"], particleTexMap);
+	
 
 	players["bombot2"] = std::make_shared<Player>(
 		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
-	players["bombot2"]->initParticles(materials["particles"], particleTexMap);
 	
 	players["bombot3"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
-	players["bombot3"]->initParticles(materials["particles"], particleTexMap);
+
 
 	players["bombot4"] = std::make_shared<Player>(
 		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
-	players["bombot4"]->initParticles(materials["particles"], particleTexMap);
+
 
 	// Report gameObject init times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -781,6 +787,11 @@ void initializeScene()
 	players["bombot3"]->setOutlineColour(glm::vec4(0.31f, 0.93f, 0.32f, 1.0f));
 	players["bombot4"]->setOutlineColour(glm::vec4(0.88f, 0.87f, 0.33f, 1.0f));
 
+	players["bombot1"]->initParticles(materials["particles"], particleTexMap);
+	players["bombot2"]->initParticles(materials["particles"], particleTexMap);
+	players["bombot3"]->initParticles(materials["particles"], particleTexMap);
+	players["bombot4"]->initParticles(materials["particles"], particleTexMap);
+
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
 
@@ -805,15 +816,8 @@ void initializeStates()
 	char startTex[] = "Assets/img/menMain_atlas.png";
 	std::shared_ptr<Texture> startTexMap = std::make_shared<Texture>(startTex, startTex, 1.0f);
 
-	char scoreTex[] = "Assets/img/winScreen_atlas.png";
-	std::shared_ptr<Texture> scoreTexMap = std::make_shared<Texture>(scoreTex, scoreTex, 1.0f);
-
-	char scoreTex2[] = "Assets/img/playerTransLayer_atlas.png";
-	std::shared_ptr<Texture> scoreTex2Map = std::make_shared<Texture>(scoreTex2, scoreTex2, 1.0f);
-
-	char pauseTex[] = "Assets/img/menPause_arlas.png";
+	char pauseTex[] = "Assets/img/menPause_atlas(4000x4000).png";
 	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
-
 
 	std::string countdownTex = "Assets/img/countdown.png";
 	std::shared_ptr<Texture> countdownTexMap = std::make_shared<Texture>(countdownTex, countdownTex, 1.0f);
@@ -825,19 +829,12 @@ void initializeStates()
 
 	//save them
 	textures["start"] = startTexMap;
-	textures["score"] = scoreTexMap;
-	textures["score2"] = scoreTex2Map;
 	textures["pause"] = pauseTexMap;
 
 	//load up menu's
 	startMenu = std::make_shared<Menu>(startTexMap, 4, 7);
 	startMenu->setMaterial(materials["menu"]);
 
-	scoreMenu = std::make_shared<Menu>(scoreTexMap, 4, 7);
-	scoreMenu->setMaterial(materials["menu"]);
-
-	scoreMenu2 = std::make_shared<Menu>(scoreTex2Map, 4, 7);
-	scoreMenu2->setMaterial(materials["menu"]);
 
 	pauseMenu = std::make_shared<Menu>(pauseTexMap, 4, 7);
 	pauseMenu->setMaterial(materials["menu"]);
@@ -855,8 +852,6 @@ void initializeStates()
 	pause = new Pause(pauseMenu);
 	pause->setPaused(true);
 
-	score = new Score(scoreMenu);
-	score->setPaused(true);
 
 	game = new Game(&gameobjects, &players, &materials, &obstacles, &readyUpRings, bombManager, countdown, pause, score, &playerCamera);
 	game->setPaused(true);
@@ -864,7 +859,6 @@ void initializeStates()
 	states.addGameState("game", game);
 	states.addGameState("MainMenu", mainMenu);
 	states.addGameState("pause", pause);
-	states.addGameState("score", score);
 
 	// Report state load times
 	t2 = std::chrono::high_resolution_clock::now();
