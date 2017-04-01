@@ -347,6 +347,9 @@ void initializeScene()
 	std::string readyTex2 = "Assets/img/right.png";
 	std::shared_ptr<Texture> readyTexMap2 = std::make_shared<Texture>(readyTex2, readyTex2, 1.0f);
 
+	std::string winTex = "Assets/img/winAssets.png";
+	std::shared_ptr<Texture> winTexMap = std::make_shared<Texture>(winTex, winTex, 1.0f);
+
 	std::string deskTex = "Assets/img/desk (diffuse).png";
 	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(deskTex, deskTex, 1.0f);
 
@@ -431,6 +434,7 @@ void initializeScene()
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
 	textures["particles"] = particleTexMap;
+	textures["win"] = winTexMap;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////		SOUNDS		///////////////////////////////
@@ -1167,7 +1171,7 @@ int main(int argc, char **argv)
 	glutInitWindowSize(1920, 1080);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutCreateWindow("Dodge Bomb");
-	glutFullScreen();
+	//glutFullScreen();
 
 	// Init GLEW
 	GLenum err = glewInit();

@@ -114,6 +114,8 @@ Game::Game
 	initializeFrameBuffers();
 	currentGameState = MAIN;
 	changeState(READYUP);
+	winScreen = std::make_shared<Menu>(textures->at("win"), 1, 1);
+	winScreen->setMaterial(materials->at("menu"));
 
 	toonRamp = ilutGLLoadImage("Assets/img/toonRamp.png");
 	glActiveTexture(GL_TEXTURE5);
@@ -324,10 +326,6 @@ void Game::update(float dt)
 		{
 			winner--;
 			changeState(WIN);
-			/*this->m_isPaused = true;
-			changeState(READYUP);
-			score->active = players->at("bombot1")->getController();
-			m_parent->getGameState("score")->setPaused(winner);*/
 		}
 	}
 
@@ -365,7 +363,18 @@ void Game::update(float dt)
 			innerCutOff = glm::mix(innerDefault, innerWin, cameraMoveLerp);
 			outerCutOff = glm::mix(outerDefault, outerWin, cameraMoveLerp);
 		}
-
+		// Let the game be ended
+		else
+		{
+			if (winPlayer->getController()->conButton(XINPUT_GAMEPAD_A))
+			{
+				this->m_isPaused = true;
+				changeState(READYUP);
+				m_parent->getGameState("MainMenu")->setPaused(0);
+				//score->active = players->at("bombot1")->getController();
+				//m_parent->getGameState("score")->setPaused(winner);
+			}
+		}
 	}
 }
 
@@ -647,7 +656,7 @@ void Game::updateScene(float dt)
 		// So we need to make sure to only invoke update() for the root nodes.
 		// Otherwise some objects would get updated twice in a frame!
 		if (player->isRoot())
-			player->update(dt, currentGameState != COUNTDOWN);
+			player->update(dt, currentGameState != COUNTDOWN && currentGameState != WIN);
 	}
 
 	bombManager->update(dt);
@@ -690,6 +699,10 @@ void Game::drawScene(Camera* _camera, Camera* _shadow)
 	if (currentGameState == COUNTDOWN)
 	{
 		countdown->draw();
+	}
+	else if (currentGameState == WIN && cameraMoveLerp == 1.0f)
+	{
+		winScreen->draw();
 	}
 }
 
