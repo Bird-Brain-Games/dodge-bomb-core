@@ -1,7 +1,7 @@
 #version 400
 
 uniform sampler2D u_tex;
-
+uniform vec3 colour;
 // Fragment Shader Inputs
 //in VertexData
 //{
@@ -11,10 +11,10 @@ in vec2 texCoord;
 	//vec3 posEye;
 //} vIn;
 
-layout(location = 0) out vec4 FragColor;
+layout(location = 2) out vec4 FragColor;
 
 void main()
 {
 	vec2 uv = texCoord.xy;
-	FragColor = texture(u_tex, uv);
+	FragColor = texture(u_tex, uv) + vec4(colour, 0.0);
 }
