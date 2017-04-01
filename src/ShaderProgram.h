@@ -29,9 +29,13 @@ public:
 	// Useful for sending vector4 to GPU
 	void sendUniformVec4(const std::string& uniformName, glm::vec4& vec4);
 
+	// Sends three floats stored in an array to GPU
+	// Useful for sending vector3 to GPU
+	void sendUniformVec3(const std::string& uniformName, glm::vec3& vec3);
+
 	// Sends two floats stored in an array to GPU
 	// Useful for sending vector2 to GPU
-	void sendUniformVec2(const std::string& uniformName, glm::vec2& vec4);
+	void sendUniformVec2(const std::string& uniformName, glm::vec2& vec2);
 
 	void sendUniformFloat(const std::string& uniformName, float floatVal);
 

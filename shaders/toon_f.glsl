@@ -15,6 +15,7 @@ uniform sampler2D u_toonRamp;
 uniform sampler2D u_shadowMap;
 
 uniform vec4 u_transparency;
+uniform vec4 u_bokehControls;
 
 in VertexData
 {
@@ -26,6 +27,33 @@ in VertexData
 } vIn;
 
 layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec4 FragDepth;
+layout(location = 2) out vec4 particles;
+
+
+float calculateCircleOfConfusion()
+{
+	// S2 is the distance this pixel is from the camera
+	// This value is computed for you in the default_v vertex shader
+	
+	float depthEye = vIn.posEye.z;
+	float S2 = abs(depthEye);
+
+	//// CALCULATE PIXEL BLURRINESS HERE (SEE LAB DOCUMENT PART 1)
+	float A = u_bokehControls.x;
+	float f = u_bokehControls.y;
+	float S1 = u_bokehControls.z;
+
+	float c = A * (abs(S2 - S1) / S2) * (f / (S1 - f));
+
+	float sensorHeight = 0.024;
+
+	float percentOfSensor = c / sensorHeight;
+
+	float blurFactor = clamp(percentOfSensor, 0.0, 1.0);
+	
+	return blurFactor;
+}
 
 void main()
 {
@@ -109,4 +137,8 @@ void main()
 		+ u_emissiveLight.xyz	   
 		);		
 	FragColor.w = u_transparency.x;
+
+	FragDepth = vec4(calculateCircleOfConfusion());
+	//FragDepth.a = 1.0;
+
 }

@@ -156,7 +156,10 @@
     <None Include="shaders\blinnphong_f.glsl" />
     <None Include="shaders\blinnphong_v.glsl" />
     <None Include="shaders\bloomComposite_f.glsl" />
+    <None Include="shaders\bokehComposite_f.glsl" />
+    <None Include="shaders\bokeh_f.glsl" />
     <None Include="shaders\bright_f.glsl" />
+    <None Include="shaders\coc_f.glsl" />
     <None Include="shaders\color_f.glsl" />
     <None Include="shaders\default_f.glsl" />
     <None Include="shaders\default_v.glsl" />

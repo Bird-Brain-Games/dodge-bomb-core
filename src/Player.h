@@ -56,6 +56,8 @@ public:
 
 	void update(float deltaT, bool canMove);
 	void draw(Camera &camera, Camera& shadow);
+	void drawParticles(Camera& camera);
+
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	void attachBombManager(std::shared_ptr<BombManager> _manager);
 	void takeDamage(int damage);
@@ -78,8 +80,8 @@ public:
 
 	Controller* getController();
 
-	ParticleEmmiter emitter; // used to show when the player is damaged
-
+	ParticleEmmiter smoke;// used to show when the player is damaged
+	ParticleEmmiter sparks;
 private:
 	void lookDirectlyAtExplosion(glm::vec3 direction);
 
@@ -130,4 +132,5 @@ private:
 	static float dashMinSpeed;	// when the player reaches this, stop dashing
 	static float maxDashCooldown;
 	static float maxDashDuration;
+
 };

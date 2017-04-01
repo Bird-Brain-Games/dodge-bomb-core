@@ -10,7 +10,7 @@ ParticleEmmiter::ParticleEmmiter()
 	particles.acceleration = nullptr;
 	particles.masses = nullptr;
 	numParticles = 0;
-
+	colour = glm::vec3(0.0);
 	playing = false;
 
 }
@@ -68,9 +68,9 @@ void ParticleEmmiter::update(float dt, glm::vec3 velocity)
 			if (*life <= 0)
 			{
 				*pos = initialPosition;
-				(*vel).x = glm::mix(initialForceMin.x, initialForceMax.x, glm::linearRand(0.0f, 1.0f)) + velocity.x;
-				(*vel).y = glm::mix(initialForceMin.y, initialForceMax.y, glm::linearRand(0.0f, 1.0f)) + velocity.y;
-				(*vel).z = glm::mix(initialForceMin.z, initialForceMax.z, glm::linearRand(0.0f, 1.0f)) + velocity.z;
+				(*vel).x = glm::mix(initialForceMin.x, initialForceMax.x, glm::linearRand(0.0f, 1.0f));
+				(*vel).y = glm::mix(initialForceMin.y, initialForceMax.y, glm::linearRand(0.0f, 1.0f));
+				(*vel).z = glm::mix(initialForceMin.z, initialForceMax.z, glm::linearRand(0.0f, 1.0f));
 
 				*life = glm::linearRand(lifeRange.x, lifeRange.y);
 				*dur = *life;
@@ -118,6 +118,8 @@ void ParticleEmmiter::draw(Camera _camera)
 	material->mat4Uniforms["u_mv"] = _camera.getView();
 	material->mat4Uniforms["u_proj"] = _camera.getProj();
 	material->intUniforms["u_tex"] = 0;
+	material->floatUniforms["u_size"] = size;
+	material->vec3Uniforms["colour"] = colour;
 	material->sendUniforms();
 
 	glDepthMask(GL_FALSE);

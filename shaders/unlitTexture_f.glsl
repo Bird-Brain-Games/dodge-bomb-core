@@ -10,4 +10,5 @@ void main()
 {
 	vec2 uv = texCoord;
 	FragColor = texture(u_tex, uv);
+	FragColor.a = 1.0;
 }
