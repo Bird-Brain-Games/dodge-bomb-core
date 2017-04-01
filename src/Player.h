@@ -114,7 +114,8 @@ private:
 
 	// Sounds
 	Sound s_damage;
-
+	Sound s_footstep;
+	bool moving;
 
 private:
 	// Player stats

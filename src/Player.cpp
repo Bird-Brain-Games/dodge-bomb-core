@@ -35,6 +35,9 @@ Player::Player(glm::vec3 position,
 	setActive(false);
 
 	s_damage = Sound(soundTemplates->at("s_damage" + std::to_string(playerNum + 1)));
+	s_footstep = Sound(soundTemplates->at("s_footstep" + std::to_string(playerNum + 1)));
+	//s_footstep.setVolume(0.0f);
+	moving = false;
 }
 
 Player::Player(Player& other)
@@ -201,6 +204,19 @@ void Player::update(float dt, bool canMove)
 
 	// Update sounds
 	s_damage.setPosition(getWorldPosition());
+	s_footstep.setPosition(getWorldPosition());
+
+	// If the player starts moving, play footsteps
+	if (glm::length(rigidBody->getLinearVelocity()) > 1.0f && !moving && !isDashing && isActive())
+	{
+		moving = true;
+		s_footstep.play();
+	}
+	else if (glm::length(rigidBody->getLinearVelocity()) < 1.0f && moving && isActive())
+	{
+		moving = false;
+		s_footstep.pause();
+	}
 
 	// Make it so they can't rotate through physics
 	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 0.0, 0.0));	

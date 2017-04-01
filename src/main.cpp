@@ -484,6 +484,10 @@ void initializeScene()
 	soundTemplates["s_damage2"] = Sound(soundPath + "bothit2_fx.wav", false);
 	soundTemplates["s_damage3"] = Sound(soundPath + "bothit3_fx.wav", false);
 	soundTemplates["s_damage4"] = Sound(soundPath + "bothit4_fx.wav", false);
+	soundTemplates["s_footstep1"] = Sound(soundPath + "bot_walk1.wav", true);
+	soundTemplates["s_footstep2"] = Sound(soundPath + "bot_walk2.wav", true);
+	soundTemplates["s_footstep3"] = Sound(soundPath + "bot_walk3.wav", true);
+	soundTemplates["s_footstep4"] = Sound(soundPath + "bot_walk4.wav", true);
 
 	
 	
@@ -510,22 +514,26 @@ void initializeScene()
 	t1 = std::chrono::high_resolution_clock::now();
 
 	gameobjects["readyBlue"] = std::make_shared<readyUpRing>(
-		glm::vec3(-12.0f, 89.5f, 10.0f), readyBottomMesh, defaultMaterial, readyTexMap2, 0);
+		glm::vec3(0.0f, 89.0f, -16.0f), readyBottomMesh, defaultMaterial, readyTexMap2, 0);
 	gameobjects["readyBlue"]->setScale(glm::vec3(0.5f));
+	gameobjects["readyBlue"]->setRotationAngleY(90.0f * degToRad);
 	readyUpRings.push_back(gameobjects["readyBlue"]);
 
 	gameobjects["readyRed"] = std::make_shared<readyUpRing>(
-		glm::vec3(0.0f, 89.5f, -16.0f), readyTopMesh, defaultMaterial, readyTexMap1, 1);
+		glm::vec3(45.0f, 89.0f, -16.0f), readyTopMesh, defaultMaterial, readyTexMap1, 1);
+	gameobjects["readyRed"]->setRotationAngleY(90.0f * degToRad);
+	gameobjects["readyRed"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyRed"]);
 
 	gameobjects["readyGreen"] = std::make_shared<readyUpRing>(
-		glm::vec3(40.0f, 89.5f, -25.0f), readyBottomMesh, defaultMaterial, readyTexMap1, 2);
-	gameobjects["readyGreen"]->setRotationAngleY(180.0f * degToRad);
+		glm::vec3(-7.0f, 89.0f, 13.0f), readyBottomMesh, defaultMaterial, readyTexMap1, 2);
+	gameobjects["readyGreen"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyGreen"]);
 
 	gameobjects["readyYellow"] = std::make_shared<readyUpRing>(
-		glm::vec3(57.0f, 89.5f, 7.0f), readyTopMesh, defaultMaterial, readyTexMap2, 3);
+		glm::vec3(53.0f, 89.0f, 13.0f), readyTopMesh, defaultMaterial, readyTexMap2, 3);
 	gameobjects["readyYellow"]->setRotationAngleY(180.0f * degToRad);
+	gameobjects["readyYellow"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyYellow"]);
 
 	gameobjects["table"] = std::make_shared<GameObject>(

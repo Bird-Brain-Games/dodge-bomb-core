@@ -67,6 +67,9 @@ public:
 	void setPosition(glm::vec3 _pos);
 	void setPosition(glm::vec3 _pos, glm::vec3 _vel);
 
+	// Set the channel volume from 0.0 to 1.0
+	void setVolume(float v);
+
 	//changes what method of rollof is being used.
 	void setRolloff(bool isLinear, float min, float max);
 	//void switchSoundMode(FMOD_MODE);
@@ -84,5 +87,6 @@ private:
 	FMOD::Channel *channel = NULL;
 	FMOD_VECTOR pos;
 	FMOD_VECTOR vel;
+	float volume;
 };
 
