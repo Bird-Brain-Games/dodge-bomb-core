@@ -692,6 +692,7 @@ void Game::drawScene(Camera* _camera, Camera* _shadow)
 		if (playersObject->isRoot())
 			playersObject->draw(*_camera, *_shadow);
 	}
+
 	scene->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
 	bombManager->draw(*_camera, *_shadow);
 
