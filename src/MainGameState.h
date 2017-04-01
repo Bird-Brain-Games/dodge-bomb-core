@@ -192,7 +192,7 @@ private:
 	// Bloom Controls
 	glm::vec4 bloomThreshold = glm::vec4(0.4f);
 	int numBlurPasses = 4;
-	bool bloomToggle = true;
+	bool bloomToggle = false;
 
 	// For Toggling
 	bool  ambientToggle = true;
