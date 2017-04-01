@@ -7,7 +7,7 @@ float Player::maxInvincibleTime = 3.0f;
 float Player::pauseTime = 0.5f;
 int Player::maxHealth = 2;
 float Player::maxBombCooldown = 1.0f;
-float Player::flashInterval = 0.2f;
+float Player::flashInterval = 0.15f;
 float Player::playerSpeed = 50.0f;
 
 // Dash values
@@ -115,7 +115,10 @@ void Player::update(float dt, bool canMove)
 	{
 		currentDashCooldown -= dt;
 		if (currentDashCooldown < 0.0f)
+		{
 			currentDashCooldown = 0.0f;
+			outlineColour += glm::vec4(0.3f, 0.3f, 0.3f, 0.0f);
+		}
 	}
 
 	// Check dashing status
@@ -126,17 +129,11 @@ void Player::update(float dt, bool canMove)
 		{
 			currentDashDuration -= dt;
 			if (currentDashDuration < 0.0f)
+			{
 				currentDashDuration = 0.0f;
-		}
-
-		glm::vec3 currentVelocity = rigidBody->getLinearVelocity();
-		if (currentDashDuration <= 0.0f) //|| glm::length(currentVelocity) <= dashMinSpeed)
-		{
-			isDashing = false;
-			rigidBody->setLinearVelocity(glm::vec3(0.0f));
-			//rigidBody->setLinearVelocity(
-				//glm::normalize(glm::vec3(-glm::sin(currentAngle), 0.0f, 
-					//glm::cos(currentAngle))) * playerSpeed);
+				isDashing = false;
+				rigidBody->setLinearVelocity(glm::vec3(0.0f));
+			}
 		}
 	}
 
@@ -285,6 +282,7 @@ void Player::handleInput(float dt)
 		isDashing = true;
 		currentDashCooldown = maxDashCooldown;
 		currentDashDuration = maxDashDuration;
+		outlineColour -= glm::vec4(0.3f, 0.3f, 0.3f, 0.0f);
 
 		// Determine what direction to dash
 		glm::vec3 playerDirection;
