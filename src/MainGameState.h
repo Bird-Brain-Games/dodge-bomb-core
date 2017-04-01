@@ -61,6 +61,7 @@ public:
 	Game(std::map<std::string, std::shared_ptr<GameObject>>*,
 		std::map<std::string, std::shared_ptr<Player>>*,
 		std::map<std::string, std::shared_ptr<Material>>*,
+		std::map<std::string, std::shared_ptr<Texture>>*,
 		std::vector<std::shared_ptr<GameObject>>*,
 		std::vector<std::shared_ptr<GameObject>>*,
 		std::shared_ptr<BombManager>,
@@ -107,6 +108,7 @@ private:
 	std::map<std::string, std::shared_ptr<GameObject>>* scene;
 	std::map<std::string, std::shared_ptr<Player>>* players;
 	std::map<std::string, std::shared_ptr<Material>>* materials;
+	std::map<std::string, std::shared_ptr<Texture>>* textures;
 	std::vector<std::shared_ptr<GameObject>>* obstacles;
 	std::vector<std::shared_ptr<GameObject>>* readyUpRings;
 	std::vector<glm::vec3> defaultPlayerPositions;

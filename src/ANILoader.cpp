@@ -618,7 +618,7 @@ void Holder::setAnim(std::string _name)
 void loadAnimations(std::shared_ptr<Holder> _temp)
 {
 	_temp->baseLoad("Assets/htr/bombot");
-	_temp->AniLoad("Assets/htr/idle", "idle");
+	_temp->AniLoad("Assets/htr/idle_Take_001", "idle");
 	_temp->AniLoad("Assets/htr/throw", "throw");
 	_temp->AniLoad("Assets/htr/walk", "walk");
 	_temp->setAnim("idle");
