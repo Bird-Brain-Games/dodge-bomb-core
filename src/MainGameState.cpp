@@ -390,8 +390,8 @@ void Game::update(float dt)
 
 void Game::draw()
 {
-	camera->setPosition(glm::vec3(20.0f, 53.0f, 30.0f));
-	camera->setForward(glm::vec3(0.01, -2.0, -5.0));
+	//camera->setPosition(glm::vec3(20.0f, 53.0f, 30.0f));
+	//camera->setForward(glm::vec3(0.01, -2.0, -5.0));
 	///////////////////////////// zero pass: shadows.
 	//note up vector maybe wrong.
 
