@@ -487,6 +487,7 @@ void Game::draw()
 	}
 
 
+	drawParticles(camera);
 	fboUnlit.bindFrameBufferForDrawing();
 	
 
@@ -567,7 +568,7 @@ void Game::updateScene(float dt)
 
 void Game::initializeFrameBuffers()
 {
-	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 2, true);
+	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 3, true);
 	spunkMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
 	fboBright.createFrameBuffer(160, 120, 1, false);
 	fboBlurA.createFrameBuffer(160, 120, 1, false);
@@ -615,6 +616,18 @@ void Game::drawScene(Camera* _camera, Camera* _shadow)
 	else if (currentGameState == WIN && cameraMoveLerp == 1.0f)
 	{
 		winScreen->draw();
+	}
+}
+
+void Game::drawParticles(Camera* _camera)
+{
+	players->begin()->second->getMaterial()->shader->sendUniformInt("skinning", 0);
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		auto playersObject = itr->second;
+
+		if (playersObject->isRoot())
+			playersObject->drawParticles(*_camera);
 	}
 }
 
