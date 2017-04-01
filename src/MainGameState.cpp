@@ -126,10 +126,10 @@ Game::Game
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
 
-	defaultPlayerPositions.push_back(glm::vec3(-12.0f, 39.5f, 10.0f));
-	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.5f, -16.0f));
-	defaultPlayerPositions.push_back(glm::vec3(40.0f, 39.5f, -25.0f));
-	defaultPlayerPositions.push_back(glm::vec3(57.0f, 39.5f, 7.0f));
+	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.0f, -16.0f));	// top left
+	defaultPlayerPositions.push_back(glm::vec3(45.0f, 39.5f, -25.0f));	// top right
+	defaultPlayerPositions.push_back(glm::vec3(-12.0f, 39.5f, 10.0f));	// bottom left
+	defaultPlayerPositions.push_back(glm::vec3(57.0f, 39.5f, 7.0f));	// bottom right
 
 	// Initialize sounds
 	m_gameMusic = Sound(soundTemplates->at("m_gameMusic"));
@@ -241,6 +241,8 @@ void Game::updateReadyPass(float dt)
 
 void Game::update(float dt)
 {
+	Sound::sys.update();
+
 	if (currentGameState == READYUP)
 	{
 		for (auto it : *readyUpRings)

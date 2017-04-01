@@ -27,7 +27,7 @@ SoundEngine::SoundEngine()
 
 	forward			= { 0.0f, 0.0f, 1.0f };
 	up				= { 0.0f, 1.0f, 0.0f };
-	listenerpos		= { 23.0f, 45.0f, 0.0f };
+	listenerpos		= { 23.0f, 55.0f, 0.0f };
 	vel				= { 0.0f, 0.0f, 0.0f };
 
 }
@@ -127,6 +127,7 @@ Sound::Sound()
 	channel = NULL; //limited. at least 32. 0 = null
 	pos = { 0.0f, 0.0f, 0.0f };
 	vel = { 0.0f, 0.0f, 0.0f };
+	volume = 1.0f;
 }
 
 Sound::Sound(std::string filename, bool isLoop)
@@ -202,6 +203,8 @@ void Sound::play()
 	sys.result = channel->set3DAttributes(&pos, &vel); checkResult(sys.result);
 	//Unpauses the sound
 	sys.result = channel->setPaused(false); checkResult(sys.result);
+	// Sets the channel volume
+	sys.result = channel->setVolume(volume); checkResult(sys.result);
 }
 
 void Sound::pause()
@@ -219,4 +222,9 @@ void Sound::setRolloff(bool isLinear, float min, float max)
 	else
 		sys.result = channel->setMode(FMOD_3D_INVERSEROLLOFF);
 	checkResult(sys.result);
+}
+
+void Sound::setVolume(float v)
+{
+	volume = v;
 }
