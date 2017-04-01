@@ -489,6 +489,7 @@ void initializeScene()
 
 	gameobjects["readyBlue"] = std::make_shared<readyUpRing>(
 		glm::vec3(-12.0f, 89.5f, 10.0f), readyBottomMesh, defaultMaterial, readyTexMap2, 0);
+	gameobjects["readyBlue"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyBlue"]);
 
 	gameobjects["readyRed"] = std::make_shared<readyUpRing>(
@@ -724,10 +725,10 @@ void initializeScene()
 	sketchBody = std::make_unique<RigidBody>();
 	trumpBody = std::make_unique<RigidBody>();
 	booksBody = std::make_unique<RigidBody>();
-	botwallBody = std::make_unique<RigidBody>();
-	rightwallBody	= std::make_unique<RigidBody>();
-	botleftBody		= std::make_unique<RigidBody>();
-	topwallBody = std::make_unique<RigidBody>();
+	botwallBody = std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
+	rightwallBody	= std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
+	botleftBody		= std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
+	topwallBody = std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
 	lampBody = std::make_unique<RigidBody>();
 	ring1Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
 	ring2Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);

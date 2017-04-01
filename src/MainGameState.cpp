@@ -191,8 +191,17 @@ void Game::updateReadyPass(float dt)
 
 	for (auto it : *players)
 	{
+		// If active and presses B, set inactive
+		if (it.second->getController()->conButton(XINPUT_GAMEPAD_B) &&
+			it.second->isActive())
+		{
+			it.second->setActive(false);
+			it.second->setPosition(glm::vec3(-1000.0f));
+		}
+
 		// Set the player as active if A pressed and not active
-		if (it.second->getController()->conButton(XINPUT_GAMEPAD_A) &&
+		if ((it.second->getController()->conButton(XINPUT_GAMEPAD_A) || 
+			(it.second->getController()->conButton(XINPUT_GAMEPAD_X))) &&
 			!it.second->isActive())
 		{
 			it.second->setActive(true);

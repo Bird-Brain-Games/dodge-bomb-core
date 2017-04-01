@@ -119,6 +119,8 @@ void Player::update(float dt, bool canMove)
 			currentDashCooldown = 0.0f;
 			outlineColour += glm::vec4(0.3f, 0.3f, 0.3f, 0.0f);
 		}
+
+		//if (currentDashCooldown)
 	}
 
 	// Check dashing status
