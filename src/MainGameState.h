@@ -222,7 +222,7 @@ private:
 	float kr = rim; // Rim Lighting
 
 	// SOUND CONTROLS
-	float musicVolume = 0.2;
+	float musicVolume = 0.1;
 
 private:
 	//static 
