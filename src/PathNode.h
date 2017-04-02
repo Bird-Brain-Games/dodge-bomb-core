@@ -20,25 +20,10 @@ struct PathNode
 	std::map<std::string, PathNode *> connections;
 
 	void addConnection(PathNode * connectionUp, PathNode * connectionRight, PathNode * connectionDown, PathNode * connectionLeft);
-	
-	void setMaterial(std::shared_ptr<Material> newMaterial) { nodeMaterial = newMaterial; }
 
 	void checkConnections();
-	void draw();
-
-
-	PathNode * path = nullptr;
 
 	bool dummy;
 
-	int f = 0; // Score for node
-	int g = 0; // Cost from start to this node
-	int h = 0; // Estimated cost from node to target
 	int distanceToTarget; //h
-
-	GLfloat vertices[6];
-
-	GLuint vao;
-	GLuint vbo;
-	std::shared_ptr<Material> nodeMaterial;
 };

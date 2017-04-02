@@ -122,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ANILoader.h" />
+    <ClInclude Include="src\aStar.h" />
     <ClInclude Include="src\Bomb.h" />
     <ClInclude Include="src\BulletDebug.h" />
     <ClInclude Include="src\camera.h" />
