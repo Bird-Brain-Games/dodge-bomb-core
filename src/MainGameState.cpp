@@ -127,6 +127,7 @@ Game::Game
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
+	currentLUT = nullptr;
 
 	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.0f, -16.0f));	// top left
 	defaultPlayerPositions.push_back(glm::vec3(45.0f, 39.5f, -25.0f));	// top right
@@ -552,16 +553,38 @@ void Game::draw()
 	if (bloomToggle)
 	{
 		bloomPass(fboUnlit, fboBloomed);
-		depthOfField(fboBloomed, fboWithBokeh);
+		if (depthToggle)
+		{
+			depthOfField(fboBloomed, fboWithBokeh);
+			fboToScreen(fboWithBokeh);
+		}
+		else
+		{
+			fboToScreen(fboBloomed);
+		}
+	}
+	else if (depthToggle)
+	{
+		depthOfField(fboUnlit, fboWithBokeh);
 		fboToScreen(fboWithBokeh);
 	}
 	else
 	{
-		bloomPass(fboUnlit, fboBloomed);
-		fboToScreen(fboBloomed);
+		fboToScreen(fboUnlit);
 	}
 
-	
+	// Color correction
+	if (currentLUT)	// if pointing to a LUT
+	{
+		if (depthToggle)
+			colorCorrectionPass(fboWithBokeh, fboColorCorrection);
+		else if (bloomToggle)
+			colorCorrectionPass(fboBloomed, fboColorCorrection);
+		else
+			colorCorrectionPass(fboUnlit, fboColorCorrection);
+
+		fboToScreen(fboColorCorrection);
+	}
 
 }
 
@@ -880,17 +903,18 @@ void Game::colorCorrectionPass(FrameBufferObject& fboIn, FrameBufferObject& fboO
 	static auto colorMaterial = materials->at("colorCorrection");
 
 	//// Bind the LUT
-	contrastLUT.bind(GL_TEXTURE6);
+	currentLUT->bind(GL_TEXTURE6);
 
 	colorMaterial->shader->bind();
 	colorMaterial->shader->sendUniformInt("u_tex", 0);
 	colorMaterial->shader->sendUniformInt("u_lookup", 6);
 	colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
-	colorMaterial->shader->sendUniformFloat("u_lookupSize", contrastLUT.getSize());
+	colorMaterial->shader->sendUniformFloat("u_lookupSize", currentLUT->getSize());
 	colorMaterial->sendUniforms();
 
 	// Draw a full screen quad using the geometry shader
 	glDrawArrays(GL_POINTS, 0, 1);
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 
 	contrastLUT.unbind(GL_TEXTURE6);
 }
@@ -924,11 +948,11 @@ void Game::handleKeyboardInputShaders()
 	{
 		if (colorCorrection == LUT_CONTRAST)
 		{
-			colorCorrection = LUT_OFF;
+			changeColorCorrection(LUT_OFF);
 		}
 		else
 		{
-			colorCorrection = LUT_CONTRAST;
+			changeColorCorrection(LUT_CONTRAST);
 		}
 	}
 	// Toggle LUT
@@ -936,11 +960,11 @@ void Game::handleKeyboardInputShaders()
 	{
 		if (colorCorrection == LUT_SEPIA)
 		{
-			colorCorrection = LUT_OFF;
+			changeColorCorrection(LUT_OFF);
 		}
 		else
 		{
-			colorCorrection = LUT_SEPIA;
+			changeColorCorrection(LUT_SEPIA);
 		}
 	}
 
@@ -1188,6 +1212,27 @@ void Game::changeState(Game::GAME_STATE newState)
 		numDeadPlayers = 0;
 		break;
 
+	default:
+		break;
+	}
+}
+
+void Game::changeColorCorrection(LUT_MODE mode)
+{
+	if (colorCorrection == mode) return;
+	colorCorrection = mode;
+
+	switch (colorCorrection)
+	{
+	case Game::LUT_OFF:
+		currentLUT = nullptr;
+		break;
+	case Game::LUT_CONTRAST:
+		currentLUT = &contrastLUT;
+		break;
+	case Game::LUT_SEPIA:
+		currentLUT = &sepiaLUT;
+		break;
 	default:
 		break;
 	}

@@ -98,6 +98,8 @@ private:
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
 
+	void changeColorCorrection(LUT_MODE);
+
 
 
 private:
@@ -162,6 +164,7 @@ private:
 
 	LUT contrastLUT;
 	LUT sepiaLUT;
+	LUT* currentLUT;
 	LUT_MODE colorCorrection;
 
 	float outlineWidth = 4.0;
@@ -202,7 +205,8 @@ private:
 	// Bloom Controls
 	glm::vec4 bloomThreshold = glm::vec4(0.4f);
 	int numBlurPasses = 4;
-	bool bloomToggle = false;
+	bool bloomToggle = true;
+	bool depthToggle = false;
 
 	// For Toggling
 	bool  ambientToggle = true;
