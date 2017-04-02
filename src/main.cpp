@@ -466,6 +466,7 @@ void initializeScene()
 	t1 = std::chrono::high_resolution_clock::now();
 
 	std::string soundPath = "assets/media/";
+	//soundTemplates[""] = Sound(soundPath + ".wav", false);
 
 	// Menu sounds
 	soundTemplates["m_mainMenu"] = Sound(soundPath + "MenuTheme.wav");
@@ -490,8 +491,8 @@ void initializeScene()
 	soundTemplates["s_bombExplosion7"] = Sound(soundPath + "bomb sounds/bomb_7.wav", false);
 	soundTemplates["s_bombExplosion8"] = Sound(soundPath + "bomb sounds/bomb_8.wav", false);
 
-	soundTemplates["s_damage1"] = Sound(soundPath + "Hit sounds/red_hit.wav", false);
-	soundTemplates["s_damage2"] = Sound(soundPath + "Hit sounds/blue_hit.wav", false);
+	soundTemplates["s_damage1"] = Sound(soundPath + "Hit sounds/blue_hit.wav", false);
+	soundTemplates["s_damage2"] = Sound(soundPath + "Hit sounds/red_hit.wav", false);
 	soundTemplates["s_damage3"] = Sound(soundPath + "Hit sounds/green_hit.wav", false);
 	soundTemplates["s_damage4"] = Sound(soundPath + "Hit sounds/yellow_hit.wav", false);
 
@@ -500,36 +501,25 @@ void initializeScene()
 	soundTemplates["s_footstep3"] = Sound(soundPath + "bot_walk3.wav", true);
 	soundTemplates["s_footstep4"] = Sound(soundPath + "bot_walk4.wav", true);
 
-	soundTemplates["s_footstep1"] = Sound(soundPath + "bot_walk1.wav", true);
-	soundTemplates["s_footstep2"] = Sound(soundPath + "bot_walk2.wav", true);
-	soundTemplates["s_footstep3"] = Sound(soundPath + "bot_walk3.wav", true);
-	soundTemplates["s_footstep4"] = Sound(soundPath + "bot_walk4.wav", true);
-
-	soundTemplates["d_ready1_1"] = Sound(soundPath + "Bombot Dialogue/red_ready_1.wav", false);
-	soundTemplates["d_ready2_1"] = Sound(soundPath + "Bombot Dialogue/blue_ready_1.wav", false);
+	soundTemplates["d_ready1_1"] = Sound(soundPath + "Bombot Dialogue/blue_ready_1.wav", false);
+	soundTemplates["d_ready2_1"] = Sound(soundPath + "Bombot Dialogue/red_ready_1.wav", false);
 	soundTemplates["d_ready3_1"] = Sound(soundPath + "Bombot Dialogue/green_ready_1.wav", false);
 	soundTemplates["d_ready4_1"] = Sound(soundPath + "Bombot Dialogue/yellow_ready_1.wav", false);
 
-	soundTemplates["d_ready1_2"] = Sound(soundPath + "Bombot Dialogue/red_ready_2.wav", false);
-	soundTemplates["d_ready2_2"] = Sound(soundPath + "Bombot Dialogue/blue_ready_2.wav", false);
+	soundTemplates["d_ready1_2"] = Sound(soundPath + "Bombot Dialogue/blue_ready_2.wav", false);
+	soundTemplates["d_ready2_2"] = Sound(soundPath + "Bombot Dialogue/red_ready_2.wav", false);
 	soundTemplates["d_ready3_2"] = Sound(soundPath + "Bombot Dialogue/green_ready_2.wav", false);
 	soundTemplates["d_ready4_2"] = Sound(soundPath + "Bombot Dialogue/yellow_ready_2.wav", false);
 
-	soundTemplates["d_win1_1"] = Sound(soundPath + "Bombot Dialogue/red_win_1.wav", false);
-	soundTemplates["d_win2_1"] = Sound(soundPath + "Bombot Dialogue/blue_win_1.wav", false);
+	soundTemplates["d_win1_1"] = Sound(soundPath + "Bombot Dialogue/blue_win_1.wav", false);
+	soundTemplates["d_win2_1"] = Sound(soundPath + "Bombot Dialogue/red_win_1.wav", false);
 	soundTemplates["d_win3_1"] = Sound(soundPath + "Bombot Dialogue/green_win_1.wav", false);
 	soundTemplates["d_win4_1"] = Sound(soundPath + "Bombot Dialogue/yellow_win_1.wav", false);
 
-	soundTemplates["d_win1_2"] = Sound(soundPath + "Bombot Dialogue/red_win_2.wav", false);
-	soundTemplates["d_win2_2"] = Sound(soundPath + "Bombot Dialogue/blue_win_2.wav", false);
+	soundTemplates["d_win1_2"] = Sound(soundPath + "Bombot Dialogue/blue_win_2.wav", false);
+	soundTemplates["d_win2_2"] = Sound(soundPath + "Bombot Dialogue/red_win_2.wav", false);
 	soundTemplates["d_win3_2"] = Sound(soundPath + "Bombot Dialogue/green_win_2.wav", false);
 	soundTemplates["d_win4_2"] = Sound(soundPath + "Bombot Dialogue/yellow_win_2.wav", false);
-
-	
-	
-	//soundTemplates[""] = Sound(soundPath + ".wav", false);
-
-
 
 	Sound::sys.update();
 
