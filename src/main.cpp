@@ -690,7 +690,7 @@ void initializeScene()
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
 	gameobjects["crate"]->setScale(glm::vec3(1.6));
 	obstacles.push_back(gameobjects["crate"]);
-	
+
 	gameobjects["crate2"] = std::make_shared<GameObject>(
 		glm::vec3(15.0f, -20.0f, 2.0f), crateMesh, defaultMaterial, crateTexMap);
 	gameobjects["crate2"]->setScale(glm::vec3(1.3));
@@ -704,198 +704,202 @@ void initializeScene()
 	//gameobjects["palmtree"] = std::make_shared<GameObject>(
 	//	glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
 
+	// A Star
+	/*
+	{
+		//////////////////////////////////A STAR BEGIN ///////////////////////////////////////////
+		//gameobjects["EndNode"] = std::make_shared<GameObject>(
+		//	aStar["EndNode"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		//gameobjects["EndNode"]->setScale(glm::vec3(0.6));
 
-	//////////////////////////////////A STAR BEGIN ///////////////////////////////////////////
-	//gameobjects["EndNode"] = std::make_shared<GameObject>(
-	//	aStar["EndNode"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	//gameobjects["EndNode"]->setScale(glm::vec3(0.6));
+		//first row of nodes
+		gameobjects["onethree"] = std::make_shared<GameObject>(
+			aStar["onethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["onethree"]->setScale(glm::vec3(0.6));
 
-	//first row of nodes
-	gameobjects["onethree"] = std::make_shared<GameObject>(
-		aStar["onethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["onethree"]->setScale(glm::vec3(0.6));
+		gameobjects["onefour"] = std::make_shared<GameObject>(
+			aStar["onefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["onefour"]->setScale(glm::vec3(0.6));
 
-	gameobjects["onefour"] = std::make_shared<GameObject>(
-		aStar["onefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["onefour"]->setScale(glm::vec3(0.6));
+		gameobjects["onefive"] = std::make_shared<GameObject>(
+			aStar["onefive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["onefive"]->setScale(glm::vec3(0.6));
 
-	gameobjects["onefive"] = std::make_shared<GameObject>(
-		aStar["onefive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["onefive"]->setScale(glm::vec3(0.6));
+		gameobjects["onesix"] = std::make_shared<GameObject>(
+			aStar["onesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["onesix"]->setScale(glm::vec3(0.6));
 
-	gameobjects["onesix"] = std::make_shared<GameObject>(
-		aStar["onesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["onesix"]->setScale(glm::vec3(0.6));
+		//second row of nodes
+		gameobjects["twoone"] = std::make_shared<GameObject>(
+			aStar["twoone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twoone"]->setScale(glm::vec3(0.6));
 
-	//second row of nodes
-	gameobjects["twoone"] = std::make_shared<GameObject>(
-		aStar["twoone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["twoone"]->setScale(glm::vec3(0.6));
+		gameobjects["twotwo"] = std::make_shared<GameObject>(
+			aStar["twotwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twotwo"]->setScale(glm::vec3(0.6));
 
-	gameobjects["twotwo"] = std::make_shared<GameObject>(
-		aStar["twotwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["twotwo"]->setScale(glm::vec3(0.6));
+		gameobjects["twothree"] = std::make_shared<GameObject>(
+			aStar["twothree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twothree"]->setScale(glm::vec3(0.6));
 
-	gameobjects["twothree"] = std::make_shared<GameObject>(
-		aStar["twothree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["twothree"]->setScale(glm::vec3(0.6));
+		gameobjects["twosix"] = std::make_shared<GameObject>(
+			aStar["twosix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twosix"]->setScale(glm::vec3(0.6));
 
-	gameobjects["twosix"] = std::make_shared<GameObject>(
-		aStar["twosix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["twosix"]->setScale(glm::vec3(0.6));
+		gameobjects["twoseven"] = std::make_shared<GameObject>(
+			aStar["twoseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twoseven"]->setScale(glm::vec3(0.6));
 
-	gameobjects["twoseven"] = std::make_shared<GameObject>(
-		aStar["twoseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["twoseven"]->setScale(glm::vec3(0.6));
+		gameobjects["twoeight"] = std::make_shared<GameObject>(
+			aStar["twoeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twoeight"]->setScale(glm::vec3(0.6));
 
-	gameobjects["twoeight"] = std::make_shared<GameObject>(
-		aStar["twoeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["twoeight"]->setScale(glm::vec3(0.6));
+		//third row
+		gameobjects["threeone"] = std::make_shared<GameObject>(
+			aStar["threeone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threeone"]->setScale(glm::vec3(0.6));
 
-	//third row
-	gameobjects["threeone"] = std::make_shared<GameObject>(
-		aStar["threeone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["threeone"]->setScale(glm::vec3(0.6));
+		gameobjects["threetwo"] = std::make_shared<GameObject>(
+			aStar["threetwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threetwo"]->setScale(glm::vec3(0.6));
 
-	gameobjects["threetwo"] = std::make_shared<GameObject>(
-		aStar["threetwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["threetwo"]->setScale(glm::vec3(0.6));
+		gameobjects["threethree"] = std::make_shared<GameObject>(
+			aStar["threethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threethree"]->setScale(glm::vec3(0.6));
 
-	gameobjects["threethree"] = std::make_shared<GameObject>(
-		aStar["threethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["threethree"]->setScale(glm::vec3(0.6));
+		gameobjects["threefour"] = std::make_shared<GameObject>(
+			aStar["threefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threefour"]->setScale(glm::vec3(0.6));
 
-	gameobjects["threefour"] = std::make_shared<GameObject>(
-		aStar["threefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["threefour"]->setScale(glm::vec3(0.6));
+		gameobjects["threefive"] = std::make_shared<GameObject>(
+			aStar["threefive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threefive"]->setScale(glm::vec3(0.6));
 
-	gameobjects["threefive"] = std::make_shared<GameObject>(
-		aStar["threefive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["threefive"]->setScale(glm::vec3(0.6));
+		gameobjects["threesix"] = std::make_shared<GameObject>(
+			aStar["threesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threesix"]->setScale(glm::vec3(0.6));
 
-	gameobjects["threesix"] = std::make_shared<GameObject>(
-		aStar["threesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["threesix"]->setScale(glm::vec3(0.6));
+		gameobjects["threeeight"] = std::make_shared<GameObject>(
+			aStar["threeeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threeeight"]->setScale(glm::vec3(0.6));
 
-	gameobjects["threeeight"] = std::make_shared<GameObject>(
-		aStar["threeeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["threeeight"]->setScale(glm::vec3(0.6));
+		//fourth row
+		gameobjects["fourone"] = std::make_shared<GameObject>(
+			aStar["fourone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourone"]->setScale(glm::vec3(0.6));
 
-	//fourth row
-	gameobjects["fourone"] = std::make_shared<GameObject>(
-		aStar["fourone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fourone"]->setScale(glm::vec3(0.6));
+		gameobjects["fourthree"] = std::make_shared<GameObject>(
+			aStar["fourthree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourthree"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fourthree"] = std::make_shared<GameObject>(
-		aStar["fourthree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fourthree"]->setScale(glm::vec3(0.6));
+		gameobjects["fourfour"] = std::make_shared<GameObject>(
+			aStar["fourfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourfour"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fourfour"] = std::make_shared<GameObject>(
-		aStar["fourfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fourfour"]->setScale(glm::vec3(0.6));
+		gameobjects["fourfive"] = std::make_shared<GameObject>(
+			aStar["fourfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourfive"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fourfive"] = std::make_shared<GameObject>(
-		aStar["fourfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fourfive"]->setScale(glm::vec3(0.6));
+		gameobjects["foursix"] = std::make_shared<GameObject>(
+			aStar["foursix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["foursix"]->setScale(glm::vec3(0.6));
 
-	gameobjects["foursix"] = std::make_shared<GameObject>(
-		aStar["foursix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["foursix"]->setScale(glm::vec3(0.6));
+		gameobjects["fourseven"] = std::make_shared<GameObject>(
+			aStar["fourseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourseven"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fourseven"] = std::make_shared<GameObject>(
-		aStar["fourseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fourseven"]->setScale(glm::vec3(0.6));
+		gameobjects["foureight"] = std::make_shared<GameObject>(
+			aStar["foureight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["foureight"]->setScale(glm::vec3(0.6));
 
-	gameobjects["foureight"] = std::make_shared<GameObject>(
-		aStar["foureight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["foureight"]->setScale(glm::vec3(0.6));
+		//fifth row
+		gameobjects["fiveone"] = std::make_shared<GameObject>(
+			aStar["fiveone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fiveone"]->setScale(glm::vec3(0.6));
 
-	//fifth row
-	gameobjects["fiveone"] = std::make_shared<GameObject>(
-		aStar["fiveone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fiveone"]->setScale(glm::vec3(0.6));
+		gameobjects["fivetwo"] = std::make_shared<GameObject>(
+			aStar["fivetwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fivetwo"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fivetwo"] = std::make_shared<GameObject>(
-		aStar["fivetwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fivetwo"]->setScale(glm::vec3(0.6));
+		gameobjects["fivethree"] = std::make_shared<GameObject>(
+			aStar["fivethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fivethree"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fivethree"] = std::make_shared<GameObject>(
-		aStar["fivethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fivethree"]->setScale(glm::vec3(0.6));
+		gameobjects["fivefour"] = std::make_shared<GameObject>(
+			aStar["fivefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fivefour"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fivefour"] = std::make_shared<GameObject>(
-		aStar["fivefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fivefour"]->setScale(glm::vec3(0.6));
+		gameobjects["fivesix"] = std::make_shared<GameObject>(
+			aStar["fivesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fivesix"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fivesix"] = std::make_shared<GameObject>(
-		aStar["fivesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fivesix"]->setScale(glm::vec3(0.6));
+		gameobjects["fiveseven"] = std::make_shared<GameObject>(
+			aStar["fiveseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fiveseven"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fiveseven"] = std::make_shared<GameObject>(
-		aStar["fiveseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fiveseven"]->setScale(glm::vec3(0.6));
+		gameobjects["fiveeight"] = std::make_shared<GameObject>(
+			aStar["fiveeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fiveeight"]->setScale(glm::vec3(0.6));
 
-	gameobjects["fiveeight"] = std::make_shared<GameObject>(
-		aStar["fiveeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["fiveeight"]->setScale(glm::vec3(0.6));
+		//sixth row
+		gameobjects["sixone"] = std::make_shared<GameObject>(
+			aStar["sixone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixone"]->setScale(glm::vec3(0.6));
 
-	//sixth row
-	gameobjects["sixone"] = std::make_shared<GameObject>(
-		aStar["sixone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sixone"]->setScale(glm::vec3(0.6));
+		gameobjects["sixthree"] = std::make_shared<GameObject>(
+			aStar["sixthree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixthree"]->setScale(glm::vec3(0.6));
 
-	gameobjects["sixthree"] = std::make_shared<GameObject>(
-		aStar["sixthree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sixthree"]->setScale(glm::vec3(0.6));
+		gameobjects["sixfour"] = std::make_shared<GameObject>(
+			aStar["sixfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixfour"]->setScale(glm::vec3(0.6));
 
-	gameobjects["sixfour"] = std::make_shared<GameObject>(
-		aStar["sixfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sixfour"]->setScale(glm::vec3(0.6));
+		gameobjects["sixfive"] = std::make_shared<GameObject>(
+			aStar["sixfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixfive"]->setScale(glm::vec3(0.6));
 
-	gameobjects["sixfive"] = std::make_shared<GameObject>(
-		aStar["sixfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sixfive"]->setScale(glm::vec3(0.6));
+		gameobjects["sixsix"] = std::make_shared<GameObject>(
+			aStar["sixsix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixsix"]->setScale(glm::vec3(0.6));
 
-	gameobjects["sixsix"] = std::make_shared<GameObject>(
-		aStar["sixsix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sixsix"]->setScale(glm::vec3(0.6));
+		gameobjects["sixeight"] = std::make_shared<GameObject>(
+			aStar["sixeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixeight"]->setScale(glm::vec3(0.6));
 
-	gameobjects["sixeight"] = std::make_shared<GameObject>(
-		aStar["sixeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sixeight"]->setScale(glm::vec3(0.6));
+		//seventh row
+		gameobjects["sevenone"] = std::make_shared<GameObject>(
+			aStar["sevenone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevenone"]->setScale(glm::vec3(0.6));
 
-	//seventh row
-	gameobjects["sevenone"] = std::make_shared<GameObject>(
-		aStar["sevenone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sevenone"]->setScale(glm::vec3(0.6));
+		gameobjects["seventwo"] = std::make_shared<GameObject>(
+			aStar["seventwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["seventwo"]->setScale(glm::vec3(0.6));
 
-	gameobjects["seventwo"] = std::make_shared<GameObject>(
-		aStar["seventwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["seventwo"]->setScale(glm::vec3(0.6));
+		gameobjects["seventhree"] = std::make_shared<GameObject>(
+			aStar["seventhree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["seventhree"]->setScale(glm::vec3(0.6));
 
-	gameobjects["seventhree"] = std::make_shared<GameObject>(
-		aStar["seventhree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["seventhree"]->setScale(glm::vec3(0.6));
+		gameobjects["sevenfour"] = std::make_shared<GameObject>(
+			aStar["sevenfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevenfour"]->setScale(glm::vec3(0.6));
 
-	gameobjects["sevenfour"] = std::make_shared<GameObject>(
-		aStar["sevenfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sevenfour"]->setScale(glm::vec3(0.6));
+		gameobjects["sevenfive"] = std::make_shared<GameObject>(
+			aStar["sevenfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevenfive"]->setScale(glm::vec3(0.6));
 
-	gameobjects["sevenfive"] = std::make_shared<GameObject>(
-		aStar["sevenfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sevenfive"]->setScale(glm::vec3(0.6));
+		gameobjects["sevensix"] = std::make_shared<GameObject>(
+			aStar["sevensix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevensix"]->setScale(glm::vec3(0.6));
 
-	gameobjects["sevensix"] = std::make_shared<GameObject>(
-		aStar["sevensix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sevensix"]->setScale(glm::vec3(0.6));
+		gameobjects["sevenseven"] = std::make_shared<GameObject>(
+			aStar["sevenseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevenseven"]->setScale(glm::vec3(0.6));
 
-	gameobjects["sevenseven"] = std::make_shared<GameObject>(
-		aStar["sevenseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["sevenseven"]->setScale(glm::vec3(0.6));
-
-	gameobjects["seveneight"] = std::make_shared<GameObject>(
-		aStar["seveneight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
-	gameobjects["seveneight"]->setScale(glm::vec3(0.6));
+		gameobjects["seveneight"] = std::make_shared<GameObject>(
+			aStar["seveneight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["seveneight"]->setScale(glm::vec3(0.6));
+	}
+	*/
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////	Players
