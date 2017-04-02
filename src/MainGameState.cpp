@@ -152,7 +152,7 @@ void Game::setPaused(int a_paused)
 		//resetPlayers();
 		makePlayersInactive();
 		bombManager->clearAllBombs();
-		currentGameState = READYUP;
+		changeState(READYUP);
 		menuDelay = 0.3f;
 	}
 }
