@@ -94,8 +94,8 @@ MainMenu::MainMenu(std::shared_ptr<Menu> _atlas, Controller* _con, std::map<std:
 	con = _con;
 	soundTemplates = _soundTemplates;
 
-//	m_mainMenu = Sound(soundTemplates->at("m_mainMenu"));
-//	m_mainMenu.setPosition(glm::vec3(23.0f, 45.0f, 25.0f));
+	m_mainMenu = Sound(soundTemplates->at("m_mainMenu"));
+	m_mainMenu.setPosition(glm::vec3(23.0f, 45.0f, 25.0f));
 //	//m_mainMenu.setRolloff(true, 0.5, 20.0f);
 	s_menuSelect = Sound(soundTemplates->at("s_menuSelect"));
 	s_menuSelect.setPosition(glm::vec3(23.0f, 45.0f, 25.0f));
@@ -113,6 +113,6 @@ void MainMenu::setPaused(int _state)
 		atlas->setSpot(glm::vec2(0, position));
 		accept = 0;
 
-		m_mainMenu.play();
+		//m_mainMenu.play();
 	}
 }

@@ -363,10 +363,10 @@ void initializeScene()
 	std::string explosionTex4 = "Assets/img/ex-4.png";
 	std::shared_ptr<Texture> explosionTexMap4 = std::make_shared<Texture>(explosionTex4, explosionTex4, 1.0f);
 
-	std::string readyTex1 = "Assets/img/left.png";
+	std::string readyTex1 = "Assets/img/rg.png";
 	std::shared_ptr<Texture> readyTexMap1 = std::make_shared<Texture>(readyTex1, readyTex1, 1.0f);
 
-	std::string readyTex2 = "Assets/img/right.png";
+	std::string readyTex2 = "Assets/img/yb.png";
 	std::shared_ptr<Texture> readyTexMap2 = std::make_shared<Texture>(readyTex2, readyTex2, 1.0f);
 
 	std::string winTex = "Assets/img/winAssets.png";
@@ -757,7 +757,7 @@ void initializeScene()
 	botwallBody = std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
 	rightwallBody	= std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
 	botleftBody		= std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
-	topwallBody = std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
+	topwallBody = std::make_unique<RigidBody>();
 	lampBody = std::make_unique<RigidBody>();
 	ring1Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
 	ring2Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);

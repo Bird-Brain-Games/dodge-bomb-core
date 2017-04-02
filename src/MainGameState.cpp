@@ -241,8 +241,6 @@ void Game::updateReadyPass(float dt)
 
 void Game::update(float dt)
 {
-	Sound::sys.update();
-
 	if (currentGameState == READYUP)
 	{
 		for (auto it : *readyUpRings)
@@ -387,6 +385,8 @@ void Game::update(float dt)
 			}
 		}
 	}
+
+	Sound::sys.update();
 }
 
 
