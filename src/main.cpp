@@ -30,6 +30,8 @@
 #include "MainMenuState.h"
 #include "MainGameState.h"
 
+#include "PathNode.h"
+
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
 const int FRAME_DELAY = 1000 / FRAMES_PER_SECOND; // Milliseconds per frame
@@ -53,6 +55,7 @@ Pause* pause;
 
 glm::vec3 position;
 float movementSpeed = 5.0f;
+bool traverse;
 
 Camera playerCamera; // the camera you move around with wasd
 Camera shadowCamera; // Camera for the shadow map
@@ -64,6 +67,16 @@ std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
 std::vector<std::shared_ptr<GameObject>> obstacles;
 std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
+
+// A* nodes
+std::map<std::string, PathNode *> aStar;
+std::map<std::string, PathNode *> openList;
+std::map<std::string, PathNode *> emptyList;
+std::map<std::string, PathNode *> closedList;
+std::map<std::string, PathNode *> pathToWalk;
+std::map<std::string, PathNode *> * aStarPointer;
+PathNode * nextPath;
+PathNode * endNode;
 
 // Materials
 std::map<std::string, std::shared_ptr<Material>> materials;
@@ -97,7 +110,7 @@ void initializeShaders()
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
-		f_noLighting, f_toon, f_sobel, f_shadow, f_colorCorrection;
+		f_noLighting, f_toon, f_sobel, f_shadow, f_colorCorrection, f_node;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
@@ -109,11 +122,14 @@ void initializeShaders()
 	f_sobel.loadShaderFromFile(shaderPath + "sobel_f.glsl", GL_FRAGMENT_SHADER);
 	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);
 	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);
+	f_node.loadShaderFromFile(shaderPath + "node.frag", GL_FRAGMENT_SHADER);
+
 
 	// Geometry Shaders
-	Shader g_quad, g_menu;
+	Shader g_quad, g_menu, g_node;
 	g_quad.loadShaderFromFile(shaderPath + "quad.geom", GL_GEOMETRY_SHADER);
 	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
+	g_node.loadShaderFromFile(shaderPath + "node.geom", GL_GEOMETRY_SHADER);
 
 	// No Lighting material
 	materials["noLighting"] = std::make_shared<Material>("noLighting");
@@ -152,6 +168,13 @@ void initializeShaders()
 	materials["menu"]->shader->attachShader(f_texColor);
 	materials["menu"]->shader->attachShader(g_menu);
 	materials["menu"]->shader->linkProgram();
+
+	// Material used for node drawing
+	materials["node"] = std::make_shared<Material>("menu");
+	materials["node"]->shader->attachShader(v_passThru);
+	materials["node"]->shader->attachShader(f_node);
+	materials["node"]->shader->attachShader(g_node);
+	materials["node"]->shader->linkProgram();
 
 	// Unlit texture material
 	materials["unlitTexture"] = std::make_shared<Material>("unlitTexture");
@@ -200,8 +223,401 @@ void initializeShaders()
 	materials["shadow"]->shader->linkProgram();
 }
 
+void initializePathNodes()
+{
+	//PathNode * end = new PathNode(glm::vec3(23.0f, 40.0f, 1.0f));
+
+	//dummies
+	PathNode * dummy1 = new PathNode(glm::vec3(500.0f, 40.0f, -300.0f),5, true);
+	PathNode * dummy2 = new PathNode(glm::vec3(500.0f, 40.0f, -300.0f),4, true);
+	PathNode * dummy3 = new PathNode(glm::vec3(500.0f, 40.0f, -300.0f),5, true);
+	PathNode * dummy4 = new PathNode(glm::vec3(500.0f, 40.0f, -300.0f),5, true);
+	PathNode * dummy5 = new PathNode(glm::vec3(500.0f, 40.0f, -300.0f),1, true);
+	PathNode * dummy6 = new PathNode(glm::vec3(500.0f, 40.0f, -300.0f),3, true);
+	PathNode * dummy7 = new PathNode(glm::vec3(500.0f, 40.0f, -300.0f),2, true);
+	
+	//first row
+	PathNode * onethree = new PathNode(glm::vec3(5.0f, 40.0f, -30.0f), 8);
+	PathNode * onefour = new PathNode(glm::vec3(15.0f, 40.0f, -30.0f), 7);
+	PathNode * onefive = new PathNode(glm::vec3(25.0f, 40.0f, -30.0f), 6);
+	PathNode * onesix = new PathNode(glm::vec3(35.0f, 40.0f, -30.0f), 7);
+
+	//second row
+	PathNode * twoone = new PathNode(glm::vec3(-15.0f, 40.0f, -19.0f), 8);
+	PathNode * twotwo = new PathNode(glm::vec3(-5.0f, 40.0f, -19.0f), 7);
+	PathNode * twothree = new PathNode(glm::vec3(5.0f, 40.0f, -19.0f), 6);
+	//dummy1
+	//dummy2
+	PathNode * twosix = new PathNode(glm::vec3(35.0f, 40.0f, -19.0f), 5);
+	PathNode * twoseven = new PathNode(glm::vec3(45.0f, 40.0f, -19.0f), 6);
+	PathNode * twoeight = new PathNode(glm::vec3(55.0f, 40.0f, -19.0f), 7);
+
+	//third row
+	PathNode * threeone = new PathNode(glm::vec3(-15.0f, 40.0f, -10.0f), 7);
+	PathNode * threetwo = new PathNode(glm::vec3(-5.0f, 40.0f, -10.0f), 6);
+	PathNode * threethree = new PathNode(glm::vec3(5.0f, 40.0f, -10.0f), 5);
+	PathNode * threefour = new PathNode(glm::vec3(15.0f, 40.0f, -10.0f), 4);
+	PathNode * threefive = new PathNode(glm::vec3(25.0f, 40.0f, -10.0f), 3);
+	PathNode * threesix = new PathNode(glm::vec3(35.0f, 40.0f, -10.0f), 4);
+	//dummy3
+	PathNode * threeeight = new PathNode(glm::vec3(55.0f, 40.0f, -10.0f), 6);
+
+	//fourth row
+	PathNode * fourone = new PathNode(glm::vec3(-15.0f, 40.0f, 0.0f), 6);
+	//dummy4
+	PathNode * fourthree = new PathNode(glm::vec3(5.0f, 40.0f, 0.0f), 4);
+	PathNode * fourfour = new PathNode(glm::vec3(15.0f, 40.0f, 0.0f), 3);
+	PathNode * fourfive = new PathNode(glm::vec3(25.0f, 40.0f, 0.0f), 2);
+	PathNode * foursix = new PathNode(glm::vec3(35.0f, 40.0f, 0.0f), 3);
+	PathNode * fourseven = new PathNode(glm::vec3(45.0f, 40.0f, 0.0f), 4);
+	PathNode * foureight = new PathNode(glm::vec3(55.0f, 40.0f, 0.0f), 5);
+
+	//fifth row
+	PathNode * fiveone = new PathNode(glm::vec3(-15.0f, 40.0f, 10.0f), 5);
+	PathNode * fivetwo = new PathNode(glm::vec3(-5.0f, 40.0f, 10.0f), 4);
+	PathNode * fivethree = new PathNode(glm::vec3(5.0f, 40.0f, 10.0f), 3);
+	PathNode * fivefour = new PathNode(glm::vec3(15.0f, 40.0f, 10.0f), 2);
+	//dummy5
+	PathNode * fivesix = new PathNode(glm::vec3(35.0f, 40.0f, 10.0f), 2);
+	PathNode * fiveseven = new PathNode(glm::vec3(45.0f, 40.0f, 10.0f), 3);
+	PathNode * fiveeight = new PathNode(glm::vec3(55.0f, 40.0f, 10.0f), 4);
+
+	//sixth row
+	PathNode * sixone = new PathNode(glm::vec3(-15.0f, 40.0f, 20.0f), 4);
+	//dummy6
+	PathNode * sixthree = new PathNode(glm::vec3(5.0f, 40.0f, 20.0f), 2);
+	PathNode * sixfour = new PathNode(glm::vec3(15.0f, 40.0f, 20.0f), 1);
+	PathNode * sixfive = new PathNode(glm::vec3(25.0f, 40.0f, 20.0f), 0);
+	PathNode * sixsix = new PathNode(glm::vec3(35.0f, 40.0f, 20.0f), 1);
+	//dummy7
+	PathNode * sixeight = new PathNode(glm::vec3(55.0f, 40.0f, 20.0f), 3);
+
+	//seventh row
+	PathNode * sevenone = new PathNode(glm::vec3(-15.0f, 40.0f, 30.0f), 5);
+	PathNode * seventwo = new PathNode(glm::vec3(-5.0f, 40.0f, 30.0f), 4);
+	PathNode * seventhree = new PathNode(glm::vec3(5.0f, 40.0f, 30.0f), 3);
+	PathNode * sevenfour = new PathNode(glm::vec3(15.0f, 40.0f, 30.0f), 2);
+	PathNode * sevenfive = new PathNode(glm::vec3(25.0f, 40.0f, 30.0f), 1);
+	PathNode * sevensix = new PathNode(glm::vec3(35.0f, 40.0f, 30.0f), 2);
+	PathNode * sevenseven = new PathNode(glm::vec3(45.0f, 40.0f, 30.0f), 3);
+	PathNode * seveneight = new PathNode(glm::vec3(55.0f, 40.0f, 30.0f), 4);
+
+	//aStar["EndNode"]		= end;
+
+	//Dummies
+	aStar["dummy1"] = dummy1;
+	aStar["dummy2"] = dummy2;
+	aStar["dummy3"] = dummy3;
+	aStar["dummy4"] = dummy4;
+	aStar["dummy5"] = dummy5;
+	aStar["dummy6"] = dummy6;
+	aStar["dummy7"] = dummy7;
+
+	//first row
+	aStar["onethree"]		= onethree;
+	aStar["onefour"]		= onefour;
+	aStar["onefive"]		= onefive;
+	aStar["onesix"]			= onesix;
+
+	//second row
+	aStar["twoone"]			= twoone;
+	aStar["twotwo"]			= twotwo;
+	aStar["twothree"]		= twothree;
+	aStar["twosix"]			= twosix;
+	aStar["twoseven"]		= twoseven;
+	aStar["twoeight"]		= twoeight;
+
+	//third row
+	aStar["threeone"]		= threeone;
+	aStar["threetwo"]		= threetwo;
+	aStar["threethree"]		= threethree;
+	aStar["threefour"]		= threefour;
+	aStar["threefive"]		= threefive;
+	aStar["threesix"]		= threesix;
+	aStar["threeeight"]		= threeeight;
+
+	//fourth row
+	aStar["fourone"]		= fourone;
+	aStar["fourthree"]		= fourthree;
+	aStar["fourfour"]		= fourfour;
+	aStar["fourfive"]		= fourfive;
+	aStar["foursix"]		= foursix;
+	aStar["fourseven"]		= fourseven;
+	aStar["foureight"]		= foureight;
+
+	//fifth row
+	aStar["fiveone"]		= fiveone;
+	aStar["fivetwo"]		= fivetwo;
+	aStar["fivethree"]		= fivethree;
+	aStar["fivefour"]		= fivefour;
+	aStar["fivesix"]		= fivesix;
+	aStar["fiveseven"]		= fiveseven;
+	aStar["fiveeight"]		= fiveeight;
+
+	//sixth row
+	aStar["sixone"]			= sixone;
+	aStar["sixthree"]		= sixthree;
+	aStar["sixfour"]		= sixfour;
+	aStar["sixfive"]		= sixfive;
+	aStar["sixsix"]			= sixsix;
+	aStar["sixeight"]		= sixeight;
+
+	//seventh row
+	aStar["sevenone"]		= sevenone;
+	aStar["seventwo"]		= seventwo;
+	aStar["seventhree"]		= seventhree;
+	aStar["sevenfour"]		= sevenfour;
+	aStar["sevenfive"]		= sevenfive;
+	aStar["sevensix"]		= sevensix;
+	aStar["sevenseven"]		= sevenseven;
+	aStar["seveneight"]		= seveneight;
+
+	// Init Connections
+	// Row One
+	aStar["onethree"]->addConnection(nullptr, aStar["onefour"], aStar["twothree"], nullptr);
+	aStar["onefour"]->addConnection(nullptr, aStar["onefive"], aStar["dummy1"], aStar["onethree"]);
+	aStar["onefive"]->addConnection(nullptr, aStar["onesix"], aStar["dummy2"], aStar["onefour"]);
+	aStar["onesix"]->addConnection(nullptr, nullptr, aStar["twosix"], aStar["onefive"]);
+
+	// Row Two
+	aStar["twoone"]->addConnection(nullptr, aStar["twotwo"], aStar["threeone"], nullptr);
+	aStar["twotwo"]->addConnection(nullptr, aStar["twothree"], aStar["threetwo"], aStar["twoone"]);
+	aStar["twothree"]->addConnection(aStar["onethree"], aStar["dummy1"], aStar["threethree"], aStar["twotwo"]);
+	aStar["dummy1"]->addConnection(aStar["onefour"], aStar["dummy2"], aStar["threefour"], aStar["twothree"]);
+	aStar["dummy2"]->addConnection(aStar["onefive"], aStar["twosix"], aStar["threefive"], aStar["dummy1"]);
+	aStar["twosix"]->addConnection(aStar["onesix"], aStar["twoseven"], aStar["threesix"], aStar["dummy2"]);
+	aStar["twoseven"]->addConnection(nullptr, aStar["twoeight"], aStar["dummy3"], aStar["twosix"]);
+	aStar["twoeight"]->addConnection(nullptr, nullptr, aStar["threeeight"], aStar["twoseven"]);
+
+	// Row Three
+	aStar["threeone"]->addConnection(aStar["twoone"], aStar["threetwo"], aStar["fourone"], nullptr);
+	aStar["threetwo"]->addConnection(aStar["twotwo"], aStar["threethree"], aStar["dummy4"], aStar["threeone"]);
+	aStar["threethree"]->addConnection(aStar["twothree"], aStar["threefour"], aStar["fourthree"], aStar["threetwo"]);
+	aStar["threefour"]->addConnection(aStar["dummy1"], aStar["threefive"], aStar["fourfour"], aStar["threethree"]);
+	aStar["threefive"]->addConnection(aStar["dummy2"], aStar["threesix"], aStar["fourfive"], aStar["threefour"]);
+	aStar["threesix"]->addConnection(aStar["twosix"], aStar["dummy3"], aStar["foursix"], aStar["threefive"]);
+	aStar["dummy3"]->addConnection(aStar["twoseven"], aStar["threeeight"], aStar["fourseven"], aStar["threesix"]);
+	aStar["threeeight"]->addConnection(aStar["twoeight"], nullptr, aStar["foureight"], aStar["dummy3"]);
+
+	// Row Four
+	aStar["fourone"]->addConnection(aStar["threeone"], aStar["dummy4"], aStar["fiveone"], nullptr);
+	aStar["dummy4"]->addConnection(aStar["threetwo"], aStar["fourthree"], aStar["fivetwo"], aStar["fourone"]);
+	aStar["fourthree"]->addConnection(aStar["threethree"], aStar["fourfour"], aStar["fivethree"], aStar["dummy4"]);
+	aStar["fourfour"]->addConnection(aStar["threefour"], aStar["fourfive"], aStar["fivefour"], aStar["fourthree"]);
+	aStar["fourfive"]->addConnection(aStar["threefive"], aStar["foursix"], aStar["dummy5"], aStar["fourfour"]);
+	aStar["foursix"]->addConnection(aStar["threesix"], aStar["fourseven"], aStar["fivesix"], aStar["fourfive"]);
+	aStar["fourseven"]->addConnection(aStar["dummy3"], aStar["foureight"], aStar["fiveseven"], aStar["foursix"]);
+	aStar["foureight"]->addConnection(aStar["threeeight"], nullptr, aStar["fiveeight"], aStar["fourseven"]);
+
+	// Row Five
+	aStar["fiveone"]->addConnection(aStar["fourone"], aStar["fivetwo"], aStar["sixone"], nullptr);
+	aStar["fivetwo"]->addConnection(aStar["dummy4"], aStar["fivethree"], aStar["dummy6"], aStar["fiveone"]);
+	aStar["fivethree"]->addConnection(aStar["fourthree"], aStar["fivefour"], aStar["sixthree"], aStar["fivetwo"]);
+	aStar["fivefour"]->addConnection(aStar["fourfour"], aStar["dummy5"], aStar["sixfour"], aStar["fivethree"]);
+	aStar["dummy5"]->addConnection(aStar["fourfive"], aStar["fivesix"], aStar["sixfive"], aStar["fivefour"]);
+	aStar["fivesix"]->addConnection(aStar["foursix"], aStar["fiveseven"], aStar["sixsix"], aStar["dummy5"]);
+	aStar["fiveseven"]->addConnection(aStar["fourseven"], aStar["fiveeight"], aStar["dummy7"], aStar["fivesix"]);
+	aStar["fiveeight"]->addConnection(aStar["foureight"], nullptr, aStar["sixeight"], aStar["fiveseven"]);
+
+	// Row Six
+	aStar["sixone"]->addConnection(aStar["fiveone"], aStar["dummy6"], aStar["sevenone"], nullptr);
+	aStar["dummy6"]->addConnection(aStar["fivetwo"], aStar["sixthree"], aStar["seventwo"], aStar["sixone"]);
+	aStar["sixthree"]->addConnection(aStar["fivethree"], aStar["sixfour"], aStar["seventhree"], aStar["dummy6"]);
+	aStar["sixfour"]->addConnection(aStar["fivefour"], aStar["sixfive"], aStar["sevenfour"], aStar["sixthree"]);
+	aStar["sixfive"]->addConnection(aStar["dummy5"], aStar["sixsix"], aStar["sevenfive"], aStar["sixfour"]);
+	aStar["sixsix"]->addConnection(aStar["fivesix"], aStar["dummy7"], aStar["sevensix"], aStar["sixfive"]);
+	aStar["dummy7"]->addConnection(aStar["fiveseven"], aStar["sixeight"], aStar["sevenseven"], aStar["sixsix"]);
+	aStar["sixeight"]->addConnection(aStar["fiveeight"], nullptr, aStar["seveneight"], aStar["dummy7"]);
+
+	// Row seven
+	aStar["sevenone"]->addConnection(aStar["sixone"], aStar["seventwo"], nullptr, nullptr);
+	aStar["seventwo"]->addConnection(aStar["dummy6"], aStar["seventhree"], nullptr, aStar["sevenone"]);
+	aStar["seventhree"]->addConnection(aStar["sixthree"], aStar["sevenfour"], nullptr, aStar["seventwo"]);
+	aStar["sevenfour"]->addConnection(aStar["sixfour"], aStar["sevenfive"], nullptr, aStar["seventhree"]);
+	aStar["sevenfive"]->addConnection(aStar["sixfive"], aStar["sevensix"], nullptr, aStar["sevenfour"]);
+	aStar["sevensix"]->addConnection(aStar["sixsix"], aStar["sevenseven"], nullptr, aStar["sevenfive"]);
+	aStar["sevenseven"]->addConnection(aStar["dummy7"], aStar["seveneight"], nullptr, aStar["sevensix"]);
+	aStar["seveneight"]->addConnection(aStar["sixeight"], nullptr, nullptr, aStar["sevenseven"]);
+
+	aStarPointer = &aStar;
+
+	std::cout << "Nodes loaded and connected" << std::endl;
+}
+
+std::string nodeName = "node";
+int nodeNum = 0;
+int addNum = 0;
+bool dupe = false;
+bool isconnected = false;
+
+template <typename T>
+T lerp(T d0, T d1, float t)
+{
+	return d0 * (1 - t) + d1 * t;
+}
+
+float lerptime = 0.0f;
+
+void addToList(std::map<std::string, PathNode *> list, std::map<std::string, PathNode *> addingList)
+{
+	for (auto itr = addingList.begin(); itr != addingList.end(); itr++)
+	{
+
+		for (auto closed = closedList.begin(); closed != closedList.end(); closed++)
+		{
+			if (itr->second == nullptr || itr->second == closed->second)
+			{
+				dupe = true;
+			}
+		}
+		if (!dupe && itr->second != nullptr)
+		{
+			openList[nodeName] = itr->second;
+		}
+		nodeNum++;
+		nodeName = ("node" + std::to_string(nodeNum));
+
+		dupe = false;
+	}
+}
+
+void findPath()
+{
+	openList = emptyList;
+	closedList = emptyList;
+	pathToWalk = emptyList;
+
+	//Target: sixfour
+	openList["start"] = players["bombot1"]->checkNodes(aStarPointer);
+	//addToList(openList, openList["start"]->connections);
+
+
+	while (openList.size() > 0)
+	{
+		for (auto itr = openList.begin(); itr != openList.end(); itr++)
+		{
+			if (nextPath == nullptr && itr->second->dummy == false)
+			{
+				nextPath = itr->second;
+			}
+			if (itr->second != nullptr && nextPath != nullptr && (nextPath->distanceToTarget > itr->second->distanceToTarget) && itr->second->dummy == false)
+			{
+				nextPath = itr->second;
+			}
+		}
+
+		addToList(openList, nextPath->connections);
+
+		for (auto itr = openList.begin(); itr != openList.end(); itr++)
+		{
+			if (itr->second == nextPath)
+			{
+				if (openList.size() > 1)
+				{
+					openList.erase(itr);
+					break;
+				}
+			}
+		}
+		nodeNum++;
+		closedList[nodeName] = nextPath;
+		nodeName = ("node" + std::to_string(nodeNum));
+
+		if (nextPath->distanceToTarget == 0)
+		{
+			endNode = nextPath;
+			openList = emptyList;
+		}
+
+		nextPath = nullptr;
+	}
+
+	nextPath = nullptr;
+
+
+		if (nextPath == nullptr)
+		{
+			nextPath = closedList.begin()->second;
+			nodeNum++;
+			nodeName = ("node" + std::to_string(nodeNum));
+			pathToWalk[nodeName] = nextPath;
+		}
+
+			while (nextPath->distanceToTarget != 0)
+			{
+				auto connect = nextPath->connections.begin();
+				connect != nextPath->connections.end(); 
+				for (int i = 0; i < 4; i++)
+				{
+					for (auto closed = closedList.begin(); closed != closedList.end(); closed++)
+					{
+						if (connect->second == closed->second)
+						{
+							isconnected = true;
+						}
+						if (isconnected && (nextPath->distanceToTarget >= closed->second->distanceToTarget) && (nextPath->pos != closed->second->pos))
+						{
+							nextPath = closed->second;
+						}
+						if (isconnected)
+						{
+							nodeNum++;
+							nodeName = ("node" + std::to_string(nodeNum));
+							pathToWalk[nodeName] = nextPath;
+							isconnected = false;
+							closedList.erase(closed);
+							break;
+						}
+						if (nextPath->distanceToTarget == 0)
+						{
+							break;
+						}
+					}
+					connect++;
+				}
+				
+		}
+			nodeNum++;
+	
+			static PathNode * eraser;
+			auto itr = pathToWalk.begin();
+			for (int i = 0; i < pathToWalk.size(); i++)
+			{
+				eraser = itr->second;
+				itr++;
+				if (itr->second == eraser)
+				{
+					pathToWalk.erase(itr);
+					itr = pathToWalk.begin();
+				}
+				
+			}
+}
+
+void traversePath(std::shared_ptr<Player> player, float dT)
+{
+	static auto pathItr = pathToWalk.begin();
+
+	if (!traverse)
+		pathItr = pathToWalk.begin();
+
+	if (lerptime >= 1.0f && pathItr != pathToWalk.end())
+	{
+		pathItr++;
+		lerptime = 0.0f;
+	}
+
+	// Player to start node
+	if (pathItr != pathToWalk.end())
+		player->setPosition(glm::vec3(lerp(player->getWorldPosition().x, pathItr->second->pos.x, dT), player->getWorldPosition().y, lerp(player->getWorldPosition().z, pathItr->second->pos.z, dT)));
+
+	lerptime += dT;
+}
+
 void initializeScene()
 {
+	initializePathNodes();
+
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	MESHES		///////////////////////////////
 	std::string meshPath = "Assets/obj/";
@@ -522,6 +938,7 @@ void initializeScene()
 		glm::vec3(23.f, 43.0f, 10.f), nullptr, defaultMaterial, nullptr);
 	gameobjects["cannonbox"]->setRotationAngleZ(68 * degToRad);
 	gameobjects["cannonbox"]->setScale(glm::vec3(1.7f));
+	obstacles.push_back(gameobjects["cannonbox"]);
 
 	gameobjects["crate"] = std::make_shared<GameObject>(
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
@@ -541,6 +958,198 @@ void initializeScene()
 	//gameobjects["palmtree"] = std::make_shared<GameObject>(
 	//	glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
 
+
+	//////////////////////////////////A STAR BEGIN ///////////////////////////////////////////
+	//gameobjects["EndNode"] = std::make_shared<GameObject>(
+	//	aStar["EndNode"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	//gameobjects["EndNode"]->setScale(glm::vec3(0.6));
+
+	//first row of nodes
+	gameobjects["onethree"] = std::make_shared<GameObject>(
+		aStar["onethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["onethree"]->setScale(glm::vec3(0.6));
+
+	gameobjects["onefour"] = std::make_shared<GameObject>(
+		aStar["onefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["onefour"]->setScale(glm::vec3(0.6));
+
+	gameobjects["onefive"] = std::make_shared<GameObject>(
+		aStar["onefive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["onefive"]->setScale(glm::vec3(0.6));
+
+	gameobjects["onesix"] = std::make_shared<GameObject>(
+		aStar["onesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["onesix"]->setScale(glm::vec3(0.6));
+
+	//second row of nodes
+	gameobjects["twoone"] = std::make_shared<GameObject>(
+		aStar["twoone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["twoone"]->setScale(glm::vec3(0.6));
+
+	gameobjects["twotwo"] = std::make_shared<GameObject>(
+		aStar["twotwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["twotwo"]->setScale(glm::vec3(0.6));
+
+	gameobjects["twothree"] = std::make_shared<GameObject>(
+		aStar["twothree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["twothree"]->setScale(glm::vec3(0.6));
+
+	gameobjects["twosix"] = std::make_shared<GameObject>(
+		aStar["twosix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["twosix"]->setScale(glm::vec3(0.6));
+
+	gameobjects["twoseven"] = std::make_shared<GameObject>(
+		aStar["twoseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["twoseven"]->setScale(glm::vec3(0.6));
+
+	gameobjects["twoeight"] = std::make_shared<GameObject>(
+		aStar["twoeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["twoeight"]->setScale(glm::vec3(0.6));
+
+	//third row
+	gameobjects["threeone"] = std::make_shared<GameObject>(
+		aStar["threeone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["threeone"]->setScale(glm::vec3(0.6));
+
+	gameobjects["threetwo"] = std::make_shared<GameObject>(
+		aStar["threetwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["threetwo"]->setScale(glm::vec3(0.6));
+
+	gameobjects["threethree"] = std::make_shared<GameObject>(
+		aStar["threethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["threethree"]->setScale(glm::vec3(0.6));
+
+	gameobjects["threefour"] = std::make_shared<GameObject>(
+		aStar["threefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["threefour"]->setScale(glm::vec3(0.6));
+
+	gameobjects["threefive"] = std::make_shared<GameObject>(
+		aStar["threefive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["threefive"]->setScale(glm::vec3(0.6));
+
+	gameobjects["threesix"] = std::make_shared<GameObject>(
+		aStar["threesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["threesix"]->setScale(glm::vec3(0.6));
+
+	gameobjects["threeeight"] = std::make_shared<GameObject>(
+		aStar["threeeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["threeeight"]->setScale(glm::vec3(0.6));
+
+	//fourth row
+	gameobjects["fourone"] = std::make_shared<GameObject>(
+		aStar["fourone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fourone"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fourthree"] = std::make_shared<GameObject>(
+		aStar["fourthree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fourthree"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fourfour"] = std::make_shared<GameObject>(
+		aStar["fourfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fourfour"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fourfive"] = std::make_shared<GameObject>(
+		aStar["fourfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fourfive"]->setScale(glm::vec3(0.6));
+
+	gameobjects["foursix"] = std::make_shared<GameObject>(
+		aStar["foursix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["foursix"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fourseven"] = std::make_shared<GameObject>(
+		aStar["fourseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fourseven"]->setScale(glm::vec3(0.6));
+
+	gameobjects["foureight"] = std::make_shared<GameObject>(
+		aStar["foureight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["foureight"]->setScale(glm::vec3(0.6));
+
+	//fifth row
+	gameobjects["fiveone"] = std::make_shared<GameObject>(
+		aStar["fiveone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fiveone"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fivetwo"] = std::make_shared<GameObject>(
+		aStar["fivetwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fivetwo"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fivethree"] = std::make_shared<GameObject>(
+		aStar["fivethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fivethree"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fivefour"] = std::make_shared<GameObject>(
+		aStar["fivefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fivefour"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fivesix"] = std::make_shared<GameObject>(
+		aStar["fivesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fivesix"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fiveseven"] = std::make_shared<GameObject>(
+		aStar["fiveseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fiveseven"]->setScale(glm::vec3(0.6));
+
+	gameobjects["fiveeight"] = std::make_shared<GameObject>(
+		aStar["fiveeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["fiveeight"]->setScale(glm::vec3(0.6));
+
+	//sixth row
+	gameobjects["sixone"] = std::make_shared<GameObject>(
+		aStar["sixone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sixone"]->setScale(glm::vec3(0.6));
+
+	gameobjects["sixthree"] = std::make_shared<GameObject>(
+		aStar["sixthree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sixthree"]->setScale(glm::vec3(0.6));
+
+	gameobjects["sixfour"] = std::make_shared<GameObject>(
+		aStar["sixfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sixfour"]->setScale(glm::vec3(0.6));
+
+	gameobjects["sixfive"] = std::make_shared<GameObject>(
+		aStar["sixfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sixfive"]->setScale(glm::vec3(0.6));
+
+	gameobjects["sixsix"] = std::make_shared<GameObject>(
+		aStar["sixsix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sixsix"]->setScale(glm::vec3(0.6));
+
+	gameobjects["sixeight"] = std::make_shared<GameObject>(
+		aStar["sixeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sixeight"]->setScale(glm::vec3(0.6));
+
+	//seventh row
+	gameobjects["sevenone"] = std::make_shared<GameObject>(
+		aStar["sevenone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sevenone"]->setScale(glm::vec3(0.6));
+
+	gameobjects["seventwo"] = std::make_shared<GameObject>(
+		aStar["seventwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["seventwo"]->setScale(glm::vec3(0.6));
+
+	gameobjects["seventhree"] = std::make_shared<GameObject>(
+		aStar["seventhree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["seventhree"]->setScale(glm::vec3(0.6));
+
+	gameobjects["sevenfour"] = std::make_shared<GameObject>(
+		aStar["sevenfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sevenfour"]->setScale(glm::vec3(0.6));
+
+	gameobjects["sevenfive"] = std::make_shared<GameObject>(
+		aStar["sevenfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sevenfive"]->setScale(glm::vec3(0.6));
+
+	gameobjects["sevensix"] = std::make_shared<GameObject>(
+		aStar["sevensix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sevensix"]->setScale(glm::vec3(0.6));
+
+	gameobjects["sevenseven"] = std::make_shared<GameObject>(
+		aStar["sevenseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["sevenseven"]->setScale(glm::vec3(0.6));
+
+	gameobjects["seveneight"] = std::make_shared<GameObject>(
+		aStar["seveneight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+	gameobjects["seveneight"]->setScale(glm::vec3(0.6));
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////	Players
@@ -806,7 +1415,6 @@ void initializeStates()
 	t2 = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	std::cout << " success, total " << duration << "ms taken" << std::endl;
-
 }
 
 void bulletNearCallback(btBroadphasePair& collisionPair,
@@ -926,6 +1534,15 @@ void KeyboardCallbackFunction(unsigned char key, int x, int y)
 void KeyboardUpCallbackFunction(unsigned char key, int x, int y)
 {
 	KEYBOARD_INPUT->SetActive(key, false);
+	switch (key) 
+	{
+	case 'g':
+		findPath();
+		traverse = !traverse;
+		
+		//players["bombot1"]->setPosition(players["bombot1"]->checkNodes(aStarPointer)->pos);
+		break;
+	}
 }
 
 
@@ -948,7 +1565,8 @@ void TimerCallbackFunction(int value)
 	elapsedTimeAtLastTick = totalElapsedTime;
 
 	// Handle all inputs 
-	
+	if (traverse)
+		traversePath(players["bombot1"], deltaTime);
 
 	// Update the camera's position
 	playerCamera.update();

@@ -70,6 +70,7 @@
     <ClCompile Include="src\Texture2D.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\PathNode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Player.h" />
@@ -149,6 +150,7 @@
     <ClInclude Include="src\Texture2D.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\PathNode.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Graphics">
@@ -232,6 +234,12 @@
       <Filter>Graphics\Shaders</Filter>
     </None>
     <None Include="shaders\color_f.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\node.geom">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\node.frag">
       <Filter>Graphics\Shaders</Filter>
     </None>
   </ItemGroup>

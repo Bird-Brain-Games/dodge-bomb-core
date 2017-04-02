@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "Bomb.h"
 #include "controller.h"
+#include "PathNode.h"
 
 enum PLAYER_STATE
 {
@@ -41,6 +42,10 @@ public:
 
 	void setAnim(std::string);
 	int getHealth();
+
+	PathNode * checkNodes(std::map<std::string, PathNode *> * nodeContainer);
+	PathNode * closestNode = nullptr;
+	//PathNode * closestX = nullptr;
 
 	Controller* getController();
 

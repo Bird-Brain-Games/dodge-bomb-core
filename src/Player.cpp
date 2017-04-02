@@ -70,6 +70,37 @@ int Player::getHealth()
 	return health;
 }
 
+PathNode * Player::checkNodes(std::map<std::string, PathNode *> * nodeContainer)
+{
+	auto itr = nodeContainer->begin();
+	closestNode = itr->second;
+	//for (int i = 0; i < 11; i++)
+	for (itr = nodeContainer->begin(); itr != nodeContainer->end(); itr++)
+	{
+		if (itr->second->dummy == false && itr->second != nullptr)
+		{
+			if ((glm::abs(this->getWorldPosition().x - itr->second->pos.x)) 
+				< (glm::abs(this->getWorldPosition().x - closestNode->pos.x)))
+			{
+				closestNode = itr->second;
+			}
+		}
+		//itr++;
+	}
+	std::cout << closestNode->pos.x << std::endl;
+	for (itr = nodeContainer->begin(); itr != nodeContainer->end(); itr++)
+	{
+		if (itr->second->pos.x == closestNode->pos.x && itr->second->dummy == false &&
+			((glm::abs(this->getWorldPosition().z - itr->second->pos.z))
+				< (glm::abs(this->getWorldPosition().z - closestNode->pos.z))))
+		{
+			closestNode = itr->second;
+		}
+	}
+
+	return closestNode;
+}
+
 Controller* Player::getController()
 {
 	return &con;
@@ -160,8 +191,8 @@ void Player::update(float dt)
 	if (con.conButton(XINPUT_GAMEPAD_BACK))
 		reset(glm::vec3(0.0f, 40.0f, 0.0f));
 
-	if (playerNum == 0)
-		std::cout << getWorldPosition().x << " " << getWorldPosition().z << std::endl;
+	//if (playerNum == 0)
+		//std::cout << getWorldPosition().x << " " << getWorldPosition().z << std::endl;
 
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);
