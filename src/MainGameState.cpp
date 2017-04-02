@@ -78,6 +78,8 @@ void LUT::unbind(GLuint textureUnit)
 	glBindTexture(GL_TEXTURE_3D, 0);
 }
 
+float Game::maxFadeTime = 0.3f;
+
 Game::Game
 (
 	std::map<std::string, std::shared_ptr<GameObject>>* _scene,
@@ -125,6 +127,7 @@ Game::Game
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_OFF;
+	currentLUT = nullptr;
 
 	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.0f, -16.0f));	// top left
 	defaultPlayerPositions.push_back(glm::vec3(45.0f, 39.5f, -25.0f));	// top right
@@ -133,7 +136,19 @@ Game::Game
 
 	// Initialize sounds
 	m_gameMusic = Sound(soundTemplates->at("m_gameMusic"));
-	m_gameMusic.setPosition(glm::vec3(23.0f, 45.0f, 25.0f));
+	m_gameMusic.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+
+	m_gameTrack1 = Sound(soundTemplates->at("m_gameTrack1"));
+	m_gameTrack2 = Sound(soundTemplates->at("m_gameTrack2"));
+	m_gameTrack3 = Sound(soundTemplates->at("m_gameTrack3"));
+	m_gameTrack1.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameTrack2.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameTrack3.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameTrack1.setVolume(musicVolume);
+
+
+	s_countDown = Sound(soundTemplates->at("s_countdown"));
+	s_countDown.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
 }
 
 void Game::setPaused(int a_paused)
@@ -141,9 +156,17 @@ void Game::setPaused(int a_paused)
 	if (a_paused == 0)
 	{
 		m_isPaused = false;
+		m_gameTrack1.resume();
+		m_gameTrack2.resume();
+		m_gameTrack3.resume();
 	}
 	else if (a_paused == 1)
+	{
 		m_isPaused = true;
+		m_gameTrack1.pause();
+		m_gameTrack2.pause();
+		m_gameTrack3.pause();
+	}
 	else if (a_paused == -1)
 	{
 		m_isPaused = false;
@@ -154,16 +177,22 @@ void Game::setPaused(int a_paused)
 		bombManager->clearAllBombs();
 		changeState(READYUP);
 		menuDelay = 0.3f;
+
+		m_gameTrack1.stop();
+		m_gameTrack2.stop();
+		m_gameTrack3.stop();
 	}
 }
 
 void Game::resetPlayers()
 {
+	numActivePlayers = 0;
 	for (auto it : *players)
 	{
 		if (it.second->isActive())
 		{
 			it.second->reset(defaultPlayerPositions.at(it.second->getPlayerNum()));
+			numActivePlayers++;
 		}
 	}
 	/*players->at("bombot1")->reset(glm::vec3(-12.0f, 39.5f, 10.0f));
@@ -335,6 +364,23 @@ void Game::update(float dt)
 		{
 			winner--;
 			changeState(WIN);
+		}
+
+		int playerDeathCounter = 0;
+		for (auto it : *players)
+		{
+			if (it.second->isActive() && it.second->getHealth() == 0)
+				playerDeathCounter++;
+		}
+
+		if (numDeadPlayers != playerDeathCounter)
+		{
+			numDeadPlayers = playerDeathCounter;
+			if (playerDeathCounter > 1)
+				m_gameTrack3.setVolume(musicVolume - 0.05);
+			else if (playerDeathCounter > 0)
+				m_gameTrack2.setVolume(musicVolume - 0.05);
+				
 		}
 	}
 
@@ -511,16 +557,38 @@ void Game::draw()
 	if (bloomToggle)
 	{
 		bloomPass(fboUnlit, fboBloomed);
-		depthOfField(fboBloomed, fboWithBokeh);
+		if (depthToggle)
+		{
+			depthOfField(fboBloomed, fboWithBokeh);
+			fboToScreen(fboWithBokeh);
+		}
+		else
+		{
+			fboToScreen(fboBloomed);
+		}
+	}
+	else if (depthToggle)
+	{
+		depthOfField(fboUnlit, fboWithBokeh);
 		fboToScreen(fboWithBokeh);
 	}
 	else
 	{
-		bloomPass(fboUnlit, fboBloomed);
-		fboToScreen(fboBloomed);
+		fboToScreen(fboUnlit);
 	}
 
-	
+	// Color correction
+	if (currentLUT)	// if pointing to a LUT
+	{
+		if (depthToggle)
+			colorCorrectionPass(fboWithBokeh, fboColorCorrection);
+		else if (bloomToggle)
+			colorCorrectionPass(fboBloomed, fboColorCorrection);
+		else
+			colorCorrectionPass(fboUnlit, fboColorCorrection);
+
+		fboToScreen(fboColorCorrection);
+	}
 
 }
 
@@ -839,17 +907,18 @@ void Game::colorCorrectionPass(FrameBufferObject& fboIn, FrameBufferObject& fboO
 	static auto colorMaterial = materials->at("colorCorrection");
 
 	//// Bind the LUT
-	contrastLUT.bind(GL_TEXTURE6);
+	currentLUT->bind(GL_TEXTURE6);
 
 	colorMaterial->shader->bind();
 	colorMaterial->shader->sendUniformInt("u_tex", 0);
 	colorMaterial->shader->sendUniformInt("u_lookup", 6);
 	colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
-	colorMaterial->shader->sendUniformFloat("u_lookupSize", contrastLUT.getSize());
+	colorMaterial->shader->sendUniformFloat("u_lookupSize", currentLUT->getSize());
 	colorMaterial->sendUniforms();
 
 	// Draw a full screen quad using the geometry shader
 	glDrawArrays(GL_POINTS, 0, 1);
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 
 	contrastLUT.unbind(GL_TEXTURE6);
 }
@@ -883,11 +952,11 @@ void Game::handleKeyboardInputShaders()
 	{
 		if (colorCorrection == LUT_CONTRAST)
 		{
-			colorCorrection = LUT_OFF;
+			changeColorCorrection(LUT_OFF);
 		}
 		else
 		{
-			colorCorrection = LUT_CONTRAST;
+			changeColorCorrection(LUT_CONTRAST);
 		}
 	}
 	// Toggle LUT
@@ -895,11 +964,11 @@ void Game::handleKeyboardInputShaders()
 	{
 		if (colorCorrection == LUT_SEPIA)
 		{
-			colorCorrection = LUT_OFF;
+			changeColorCorrection(LUT_OFF);
 		}
 		else
 		{
-			colorCorrection = LUT_SEPIA;
+			changeColorCorrection(LUT_SEPIA);
 		}
 	}
 
@@ -1095,6 +1164,11 @@ void Game::changeState(Game::GAME_STATE newState)
 		innerCutOff = innerDefault;
 		outerCutOff = outerDefault;
 
+		// Reset the sounds
+		m_gameTrack1.stop();
+		m_gameTrack2.stop();
+		m_gameTrack3.stop();
+
 		for (auto it : *obstacles)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
@@ -1109,6 +1183,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		break;
 
 	case Game::COUNTDOWN:
+		s_countDown.play();
 		currentCountdown = 4.0f;
 		for (auto it : *obstacles)
 		{
@@ -1130,6 +1205,38 @@ void Game::changeState(Game::GAME_STATE newState)
 		playerStartPosition = players->at("bombot" + std::to_string(winner))->getWorldPosition();
 		break;
 
+	case Game::MAIN:
+		m_gameTrack1.play();
+		m_gameTrack2.play();
+		m_gameTrack3.play();
+
+		m_gameTrack2.setVolume(0.0f);
+		m_gameTrack3.setVolume(0.0f);
+		numTracksPlaying = 1;
+		numDeadPlayers = 0;
+		break;
+
+	default:
+		break;
+	}
+}
+
+void Game::changeColorCorrection(LUT_MODE mode)
+{
+	if (colorCorrection == mode) return;
+	colorCorrection = mode;
+
+	switch (colorCorrection)
+	{
+	case Game::LUT_OFF:
+		currentLUT = nullptr;
+		break;
+	case Game::LUT_CONTRAST:
+		currentLUT = &contrastLUT;
+		break;
+	case Game::LUT_SEPIA:
+		currentLUT = &sepiaLUT;
+		break;
 	default:
 		break;
 	}

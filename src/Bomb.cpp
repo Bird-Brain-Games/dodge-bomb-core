@@ -49,7 +49,7 @@ bool BombManager::init(
 			material,
 			textures[i + 4],
 			nullptr,
-			soundTemplates->at("s_bombExplosion" + std::to_string(i + 1)));
+			Sound());//soundTemplates->at("s_bombExplosion" + std::to_string(i + 1)));
 
 		// Create the explosion rigidBody
 		std::unique_ptr<RigidBody> explosionBody =
@@ -58,6 +58,13 @@ bool BombManager::init(
 		explosionObject->attachRigidBody(explosionBody);
 
 		explosionTemplates.push_back(explosionObject);
+	}
+
+	// Load explosion sounds
+	for (int i = 1; i <= 8; i++)
+	{
+		explosionSounds.push_back(soundTemplates->at("s_bombExplosion" + std::to_string(i)));
+		explosionSounds.at(i - 1).setVolume(0.3);///////////////////////////////////////////////////////// Explosion Volume
 	}
 
 	// Create the bomb object templates
@@ -147,6 +154,8 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 	int playerNum = player->getPlayerNum();
 	std::shared_ptr<Bomb> newBomb = std::make_shared<Bomb>(*bombTemplates.at(playerNum));
 	newBomb->attachPlayerPtr(player);
+	newBomb->getExplosion()->setExplosionSound(
+		explosionSounds.at((rand() % explosionSounds.size())));
 	activeBombs.push_back(newBomb);
 
 	glm::vec2 playerForce;
@@ -363,7 +372,6 @@ void Explosion::update(float dt)
 	}
 
 	GameObject::update(dt);
-	s_explosion.setPosition(getWorldPosition());
 }
 
 void Explosion::setBombParent(Bomb* newParent)
