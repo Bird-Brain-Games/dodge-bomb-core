@@ -14,6 +14,7 @@ void checkResult(FMOD_RESULT result)
 	if (result != FMOD_OK)
 	{
 		std::string msg = FMOD_ErrorString(result);
+		std::cerr << msg << std::endl;
 	}
 }
 
@@ -103,8 +104,12 @@ void Sound::setPosition(FMOD_VECTOR _pos, FMOD_VECTOR _vel)
 {
 	pos = _pos;
 	vel = _vel;
-	sys.result = channel->set3DAttributes(&pos, &vel);
-	checkResult(sys.result);
+
+	if (isPlaying())
+	{
+		sys.result = channel->set3DAttributes(&pos, &vel);
+		checkResult(sys.result);
+	}
 }
 
 void Sound::setPosition(glm::vec3 _pos)
@@ -131,14 +136,15 @@ Sound::Sound()
 }
 
 Sound::Sound(std::string filename, bool isLoop)
+	: Sound()
 {
-	Sound();
 	load(filename, isLoop);
 }
 
 Sound::Sound(const Sound& other)
 	: sound(other.sound),
-	channel(NULL)
+	channel(NULL),
+	volume(other.volume)
 {
 	pos = { 0.0f, 0.0f, 0.0f };
 	vel = { 0.0f, 0.0f, 0.0f };
@@ -157,6 +163,7 @@ Sound::~Sound()
 void Sound::release()
 {
 	sys.result = sound->release(); checkResult(sys.result);
+	channel = nullptr;
 }
 
 //loads the sound from the file path specificied
@@ -176,9 +183,6 @@ bool Sound::load(std::string filename, bool isLoop)
 		return false;
 	}
 
-	//sets how the sound behaves as its position changes
-	setRolloff(false, 0.5f, 100.0f);
-
 	//Sets how the sound will play (loop, single play etc)
 	if (isLoop)
 	{
@@ -197,34 +201,71 @@ bool Sound::load(std::string filename, bool isLoop)
 //plays the sound
 void Sound::play()
 {
-	//plays the sound
+	// plays the sound
 	sys.result = sys.system->playSound(sound, 0, true, &channel); checkResult(sys.result);
-	//sets the sound position
+
+	// sets the sound position
 	sys.result = channel->set3DAttributes(&pos, &vel); checkResult(sys.result);
-	//Unpauses the sound
+
+	// Unpauses the sound
 	sys.result = channel->setPaused(false); checkResult(sys.result);
+
 	// Sets the channel volume
-	sys.result = channel->setVolume(volume); checkResult(sys.result);
+	setVolume(volume);
+
+	float minDist, maxDist;
+	FMOD_MODE mode;
+	setRolloff(true, 2.0f, 1000.0f);
+	channel->get3DMinMaxDistance(&minDist, &maxDist);
+	channel->getMode(&mode);
+	// Sets how the sound behaves as its position changes
 }
 
 void Sound::pause()
 {
-	sys.result = channel->setPaused(true); checkResult(sys.result);
+	if (isPlaying())
+	{
+		sys.result = channel->setPaused(true); 
+		checkResult(sys.result);
+	}
 }
 
 //changes how the sound rolloff works
 void Sound::setRolloff(bool isLinear, float min, float max)
 {
-	sys.result = channel->set3DMinMaxDistance(min, max); checkResult(sys.result);
+	if (isPlaying())
+	{
+		sys.result = channel->set3DMinMaxDistance(min, max); checkResult(sys.result);
 
-	if (isLinear)
-		sys.result = channel->setMode(FMOD_3D_LINEARROLLOFF);
-	else
-		sys.result = channel->setMode(FMOD_3D_INVERSEROLLOFF);
-	checkResult(sys.result);
+		if (isLinear)
+			sys.result = channel->setMode(FMOD_3D_LINEARROLLOFF);
+		else
+			sys.result = channel->setMode(FMOD_3D_INVERSEROLLOFF);
+		checkResult(sys.result);
+	}
 }
 
 void Sound::setVolume(float v)
 {
 	volume = v;
+	if (isPlaying())
+	{
+		sys.result = channel->setVolume(volume); checkResult(sys.result);
+	}
+}
+
+bool Sound::isPlaying()
+{
+	if (channel == NULL) return false;
+
+	FMOD::Sound* channelSound;
+	sys.result = channel->getCurrentSound(&channelSound);
+	if (sound == channelSound)
+	{
+		bool isPlaying;
+		sys.result = channel->isPlaying(&isPlaying); checkResult(sys.result);
+		if (isPlaying)
+			return true;
+	}
+	return false;
 }

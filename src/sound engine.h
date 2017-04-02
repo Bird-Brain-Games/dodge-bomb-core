@@ -66,6 +66,7 @@ public:
 	void setPosition(FMOD_VECTOR _pos, FMOD_VECTOR _vel);
 	void setPosition(glm::vec3 _pos);
 	void setPosition(glm::vec3 _pos, glm::vec3 _vel);
+	bool isPlaying();
 
 	// Set the channel volume from 0.0 to 1.0
 	void setVolume(float v);
