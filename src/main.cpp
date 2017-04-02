@@ -496,10 +496,10 @@ void initializeScene()
 	soundTemplates["s_damage3"] = Sound(soundPath + "Hit sounds/green_hit.wav", false);
 	soundTemplates["s_damage4"] = Sound(soundPath + "Hit sounds/yellow_hit.wav", false);
 
-	soundTemplates["s_footstep1"] = Sound(soundPath + "bot_walk1.wav", true);
-	soundTemplates["s_footstep2"] = Sound(soundPath + "bot_walk2.wav", true);
-	soundTemplates["s_footstep3"] = Sound(soundPath + "bot_walk3.wav", true);
-	soundTemplates["s_footstep4"] = Sound(soundPath + "bot_walk4.wav", true);
+	soundTemplates["s_footstep1"] = Sound(soundPath + "walk sounds/blue_walk.wav", true);
+	soundTemplates["s_footstep2"] = Sound(soundPath + "walk sounds/red_walk.wav", true);
+	soundTemplates["s_footstep3"] = Sound(soundPath + "walk sounds/green_walk.wav", true);
+	soundTemplates["s_footstep4"] = Sound(soundPath + "walk sounds/yellow_walk.wav", true);
 
 	soundTemplates["d_ready1_1"] = Sound(soundPath + "Bombot Dialogue/blue_ready_1.wav", false);
 	soundTemplates["d_ready2_1"] = Sound(soundPath + "Bombot Dialogue/red_ready_1.wav", false);
