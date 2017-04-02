@@ -1,0 +1,53 @@
+#include "PathNode.h"
+
+PathNode::PathNode(int _distanceToTarget)
+{
+	dummy = true;
+	distanceToTarget = _distanceToTarget;
+}
+
+PathNode::PathNode(glm::vec3 _pos, int _distanceToTarget, bool _dummy)
+{
+	pos = _pos;
+	dummy = _dummy;
+	distanceToTarget = _distanceToTarget;
+}
+
+PathNode::PathNode(glm::vec3 _pos, int _distanceToTarget)
+{
+	pos = _pos;
+	dummy = false;
+	distanceToTarget = _distanceToTarget;
+}
+
+PathNode::~PathNode()
+{
+}
+
+void PathNode::addConnection(PathNode * connectionUp, PathNode * connectionRight, PathNode * connectionDown, PathNode * connectionLeft)
+{
+	connections["connectionUp"] = connectionUp;
+	connections["connectionRight"] = connectionRight;
+	connections["connectionDown"] = connectionDown;
+	connections["connectionLeft"] = connectionLeft;
+
+}
+
+void PathNode::checkConnections()
+{
+	path = connections["connectionUp"];
+	for (auto itr = connections.begin(); itr != connections.end(); itr++)
+	{
+		if (itr->second->distanceToTarget < path->distanceToTarget)
+		{
+			path = itr->second;
+		}
+	}
+
+}
+
+void PathNode::draw()
+{
+
+}
+
