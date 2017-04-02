@@ -16,7 +16,6 @@ class Camera
 public:
 	Camera();
 	void setProperties(float _FOV, float _ratio, float _minRange, float _maxRange, float _speed);
-
 	// Set the camera window ratio
 	void setRatio(float _ratio) { windowRatio = _ratio; }
 	void setRatio(float windowHeight, float windowWidth) { windowRatio = windowWidth / windowHeight; }
@@ -25,6 +24,7 @@ public:
 	void setPosition(glm::vec3 _pos);
 	void setForward(glm::vec3 _for);
 	void setAngle(float, float);
+	glm::vec3 getForward() { return forward; }
 
 	//returns view matrix
 	glm::mat4x4 getView();
@@ -37,7 +37,7 @@ public:
 
 	//recalculates the view and projection matrix
 	void update();
-	void shadowCam();
+	void shadowCam(glm::vec3 _pos, glm::vec3 _forward, glm::vec3 _up, float _minRange, float _maxRange);
 	//rotates camera based on values given.
 	void mouseMotion(int x, int y, int preY, int preX);
 

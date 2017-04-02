@@ -1,8 +1,6 @@
 // Graham Watson 100522240
 // Robert Savaglio 100591436
 
-
-
 // Core Libraries
 #include <iostream>
 #include <string>
@@ -55,6 +53,8 @@ Game* game;
 Score* score;
 Pause* pause;
 
+
+
 glm::vec3 position;
 float movementSpeed = 5.0f;
 
@@ -62,19 +62,20 @@ float movementSpeed = 5.0f;
 Camera playerCamera; // the camera you move around with wasd
 Camera shadowCamera; // Camera for the shadow map
 
-
 // Asset databases
 std::map<std::string, std::shared_ptr<Loader>> meshes;
 std::map<std::string, std::shared_ptr<GameObject>> gameobjects;
 std::vector<std::shared_ptr<GameObject>> obstacles;
+std::vector<std::shared_ptr<GameObject>> readyUpRings;
 std::map<std::string, std::shared_ptr<Player>> players;
 std::map<std::string, std::shared_ptr<Texture>> textures;
 
-
+//Sound Stuff
+//SoundDriver* audio_Driver;
+std::map<std::string, Sound> soundTemplates;
 
 // Materials
 std::map<std::string, std::shared_ptr<Material>> materials;
-
 
 // Controls
 bool inMenu = false;
@@ -95,35 +96,39 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru, v_null, v_skinning, v_shadow;
+	Shader v_default, v_passThru, v_null, v_skinning;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
 	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
-	v_shadow.loadShaderFromFile(shaderPath + "shadowMap_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
-	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor, 
-		f_noLighting, f_toon, f_sobel, f_shadow, f_colorCorrection, f_node;
-	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);
-	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);
+	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor,
+		f_noLighting, f_toon, f_outline, f_sobel, f_shadow, f_colorCorrection, 
+		f_particles, f_combination, f_bokeh, f_bokehComp, f_node;
+	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);//
+	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);//
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
-	f_composite.loadShaderFromFile(shaderPath + "bloomComposite_f.glsl", GL_FRAGMENT_SHADER);
-	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER);
-	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);
-	f_noLighting.loadShaderFromFile(shaderPath + "noLighting_f.glsl", GL_FRAGMENT_SHADER);
-	f_toon.loadShaderFromFile(shaderPath + "toon_f.glsl", GL_FRAGMENT_SHADER);
-	f_sobel.loadShaderFromFile(shaderPath + "sobel_f.glsl", GL_FRAGMENT_SHADER);
-	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);
-	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);
+	f_composite.loadShaderFromFile(shaderPath + "pls.glsl", GL_FRAGMENT_SHADER);//
+	f_particles.loadShaderFromFile(shaderPath + "test_f.glsl", GL_FRAGMENT_SHADER);
+	f_blur.loadShaderFromFile(shaderPath + "gaussianBlur_f.glsl", GL_FRAGMENT_SHADER); //a
+	f_texColor.loadShaderFromFile(shaderPath + "shader_texture.frag", GL_FRAGMENT_SHADER);//
+	f_noLighting.loadShaderFromFile(shaderPath + "noLighting_f.glsl", GL_FRAGMENT_SHADER);//
+	f_toon.loadShaderFromFile(shaderPath + "toon_f.glsl", GL_FRAGMENT_SHADER);//
+	f_outline.loadShaderFromFile(shaderPath + "outline_f.glsl", GL_FRAGMENT_SHADER);//
+	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);//
+	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);//
+	f_combination.loadShaderFromFile(shaderPath + "combinataion_f.glsl", GL_FRAGMENT_SHADER);
 	f_node.loadShaderFromFile(shaderPath + "node.frag", GL_FRAGMENT_SHADER);
-
+	f_bokeh.loadShaderFromFile(shaderPath + "bokeh_f.glsl", GL_FRAGMENT_SHADER);//
+	f_bokehComp.loadShaderFromFile(shaderPath + "bokehComposite_f.glsl", GL_FRAGMENT_SHADER);//
 
 	// Geometry Shaders
-	Shader g_quad, g_menu, g_node;
+	Shader g_quad, g_menu, g_node, g_particles;
 	g_quad.loadShaderFromFile(shaderPath + "quad.geom", GL_GEOMETRY_SHADER);
 	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
 	g_node.loadShaderFromFile(shaderPath + "node.geom", GL_GEOMETRY_SHADER);
+	g_particles.loadShaderFromFile(shaderPath + "particles.geom", GL_GEOMETRY_SHADER);
 
 	// No Lighting material
 	materials["noLighting"] = std::make_shared<Material>("noLighting");
@@ -139,7 +144,7 @@ void initializeShaders()
 
 	// Default material that all objects use
 	materials["toon"] = std::make_shared<Material>("toon");
-	materials["toon"]->shader->attachShader(v_default);
+	materials["toon"]->shader->attachShader(v_skinning);
 	materials["toon"]->shader->attachShader(f_toon);
 	materials["toon"]->shader->linkProgram();
 
@@ -150,11 +155,6 @@ void initializeShaders()
 	materials["colorCorrection"]->shader->attachShader(g_quad);
 	materials["colorCorrection"]->shader->linkProgram();
 
-	//material for our players and there meshes.
-	materials["toonPlayer"] = std::make_shared<Material>("toonPlayer");
-	materials["toonPlayer"]->shader->attachShader(v_skinning);
-	materials["toonPlayer"]->shader->attachShader(f_toon);
-	materials["toonPlayer"]->shader->linkProgram();
 
 	// Material used for menu full screen drawing
 	materials["menu"] = std::make_shared<Material>("menu");
@@ -200,21 +200,41 @@ void initializeShaders()
 
 	// Sobel filter material
 	materials["outline"] = std::make_shared<Material>("outline");
-	materials["outline"]->shader->attachShader(v_passThru);
-	materials["outline"]->shader->attachShader(f_sobel);
+	materials["outline"]->shader->attachShader(v_skinning);
+	materials["outline"]->shader->attachShader(f_outline);
 	materials["outline"]->shader->linkProgram();
-
-	// sobel filter for player
-	materials["sobelPlayer"] = std::make_shared<Material>("sobelPlayer");
-	materials["sobelPlayer"]->shader->attachShader(v_skinning);
-	materials["sobelPlayer"]->shader->attachShader(f_sobel);
-	materials["sobelPlayer"]->shader->linkProgram();
 
 	// Shadow filter material
 	materials["shadow"] = std::make_shared<Material>("shadow");
-	materials["shadow"]->shader->attachShader(v_shadow);
+	materials["shadow"]->shader->attachShader(v_skinning);
 	materials["shadow"]->shader->attachShader(f_shadow);
 	materials["shadow"]->shader->linkProgram();
+
+	// Unlit texture material with point-to-quad geometry shader
+	materials["particles"] = std::make_shared<Material>("particles");
+	materials["particles"]->shader->attachShader(v_passThru);
+	materials["particles"]->shader->attachShader(g_particles); // Geometry Shader!
+	materials["particles"]->shader->attachShader(f_particles);
+	materials["particles"]->shader->linkProgram();
+
+	materials["bokeh"] = std::make_shared<Material>("bokeh");
+	materials["bokeh"]->shader->attachShader(v_passThru);
+	materials["bokeh"]->shader->attachShader(g_quad); // Geometry Shader!
+	materials["bokeh"]->shader->attachShader(f_bokeh);
+	materials["bokeh"]->shader->linkProgram();
+	
+	materials["particleCombination"] = std::make_shared<Material>("particles");
+	materials["particleCombination"]->shader->attachShader(v_passThru); // Geometry Shader!
+	materials["particleCombination"]->shader->attachShader(g_quad); // Geometry Shader!
+	materials["particleCombination"]->shader->attachShader(f_combination);
+	materials["particleCombination"]->shader->linkProgram();
+
+	materials["bokehComp"] = std::make_shared<Material>("bokehComp");
+	materials["bokehComp"]->shader->attachShader(v_passThru);
+	materials["bokehComp"]->shader->attachShader(g_quad); // Geometry Shader!
+	materials["bokehComp"]->shader->attachShader(f_bokehComp);
+	materials["bokehComp"]->shader->linkProgram();
+
 }
 
 void initializeScene()
@@ -242,6 +262,8 @@ void initializeScene()
 	std::shared_ptr<LoadObject> organizerMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> mapMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> markerMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> readyTopMesh = std::make_shared<LoadObject>();
+	std::shared_ptr<LoadObject> readyBottomMesh = std::make_shared<LoadObject>();
 
 	std::shared_ptr<Holder> bombotMesh = std::make_shared<Holder>();
 	std::shared_ptr<Holder> bombotMesh2 = std::make_shared<Holder>();
@@ -284,6 +306,8 @@ void initializeScene()
 	organizerMesh->load(meshPath + "scaledorganizer.obj");
 	mapMesh->load(meshPath + "scaledmap.obj");
 	markerMesh->load(meshPath + "scaledmarker.obj");
+	readyTopMesh->load(meshPath + "topLeft.obj");
+	readyBottomMesh->load(meshPath + "bottomLeft.obj");
 
 	// Report mesh load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -309,6 +333,8 @@ void initializeScene()
 	meshes["organizer"] = organizerMesh;
 	meshes["map"] = mapMesh;
 	meshes["marker"] = markerMesh;
+	meshes["readyTop"] = readyTopMesh;
+	meshes["readyBottom"] = readyBottomMesh;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	TEXTURES	///////////////////////////////
@@ -354,8 +380,20 @@ void initializeScene()
 	std::string explosionTex4 = "Assets/img/ex-4.png";
 	std::shared_ptr<Texture> explosionTexMap4 = std::make_shared<Texture>(explosionTex4, explosionTex4, 1.0f);
 
-	std::string diffuseTex = "Assets/img/desk (diffuse).png";
-	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(diffuseTex, diffuseTex, 1.0f);
+	std::string readyTex1 = "Assets/img/rg.png";
+	std::shared_ptr<Texture> readyTexMap1 = std::make_shared<Texture>(readyTex1, readyTex1, 1.0f);
+
+	std::string readyTex2 = "Assets/img/yb.png";
+	std::shared_ptr<Texture> readyTexMap2 = std::make_shared<Texture>(readyTex2, readyTex2, 1.0f);
+
+	std::string winTex = "Assets/img/win(scaled).png";
+	std::shared_ptr<Texture> winTexMap = std::make_shared<Texture>(winTex, winTex, 1.0f);
+
+	std::string deskTex = "Assets/img/desk (diffuse).png";
+	std::shared_ptr<Texture> deskTexMap = std::make_shared<Texture>(deskTex, deskTex, 1.0f);
+
+	std::string deskReadyTex = "Assets/img/deskReady (diffuse).png";
+	std::shared_ptr<Texture> deskReadyTexMap = std::make_shared<Texture>(deskReadyTex, deskReadyTex, 1.0f);
 
 	std::string corkboardTex = "Assets/img/corkboard(diffuse).png";
 	std::shared_ptr<Texture> corkboardTexMap = std::make_shared<Texture>(corkboardTex, corkboardTex, 1.0f);
@@ -396,13 +434,17 @@ void initializeScene()
 	std::string boatTex = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
+	std::string particle = "Assets/img/smoke.png";
+	std::shared_ptr<Texture> particleTexMap = std::make_shared<Texture>(particle, particle, 1.0f);
+
 	// Report texture load times
 	t2 = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	std::cout << "success, texture loading took " << duration << "ms" << std::endl << std::endl;
 
 	//Add textures to the map
-	textures["default"] = deskTexMap;
+	textures["table"] = deskTexMap;
+	textures["readyTable"] = deskReadyTexMap;
 	textures["bombot1"] = bombot1TexMap;
 	textures["bombot2"] = bombot2TexMap;
 	textures["bombot3"] = bombot3TexMap;
@@ -417,6 +459,8 @@ void initializeScene()
 	textures["explosion2"] = explosionTexMap2;
 	textures["explosion3"] = explosionTexMap3;
 	textures["explosion4"] = explosionTexMap4;
+	textures["readyL"] = readyTexMap1;
+	textures["readyR"] = readyTexMap2;
 	textures["barrel"] = barrelTexMap;
 	textures["cannon"] = cannonTexMap;
 	textures["boat"] = boatTexMap;
@@ -428,8 +472,79 @@ void initializeScene()
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
+	textures["particles"] = particleTexMap;
+	textures["win"] = winTexMap;
+
+	///////////////////////////////////////////////////////////////////////////
+	////////////////////////		SOUNDS		///////////////////////////////
+
+	// Test sound  load times
+	std::cout << "Initializing sounds...";
+	t1 = std::chrono::high_resolution_clock::now();
+
+	std::string soundPath = "assets/media/";
+	//soundTemplates[""] = Sound(soundPath + ".wav", false);
+
+	// Menu sounds
+	soundTemplates["m_mainMenu"] = Sound(soundPath + "MenuTheme.wav");
+	soundTemplates["s_menuSelect"] = Sound(soundPath + "select_fx.wav", false);
+	soundTemplates["s_menuSwitch"] = Sound(soundPath + "switch_fx.wav", false);
+
+	// Battle music
+	soundTemplates["m_readyMusic"] = Sound(soundPath + "MenuTheme.wav", true);
+	soundTemplates["m_gameTrack1"] = Sound(soundPath + "Music Layers/layer_1.wav", true);
+	soundTemplates["m_gameTrack2"] = Sound(soundPath + "Music Layers/layer_2.wav", true);
+	soundTemplates["m_gameTrack3"] = Sound(soundPath + "Music Layers/layer_3.wav", true);
+
+	soundTemplates["s_countdown"] = Sound(soundPath + "3_2_1_DodgeBomb.wav", false);
+
+	// Battle SFX
+	soundTemplates["s_bombExplosion1"] = Sound(soundPath + "bomb sounds/bomb_1.wav", false);
+	soundTemplates["s_bombExplosion2"] = Sound(soundPath + "bomb sounds/bomb_2.wav", false);
+	soundTemplates["s_bombExplosion3"] = Sound(soundPath + "bomb sounds/bomb_3.wav", false);
+	soundTemplates["s_bombExplosion4"] = Sound(soundPath + "bomb sounds/bomb_4.wav", false);
+	soundTemplates["s_bombExplosion5"] = Sound(soundPath + "bomb sounds/bomb_5.wav", false);
+	soundTemplates["s_bombExplosion6"] = Sound(soundPath + "bomb sounds/bomb_6.wav", false);
+	soundTemplates["s_bombExplosion7"] = Sound(soundPath + "bomb sounds/bomb_7.wav", false);
+	soundTemplates["s_bombExplosion8"] = Sound(soundPath + "bomb sounds/bomb_8.wav", false);
+
+	soundTemplates["s_damage1"] = Sound(soundPath + "Hit sounds/blue_hit.wav", false);
+	soundTemplates["s_damage2"] = Sound(soundPath + "Hit sounds/red_hit.wav", false);
+	soundTemplates["s_damage3"] = Sound(soundPath + "Hit sounds/green_hit.wav", false);
+	soundTemplates["s_damage4"] = Sound(soundPath + "Hit sounds/yellow_hit.wav", false);
+
+	soundTemplates["s_footstep1"] = Sound(soundPath + "walk sounds/blue_walk.wav", true);
+	soundTemplates["s_footstep2"] = Sound(soundPath + "walk sounds/red_walk.wav", true);
+	soundTemplates["s_footstep3"] = Sound(soundPath + "walk sounds/green_walk.wav", true);
+	soundTemplates["s_footstep4"] = Sound(soundPath + "walk sounds/yellow_walk.wav", true);
+
+	soundTemplates["d_ready1_1"] = Sound(soundPath + "Bombot Dialogue/blue_ready_1.wav", false);
+	soundTemplates["d_ready2_1"] = Sound(soundPath + "Bombot Dialogue/red_ready_1.wav", false);
+	soundTemplates["d_ready3_1"] = Sound(soundPath + "Bombot Dialogue/green_ready_1.wav", false);
+	soundTemplates["d_ready4_1"] = Sound(soundPath + "Bombot Dialogue/yellow_ready_1.wav", false);
+
+	soundTemplates["d_ready1_2"] = Sound(soundPath + "Bombot Dialogue/blue_ready_2.wav", false);
+	soundTemplates["d_ready2_2"] = Sound(soundPath + "Bombot Dialogue/red_ready_2.wav", false);
+	soundTemplates["d_ready3_2"] = Sound(soundPath + "Bombot Dialogue/green_ready_2.wav", false);
+	soundTemplates["d_ready4_2"] = Sound(soundPath + "Bombot Dialogue/yellow_ready_2.wav", false);
+
+	soundTemplates["d_win1_1"] = Sound(soundPath + "Bombot Dialogue/blue_win_1.wav", false);
+	soundTemplates["d_win2_1"] = Sound(soundPath + "Bombot Dialogue/red_win_1.wav", false);
+	soundTemplates["d_win3_1"] = Sound(soundPath + "Bombot Dialogue/green_win_1.wav", false);
+	soundTemplates["d_win4_1"] = Sound(soundPath + "Bombot Dialogue/yellow_win_1.wav", false);
+
+	soundTemplates["d_win1_2"] = Sound(soundPath + "Bombot Dialogue/blue_win_2.wav", false);
+	soundTemplates["d_win2_2"] = Sound(soundPath + "Bombot Dialogue/red_win_2.wav", false);
+	soundTemplates["d_win3_2"] = Sound(soundPath + "Bombot Dialogue/green_win_2.wav", false);
+	soundTemplates["d_win4_2"] = Sound(soundPath + "Bombot Dialogue/yellow_win_2.wav", false);
+
+	Sound::sys.update();
 
 
+	// Report sound init times
+	t2 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << " success, " << duration << "ms taken" << std::endl;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
@@ -441,6 +556,29 @@ void initializeScene()
 	std::cout << "Initializing gameObjects...";
 	t1 = std::chrono::high_resolution_clock::now();
 
+	gameobjects["readyBlue"] = std::make_shared<readyUpRing>(
+		glm::vec3(0.0f, 89.0f, -16.0f), readyBottomMesh, defaultMaterial, readyTexMap2, 0);
+	gameobjects["readyBlue"]->setScale(glm::vec3(0.5f));
+	gameobjects["readyBlue"]->setRotationAngleY(90.0f * degToRad);
+	readyUpRings.push_back(gameobjects["readyBlue"]);
+
+	gameobjects["readyRed"] = std::make_shared<readyUpRing>(
+		glm::vec3(45.0f, 89.0f, -16.0f), readyTopMesh, defaultMaterial, readyTexMap1, 1);
+	gameobjects["readyRed"]->setRotationAngleY(90.0f * degToRad);
+	gameobjects["readyRed"]->setScale(glm::vec3(0.5f));
+	readyUpRings.push_back(gameobjects["readyRed"]);
+
+	gameobjects["readyGreen"] = std::make_shared<readyUpRing>(
+		glm::vec3(-7.0f, 89.0f, 13.0f), readyBottomMesh, defaultMaterial, readyTexMap1, 2);
+	gameobjects["readyGreen"]->setScale(glm::vec3(0.5f));
+	readyUpRings.push_back(gameobjects["readyGreen"]);
+
+	gameobjects["readyYellow"] = std::make_shared<readyUpRing>(
+		glm::vec3(53.0f, 89.0f, 13.0f), readyTopMesh, defaultMaterial, readyTexMap2, 3);
+	gameobjects["readyYellow"]->setRotationAngleY(180.0f * degToRad);
+	gameobjects["readyYellow"]->setScale(glm::vec3(0.5f));
+	readyUpRings.push_back(gameobjects["readyYellow"]);
+
 	gameobjects["table"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), tableMesh, defaultMaterial, deskTexMap);
 
@@ -448,7 +586,7 @@ void initializeScene()
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
 
 	gameobjects["corkboard"] = std::make_shared<GameObject>(
-		glm::vec3(0.0f, 0.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
+		glm::vec3(-5000.0f, -5000.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
 
 	gameobjects["organizer"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), organizerMesh, defaultMaterial, organizerTexMap);
@@ -504,9 +642,14 @@ void initializeScene()
 	//	glm::vec3(15.f, 42.0f, 10.f), barrelMesh, defaultMaterial, barrelTexMap);
 
 	gameobjects["barrelTR"] = std::make_shared<GameObject>(
+		//glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
 		glm::vec3(37.f, -20.0f, -2.0f), barrelMesh, defaultMaterial, barrelTexMap);
 	gameobjects["barrelTR"]->setScale(glm::vec3(1.2));
 	obstacles.push_back(gameobjects["barrelTR"]);
+
+	//gameobjects["listener"] = std::make_shared<GameObject>(
+	//	glm::vec3(23.0f, 45.0f, 0.0f), barrelMesh, defaultMaterial, barrelTexMap);
+
 	//gameobjects["barrelBR"] = std::make_shared<GameObject>(
 	//	glm::vec3(40.f, 42.0f, 25.f), barrelMesh, defaultMaterial, barrelTexMap);
 
@@ -534,7 +677,7 @@ void initializeScene()
 	gameobjects["cannon"] = std::make_shared<GameObject>(
 		glm::vec3(23.f, 43.0f, 10.f), cannonMesh, defaultMaterial, cannonTexMap);
 	gameobjects["cannon"]->setScale(glm::vec3(1.7f));
-	gameobjects["cannon"]->emissiveLight = 0.3f;
+	//gameobjects["cannon"]->emissiveLight = 0.3f;
 	obstacles.push_back(gameobjects["cannon"]);
 
 	gameobjects["cannonbox"] = std::make_shared<GameObject>(
@@ -758,20 +901,19 @@ void initializeScene()
 	////////////////	Players
 
 	players["bombot1"] = std::make_shared<Player>(
-		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0);
-	gameobjects["bombot1"] = players["bombot1"];
+		glm::vec3(-8.0f, 39.5f, 9.0f), bombotMesh, defaultMaterial, bombot1TexMap, 0, &soundTemplates);
+	
 
 	players["bombot2"] = std::make_shared<Player>(
-		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1);
-	gameobjects["bombot2"] = players["bombot2"];
+		glm::vec3(50.0f, 39.5f, 5.0f), bombotMesh2, defaultMaterial, bombot2TexMap, 1, &soundTemplates);
 	
 	players["bombot3"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2);
-	gameobjects["bombot3"] = players["bombot3"];
+		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh3, defaultMaterial, bombot3TexMap, 2, &soundTemplates);
+
 
 	players["bombot4"] = std::make_shared<Player>(
-		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3);
-	gameobjects["bombot4"] = players["bombot4"];
+		glm::vec3(0.0f, 40.0f, 0.0f), bombotMesh4, defaultMaterial, bombot4TexMap, 3, &soundTemplates);
+
 
 	// Report gameObject init times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -800,6 +942,7 @@ void initializeScene()
 	std::string rightwallBodyPath = "assets\\bullet\\botwall.btdata";
 	std::string topwallBodyPath = "assets\\bullet\\topwall.btdata";
 	std::string lampBodyPath = "assets\\bullet\\lamp.btdata";
+	std::string ringBodyPath = "assets\\bullet\\readyUp.btdata";
 
 	// Create rigidbodies
 	std::unique_ptr<RigidBody> tableBody;
@@ -824,6 +967,10 @@ void initializeScene()
 	std::unique_ptr<RigidBody> botleftBody;
 	std::unique_ptr<RigidBody> topwallBody;
 	std::unique_ptr<RigidBody> lampBody;
+	std::unique_ptr<RigidBody> ring1Body;
+	std::unique_ptr<RigidBody> ring2Body;
+	std::unique_ptr<RigidBody> ring3Body;
+	std::unique_ptr<RigidBody> ring4Body;
 
 	tableBody = std::make_unique<RigidBody>();
 	bombot1Body = std::make_unique<RigidBody>(btBroadphaseProxy::CharacterFilter);
@@ -842,11 +989,16 @@ void initializeScene()
 	sketchBody = std::make_unique<RigidBody>();
 	trumpBody = std::make_unique<RigidBody>();
 	booksBody = std::make_unique<RigidBody>();
-	botwallBody = std::make_unique<RigidBody>();
-	rightwallBody	= std::make_unique<RigidBody>();
-	botleftBody		= std::make_unique<RigidBody>();
+	botwallBody = std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
+	rightwallBody	= std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
+	botleftBody		= std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
 	topwallBody = std::make_unique<RigidBody>();
 	lampBody = std::make_unique<RigidBody>();
+	ring1Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+	ring2Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+	ring3Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+	ring4Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
+
 
 	// Test gameobject load times
 	std::cout << "loading rigidBodies...";
@@ -875,6 +1027,10 @@ void initializeScene()
 	botleftBody->load(botleftBodyPath);
 	topwallBody->load(topwallBodyPath);
 	lampBody->load(lampBodyPath);
+	ring1Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+	ring2Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+	ring3Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+	ring4Body->load(ringBodyPath, btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
 
 	// Report rigidbody load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -882,11 +1038,12 @@ void initializeScene()
 	std::cout << " success, " << duration << "ms taken" << std::endl << std::endl;
 
 	// Attach rigidbodies
+	players["bombot1"]->attachRigidBody(bombot1Body);
+	players["bombot2"]->attachRigidBody(bombot2Body);
+	players["bombot3"]->attachRigidBody(bombot3Body);
+	players["bombot4"]->attachRigidBody(bombot4Body);
+
 	gameobjects["table"]->attachRigidBody(tableBody);
-	gameobjects["bombot1"]->attachRigidBody(bombot1Body);
-	gameobjects["bombot2"]->attachRigidBody(bombot2Body);
-	gameobjects["bombot3"]->attachRigidBody(bombot3Body);
-	gameobjects["bombot4"]->attachRigidBody(bombot4Body);
 	gameobjects["sphere"]->attachRigidBody(sphereBody);
 	gameobjects["barrelTR"]->attachRigidBody(barrelBody);
 	gameobjects["barrel1"]->attachRigidBody(barrel1Body);
@@ -904,6 +1061,10 @@ void initializeScene()
 	gameobjects["rightwall"]->attachRigidBody(rightwallBody);
 	gameobjects["topwall"]->attachRigidBody(topwallBody);
 	gameobjects["lamp"]->attachRigidBody(lampBody);
+	gameobjects["readyBlue"]->attachRigidBody(ring1Body);
+	gameobjects["readyRed"]->attachRigidBody(ring2Body);
+	gameobjects["readyGreen"]->attachRigidBody(ring3Body);
+	gameobjects["readyYellow"]->attachRigidBody(ring4Body);
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	PROPERTIES		///////////////////////////////
@@ -922,7 +1083,8 @@ void initializeScene()
 		explosionTexMap4,	// Explosion texture 4
 		sphereBodyPath,	// Explosion rigidbody
 		defaultMaterial,
-		bombBodyPath);
+		bombBodyPath,
+		&soundTemplates);
 
 	players["bombot1"]->attachBombManager(bombManager);
 	players["bombot2"]->attachBombManager(bombManager);
@@ -934,6 +1096,11 @@ void initializeScene()
 	players["bombot2"]->setOutlineColour(glm::vec4(1.0f, 0.41f, 0.37f, 1.0f));
 	players["bombot3"]->setOutlineColour(glm::vec4(0.31f, 0.93f, 0.32f, 1.0f));
 	players["bombot4"]->setOutlineColour(glm::vec4(0.88f, 0.87f, 0.33f, 1.0f));
+
+	players["bombot1"]->initParticles(materials["particles"], particleTexMap);
+	players["bombot2"]->initParticles(materials["particles"], particleTexMap);
+	players["bombot3"]->initParticles(materials["particles"], particleTexMap);
+	players["bombot4"]->initParticles(materials["particles"], particleTexMap);
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
@@ -951,7 +1118,6 @@ void initializeScene()
 
 void initializeStates()
 {
-
 	// Test atlas load times
 	std::cout << "Loading atlases..." << std::endl;
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
@@ -960,14 +1126,11 @@ void initializeStates()
 	char startTex[] = "Assets/img/menMain_atlas.png";
 	std::shared_ptr<Texture> startTexMap = std::make_shared<Texture>(startTex, startTex, 1.0f);
 
-	char scoreTex[] = "Assets/img/winScreen_atlas.png";
-	std::shared_ptr<Texture> scoreTexMap = std::make_shared<Texture>(scoreTex, scoreTex, 1.0f);
-
-	char scoreTex2[] = "Assets/img/playerTransLayer_atlas.png";
-	std::shared_ptr<Texture> scoreTex2Map = std::make_shared<Texture>(scoreTex2, scoreTex2, 1.0f);
-
-	char pauseTex[] = "Assets/img/menPause_arlas.png";
+	char pauseTex[] = "Assets/img/menPause_atlas(4000x4000).png";
 	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
+
+	std::string countdownTex = "Assets/img/321(scaled).png";
+	std::shared_ptr<Texture> countdownTexMap = std::make_shared<Texture>(countdownTex, countdownTex, 1.0f);
 
 	// Report atlas load times
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
@@ -976,43 +1139,36 @@ void initializeStates()
 
 	//save them
 	textures["start"] = startTexMap;
-	textures["score"] = scoreTexMap;
-	textures["score2"] = scoreTex2Map;
 	textures["pause"] = pauseTexMap;
 
 	//load up menu's
 	startMenu = std::make_shared<Menu>(startTexMap, 4, 7);
 	startMenu->setMaterial(materials["menu"]);
 
-	scoreMenu = std::make_shared<Menu>(scoreTexMap, 4, 7);
-	scoreMenu->setMaterial(materials["menu"]);
-
-	scoreMenu2 = std::make_shared<Menu>(scoreTex2Map, 4, 7);
-	scoreMenu2->setMaterial(materials["menu"]);
 
 	pauseMenu = std::make_shared<Menu>(pauseTexMap, 4, 7);
 	pauseMenu->setMaterial(materials["menu"]);
+
+	std::shared_ptr<Menu> countdown = std::make_shared<Menu>(countdownTexMap, 2, 2);
+	countdown->setMaterial(materials["menu"]);
 
 	std::cout << "Loading states...";
 	t1 = std::chrono::high_resolution_clock::now();
 
 	//init states.
-	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController());
+	mainMenu = new MainMenu(startMenu, players.at("bombot1")->getController(), &soundTemplates);
 	mainMenu->setPaused(false);
 
 	pause = new Pause(pauseMenu);
 	pause->setPaused(true);
 
-	score = new Score(scoreMenu);
-	score->setPaused(true);
 
-	game = new Game(&gameobjects, &players, &materials, &obstacles, bombManager, pause, score, &playerCamera);
+	game = new Game(&gameobjects, &players, &materials, &textures, &obstacles, &readyUpRings, bombManager, countdown, &soundTemplates, pause, score, &playerCamera);
 	game->setPaused(true);
 
 	states.addGameState("game", game);
 	states.addGameState("MainMenu", mainMenu);
 	states.addGameState("pause", pause);
-	states.addGameState("score", score);
 
 	// Report state load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -1027,13 +1183,13 @@ void bulletNearCallback(btBroadphasePair& collisionPair,
 	// Only dispatch the Bullet collision information if you want the physics to continue
 	// From Bullet user manual
 
-	if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
+	/*if (collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter ||
 		collisionPair.m_pProxy0->m_collisionFilterGroup == btBroadphaseProxy::DebrisFilter &&
 		collisionPair.m_pProxy1->m_collisionFilterGroup == btBroadphaseProxy::SensorTrigger)
 	{
 		return;
-	}
+	}*/
 
 	// Tell the dispatcher to do the collision information
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
@@ -1043,16 +1199,19 @@ void collideWithCorrectType(Player* player, GameObject* object)
 {
 	switch (object->getColliderType())
 	{
-	case COLLIDER_DEFAULT:
+	case GameObject::COLLIDER_DEFAULT:
 		break;
-	case PLAYER:
+	case GameObject::PLAYER:
 		player->checkCollisionWith((Player*)object);
 		break;
-	case BOMB_BASE:
-		player->checkCollisionWith((Bomb*)object);
+	case GameObject::BOMB_BASE:
+		player->checkCollisionWith((Bomb*)object, game->getCurrentState() == Game::GAME_STATE::READYUP);
 		break;
-	case BOMB_EXPLOSION:
-		player->checkCollisionWith((Explosion*)object);
+	case GameObject::BOMB_EXPLOSION:
+		player->checkCollisionWith((Explosion*)object, game->getCurrentState() == Game::GAME_STATE::READYUP);
+		break;
+	case GameObject::READYUP:
+		player->checkCollisionWith((readyUpRing*)object);
 		break;
 	default:
 		break;
@@ -1249,7 +1408,10 @@ void InitErrorFuncCallbackFunction(const char *fmt, va_list ap)
 void CloseCallbackFunction()
 {
 	KEYBOARD_INPUT->Destroy();
-
+	for (auto it : soundTemplates)
+	{
+		it.second.release();
+	}
 }
 
 /* function main()
@@ -1313,6 +1475,7 @@ int main(int argc, char **argv)
 	// Initialize scene
 	initializeShaders();
 	initializeScene();
+
 	initializeStates();
 
 	totalFinish = std::chrono::high_resolution_clock::now();
@@ -1320,7 +1483,7 @@ int main(int argc, char **argv)
 	auto durationS = std::chrono::duration_cast<std::chrono::seconds>(totalFinish - totalStart).count();
 	std::cout << "Total time to initialize: " << durationMS << " ms or " << durationS << " seconds" << std::endl;
 
-
+	srand(time(0));
 	/* Start Game Loop */
 	deltaTime = glutGet(GLUT_ELAPSED_TIME);
 	deltaTime /= 1000.0f;

@@ -198,12 +198,13 @@ void GameObject::update(float dt)
 	rotNeedsUpdating = false;
 }
 
-void GameObject::draw(Camera &camera)
+void GameObject::draw(Camera &camera, Camera &shadow)
 {
 	if (mesh != nullptr)
 	{
 		material->shader->bind();
 		material->mat4Uniforms["u_mvp"] = camera.getViewProj() * m_pLocalToWorldMatrix;
+		material->mat4Uniforms["u_lmvp"] = shadow.getViewProj() * m_pLocalToWorldMatrix;
 		material->mat4Uniforms["u_mv"] = camera.getView() * m_pLocalToWorldMatrix;
 		material->vec4Uniforms["u_outlineColour"] = outlineColour;
 		material->vec4Uniforms["u_transparency"] = glm::vec4(transparency);
@@ -227,7 +228,7 @@ void GameObject::draw(Camera &camera)
 
 		// Draw children
 		for (int i = 0; i < m_pChildren.size(); ++i)
-			m_pChildren[i]->draw(camera);
+			m_pChildren[i]->draw(camera, shadow);
 	}
 }
 
