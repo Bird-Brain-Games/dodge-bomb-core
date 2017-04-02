@@ -201,6 +201,8 @@ bool Sound::load(std::string filename, bool isLoop)
 //plays the sound
 void Sound::play()
 {
+	//if (isPlaying()) return;
+
 	// plays the sound
 	sys.result = sys.system->playSound(sound, 0, true, &channel); checkResult(sys.result);
 
@@ -226,6 +228,24 @@ void Sound::pause()
 	if (isPlaying())
 	{
 		sys.result = channel->setPaused(true); 
+		checkResult(sys.result);
+	}
+}
+
+void Sound::resume()
+{
+	if (isPlaying())
+	{
+		sys.result = channel->setPaused(false);
+		checkResult(sys.result);
+	}
+}
+
+void Sound::stop()
+{
+	if (isPlaying())
+	{
+		sys.result = channel->stop();
 		checkResult(sys.result);
 	}
 }

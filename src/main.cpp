@@ -473,18 +473,27 @@ void initializeScene()
 	soundTemplates["s_menuSwitch"] = Sound(soundPath + "switch_fx.wav", false);
 
 	// Battle music
-	soundTemplates["m_gameMusic"] = Sound(soundPath + "GameTheme.wav");
+	soundTemplates["m_gameMusic"] = Sound(soundPath + "GameTheme.wav", true);
+	soundTemplates["m_gameTrack1"] = Sound(soundPath + "Music Layers/layer_1.wav", true);
+	soundTemplates["m_gameTrack2"] = Sound(soundPath + "Music Layers/layer_2.wav", true);
+	soundTemplates["m_gameTrack3"] = Sound(soundPath + "Music Layers/layer_3.wav", true);
+
+	soundTemplates["s_countdown"] = Sound(soundPath + "3_2_1_DodgeBomb.wav", false);
 
 	// Battle SFX
-	soundTemplates["s_bombExplosion1"] = Sound(soundPath + "bomb_1.wav", false);
-	soundTemplates["s_bombExplosion2"] = Sound(soundPath + "bomb_2.wav", false);
-	soundTemplates["s_bombExplosion3"] = Sound(soundPath + "bomb_3.wav", false);
-	soundTemplates["s_bombExplosion4"] = Sound(soundPath + "bomb_4.wav", false);
+	soundTemplates["s_bombExplosion1"] = Sound(soundPath + "bomb sounds/bomb_1.wav", false);
+	soundTemplates["s_bombExplosion2"] = Sound(soundPath + "bomb sounds/bomb_2.wav", false);
+	soundTemplates["s_bombExplosion3"] = Sound(soundPath + "bomb sounds/bomb_3.wav", false);
+	soundTemplates["s_bombExplosion4"] = Sound(soundPath + "bomb sounds/bomb_4.wav", false);
+	soundTemplates["s_bombExplosion5"] = Sound(soundPath + "bomb sounds/bomb_5.wav", false);
+	soundTemplates["s_bombExplosion6"] = Sound(soundPath + "bomb sounds/bomb_6.wav", false);
+	soundTemplates["s_bombExplosion7"] = Sound(soundPath + "bomb sounds/bomb_7.wav", false);
+	soundTemplates["s_bombExplosion8"] = Sound(soundPath + "bomb sounds/bomb_8.wav", false);
 
-	soundTemplates["s_damage1"] = Sound(soundPath + "bothit_fx.wav", false);
-	soundTemplates["s_damage2"] = Sound(soundPath + "bothit2_fx.wav", false);
-	soundTemplates["s_damage3"] = Sound(soundPath + "bothit3_fx.wav", false);
-	soundTemplates["s_damage4"] = Sound(soundPath + "bothit4_fx.wav", false);
+	soundTemplates["s_damage1"] = Sound(soundPath + "Hit sounds/red_hit.wav", false);
+	soundTemplates["s_damage2"] = Sound(soundPath + "Hit sounds/blue_hit.wav", false);
+	soundTemplates["s_damage3"] = Sound(soundPath + "Hit sounds/green_hit.wav", false);
+	soundTemplates["s_damage4"] = Sound(soundPath + "Hit sounds/yellow_hit.wav", false);
 
 	soundTemplates["s_footstep1"] = Sound(soundPath + "bot_walk1.wav", true);
 	soundTemplates["s_footstep2"] = Sound(soundPath + "bot_walk2.wav", true);

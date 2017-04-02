@@ -44,7 +44,7 @@ Player::Player(glm::vec3 position,
 	s_ready1 = Sound(soundTemplates->at("d_ready" + std::to_string(playerNum + 1) + "_1"));
 	s_ready2 = Sound(soundTemplates->at("d_ready" + std::to_string(playerNum + 1) + "_2"));
 	s_win1 = Sound(soundTemplates->at("d_win" + std::to_string(playerNum + 1) + "_1"));
-	s_win1 = Sound(soundTemplates->at("d_win" + std::to_string(playerNum + 1) + "_2"));
+	s_win2 = Sound(soundTemplates->at("d_win" + std::to_string(playerNum + 1) + "_2"));
 }
 
 Player::Player(Player& other)
