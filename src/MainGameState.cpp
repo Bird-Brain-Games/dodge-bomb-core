@@ -1055,6 +1055,16 @@ void Game::handleKeyboardInput()
 		players->at("bombot2")->setActive(true);
 		players->at("bombot2")->setPosition(glm::vec3(15.0f * players->at("bombot2")->getPlayerNum(), 35.0f, 0.0f));
 	}
+	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('J'))
+	{
+		players->at("bombot3")->setActive(true);
+		players->at("bombot3")->setPosition(glm::vec3(15.0f * players->at("bombot3")->getPlayerNum(), 35.0f, 0.0f));
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('J'))
+	{
+		players->at("bombot4")->setActive(true);
+		players->at("bombot4")->setPosition(glm::vec3(15.0f * players->at("bombot4")->getPlayerNum(), 35.0f, 0.0f));
+	}
 
 
 

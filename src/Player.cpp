@@ -258,13 +258,13 @@ void Player::handleInput(float dt)
 	{
 		if (LStick.x < -0.1 || LStick.x > 0.1)
 		{
-			mesh->setAnim("walk");
+			setAnim("walk");
 			trans.x = LStick.x / 2;
 			hasMoved = true;
 		}
 		if (LStick.y < -0.1 || LStick.y > 0.1)
 		{
-			mesh->setAnim("walk");
+			setAnim("walk");
 			trans.z = -LStick.y / 2;
 			hasMoved = true;
 		}
@@ -307,7 +307,7 @@ void Player::handleInput(float dt)
 			playerVelocity = glm::vec2(0.0f);
 
 		bombManager->throwBomb(this, normalized, playerVelocity, throwingForce);
-		mesh->setAnim("throw");
+		setAnim("throw");
 		currentCooldown += bombCooldown;
 	}
 
@@ -424,6 +424,7 @@ void Player::attachBombManager(std::shared_ptr<BombManager> manager)
 void Player::setAnim(std::string _name)
 {
 	mesh->setAnim(_name);
+	//std::cout << "Set animation: " << _name << std::endl;
 }
 
 void Player::takeDamage(int damage)
@@ -448,7 +449,7 @@ void Player::takeDamage(int damage)
 	else if (health == 1)
 	{
 		smoke.play();
-		mesh->setAnim("stumble");
+		setAnim("stumble");
 	}
 }
 
