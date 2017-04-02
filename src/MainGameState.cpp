@@ -292,10 +292,9 @@ void Game::update(float dt)
 		int count = 0;
 		for (auto it : *players)
 		{
-
+			count++;
 			if (it.second->getController()->conButton(XINPUT_GAMEPAD_START) && currentGameState == MAIN)
 				pausing = count;
-			count++;
 		}
 
 		if (pausing > 0 && pauseTimer > 1.0)
@@ -329,6 +328,7 @@ void Game::update(float dt)
 				pauseTimer = 0;
 				break;
 			}
+			pausing = 0;
 		}
 		winner = deathCheck();
 		if (winner > 0)
