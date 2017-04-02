@@ -99,6 +99,7 @@ private:
 	void handleKeyboardInputShaders();
 
 
+
 private:
 	FrameBufferObject fboUnlit;
 	FrameBufferObject fboBright;
@@ -128,6 +129,13 @@ private:
 	Camera * camera;
 
 	Sound m_gameMusic;
+	Sound m_gameTrack1;
+	Sound m_gameTrack2;
+	Sound m_gameTrack3;
+	float fadeTimer;
+	int numTracksPlaying;
+
+	Sound s_countDown;
 
 	int pausing;
 	float pauseTimer;
@@ -166,6 +174,8 @@ private:
 	// Ready-up controls
 	std::shared_ptr<Menu> countdown;
 	float currentCountdown = 0.0f;
+	int numActivePlayers;
+	int numDeadPlayers;
 
 	// Lighting Controls
 	float innerCutOff = 0.1; // Spot Light Size
@@ -209,6 +219,7 @@ private:
 
 private:
 	//static 
+	static float maxFadeTime;
 
 	// A few conversions to know
 	const float degToRad = 3.14159f / 180.0f;

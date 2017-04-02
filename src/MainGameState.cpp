@@ -78,6 +78,8 @@ void LUT::unbind(GLuint textureUnit)
 	glBindTexture(GL_TEXTURE_3D, 0);
 }
 
+float Game::maxFadeTime = 0.3f;
+
 Game::Game
 (
 	std::map<std::string, std::shared_ptr<GameObject>>* _scene,
@@ -133,7 +135,17 @@ Game::Game
 
 	// Initialize sounds
 	m_gameMusic = Sound(soundTemplates->at("m_gameMusic"));
-	m_gameMusic.setPosition(glm::vec3(23.0f, 45.0f, 25.0f));
+	m_gameMusic.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+
+	m_gameTrack1 = Sound(soundTemplates->at("m_gameTrack1"));
+	m_gameTrack2 = Sound(soundTemplates->at("m_gameTrack2"));
+	m_gameTrack3 = Sound(soundTemplates->at("m_gameTrack3"));
+	m_gameTrack1.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameTrack2.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameTrack3.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+
+	s_countDown = Sound(soundTemplates->at("s_countdown"));
+	s_countDown.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
 }
 
 void Game::setPaused(int a_paused)
@@ -141,9 +153,17 @@ void Game::setPaused(int a_paused)
 	if (a_paused == 0)
 	{
 		m_isPaused = false;
+		m_gameTrack1.resume();
+		m_gameTrack2.resume();
+		m_gameTrack3.resume();
 	}
 	else if (a_paused == 1)
+	{
 		m_isPaused = true;
+		m_gameTrack1.pause();
+		m_gameTrack2.pause();
+		m_gameTrack3.pause();
+	}
 	else if (a_paused == -1)
 	{
 		m_isPaused = false;
@@ -154,16 +174,22 @@ void Game::setPaused(int a_paused)
 		bombManager->clearAllBombs();
 		changeState(READYUP);
 		menuDelay = 0.3f;
+
+		m_gameTrack1.stop();
+		m_gameTrack2.stop();
+		m_gameTrack3.stop();
 	}
 }
 
 void Game::resetPlayers()
 {
+	numActivePlayers = 0;
 	for (auto it : *players)
 	{
 		if (it.second->isActive())
 		{
 			it.second->reset(defaultPlayerPositions.at(it.second->getPlayerNum()));
+			numActivePlayers++;
 		}
 	}
 	/*players->at("bombot1")->reset(glm::vec3(-12.0f, 39.5f, 10.0f));
@@ -335,6 +361,23 @@ void Game::update(float dt)
 		{
 			winner--;
 			changeState(WIN);
+		}
+
+		int playerDeathCounter = 0;
+		for (auto it : *players)
+		{
+			if (it.second->isActive() && it.second->getHealth() == 0)
+				playerDeathCounter++;
+		}
+
+		if (numDeadPlayers != playerDeathCounter)
+		{
+			numDeadPlayers = playerDeathCounter;
+			if (playerDeathCounter > 1)
+				m_gameTrack3.setVolume(1.0f);
+			else if (playerDeathCounter > 0)
+				m_gameTrack2.setVolume(1.0f);
+				
 		}
 	}
 
@@ -1091,6 +1134,11 @@ void Game::changeState(Game::GAME_STATE newState)
 		innerCutOff = innerDefault;
 		outerCutOff = outerDefault;
 
+		// Reset the sounds
+		m_gameTrack1.stop();
+		m_gameTrack2.stop();
+		m_gameTrack3.stop();
+
 		for (auto it : *obstacles)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
@@ -1105,6 +1153,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		break;
 
 	case Game::COUNTDOWN:
+		s_countDown.play();
 		currentCountdown = 4.0f;
 		for (auto it : *obstacles)
 		{
@@ -1124,6 +1173,17 @@ void Game::changeState(Game::GAME_STATE newState)
 		playerMoveLerp = 0.0f;
 		cameraMoveLerp = 0.0f;
 		playerStartPosition = players->at("bombot" + std::to_string(winner))->getWorldPosition();
+		break;
+
+	case Game::MAIN:
+		m_gameTrack1.play();
+		m_gameTrack2.play();
+		m_gameTrack3.play();
+
+		m_gameTrack2.setVolume(0.0f);
+		m_gameTrack3.setVolume(0.0f);
+		numTracksPlaying = 1;
+		numDeadPlayers = 0;
 		break;
 
 	default:

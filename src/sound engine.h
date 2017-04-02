@@ -77,6 +77,8 @@ public:
 
 	//pauses the sound
 	void pause();
+	void resume();
+	void stop();
 
 
 	//a variable that allows us to access the sound engine
