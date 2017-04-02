@@ -486,18 +486,27 @@ void Game::draw()
 	break;
 	}
 
-
-	drawParticles(camera);
-	fboUnlit.bindFrameBufferForDrawing();
-	
-
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
 		RigidBody::drawDebug(camera->getView(), camera->getProj());
 
-	// Unbind scene FBO
+	//unbind the frame buffer
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
 	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
+
+	//copy and enable the frame buffer
+	fboUnlit.copyBuffer(fboUnlit.getWidth(), fboUnlit.getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST, fboParticle.getId());
+	fboParticle.bindFrameBufferForDrawing();
+
+	//draw the particles
+	drawParticles(camera);
+	//unbind the frame buffer
+	fboParticle.unbindFrameBuffer(windowWidth, windowHeight);
+
+
+
+	// Unbind scene FBO
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Post Processing /////////////////////////////
@@ -568,7 +577,7 @@ void Game::updateScene(float dt)
 
 void Game::initializeFrameBuffers()
 {
-	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 3, true);
+	fboUnlit.createFrameBuffer(windowWidth, windowHeight, 2, true);
 	spunkMap.createFrameBuffer(windowWidth, windowHeight, 1, true);
 	fboBright.createFrameBuffer(160, 120, 1, false);
 	fboBlurA.createFrameBuffer(160, 120, 1, false);
@@ -583,6 +592,7 @@ void Game::initializeFrameBuffers()
 	bokehBfbo.createFrameBuffer(windowWidth, windowHeight, 1, true);
 	fboWithBokeh.createFrameBuffer(windowWidth, windowHeight, 1, true);
 
+	fboParticle.createFrameBuffer(windowWidth, windowHeight, 1, true);
 }
 
 void Game::drawScene(Camera* _camera, Camera* _shadow)
