@@ -114,8 +114,7 @@ Game::Game
 	_camera->update();
 	cameraDefaultForward = _camera->getForward();
 	initializeFrameBuffers();
-	currentGameState = MAIN;
-	changeState(READYUP);
+	
 	winScreen = std::make_shared<Menu>(textures->at("win"), 1, 1);
 	winScreen->setMaterial(materials->at("menu"));
 
@@ -126,8 +125,8 @@ Game::Game
 
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
-	colorCorrection = LUT_OFF;
-	currentLUT = nullptr;
+	colorCorrection = LUT_SEPIA;
+	currentLUT = &sepiaLUT;
 
 	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.0f, -16.0f));	// top left
 	defaultPlayerPositions.push_back(glm::vec3(45.0f, 39.5f, -25.0f));	// top right
@@ -135,8 +134,9 @@ Game::Game
 	defaultPlayerPositions.push_back(glm::vec3(57.0f, 39.5f, 7.0f));	// bottom right
 
 	// Initialize sounds
-	m_gameMusic = Sound(soundTemplates->at("m_gameMusic"));
+	m_gameMusic = Sound(soundTemplates->at("m_readyMusic"));
 	m_gameMusic.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameMusic.setVolume(0.5f);
 
 	m_gameTrack1 = Sound(soundTemplates->at("m_gameTrack1"));
 	m_gameTrack2 = Sound(soundTemplates->at("m_gameTrack2"));
@@ -149,6 +149,10 @@ Game::Game
 
 	s_countDown = Sound(soundTemplates->at("s_countdown"));
 	s_countDown.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	s_countDown.setVolume(0.4);
+	
+	currentGameState = MAIN;
+	changeState(READYUP);
 }
 
 void Game::setPaused(int a_paused)
@@ -181,6 +185,7 @@ void Game::setPaused(int a_paused)
 		m_gameTrack1.stop();
 		m_gameTrack2.stop();
 		m_gameTrack3.stop();
+		//m_gameMusic.play();
 	}
 }
 
@@ -912,7 +917,7 @@ void Game::colorCorrectionPass(FrameBufferObject& fboIn, FrameBufferObject& fboO
 	colorMaterial->shader->bind();
 	colorMaterial->shader->sendUniformInt("u_tex", 0);
 	colorMaterial->shader->sendUniformInt("u_lookup", 6);
-	colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
+	colorMaterial->shader->sendUniformFloat("u_mixAmount", 0.5f);
 	colorMaterial->shader->sendUniformFloat("u_lookupSize", currentLUT->getSize());
 	colorMaterial->sendUniforms();
 
@@ -1168,6 +1173,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		m_gameTrack1.stop();
 		m_gameTrack2.stop();
 		m_gameTrack3.stop();
+		if (!m_gameMusic.isPlaying()) m_gameMusic.play();
 
 		for (auto it : *obstacles)
 		{
@@ -1184,6 +1190,8 @@ void Game::changeState(Game::GAME_STATE newState)
 
 	case Game::COUNTDOWN:
 		s_countDown.play();
+		m_gameMusic.stop();
+
 		currentCountdown = 4.0f;
 		for (auto it : *obstacles)
 		{
