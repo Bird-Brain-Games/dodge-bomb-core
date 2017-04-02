@@ -474,7 +474,7 @@ void initializeScene()
 	soundTemplates["s_menuSwitch"] = Sound(soundPath + "switch_fx.wav", false);
 
 	// Battle music
-	soundTemplates["m_gameMusic"] = Sound(soundPath + "GameTheme.wav", true);
+	soundTemplates["m_readyMusic"] = Sound(soundPath + "MenuTheme.wav", true);
 	soundTemplates["m_gameTrack1"] = Sound(soundPath + "Music Layers/layer_1.wav", true);
 	soundTemplates["m_gameTrack2"] = Sound(soundPath + "Music Layers/layer_2.wav", true);
 	soundTemplates["m_gameTrack3"] = Sound(soundPath + "Music Layers/layer_3.wav", true);
@@ -920,7 +920,7 @@ void initializeStates()
 	char pauseTex[] = "Assets/img/menPause_atlas(4000x4000).png";
 	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
 
-	std::string countdownTex = "Assets/img/countdown.png";
+	std::string countdownTex = "Assets/img/321(scaled).png";
 	std::shared_ptr<Texture> countdownTexMap = std::make_shared<Texture>(countdownTex, countdownTex, 1.0f);
 
 	// Report atlas load times
