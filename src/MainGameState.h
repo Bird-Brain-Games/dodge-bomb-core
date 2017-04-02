@@ -98,6 +98,9 @@ private:
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
 
+	void changeColorCorrection(LUT_MODE);
+
+
 
 private:
 	FrameBufferObject fboUnlit;
@@ -128,6 +131,13 @@ private:
 	Camera * camera;
 
 	Sound m_gameMusic;
+	Sound m_gameTrack1;
+	Sound m_gameTrack2;
+	Sound m_gameTrack3;
+	float fadeTimer;
+	int numTracksPlaying;
+
+	Sound s_countDown;
 
 	int pausing;
 	float pauseTimer;
@@ -154,6 +164,7 @@ private:
 
 	LUT contrastLUT;
 	LUT sepiaLUT;
+	LUT* currentLUT;
 	LUT_MODE colorCorrection;
 
 	float outlineWidth = 4.0;
@@ -166,6 +177,8 @@ private:
 	// Ready-up controls
 	std::shared_ptr<Menu> countdown;
 	float currentCountdown = 0.0f;
+	int numActivePlayers;
+	int numDeadPlayers;
 
 	// Lighting Controls
 	float innerCutOff = 0.1; // Spot Light Size
@@ -192,7 +205,8 @@ private:
 	// Bloom Controls
 	glm::vec4 bloomThreshold = glm::vec4(0.4f);
 	int numBlurPasses = 4;
-	bool bloomToggle = false;
+	bool bloomToggle = true;
+	bool depthToggle = false;
 
 	// For Toggling
 	bool  ambientToggle = true;
@@ -207,8 +221,12 @@ private:
 	bool  rimToggle = true;
 	float kr = rim; // Rim Lighting
 
+	// SOUND CONTROLS
+	float musicVolume = 0.2;
+
 private:
 	//static 
+	static float maxFadeTime;
 
 	// A few conversions to know
 	const float degToRad = 3.14159f / 180.0f;
