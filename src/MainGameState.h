@@ -146,9 +146,9 @@ private:
 	// Win state controls
 	int winner;
 
-	glm::vec3 winPlayerPosition = glm::vec3(5.0f, 43.0f, 0.0f);
+	glm::vec3 winPlayerPosition = glm::vec3(11.0f, 43.0f, 18.0f);
 	glm::vec3 winCameraPosition = glm::vec3(20.0f, 53.0f, 30.0f);
-	glm::vec3 winCameraForward = glm::vec3(0.01f, -2.0f, -5.0f);
+	glm::vec3 winCameraForward = glm::vec3(-1.5f, -2.0f, -2.0f);
 	glm::vec3 cameraDefaultPosition = glm::vec3(23.0f, 90.0f, 40.0f);
 	glm::vec2 cameraDefaultAngle = glm::vec2(3.14159012f, 5.3f);
 	glm::vec3 cameraDefaultForward;
@@ -222,7 +222,7 @@ private:
 	float kr = rim; // Rim Lighting
 
 	// SOUND CONTROLS
-	float musicVolume = 0.1;
+	float musicVolume = 0.25;
 
 private:
 	//static 
