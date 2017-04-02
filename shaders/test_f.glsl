@@ -11,7 +11,7 @@ in vec2 texCoord;
 	//vec3 posEye;
 //} vIn;
 
-layout(location = 2) out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 
 void main()
 {

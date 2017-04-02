@@ -112,6 +112,7 @@ private:
 	FrameBufferObject fboBloomed;
 	FrameBufferObject fboWithBokeh;
 	FrameBufferObject spunkMap;
+	FrameBufferObject fboParticle;
 
 	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 0.0);
 
