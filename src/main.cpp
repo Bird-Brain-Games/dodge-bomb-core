@@ -480,14 +480,41 @@ void initializeScene()
 	soundTemplates["s_bombExplosion2"] = Sound(soundPath + "bomb_2.wav", false);
 	soundTemplates["s_bombExplosion3"] = Sound(soundPath + "bomb_3.wav", false);
 	soundTemplates["s_bombExplosion4"] = Sound(soundPath + "bomb_4.wav", false);
+
 	soundTemplates["s_damage1"] = Sound(soundPath + "bothit_fx.wav", false);
 	soundTemplates["s_damage2"] = Sound(soundPath + "bothit2_fx.wav", false);
 	soundTemplates["s_damage3"] = Sound(soundPath + "bothit3_fx.wav", false);
 	soundTemplates["s_damage4"] = Sound(soundPath + "bothit4_fx.wav", false);
+
 	soundTemplates["s_footstep1"] = Sound(soundPath + "bot_walk1.wav", true);
 	soundTemplates["s_footstep2"] = Sound(soundPath + "bot_walk2.wav", true);
 	soundTemplates["s_footstep3"] = Sound(soundPath + "bot_walk3.wav", true);
 	soundTemplates["s_footstep4"] = Sound(soundPath + "bot_walk4.wav", true);
+
+	soundTemplates["s_footstep1"] = Sound(soundPath + "bot_walk1.wav", true);
+	soundTemplates["s_footstep2"] = Sound(soundPath + "bot_walk2.wav", true);
+	soundTemplates["s_footstep3"] = Sound(soundPath + "bot_walk3.wav", true);
+	soundTemplates["s_footstep4"] = Sound(soundPath + "bot_walk4.wav", true);
+
+	soundTemplates["d_ready1_1"] = Sound(soundPath + "Bombot Dialogue/red_ready_1.wav", false);
+	soundTemplates["d_ready2_1"] = Sound(soundPath + "Bombot Dialogue/blue_ready_1.wav", false);
+	soundTemplates["d_ready3_1"] = Sound(soundPath + "Bombot Dialogue/green_ready_1.wav", false);
+	soundTemplates["d_ready4_1"] = Sound(soundPath + "Bombot Dialogue/yellow_ready_1.wav", false);
+
+	soundTemplates["d_ready1_2"] = Sound(soundPath + "Bombot Dialogue/red_ready_2.wav", false);
+	soundTemplates["d_ready2_2"] = Sound(soundPath + "Bombot Dialogue/blue_ready_2.wav", false);
+	soundTemplates["d_ready3_2"] = Sound(soundPath + "Bombot Dialogue/green_ready_2.wav", false);
+	soundTemplates["d_ready4_2"] = Sound(soundPath + "Bombot Dialogue/yellow_ready_2.wav", false);
+
+	soundTemplates["d_win1_1"] = Sound(soundPath + "Bombot Dialogue/red_win_1.wav", false);
+	soundTemplates["d_win2_1"] = Sound(soundPath + "Bombot Dialogue/blue_win_1.wav", false);
+	soundTemplates["d_win3_1"] = Sound(soundPath + "Bombot Dialogue/green_win_1.wav", false);
+	soundTemplates["d_win4_1"] = Sound(soundPath + "Bombot Dialogue/yellow_win_1.wav", false);
+
+	soundTemplates["d_win1_2"] = Sound(soundPath + "Bombot Dialogue/red_win_2.wav", false);
+	soundTemplates["d_win2_2"] = Sound(soundPath + "Bombot Dialogue/blue_win_2.wav", false);
+	soundTemplates["d_win3_2"] = Sound(soundPath + "Bombot Dialogue/green_win_2.wav", false);
+	soundTemplates["d_win4_2"] = Sound(soundPath + "Bombot Dialogue/yellow_win_2.wav", false);
 
 	
 	
@@ -1238,7 +1265,7 @@ int main(int argc, char **argv)
 	auto durationS = std::chrono::duration_cast<std::chrono::seconds>(totalFinish - totalStart).count();
 	std::cout << "Total time to initialize: " << durationMS << " ms or " << durationS << " seconds" << std::endl;
 
-
+	srand(time(0));
 	/* Start Game Loop */
 	deltaTime = glutGet(GLUT_ELAPSED_TIME);
 	deltaTime /= 1000.0f;

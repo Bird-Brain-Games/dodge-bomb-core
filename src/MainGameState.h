@@ -136,7 +136,7 @@ private:
 	// Win state controls
 	int winner;
 
-	glm::vec3 winPlayerPosition = glm::vec3(0.0f, 43.0f, 0.0f);
+	glm::vec3 winPlayerPosition = glm::vec3(5.0f, 43.0f, 0.0f);
 	glm::vec3 winCameraPosition = glm::vec3(20.0f, 53.0f, 30.0f);
 	glm::vec3 winCameraForward = glm::vec3(0.01f, -2.0f, -5.0f);
 	glm::vec3 cameraDefaultPosition = glm::vec3(23.0f, 90.0f, 40.0f);

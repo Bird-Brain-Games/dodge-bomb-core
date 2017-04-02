@@ -622,5 +622,6 @@ void loadAnimations(std::shared_ptr<Holder> _temp)
 	_temp->AniLoad("Assets/htr/throw", "throw");
 	_temp->AniLoad("Assets/htr/walk", "walk");
 	_temp->AniLoad("Assets/htr/stumble_Take_001", "stumble");
+	_temp->AniLoad("Assets/htr/win_Take_001", "win");
 	_temp->setAnim("idle");
 }

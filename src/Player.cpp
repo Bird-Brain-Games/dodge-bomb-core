@@ -1,5 +1,7 @@
 #include "Player.h"
 #include <iostream>
+//#include "GLM\gtc\random.hpp"
+#include <random>
 
 const float degToRad = 3.14159f / 180.0f;
 
@@ -38,6 +40,11 @@ Player::Player(glm::vec3 position,
 	s_footstep = Sound(soundTemplates->at("s_footstep" + std::to_string(playerNum + 1)));
 	s_footstep.setVolume(0.1f);
 	moving = false;
+
+	s_ready1 = Sound(soundTemplates->at("d_ready" + std::to_string(playerNum + 1) + "_1"));
+	s_ready2 = Sound(soundTemplates->at("d_ready" + std::to_string(playerNum + 1) + "_2"));
+	s_win1 = Sound(soundTemplates->at("d_win" + std::to_string(playerNum + 1) + "_1"));
+	s_win1 = Sound(soundTemplates->at("d_win" + std::to_string(playerNum + 1) + "_2"));
 }
 
 Player::Player(Player& other)
@@ -461,6 +468,32 @@ void Player::reset(glm::vec3 newPos)
 glm::vec3 Player::getCurrentVelocity()
 {
 	return rigidBody->getLinearVelocity();
+}
+
+void Player::setActive(bool active)
+{
+	currentState = (active) ? P_NORMAL : P_INACTIVE;
+	if (currentState == P_NORMAL)
+	{
+		//float random = glm::linearRand(0.0f, 1.0f);
+		float random = (float)rand() / RAND_MAX;
+		if (random < 0.5)
+			s_ready1.play();
+		else
+			s_ready2.play();
+	}
+}
+
+void Player::playWin()
+{
+	setRotationAngleY(0.0f);
+	setAnim("win");
+
+	float random = (float)rand() / RAND_MAX;
+	if (random < 0.5)
+		s_win1.play();
+	else
+		s_win2.play();
 }
 
 //void Player::lookDirectlyAtExplosion(glm::vec3 direction)
