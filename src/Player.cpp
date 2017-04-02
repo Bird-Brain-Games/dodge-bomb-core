@@ -54,7 +54,7 @@ Player::~Player()
 }
 
 
-void Player::initParticles(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture)
+void Player::initParticleSmoke(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture)
 {
 	//make smoker slower. somewhere between 100-250. die faster so not as tall.
 	smoke.lifeRange = glm::vec3(0.5, 0.85, 0.0); // this should be a vec2, rands life from x to y.
@@ -68,10 +68,32 @@ void Player::initParticles(std::shared_ptr<Material> _material, std::shared_ptr<
 
 	smoke.material = _material;
 	smoke.texture = _texture;
-	smoke.initialize(250);
+	smoke.initialize(25);
 	smoke.play();
 	smoke.dimensions = glm::vec2(5.0f, 2.0f);
 	smoke.max = 5;
+	smoke.mixer = 0.8;
+}
+
+void Player::initParticleSpark(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture)
+{
+	//make smoker slower. somewhere between 100-250. die faster so not as tall.
+	sparks.lifeRange = glm::vec3(0.35, 0.5, 0.0); // this should be a vec2, rands life from x to y.
+	sparks.initialForceMin = glm::vec3(-3.5, -3.5, 0.0);
+	sparks.initialForceMax = glm::vec3(3.5, 0.0, 7.5);
+	sparks.initialPosition = glm::vec3(0.0f, 5.0f, 0.0f);
+
+	sparks.size = 1.0f;
+	sparks.initialGravity = glm::vec3(0.0f, 2.3f, 0.0f);
+	sparks.colour = glm::vec3(0.0, 0.0, 0.0);
+
+	sparks.material = _material;
+	sparks.texture = _texture;
+	sparks.initialize(2);
+	sparks.play();
+	sparks.dimensions = glm::vec2(5.0f, 2.0f);
+	sparks.max = 5;
+	sparks.mixer = 0.0;
 }
 
 void Player::draw(Camera &camera, Camera& shadow)
@@ -91,9 +113,14 @@ void Player::draw(Camera &camera, Camera& shadow)
 	}
 }
 
-void Player::drawParticles(Camera& camera)
+void Player::drawSmoke(Camera& camera)
 {
 	smoke.draw(camera);
+}
+
+void Player::drawSparks(Camera& camera)
+{
+	sparks.draw(camera);
 }
 
 int Player::getHealth()
@@ -110,9 +137,13 @@ void Player::update(float dt, bool canMove)
 {
 	// Update the bomb cooldown
 	smoke.initialPosition = getWorldPosition() + glm::vec3(0.0, 2.2, 0.0);
+	sparks.initialPosition = getWorldPosition() + glm::vec3(0.0, -1.0, 0.0);
 
 	glm::vec3 velocity = rigidBody->getLinearVelocity() * glm::vec3(0.3);
+	
 	smoke.update(dt, velocity);
+	sparks.update(dt, velocity);
+
 	if (currentCooldown > 0.0f)
 	{
 		currentCooldown -= dt;
@@ -425,6 +456,7 @@ void Player::takeDamage(int damage)
 	else if (health == 1)
 	{
 		smoke.play();
+		sparks.play();
 	}
 }
 

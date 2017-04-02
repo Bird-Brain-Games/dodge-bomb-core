@@ -93,6 +93,8 @@ void ParticleEmmiter::update(float dt, glm::vec3 velocity)
 
 void ParticleEmmiter::draw(Camera _camera)
 {
+	if (playing == false) return;
+
 	Attribute* points = vao.getAttribute(AttributeLocations::VERTEX);
 	Attribute* cycle = vao.getAttribute(AttributeLocations::TEX_COORD);
 
@@ -112,16 +114,18 @@ void ParticleEmmiter::draw(Camera _camera)
 		texture->bind(GL_TEXTURE0, GL_TEXTURE1);
 	}
 
-	material->shader->bind();
+
 	material->vec2Uniforms["dimensions"] = dimensions;
 	material->mat4Uniforms["u_mvp"] = _camera.getViewProj();
 	material->mat4Uniforms["u_mv"] = _camera.getView();
 	material->mat4Uniforms["u_proj"] = _camera.getProj();
 	material->intUniforms["u_tex"] = 0;
 	material->floatUniforms["u_size"] = size;
+	material->floatUniforms["mixer"] = mixer;
 	material->vec3Uniforms["colour"] = colour;
 	material->sendUniforms();
-
+	//99, 183, 255
+	//0.38, 0.717, 1
 	glDepthMask(GL_FALSE);
 	vao.draw();
 	glDepthMask(GL_TRUE);

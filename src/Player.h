@@ -49,14 +49,15 @@ public:
 	Player(Player&);
 	~Player();
 
-	void initParticles(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture);
-
+	void initParticleSmoke(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture);
+	void initParticleSpark(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture);
 
 	void handleInput(float dt);
 
 	void update(float deltaT, bool canMove);
 	void draw(Camera &camera, Camera& shadow);
-	void drawParticles(Camera& camera);
+	void drawSmoke(Camera& camera);
+	void drawSparks(Camera& camera);
 
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	void attachBombManager(std::shared_ptr<BombManager> _manager);

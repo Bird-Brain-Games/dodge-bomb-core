@@ -19,8 +19,14 @@ in VertexData
 	vec3 posEye;
 } vIn[]; // array size = num vertices in primitve
 
+out GeomData
+{
+	vec3 normal;
+	vec2 texCoord;
+	vec3 posEye;
+} gOut;
 
-out vec2 texCoord;
+
 
 uniform vec2 dimensions; // the size of our atlas (relative to number of elements)
 
@@ -42,20 +48,28 @@ void PointToQuadBillboarded(vec4 p, float size)
 	vec4 botRight = vec4(pEye.xy + vec2(halfSize, -halfSize), pEye.z, 1.0);
 
 	gl_Position = u_proj * topRight;
-	texCoord = vec2(length.y, height.y);
+	gOut.posEye = topRight.xyz;
+	gOut.texCoord = vec2(length.y, height.y);
+	gOut.normal = (p - topRight).xyz;
 	EmitVertex();
 	
 	gl_Position = u_proj * topLeft;
-	texCoord = vec2(length.x, height.y);
+	gOut.posEye = topLeft.xyz;
+	gOut.texCoord = vec2(length.x, height.y);
+	gOut.normal = (p - topLeft).xyz;
 	EmitVertex();
 	
 	gl_Position = u_proj * botRight;
-	texCoord = vec2(length.y, height.x);
+	gOut.posEye = botRight.xyz;
+	gOut.texCoord = vec2(length.y, height.x);
+	gOut.normal = (p - botRight).xyz;
 	EmitVertex();
 
 	
 	gl_Position = u_proj * botLeft;
-	texCoord = vec2(length.x, height.x);
+	gOut.posEye = botLeft.xyz;
+	gOut.texCoord = vec2(length.x, height.x);
+	gOut.normal = (p - botLeft).xyz;
 	EmitVertex();
 
 	EndPrimitive();
