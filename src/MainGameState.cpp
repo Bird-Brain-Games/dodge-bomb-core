@@ -406,7 +406,10 @@ void Game::update(float dt)
 		{
 			playerMoveLerp += dt;
 			if (playerMoveLerp > 1.0f)
+			{
 				playerMoveLerp = 1.0f;
+				depthToggle = true;
+			}
 			
 			winPlayer->setPosition(glm::mix(playerStartPosition, winPlayerPosition, playerMoveLerp));
 			
@@ -419,16 +422,13 @@ void Game::update(float dt)
 			{
 				cameraMoveLerp = 1.0f;
 				winPlayer->playWin();
+				
 			}
 
 			camera->setPosition(glm::mix(cameraDefaultPosition, winCameraPosition, cameraMoveLerp));
 			camera->setForward(glm::mix(cameraDefaultForward, winCameraForward, cameraMoveLerp));
 			innerCutOff = glm::mix(innerDefault, innerWin, cameraMoveLerp);
 			outerCutOff = glm::mix(outerDefault, outerWin, cameraMoveLerp);
-		}
-		else if (winPlayer->getController()->conButton(XINPUT_GAMEPAD_Y))
-		{
-			winPlayer->playWin();
 		}
 		// Let the game be ended
 		else
@@ -1163,6 +1163,8 @@ void Game::changeState(Game::GAME_STATE newState)
 	switch (currentGameState)
 	{
 	case Game::READYUP:
+		depthToggle = false;
+
 		// reset the camera
 		camera->setPosition(cameraDefaultPosition);
 		camera->setAngle(cameraDefaultAngle.x, cameraDefaultAngle.y);

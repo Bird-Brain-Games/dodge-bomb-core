@@ -369,7 +369,7 @@ void initializeScene()
 	std::string readyTex2 = "Assets/img/yb.png";
 	std::shared_ptr<Texture> readyTexMap2 = std::make_shared<Texture>(readyTex2, readyTex2, 1.0f);
 
-	std::string winTex = "Assets/img/winAssets.png";
+	std::string winTex = "Assets/img/win(scaled).png";
 	std::shared_ptr<Texture> winTexMap = std::make_shared<Texture>(winTex, winTex, 1.0f);
 
 	std::string deskTex = "Assets/img/desk (diffuse).png";
