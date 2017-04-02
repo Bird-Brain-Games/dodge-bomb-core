@@ -24,6 +24,7 @@ void Pause::update(float dt)
 			timer = 0;
 			setPaused(true);
 			m_parent->getGameState("MainMenu")->setPaused(0);
+			m_parent->getGameState("game")->setPaused(-1);
 		}
 		break;
 	case 4:

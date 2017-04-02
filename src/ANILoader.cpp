@@ -596,8 +596,7 @@ void Holder::update(float dt, float overRide, float counter)
 
 void Holder::setAnim(std::string _name)
 {
-
-	if (animations.count(_name) == 1)
+	if (animations.find(_name) != animations.end())
 	{
 
 		if (currentTop == animations["idle"] || currentTop == animations["walk"])
