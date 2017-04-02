@@ -151,6 +151,7 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\PathNode.h" />
+    <ClInclude Include="src\aStar.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Graphics">

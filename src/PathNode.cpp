@@ -32,22 +32,3 @@ void PathNode::addConnection(PathNode * connectionUp, PathNode * connectionRight
 	connections["connectionLeft"] = connectionLeft;
 
 }
-
-void PathNode::checkConnections()
-{
-	path = connections["connectionUp"];
-	for (auto itr = connections.begin(); itr != connections.end(); itr++)
-	{
-		if (itr->second->distanceToTarget < path->distanceToTarget)
-		{
-			path = itr->second;
-		}
-	}
-
-}
-
-void PathNode::draw()
-{
-
-}
-
