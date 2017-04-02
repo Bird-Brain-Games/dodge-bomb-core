@@ -365,7 +365,10 @@ void Game::update(float dt)
 		{
 			cameraMoveLerp += dt / 2.0f;
 			if (cameraMoveLerp > 1.0f)
+			{
 				cameraMoveLerp = 1.0f;
+				winPlayer->playWin();
+			}
 
 			camera->setPosition(glm::mix(cameraDefaultPosition, winCameraPosition, cameraMoveLerp));
 			camera->setForward(glm::mix(cameraDefaultForward, winCameraForward, cameraMoveLerp));
@@ -380,8 +383,6 @@ void Game::update(float dt)
 				this->m_isPaused = true;
 				changeState(READYUP);
 				m_parent->getGameState("MainMenu")->setPaused(0);
-				//score->active = players->at("bombot1")->getController();
-				//m_parent->getGameState("score")->setPaused(winner);
 			}
 		}
 	}

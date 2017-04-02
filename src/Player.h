@@ -73,10 +73,12 @@ public:
 
 	inline bool isReady() { return ready; }
 	inline bool isActive() { return currentState != P_INACTIVE; }
-	inline void setActive(bool active) { currentState = (active) ? P_NORMAL : P_INACTIVE; }
+	void setActive(bool active);
 
 	void setAnim(std::string);
 	int getHealth();
+
+	void playWin();
 
 	Controller* getController();
 
@@ -116,6 +118,8 @@ private:
 	Sound s_damage;
 	Sound s_footstep;
 	bool moving;
+	Sound s_ready1, s_ready2;
+	Sound s_win1, s_win2;
 
 private:
 	// Player stats
