@@ -136,7 +136,7 @@ Game::Game
 	// Initialize sounds
 	m_gameMusic = Sound(soundTemplates->at("m_readyMusic"));
 	m_gameMusic.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
-	m_gameMusic.setVolume(0.5f);
+	m_gameMusic.setVolume(musicVolume);
 
 	m_gameTrack1 = Sound(soundTemplates->at("m_gameTrack1"));
 	m_gameTrack2 = Sound(soundTemplates->at("m_gameTrack2"));
