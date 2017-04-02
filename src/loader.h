@@ -11,6 +11,7 @@ public:
 	virtual void createVAO() = 0;
 	virtual void update(float dt, float overRide, float counter) {};
 	virtual void setAnim(std::string) {};
+	virtual void overWrite(std::string) {};
 protected:
 
 	std::vector<glm::vec3> vertices;

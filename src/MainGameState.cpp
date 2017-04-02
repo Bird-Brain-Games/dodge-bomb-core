@@ -375,6 +375,10 @@ void Game::update(float dt)
 			innerCutOff = glm::mix(innerDefault, innerWin, cameraMoveLerp);
 			outerCutOff = glm::mix(outerDefault, outerWin, cameraMoveLerp);
 		}
+		else if (winPlayer->getController()->conButton(XINPUT_GAMEPAD_Y))
+		{
+			winPlayer->playWin();
+		}
 		// Let the game be ended
 		else
 		{

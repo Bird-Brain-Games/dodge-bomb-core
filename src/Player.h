@@ -76,6 +76,8 @@ public:
 	void setActive(bool active);
 
 	void setAnim(std::string);
+	void overWrite(std::string);
+
 	int getHealth();
 
 	void playWin();

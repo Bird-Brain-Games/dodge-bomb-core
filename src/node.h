@@ -61,7 +61,7 @@ public:
 
 	
 	void updateTop(float dt);
-	void updateBot(float dt, float overRide);
+	void updateBot(float dt, float overRide, bool finalAni = false);
 
 	virtual void update();
 	void Node::createBase(std::vector<glm::mat4> &temp, std::vector<glm::mat4> &, int &count);

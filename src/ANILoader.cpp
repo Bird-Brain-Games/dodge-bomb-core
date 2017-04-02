@@ -501,6 +501,7 @@ Holder::Holder(std::shared_ptr<Holder> _duplicate)
 {
 	this->vao = _duplicate->vao;
 	this->basePose = new Node(*_duplicate->basePose);
+	winAnimation = false;
 	//Node* temp = _duplicate->animations["idle"];
 	//this->animations[]
 
@@ -508,6 +509,7 @@ Holder::Holder(std::shared_ptr<Holder> _duplicate)
 
 bool Holder::baseLoad(std::string _path)
 {
+	winAnimation = false;
 
 	ANILoader *temp = new ANILoader;
 	temp->loadHTR(_path + ".bp");
@@ -573,11 +575,11 @@ void Holder::draw(std::shared_ptr<ShaderProgram> s)
 
 void Holder::update(float dt, float overRide, float counter)
 {
-	int count = 0;
+ 	int count = 0;
 	if (overRide != 0)
 		angle = overRide;
 
-	currentBot->updateBot(dt, angle + counter + 180 * degToRad);
+	currentBot->updateBot(dt, angle + counter + 180 * degToRad, winAnimation);
 
 	currentTop->updateTop(dt);
 
@@ -596,6 +598,7 @@ void Holder::update(float dt, float overRide, float counter)
 
 void Holder::setAnim(std::string _name)
 {
+	winAnimation = false;
 	if (animations.find(_name) != animations.end())
 	{
 
@@ -612,6 +615,15 @@ void Holder::setAnim(std::string _name)
 	}
 	else
 		std::cout << "error the animation " + _name + " does not exist" << std::endl;
+}
+
+void Holder::overWrite(std::string _name)
+{
+	currentTop = animations[_name];
+	currentBot = animations[_name];
+	currentBot->setFrame(0);
+	currentTop->setFrame(0);
+	winAnimation = true;
 }
 
 void loadAnimations(std::shared_ptr<Holder> _temp)

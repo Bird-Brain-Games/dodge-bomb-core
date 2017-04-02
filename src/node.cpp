@@ -75,9 +75,11 @@ void Node::updateTop(float dt)
 	m_pChildren[0]->update(dt);
 }
 
-void Node::updateBot(float dt, float overRide)
+void Node::updateBot(float dt, float overRide, bool finalAni)
 {
-	updating(dt, overRide);
+	if (finalAni == false)
+		updating(dt, overRide);
+
 	m_pChildren[1]->update(dt);
 }
 

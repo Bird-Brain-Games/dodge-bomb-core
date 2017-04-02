@@ -427,6 +427,12 @@ void Player::setAnim(std::string _name)
 	//std::cout << "Set animation: " << _name << std::endl;
 }
 
+void Player::overWrite(std::string _name)
+{
+	mesh->overWrite(_name);
+	//std::cout << "Set animation: " << _name << std::endl;
+}
+
 void Player::takeDamage(int damage)
 {
 	invincibleTime = maxInvincibleTime;
@@ -488,7 +494,9 @@ void Player::setActive(bool active)
 void Player::playWin()
 {
 	setRotationAngleY(0.0f);
-	setAnim("win");
+	bottomAngle = 0;
+	currentAngle = 0;
+	overWrite("win");
 
 	float random = (float)rand() / RAND_MAX;
 	if (random < 0.5)
