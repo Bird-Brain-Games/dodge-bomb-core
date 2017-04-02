@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include <btBulletDynamicsCommon.h>
 #include <queue>
+#include "sound engine.h"
 
 // Bomb emitter class tracks active bombs
 // And assigns bomb properties upon creation
@@ -33,7 +34,7 @@ public:
 	~Bomb();
 
 	void attachPlayerPtr(Player* _playerPtr);
-	void draw(Camera& camera);
+	void draw(Camera& camera, Camera& shadow);
 	void update(float dt);
 	void setMaterial(std::shared_ptr<Material> _material);
 
@@ -44,6 +45,7 @@ public:
 
 	Player const* getPlayer() { return playerPtr; }
 	int getPlayerNum() { return playerNum; }
+	std::shared_ptr<Explosion> getExplosion() { return explosion; }
 	
 	bool justExploded;
 
@@ -71,7 +73,8 @@ public:
 		std::shared_ptr<Loader> _mesh,
 		std::shared_ptr<Material> _material,
 		std::shared_ptr<Texture> _texture,
-		Bomb* _parent);
+		Bomb* _parent,
+		Sound& _s_explosion);
 	Explosion(Explosion&);
 	//~Explosion();
 
@@ -80,12 +83,14 @@ public:
 	void setBombParent(Bomb*);
 	Bomb* getBombParent() { return parent; }
 
+	void setExplosionSound(Sound s) { s_explosion = Sound(s); };
 	void explode();
 
 private:
 	Bomb* parent;
 	float expandTimer;
 	bool isExpanding;
+	Sound s_explosion;
 
 private:
 	static float timeToExpand;
@@ -116,13 +121,15 @@ public:
 		std::shared_ptr<Texture> _explosionTex4,
 		std::string _explosionBodyPath,
 		std::shared_ptr<Material> _material,
-		std::string bodyPath);
+		std::string bodyPath,
+		std::map<std::string, Sound>* soundTemplates);
 
 	void update(float dt);
 	void checkIfExploded(Camera& camera);
-	void draw(Camera& camera);
+	void draw(Camera& camera, Camera& shadow);
 	void setMaterialForAllBombs(std::shared_ptr<Material> mat);
 	void clearAllBombs();
+	bool isEmpty() { return activeBombs.empty(); }
 
 	// Create the new bomb, add it to the active list,
 	// and tell it to throw in the given direction.
@@ -136,6 +143,7 @@ private:
 	std::vector<std::shared_ptr<Explosion>> explosionTemplates;
 	std::vector <std::shared_ptr<Bomb>> activeBombs;
 	std::queue<std::shared_ptr<Bomb>> bombQueue;
+	std::vector<Sound> explosionSounds;
 
 	bool initialized;
 	float impulseY;

@@ -23,7 +23,8 @@ bool BombManager::init(
 	std::shared_ptr<Texture> _explosionTex4,
 	std::string _explosionBodyPath,
 	std::shared_ptr<Material> _material,
-	std::string bodyPath)
+	std::string bodyPath,
+	std::map<std::string, Sound>* soundTemplates)
 {
 	if (initialized) return false;
 
@@ -47,15 +48,23 @@ bool BombManager::init(
 			explosionMesh,
 			material,
 			textures[i + 4],
-			nullptr);
+			nullptr,
+			Sound());//soundTemplates->at("s_bombExplosion" + std::to_string(i + 1)));
 
 		// Create the explosion rigidBody
 		std::unique_ptr<RigidBody> explosionBody =
-			std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter);
+			std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
 		explosionBody->load(_explosionBodyPath, btCollisionObject::CF_KINEMATIC_OBJECT);
 		explosionObject->attachRigidBody(explosionBody);
 
 		explosionTemplates.push_back(explosionObject);
+	}
+
+	// Load explosion sounds
+	for (int i = 1; i <= 8; i++)
+	{
+		explosionSounds.push_back(soundTemplates->at("s_bombExplosion" + std::to_string(i)));
+		explosionSounds.at(i - 1).setVolume(0.3);///////////////////////////////////////////////////////// Explosion Volume
 	}
 
 	// Create the bomb object templates
@@ -116,13 +125,13 @@ void BombManager::update(float dt)
 	}
 }
 
-void BombManager::draw(Camera& camera)
+void BombManager::draw(Camera& camera, Camera& shadow)
 {
 	for (auto it : activeBombs)
 	{
 		if (it->getCurrentState() != BOMB_STATE::OFF ||
 			it->getCurrentState() != BOMB_STATE::DONE)
-			it->draw(camera);
+			it->draw(camera, shadow);
 	}
 }
 
@@ -145,6 +154,8 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 	int playerNum = player->getPlayerNum();
 	std::shared_ptr<Bomb> newBomb = std::make_shared<Bomb>(*bombTemplates.at(playerNum));
 	newBomb->attachPlayerPtr(player);
+	newBomb->getExplosion()->setExplosionSound(
+		explosionSounds.at((rand() % explosionSounds.size())));
 	activeBombs.push_back(newBomb);
 
 	glm::vec2 playerForce;
@@ -160,7 +171,7 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 	// direction of bomb * bomb force + direction of player * player force
 	force = glm::vec3(direction.x, 0.0f, -direction.y) * force +
 		glm::vec3(playerForce.x, 2.0f, -playerForce.y) * 0.5f;
-	std::cout << "Force vector: " << force.x << " " << force.z << std::endl;
+	//std::cout << "Force vector: " << force.x << " " << force.z << std::endl;
 
 	newBomb->throwBomb(direction, glm::vec3(force.x, impulseY, force.z));
 }
@@ -232,17 +243,17 @@ void Bomb::throwBomb(glm::vec2 direction, glm::vec3 force)
 
 
 
-void Bomb::draw(Camera& camera)
+void Bomb::draw(Camera& camera, Camera& shadow)
 {
 	switch (currentState)
 	{
 	case OFF:
 		break;
 	case THROWN:
-		GameObject::draw(camera);
+		GameObject::draw(camera, shadow);
 		break;
 	case EXPLODING:
-		explosion->draw(camera);
+		explosion->draw(camera, shadow);
 		break;
 	case DONE:
 		break;
@@ -291,7 +302,7 @@ void Bomb::explode()
 	currentFuseTime = 0.0f;
 	currentExplodeTime = maxExplodeTime;
 	currentState = EXPLODING;
-	std::cout << "Bomb " << playerNum << " exploded" << std::endl;
+	//std::cout << "Bomb " << playerNum << " exploded" << std::endl;
 
 	// Swap the bomb and the explosion's position
 	explosion->setPosition(getWorldPosition());
@@ -304,7 +315,7 @@ void Bomb::destroy()
 {
 	currentExplodeTime = 0.0f;
 	currentState = DONE;
-	std::cout << "Bomb " << playerNum << " destroyed" << std::endl;
+	//std::cout << "Bomb " << playerNum << " destroyed" << std::endl;
 	explosion->setPosition(glm::vec3(-100.0f));
 	explosion->setBombParent(nullptr);
 }
@@ -318,17 +329,19 @@ void Bomb::setMaterial(std::shared_ptr<Material> _material)
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////	EXPLOOOOSION	///////////////////////////////////
 float Explosion::timeToExpand = 0.15f;
-float Explosion::maxScale = 7.5f;
+float Explosion::maxScale = 8.5f;
 float Explosion::minScale = 0.5f;
 
 Explosion::Explosion(glm::vec3 position,
 	std::shared_ptr<Loader> _mesh,
 	std::shared_ptr<Material> _material,
 	std::shared_ptr<Texture> _texture,
-	Bomb* _parent)
+	Bomb* _parent,
+	Sound& _s_explosion)
 	: GameObject(position, _mesh, _material, _texture),
 	expandTimer(timeToExpand),
-	parent(_parent)
+	parent(_parent),
+	s_explosion(_s_explosion)
 {
 	colliderType = COLLIDER_TYPE::BOMB_EXPLOSION;
 	//setScale(glm::vec3(maxScale));
@@ -340,6 +353,7 @@ Explosion::Explosion(Explosion& other)
 	parent(nullptr)
 {
 	colliderType = COLLIDER_TYPE::BOMB_EXPLOSION;
+	s_explosion = Sound(other.s_explosion);
 	//setScale(glm::vec3(maxScale));
 }
 
@@ -369,4 +383,6 @@ void Explosion::explode()
 {
 	expandTimer = 0.0f;
 	rigidBody->setDeactivationMode(ISLAND_SLEEPING);
+	s_explosion.setPosition(getWorldPosition());
+	s_explosion.play();
 }
