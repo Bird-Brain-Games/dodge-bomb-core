@@ -495,10 +495,11 @@ void Game::draw()
 
 
 	//copy and enable the frame buffer
+	fboParticle.bindFrameBufferForDrawing();
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 	fboUnlit.copyBuffer(fboUnlit.getWidth(), fboUnlit.getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST, fboParticle.getId());
 	fboParticle.bindFrameBufferForDrawing();
-
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	
 
 	//draw the particles
 	players->at("bombot1")->sparks;
@@ -521,7 +522,7 @@ void Game::draw()
 	{
 		bloomPass(fboUnlit, fboBloomed);
 		depthOfField(fboBloomed, fboWithBokeh);
-		//bloomPass(fboParticle, bloomParticle); // sets up fbo's for particle pass
+		bloomPass(fboParticle, bloomParticle); // sets up fbo's for particle pass
 		particlePass(fboWithBokeh, fboFinal);
 		fboToScreen(fboFinal);
 
@@ -529,7 +530,7 @@ void Game::draw()
 	else
 	{
 		bloomPass(fboUnlit, fboBloomed);
-		//bloomPass(fboParticle, bloomParticle);
+		bloomPass(fboParticle, bloomParticle);
 		particlePass(fboBloomed, fboFinal);
 		fboToScreen(fboFinal);
 	}
@@ -863,12 +864,14 @@ void Game::particlePass(FrameBufferObject& fboToSample, FrameBufferObject& fboTo
 	fboToDrawTo.clearFrameBuffer(clearColor);
 
 	fboToSample.bindTextureForSampling(0, GL_TEXTURE0);
-	fboParticle.bindTextureForSampling(0, GL_TEXTURE1);
+	bloomParticle.bindTextureForSampling(0, GL_TEXTURE1);
+	fboParticle.bindTextureForSampling(0, GL_TEXTURE2);
 
 	static auto combine = materials->at("combine");
 	combine->shader->bind();
 	combine->intUniforms["u_particle"] = 1;
 	combine->intUniforms["u_tex"] = 0;
+	combine->intUniforms["u_activater"] = 2;
 	combine->mat4Uniforms["u_mvp"] = glm::mat4();
 
 	combine->sendUniforms();
