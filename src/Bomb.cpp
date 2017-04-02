@@ -64,6 +64,7 @@ bool BombManager::init(
 	for (int i = 1; i <= 8; i++)
 	{
 		explosionSounds.push_back(soundTemplates->at("s_bombExplosion" + std::to_string(i)));
+		explosionSounds.at(i - 1).setVolume(0.3);///////////////////////////////////////////////////////// Explosion Volume
 	}
 
 	// Create the bomb object templates

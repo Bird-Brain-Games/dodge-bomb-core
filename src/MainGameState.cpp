@@ -143,6 +143,8 @@ Game::Game
 	m_gameTrack1.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
 	m_gameTrack2.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
 	m_gameTrack3.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameTrack1.setVolume(musicVolume);
+
 
 	s_countDown = Sound(soundTemplates->at("s_countdown"));
 	s_countDown.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
@@ -374,9 +376,9 @@ void Game::update(float dt)
 		{
 			numDeadPlayers = playerDeathCounter;
 			if (playerDeathCounter > 1)
-				m_gameTrack3.setVolume(1.0f);
+				m_gameTrack3.setVolume(musicVolume - 0.05);
 			else if (playerDeathCounter > 0)
-				m_gameTrack2.setVolume(1.0f);
+				m_gameTrack2.setVolume(musicVolume - 0.05);
 				
 		}
 	}

@@ -217,6 +217,9 @@ private:
 	bool  rimToggle = true;
 	float kr = rim; // Rim Lighting
 
+	// SOUND CONTROLS
+	float musicVolume = 0.2;
+
 private:
 	//static 
 	static float maxFadeTime;

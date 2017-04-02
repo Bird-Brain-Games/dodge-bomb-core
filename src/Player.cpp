@@ -37,6 +37,7 @@ Player::Player(glm::vec3 position,
 	setActive(false);
 
 	s_damage = Sound(soundTemplates->at("s_damage" + std::to_string(playerNum + 1)));
+	s_damage.setVolume(0.6f);
 	s_footstep = Sound(soundTemplates->at("s_footstep" + std::to_string(playerNum + 1)));
 	s_footstep.setVolume(0.1f);
 	moving = false;
