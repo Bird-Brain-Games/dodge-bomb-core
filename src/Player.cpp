@@ -428,6 +428,13 @@ void Player::checkCollisionWith(Explosion* other, bool inReadyUp)
 		bombParent->getPlayerNum() != playerNum)
 	{
 		takeDamage(1);
+
+		if (inReadyUp)
+		{
+			health++;
+			smoke.pause();
+			sparks.pause();
+		}
 		con.setVibration(32000, 16000);
 
 		// If in ready up, don't take damage
@@ -451,9 +458,14 @@ void Player::checkCollisionWith(Bomb* other, bool inReadyUp)
 			other->explode();
 
 			// If in ready up, don't take damage
-			if (inReadyUp) health++;
-
 			takeDamage(1);
+
+			if (inReadyUp)
+			{
+				health++;
+				smoke.pause();
+				sparks.pause();
+			}
 			con.setVibration(32000, 16000);
 
 			//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
