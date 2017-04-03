@@ -26,7 +26,8 @@ void main()
 {
 	vec2 uv = gIn.texCoord.xy;
 	vec4 textureColour = texture(u_tex, uv);
-	vec3 newColour = mix(textureColour.xyz, colour, mixer);
+	vec3 newColour = textureColour.xyz;
+//	mix(textureColour.xyz, colour, mixer);
 	
 	vec3 L = normalize(u_lightPos.xyz - gIn.posEye);
 	vec3 N = normalize(gIn.normal);
@@ -71,6 +72,8 @@ void main()
 		+ vec3(lights)
 		+ u_emissiveLight.xyz	   
 		);
+	
+	FragColor.rgb = mix(FragColor.xyz, colour, mixer);
 	
 	if (textureColour.w > 0.0)
 		textureColour.w = 1.0;

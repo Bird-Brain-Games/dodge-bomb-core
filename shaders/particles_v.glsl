@@ -5,7 +5,7 @@
 layout(location = 0) in vec3 vIn_vertex;
 layout(location = 1) in vec3 vIn_normal;
 layout(location = 2) in vec2 vIn_uv;
-layout(location = 3) in vec4 vIn_colour;
+layout(location = 3) in float size;
 
 // Uniforms
 // Constants throughout the entire pipeline
@@ -18,13 +18,13 @@ out VertexData
 {
 	vec3 normal;
 	vec2 texCoord;
-	vec4 colour;
-	vec3 posEye;
-} vOut;
+	float size;
+} vOut; 
 
 void main() 
 {
 	vOut.texCoord = vIn_uv;
 	vOut.normal = vIn_normal;
+	vOut.size = size;
 	gl_Position = vec4(vIn_vertex, 1.0);
 }
