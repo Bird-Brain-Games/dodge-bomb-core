@@ -204,7 +204,7 @@ void Game::resetPlayers()
 	{
 		if (it.second->isActive())
 		{
-			it.second->reset(defaultPlayerPositions.at(it.second->getPlayerNum()));
+			it.second->reset(defaultPlayerPositions.at(it.second->getPlayerNum()) + glm::vec3(0.0f, 2.0f, 0.0f));
 			numActivePlayers++;
 		}
 	}
@@ -435,11 +435,13 @@ void Game::update(float dt)
 		if (numDeadPlayers != playerDeathCounter)
 		{
 			numDeadPlayers = playerDeathCounter;
+
 			if (playerDeathCounter > 1)
 				m_gameTrack3.setVolume(musicVolume - 0.05);
 			else if (playerDeathCounter > 0)
 				m_gameTrack2.setVolume(musicVolume - 0.05);
-				
+
+			roomLight -= 0.1f;
 		}
 	}
 
