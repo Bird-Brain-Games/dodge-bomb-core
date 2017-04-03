@@ -523,7 +523,7 @@ void Game::draw()
 		bloomPass(fboUnlit, fboBloomed);
 		depthOfField(fboBloomed, fboWithBokeh);
 		bloomPass(fboParticle, bloomParticle); // sets up fbo's for particle pass
-		particlePass(fboWithBokeh, fboFinal);
+		particlePass(bloomParticle, fboFinal);
 		fboToScreen(fboFinal);
 
 	}
