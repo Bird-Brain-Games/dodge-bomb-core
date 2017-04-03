@@ -10,6 +10,7 @@
 #include "FrameBufferObject.h"
 #include "particles.h"
 #include "sound engine.h"
+#include "aStar.h"
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////	Lighting Controls	//////////////////////////
@@ -102,6 +103,9 @@ private:
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
 
+	void changeColorCorrection(LUT_MODE);
+
+
 
 
 private:
@@ -136,6 +140,13 @@ private:
 	Camera * camera;
 
 	Sound m_gameMusic;
+	Sound m_gameTrack1;
+	Sound m_gameTrack2;
+	Sound m_gameTrack3;
+	float fadeTimer;
+	int numTracksPlaying;
+
+	Sound s_countDown;
 
 	int pausing;
 	float pauseTimer;
@@ -144,8 +155,8 @@ private:
 	// Win state controls
 	int winner;
 
-	glm::vec3 winPlayerPosition = glm::vec3(0.0f, 43.0f, 0.0f);
-	glm::vec3 winCameraPosition = glm::vec3(20.0f, 53.0f, 30.0f);
+	glm::vec3 winPlayerPosition = glm::vec3(20.0f, 43.0f, 26.0f);
+	glm::vec3 winCameraPosition = glm::vec3(20.0f, 50.0f, 43.0f);
 	glm::vec3 winCameraForward = glm::vec3(0.01f, -2.0f, -5.0f);
 	glm::vec3 cameraDefaultPosition = glm::vec3(23.0f, 90.0f, 40.0f);
 	glm::vec2 cameraDefaultAngle = glm::vec2(3.14159012f, 5.3f);
@@ -159,10 +170,14 @@ private:
 	float playerMoveLerp;	// to be replaced with A*
 	glm::vec3 playerStartPosition; // to be replaced with A*
 	float cameraMoveLerp;
+	float forwardLerp;
 
 	LUT contrastLUT;
 	LUT sepiaLUT;
+	LUT* currentLUT;
 	LUT_MODE colorCorrection;
+
+	AStar aStar;
 
 	float outlineWidth = 4.0;
 	bool outlineToggle = true;
@@ -174,6 +189,8 @@ private:
 	// Ready-up controls
 	std::shared_ptr<Menu> countdown;
 	float currentCountdown = 0.0f;
+	int numActivePlayers;
+	int numDeadPlayers;
 
 	// Lighting Controls
 	float innerCutOff = 0.1; // Spot Light Size
@@ -200,7 +217,8 @@ private:
 	// Bloom Controls
 	glm::vec4 bloomThreshold = glm::vec4(0.4f);
 	int numBlurPasses = 4;
-	bool bloomToggle = false;
+	bool bloomToggle = true;
+	bool depthToggle = false;
 
 	// For Toggling
 	bool  ambientToggle = true;
@@ -215,8 +233,12 @@ private:
 	bool  rimToggle = true;
 	float kr = rim; // Rim Lighting
 
+	// SOUND CONTROLS
+	float musicVolume = 0.25;
+
 private:
 	//static 
+	static float maxFadeTime;
 
 	// A few conversions to know
 	const float degToRad = 3.14159f / 180.0f;

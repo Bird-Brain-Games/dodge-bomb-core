@@ -45,6 +45,7 @@ public:
 
 	Player const* getPlayer() { return playerPtr; }
 	int getPlayerNum() { return playerNum; }
+	std::shared_ptr<Explosion> getExplosion() { return explosion; }
 	
 	bool justExploded;
 
@@ -82,6 +83,7 @@ public:
 	void setBombParent(Bomb*);
 	Bomb* getBombParent() { return parent; }
 
+	void setExplosionSound(Sound s) { s_explosion = Sound(s); };
 	void explode();
 
 private:
@@ -146,6 +148,7 @@ private:
 	std::vector <std::shared_ptr<Bomb>> activeBombs;
 	std::vector<std::shared_ptr<ParticleEmmiter>> emitters;
 	std::queue<std::shared_ptr<Bomb>> bombQueue;
+	std::vector<Sound> explosionSounds;
 
 	bool initialized;
 	float impulseY;

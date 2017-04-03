@@ -1,5 +1,7 @@
 #include "Player.h"
 #include <iostream>
+//#include "GLM\gtc\random.hpp"
+#include <random>
 
 const float degToRad = 3.14159f / 180.0f;
 
@@ -35,6 +37,15 @@ Player::Player(glm::vec3 position,
 	setActive(false);
 
 	s_damage = Sound(soundTemplates->at("s_damage" + std::to_string(playerNum + 1)));
+	s_damage.setVolume(0.6f);
+	s_footstep = Sound(soundTemplates->at("s_footstep" + std::to_string(playerNum + 1)));
+	s_footstep.setVolume(0.2f);
+	moving = false;
+
+	s_ready1 = Sound(soundTemplates->at("d_ready" + std::to_string(playerNum + 1) + "_1"));
+	s_ready2 = Sound(soundTemplates->at("d_ready" + std::to_string(playerNum + 1) + "_2"));
+	s_win1 = Sound(soundTemplates->at("d_win" + std::to_string(playerNum + 1) + "_1"));
+	s_win2 = Sound(soundTemplates->at("d_win" + std::to_string(playerNum + 1) + "_2"));
 }
 
 Player::Player(Player& other)
@@ -126,6 +137,37 @@ void Player::drawSparks(Camera& camera)
 int Player::getHealth()
 {
 	return health;
+}
+
+PathNode * Player::checkNodes(std::map<std::string, PathNode *> * nodeContainer)
+{
+	auto itr = nodeContainer->begin();
+	closestNode = itr->second;
+	//for (int i = 0; i < 11; i++)
+	for (itr = nodeContainer->begin(); itr != nodeContainer->end(); itr++)
+	{
+		if (itr->second->dummy == false && itr->second != nullptr)
+		{
+			if ((glm::abs(this->getWorldPosition().x - itr->second->pos.x)) 
+				< (glm::abs(this->getWorldPosition().x - closestNode->pos.x)))
+			{
+				closestNode = itr->second;
+			}
+		}
+		//itr++;
+	}
+	std::cout << closestNode->pos.x << std::endl;
+	for (itr = nodeContainer->begin(); itr != nodeContainer->end(); itr++)
+	{
+		if (itr->second->pos.x == closestNode->pos.x && itr->second->dummy == false &&
+			((glm::abs(this->getWorldPosition().z - itr->second->pos.z))
+				< (glm::abs(this->getWorldPosition().z - closestNode->pos.z))))
+		{
+			closestNode = itr->second;
+		}
+	}
+
+	return closestNode;
 }
 
 Controller* Player::getController()
@@ -238,6 +280,19 @@ void Player::update(float dt, bool canMove)
 
 	// Update sounds
 	s_damage.setPosition(getWorldPosition());
+	s_footstep.setPosition(getWorldPosition());
+
+	// If the player starts moving, play footsteps
+	if (glm::length(rigidBody->getLinearVelocity()) > 1.0f && !moving && !isDashing && isActive())
+	{
+		moving = true;
+		s_footstep.play();
+	}
+	else if (glm::length(rigidBody->getLinearVelocity()) < 1.0f && moving && isActive())
+	{
+		moving = false;
+		s_footstep.pause();
+	}
 
 	// Make it so they can't rotate through physics
 	rigidBody->getBody()->setAngularFactor(btVector3(0.0, 0.0, 0.0));	
@@ -272,13 +327,13 @@ void Player::handleInput(float dt)
 	{
 		if (LStick.x < -0.1 || LStick.x > 0.1)
 		{
-			mesh->setAnim("walk");
+			setAnim("walk");
 			trans.x = LStick.x / 2;
 			hasMoved = true;
 		}
 		if (LStick.y < -0.1 || LStick.y > 0.1)
 		{
-			mesh->setAnim("walk");
+			setAnim("walk");
 			trans.z = -LStick.y / 2;
 			hasMoved = true;
 		}
@@ -321,7 +376,7 @@ void Player::handleInput(float dt)
 			playerVelocity = glm::vec2(0.0f);
 
 		bombManager->throwBomb(this, normalized, playerVelocity, throwingForce);
-		mesh->setAnim("throw");
+		setAnim("throw");
 		currentCooldown += bombCooldown;
 	}
 
@@ -438,6 +493,13 @@ void Player::attachBombManager(std::shared_ptr<BombManager> manager)
 void Player::setAnim(std::string _name)
 {
 	mesh->setAnim(_name);
+	//std::cout << "Set animation: " << _name << std::endl;
+}
+
+void Player::overWrite(std::string _name)
+{
+	mesh->overWrite(_name);
+	//std::cout << "Set animation: " << _name << std::endl;
 }
 
 void Player::takeDamage(int damage)
@@ -462,6 +524,7 @@ void Player::takeDamage(int damage)
 	else if (health == 1)
 	{
 		smoke.play();
+		setAnim("stumble");
 		sparks.play();
 	}
 }
@@ -477,11 +540,40 @@ void Player::reset(glm::vec3 newPos)
 	ready = false;
 	currentDashCooldown = 0.0f;
 	currentDashDuration = 0.0f;
+	setAnim("idle");
 }
 
 glm::vec3 Player::getCurrentVelocity()
 {
 	return rigidBody->getLinearVelocity();
+}
+
+void Player::setActive(bool active)
+{
+	currentState = (active) ? P_NORMAL : P_INACTIVE;
+	if (currentState == P_NORMAL)
+	{
+		//float random = glm::linearRand(0.0f, 1.0f);
+		float random = (float)rand() / RAND_MAX;
+		if (random < 0.5)
+			s_ready1.play();
+		else
+			s_ready2.play();
+	}
+}
+
+void Player::playWin()
+{
+	setRotationAngleY(0.0f);
+	bottomAngle = 0;
+	currentAngle = 0;
+	overWrite("win");
+
+	float random = (float)rand() / RAND_MAX;
+	if (random < 0.5)
+		s_win1.play();
+	else
+		s_win2.play();
 }
 
 //void Player::lookDirectlyAtExplosion(glm::vec3 direction)

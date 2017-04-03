@@ -119,9 +119,11 @@ private:
 	float angle;
 public:
 	//
+	bool winAnimation;
 	Holder() {};
 	Holder(std::shared_ptr<Holder>);
 	void setAnim(std::string);
+	void overWrite(std::string);
 	bool baseLoad(std::string);
 	bool AniLoad(std::string, std::string);
 	void draw(std::shared_ptr<ShaderProgram> s);

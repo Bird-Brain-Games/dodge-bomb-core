@@ -96,6 +96,7 @@
     <ClCompile Include="src\MainMenuState.cpp" />
     <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\node.cpp" />
+    <ClCompile Include="src\PathNode.cpp" />
     <ClCompile Include="src\particles.cpp" />
     <ClCompile Include="src\PauseState.cpp" />
     <ClCompile Include="src\Player.cpp" />
@@ -122,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ANILoader.h" />
+    <ClInclude Include="src\aStar.h" />
     <ClInclude Include="src\Bomb.h" />
     <ClInclude Include="src\BulletDebug.h" />
     <ClInclude Include="src\camera.h" />
@@ -140,6 +142,7 @@
     <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\node.h" />
     <ClInclude Include="src\particles.h" />
+    <ClInclude Include="src\PathNode.h" />
     <ClInclude Include="src\PauseState.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\RigidBody.h" />
@@ -165,6 +168,8 @@
     <None Include="shaders\default_v.glsl" />
     <None Include="shaders\gaussianBlur_f.glsl" />
     <None Include="shaders\menu.geom" />
+    <None Include="shaders\node.frag" />
+    <None Include="shaders\node.geom" />
     <None Include="shaders\noLighting_f.glsl" />
     <None Include="shaders\null.vert" />
     <None Include="shaders\particles.geom" />

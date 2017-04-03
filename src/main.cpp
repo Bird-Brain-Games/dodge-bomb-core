@@ -28,6 +28,9 @@
 #include "MainMenuState.h"
 #include "MainGameState.h"
 
+// aStar Libs
+#include "aStar.h"
+
 // Defines and Core variables
 #define FRAMES_PER_SECOND 60
 const int FRAME_DELAY = 1000 / FRAMES_PER_SECOND; // Milliseconds per frame
@@ -53,6 +56,7 @@ Pause* pause;
 
 glm::vec3 position;
 float movementSpeed = 5.0f;
+
 
 Camera playerCamera; // the camera you move around with wasd
 Camera shadowCamera; // Camera for the shadow map
@@ -100,7 +104,8 @@ void initializeShaders()
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor,
-		f_noLighting, f_toon, f_outline, f_sobel, f_shadow, f_colorCorrection, f_particles, f_combination, f_bokeh, f_bokehComp;
+		f_noLighting, f_toon, f_outline, f_sobel, f_shadow, f_colorCorrection, 
+		f_particles, f_combination, f_bokeh, f_bokehComp, f_node;
 	f_default.loadShaderFromFile(shaderPath + "default_f.glsl", GL_FRAGMENT_SHADER);//
 	f_bright.loadShaderFromFile(shaderPath + "bright_f.glsl", GL_FRAGMENT_SHADER);//
 	f_unlitTex.loadShaderFromFile(shaderPath + "unlitTexture_f.glsl", GL_FRAGMENT_SHADER);
@@ -114,13 +119,15 @@ void initializeShaders()
 	f_shadow.loadShaderFromFile(shaderPath + "shadowMap_f.glsl", GL_FRAGMENT_SHADER);//
 	f_colorCorrection.loadShaderFromFile(shaderPath + "color_f.glsl", GL_FRAGMENT_SHADER);//
 	f_combination.loadShaderFromFile(shaderPath + "combinataion_f.glsl", GL_FRAGMENT_SHADER);
+	f_node.loadShaderFromFile(shaderPath + "node.frag", GL_FRAGMENT_SHADER);
 	f_bokeh.loadShaderFromFile(shaderPath + "bokeh_f.glsl", GL_FRAGMENT_SHADER);//
 	f_bokehComp.loadShaderFromFile(shaderPath + "bokehComposite_f.glsl", GL_FRAGMENT_SHADER);//
 
 	// Geometry Shaders
-	Shader g_quad, g_menu, g_particles;
+	Shader g_quad, g_menu, g_node, g_particles;
 	g_quad.loadShaderFromFile(shaderPath + "quad.geom", GL_GEOMETRY_SHADER);
 	g_menu.loadShaderFromFile(shaderPath + "menu.geom", GL_GEOMETRY_SHADER);
+	g_node.loadShaderFromFile(shaderPath + "node.geom", GL_GEOMETRY_SHADER);
 	g_particles.loadShaderFromFile(shaderPath + "particles.geom", GL_GEOMETRY_SHADER);
 
 	// No Lighting material
@@ -155,6 +162,13 @@ void initializeShaders()
 	materials["menu"]->shader->attachShader(f_texColor);
 	materials["menu"]->shader->attachShader(g_menu);
 	materials["menu"]->shader->linkProgram();
+
+	// Material used for node drawing
+	materials["node"] = std::make_shared<Material>("menu");
+	materials["node"]->shader->attachShader(v_passThru);
+	materials["node"]->shader->attachShader(f_node);
+	materials["node"]->shader->attachShader(g_node);
+	materials["node"]->shader->linkProgram();
 
 	// Unlit texture material
 	materials["unlitTexture"] = std::make_shared<Material>("unlitTexture");
@@ -225,6 +239,8 @@ void initializeShaders()
 
 void initializeScene()
 {
+	//aStar.initializePathNodes();
+
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	MESHES		///////////////////////////////
 	std::string meshPath = "Assets/obj/";
@@ -364,13 +380,13 @@ void initializeScene()
 	std::string explosionTex4 = "Assets/img/ex-4.png";
 	std::shared_ptr<Texture> explosionTexMap4 = std::make_shared<Texture>(explosionTex4, explosionTex4, 1.0f);
 
-	std::string readyTex1 = "Assets/img/left.png";
+	std::string readyTex1 = "Assets/img/rg.png";
 	std::shared_ptr<Texture> readyTexMap1 = std::make_shared<Texture>(readyTex1, readyTex1, 1.0f);
 
-	std::string readyTex2 = "Assets/img/right.png";
+	std::string readyTex2 = "Assets/img/yb.png";
 	std::shared_ptr<Texture> readyTexMap2 = std::make_shared<Texture>(readyTex2, readyTex2, 1.0f);
 
-	std::string winTex = "Assets/img/winAssets.png";
+	std::string winTex = "Assets/img/win(scaled).png";
 	std::shared_ptr<Texture> winTexMap = std::make_shared<Texture>(winTex, winTex, 1.0f);
 
 	std::string deskTex = "Assets/img/desk (diffuse).png";
@@ -475,6 +491,7 @@ void initializeScene()
 	t1 = std::chrono::high_resolution_clock::now();
 
 	std::string soundPath = "assets/media/";
+	//soundTemplates[""] = Sound(soundPath + ".wav", false);
 
 	// Menu sounds
 	soundTemplates["m_mainMenu"] = Sound(soundPath + "MenuTheme.wav");
@@ -482,23 +499,52 @@ void initializeScene()
 	soundTemplates["s_menuSwitch"] = Sound(soundPath + "switch_fx.wav", false);
 
 	// Battle music
-	soundTemplates["m_gameMusic"] = Sound(soundPath + "GameTheme.wav");
+	soundTemplates["m_readyMusic"] = Sound(soundPath + "MenuTheme.wav", true);
+	soundTemplates["m_gameTrack1"] = Sound(soundPath + "Music Layers/layer_1.wav", true);
+	soundTemplates["m_gameTrack2"] = Sound(soundPath + "Music Layers/layer_2.wav", true);
+	soundTemplates["m_gameTrack3"] = Sound(soundPath + "Music Layers/layer_3.wav", true);
+
+	soundTemplates["s_countdown"] = Sound(soundPath + "3_2_1_DodgeBomb.wav", false);
 
 	// Battle SFX
-	soundTemplates["s_bombExplosion1"] = Sound(soundPath + "bomb_1.wav", false);
-	soundTemplates["s_bombExplosion2"] = Sound(soundPath + "bomb_2.wav", false);
-	soundTemplates["s_bombExplosion3"] = Sound(soundPath + "bomb_3.wav", false);
-	soundTemplates["s_bombExplosion4"] = Sound(soundPath + "bomb_4.wav", false);
-	soundTemplates["s_damage1"] = Sound(soundPath + "bothit_fx.wav", false);
-	soundTemplates["s_damage2"] = Sound(soundPath + "bothit2_fx.wav", false);
-	soundTemplates["s_damage3"] = Sound(soundPath + "bothit3_fx.wav", false);
-	soundTemplates["s_damage4"] = Sound(soundPath + "bothit4_fx.wav", false);
+	soundTemplates["s_bombExplosion1"] = Sound(soundPath + "bomb sounds/bomb_1.wav", false);
+	soundTemplates["s_bombExplosion2"] = Sound(soundPath + "bomb sounds/bomb_2.wav", false);
+	soundTemplates["s_bombExplosion3"] = Sound(soundPath + "bomb sounds/bomb_3.wav", false);
+	soundTemplates["s_bombExplosion4"] = Sound(soundPath + "bomb sounds/bomb_4.wav", false);
+	soundTemplates["s_bombExplosion5"] = Sound(soundPath + "bomb sounds/bomb_5.wav", false);
+	soundTemplates["s_bombExplosion6"] = Sound(soundPath + "bomb sounds/bomb_6.wav", false);
+	soundTemplates["s_bombExplosion7"] = Sound(soundPath + "bomb sounds/bomb_7.wav", false);
+	soundTemplates["s_bombExplosion8"] = Sound(soundPath + "bomb sounds/bomb_8.wav", false);
 
-	
-	
-	//soundTemplates[""] = Sound(soundPath + ".wav", false);
+	soundTemplates["s_damage1"] = Sound(soundPath + "Hit sounds/blue_hit.wav", false);
+	soundTemplates["s_damage2"] = Sound(soundPath + "Hit sounds/red_hit.wav", false);
+	soundTemplates["s_damage3"] = Sound(soundPath + "Hit sounds/green_hit.wav", false);
+	soundTemplates["s_damage4"] = Sound(soundPath + "Hit sounds/yellow_hit.wav", false);
 
+	soundTemplates["s_footstep1"] = Sound(soundPath + "walk sounds/blue_walk.wav", true);
+	soundTemplates["s_footstep2"] = Sound(soundPath + "walk sounds/red_walk.wav", true);
+	soundTemplates["s_footstep3"] = Sound(soundPath + "walk sounds/green_walk.wav", true);
+	soundTemplates["s_footstep4"] = Sound(soundPath + "walk sounds/yellow_walk.wav", true);
 
+	soundTemplates["d_ready1_1"] = Sound(soundPath + "Bombot Dialogue/blue_ready_1.wav", false);
+	soundTemplates["d_ready2_1"] = Sound(soundPath + "Bombot Dialogue/red_ready_1.wav", false);
+	soundTemplates["d_ready3_1"] = Sound(soundPath + "Bombot Dialogue/green_ready_1.wav", false);
+	soundTemplates["d_ready4_1"] = Sound(soundPath + "Bombot Dialogue/yellow_ready_1.wav", false);
+
+	soundTemplates["d_ready1_2"] = Sound(soundPath + "Bombot Dialogue/blue_ready_2.wav", false);
+	soundTemplates["d_ready2_2"] = Sound(soundPath + "Bombot Dialogue/red_ready_2.wav", false);
+	soundTemplates["d_ready3_2"] = Sound(soundPath + "Bombot Dialogue/green_ready_2.wav", false);
+	soundTemplates["d_ready4_2"] = Sound(soundPath + "Bombot Dialogue/yellow_ready_2.wav", false);
+
+	soundTemplates["d_win1_1"] = Sound(soundPath + "Bombot Dialogue/blue_win_1.wav", false);
+	soundTemplates["d_win2_1"] = Sound(soundPath + "Bombot Dialogue/red_win_1.wav", false);
+	soundTemplates["d_win3_1"] = Sound(soundPath + "Bombot Dialogue/green_win_1.wav", false);
+	soundTemplates["d_win4_1"] = Sound(soundPath + "Bombot Dialogue/yellow_win_1.wav", false);
+
+	soundTemplates["d_win1_2"] = Sound(soundPath + "Bombot Dialogue/blue_win_2.wav", false);
+	soundTemplates["d_win2_2"] = Sound(soundPath + "Bombot Dialogue/red_win_2.wav", false);
+	soundTemplates["d_win3_2"] = Sound(soundPath + "Bombot Dialogue/green_win_2.wav", false);
+	soundTemplates["d_win4_2"] = Sound(soundPath + "Bombot Dialogue/yellow_win_2.wav", false);
 
 	Sound::sys.update();
 
@@ -519,22 +565,26 @@ void initializeScene()
 	t1 = std::chrono::high_resolution_clock::now();
 
 	gameobjects["readyBlue"] = std::make_shared<readyUpRing>(
-		glm::vec3(-12.0f, 89.5f, 10.0f), readyBottomMesh, defaultMaterial, readyTexMap2, 0);
+		glm::vec3(0.0f, -11.0f, -16.0f), readyBottomMesh, defaultMaterial, readyTexMap2, 0);
 	gameobjects["readyBlue"]->setScale(glm::vec3(0.5f));
+	gameobjects["readyBlue"]->setRotationAngleY(90.0f * degToRad);
 	readyUpRings.push_back(gameobjects["readyBlue"]);
 
 	gameobjects["readyRed"] = std::make_shared<readyUpRing>(
-		glm::vec3(0.0f, 89.5f, -16.0f), readyTopMesh, defaultMaterial, readyTexMap1, 1);
+		glm::vec3(45.0f, -11.0f, -16.0f), readyTopMesh, defaultMaterial, readyTexMap1, 1);
+	gameobjects["readyRed"]->setRotationAngleY(90.0f * degToRad);
+	gameobjects["readyRed"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyRed"]);
 
 	gameobjects["readyGreen"] = std::make_shared<readyUpRing>(
-		glm::vec3(40.0f, 89.5f, -25.0f), readyBottomMesh, defaultMaterial, readyTexMap1, 2);
-	gameobjects["readyGreen"]->setRotationAngleY(180.0f * degToRad);
+		glm::vec3(-7.0f, -11.0f, 13.0f), readyBottomMesh, defaultMaterial, readyTexMap1, 2);
+	gameobjects["readyGreen"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyGreen"]);
 
 	gameobjects["readyYellow"] = std::make_shared<readyUpRing>(
-		glm::vec3(57.0f, 89.5f, 7.0f), readyTopMesh, defaultMaterial, readyTexMap2, 3);
+		glm::vec3(53.0f, -11.0f, 13.0f), readyTopMesh, defaultMaterial, readyTexMap2, 3);
 	gameobjects["readyYellow"]->setRotationAngleY(180.0f * degToRad);
+	gameobjects["readyYellow"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyYellow"]);
 
 	gameobjects["table"] = std::make_shared<GameObject>(
@@ -648,7 +698,7 @@ void initializeScene()
 		glm::vec3(45.0f, 42.0f, -8.0f), crateMesh, defaultMaterial, crateTexMap);
 	gameobjects["crate"]->setScale(glm::vec3(1.6));
 	obstacles.push_back(gameobjects["crate"]);
-	
+
 	gameobjects["crate2"] = std::make_shared<GameObject>(
 		glm::vec3(15.0f, -20.0f, 2.0f), crateMesh, defaultMaterial, crateTexMap);
 	gameobjects["crate2"]->setScale(glm::vec3(1.3));
@@ -662,6 +712,202 @@ void initializeScene()
 	//gameobjects["palmtree"] = std::make_shared<GameObject>(
 	//	glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
 
+	// A Star
+	/*
+	{
+		//////////////////////////////////A STAR BEGIN ///////////////////////////////////////////
+		//gameobjects["EndNode"] = std::make_shared<GameObject>(
+		//	aStar["EndNode"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		//gameobjects["EndNode"]->setScale(glm::vec3(0.6));
+
+		//first row of nodes
+		gameobjects["onethree"] = std::make_shared<GameObject>(
+			aStar["onethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["onethree"]->setScale(glm::vec3(0.6));
+
+		gameobjects["onefour"] = std::make_shared<GameObject>(
+			aStar["onefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["onefour"]->setScale(glm::vec3(0.6));
+
+		gameobjects["onefive"] = std::make_shared<GameObject>(
+			aStar["onefive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["onefive"]->setScale(glm::vec3(0.6));
+
+		gameobjects["onesix"] = std::make_shared<GameObject>(
+			aStar["onesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["onesix"]->setScale(glm::vec3(0.6));
+
+		//second row of nodes
+		gameobjects["twoone"] = std::make_shared<GameObject>(
+			aStar["twoone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twoone"]->setScale(glm::vec3(0.6));
+
+		gameobjects["twotwo"] = std::make_shared<GameObject>(
+			aStar["twotwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twotwo"]->setScale(glm::vec3(0.6));
+
+		gameobjects["twothree"] = std::make_shared<GameObject>(
+			aStar["twothree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twothree"]->setScale(glm::vec3(0.6));
+
+		gameobjects["twosix"] = std::make_shared<GameObject>(
+			aStar["twosix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twosix"]->setScale(glm::vec3(0.6));
+
+		gameobjects["twoseven"] = std::make_shared<GameObject>(
+			aStar["twoseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twoseven"]->setScale(glm::vec3(0.6));
+
+		gameobjects["twoeight"] = std::make_shared<GameObject>(
+			aStar["twoeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["twoeight"]->setScale(glm::vec3(0.6));
+
+		//third row
+		gameobjects["threeone"] = std::make_shared<GameObject>(
+			aStar["threeone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threeone"]->setScale(glm::vec3(0.6));
+
+		gameobjects["threetwo"] = std::make_shared<GameObject>(
+			aStar["threetwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threetwo"]->setScale(glm::vec3(0.6));
+
+		gameobjects["threethree"] = std::make_shared<GameObject>(
+			aStar["threethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threethree"]->setScale(glm::vec3(0.6));
+
+		gameobjects["threefour"] = std::make_shared<GameObject>(
+			aStar["threefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threefour"]->setScale(glm::vec3(0.6));
+
+		gameobjects["threefive"] = std::make_shared<GameObject>(
+			aStar["threefive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threefive"]->setScale(glm::vec3(0.6));
+
+		gameobjects["threesix"] = std::make_shared<GameObject>(
+			aStar["threesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threesix"]->setScale(glm::vec3(0.6));
+
+		gameobjects["threeeight"] = std::make_shared<GameObject>(
+			aStar["threeeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["threeeight"]->setScale(glm::vec3(0.6));
+
+		//fourth row
+		gameobjects["fourone"] = std::make_shared<GameObject>(
+			aStar["fourone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourone"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fourthree"] = std::make_shared<GameObject>(
+			aStar["fourthree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourthree"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fourfour"] = std::make_shared<GameObject>(
+			aStar["fourfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourfour"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fourfive"] = std::make_shared<GameObject>(
+			aStar["fourfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourfive"]->setScale(glm::vec3(0.6));
+
+		gameobjects["foursix"] = std::make_shared<GameObject>(
+			aStar["foursix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["foursix"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fourseven"] = std::make_shared<GameObject>(
+			aStar["fourseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fourseven"]->setScale(glm::vec3(0.6));
+
+		gameobjects["foureight"] = std::make_shared<GameObject>(
+			aStar["foureight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["foureight"]->setScale(glm::vec3(0.6));
+
+		//fifth row
+		gameobjects["fiveone"] = std::make_shared<GameObject>(
+			aStar["fiveone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fiveone"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fivetwo"] = std::make_shared<GameObject>(
+			aStar["fivetwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fivetwo"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fivethree"] = std::make_shared<GameObject>(
+			aStar["fivethree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fivethree"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fivefour"] = std::make_shared<GameObject>(
+			aStar["fivefour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fivefour"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fivesix"] = std::make_shared<GameObject>(
+			aStar["fivesix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fivesix"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fiveseven"] = std::make_shared<GameObject>(
+			aStar["fiveseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fiveseven"]->setScale(glm::vec3(0.6));
+
+		gameobjects["fiveeight"] = std::make_shared<GameObject>(
+			aStar["fiveeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["fiveeight"]->setScale(glm::vec3(0.6));
+
+		//sixth row
+		gameobjects["sixone"] = std::make_shared<GameObject>(
+			aStar["sixone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixone"]->setScale(glm::vec3(0.6));
+
+		gameobjects["sixthree"] = std::make_shared<GameObject>(
+			aStar["sixthree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixthree"]->setScale(glm::vec3(0.6));
+
+		gameobjects["sixfour"] = std::make_shared<GameObject>(
+			aStar["sixfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixfour"]->setScale(glm::vec3(0.6));
+
+		gameobjects["sixfive"] = std::make_shared<GameObject>(
+			aStar["sixfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixfive"]->setScale(glm::vec3(0.6));
+
+		gameobjects["sixsix"] = std::make_shared<GameObject>(
+			aStar["sixsix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixsix"]->setScale(glm::vec3(0.6));
+
+		gameobjects["sixeight"] = std::make_shared<GameObject>(
+			aStar["sixeight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sixeight"]->setScale(glm::vec3(0.6));
+
+		//seventh row
+		gameobjects["sevenone"] = std::make_shared<GameObject>(
+			aStar["sevenone"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevenone"]->setScale(glm::vec3(0.6));
+
+		gameobjects["seventwo"] = std::make_shared<GameObject>(
+			aStar["seventwo"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["seventwo"]->setScale(glm::vec3(0.6));
+
+		gameobjects["seventhree"] = std::make_shared<GameObject>(
+			aStar["seventhree"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["seventhree"]->setScale(glm::vec3(0.6));
+
+		gameobjects["sevenfour"] = std::make_shared<GameObject>(
+			aStar["sevenfour"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevenfour"]->setScale(glm::vec3(0.6));
+
+		gameobjects["sevenfive"] = std::make_shared<GameObject>(
+			aStar["sevenfive"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevenfive"]->setScale(glm::vec3(0.6));
+
+		gameobjects["sevensix"] = std::make_shared<GameObject>(
+			aStar["sevensix"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevensix"]->setScale(glm::vec3(0.6));
+
+		gameobjects["sevenseven"] = std::make_shared<GameObject>(
+			aStar["sevenseven"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["sevenseven"]->setScale(glm::vec3(0.6));
+
+		gameobjects["seveneight"] = std::make_shared<GameObject>(
+			aStar["seveneight"]->pos, barrelMesh, defaultMaterial, barrelTexMap);
+		gameobjects["seveneight"]->setScale(glm::vec3(0.6));
+	}
+	*/
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////	Players
@@ -758,7 +1004,7 @@ void initializeScene()
 	botwallBody = std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
 	rightwallBody	= std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
 	botleftBody		= std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
-	topwallBody = std::make_unique<RigidBody>(btBroadphaseProxy::DebrisFilter, btBroadphaseProxy::CharacterFilter);
+	topwallBody = std::make_unique<RigidBody>();
 	lampBody = std::make_unique<RigidBody>();
 	ring1Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
 	ring2Body = std::make_unique<RigidBody>(btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::CharacterFilter);
@@ -902,7 +1148,7 @@ void initializeStates()
 	char pauseTex[] = "Assets/img/menPause_atlas(4000x4000).png";
 	std::shared_ptr<Texture> pauseTexMap = std::make_shared<Texture>(pauseTex, pauseTex, 1.0f);
 
-	std::string countdownTex = "Assets/img/countdown.png";
+	std::string countdownTex = "Assets/img/321(scaled).png";
 	std::shared_ptr<Texture> countdownTexMap = std::make_shared<Texture>(countdownTex, countdownTex, 1.0f);
 
 	// Report atlas load times
@@ -947,7 +1193,6 @@ void initializeStates()
 	t2 = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	std::cout << " success, total " << duration << "ms taken" << std::endl;
-
 }
 
 void bulletNearCallback(btBroadphasePair& collisionPair,
@@ -1070,6 +1315,16 @@ void KeyboardCallbackFunction(unsigned char key, int x, int y)
 void KeyboardUpCallbackFunction(unsigned char key, int x, int y)
 {
 	KEYBOARD_INPUT->SetActive(key, false);
+	switch (key) 
+	{
+	case 'g':
+		//aStar.findPath(players["bombot1"]);
+		//aStar.newTraverse = true;
+		//aStar.traverse = true;
+		
+		//players["bombot1"]->setPosition(players["bombot1"]->checkNodes(aStarPointer)->pos);
+		break;
+	}
 }
 
 
@@ -1092,7 +1347,8 @@ void TimerCallbackFunction(int value)
 	elapsedTimeAtLastTick = totalElapsedTime;
 
 	// Handle all inputs 
-	
+	//if (aStar.traverse)
+		//aStar.traversePath(players["bombot1"], deltaTime);
 
 	// Update the camera's position
 	playerCamera.update();
@@ -1246,7 +1502,7 @@ int main(int argc, char **argv)
 	auto durationS = std::chrono::duration_cast<std::chrono::seconds>(totalFinish - totalStart).count();
 	std::cout << "Total time to initialize: " << durationMS << " ms or " << durationS << " seconds" << std::endl;
 
-
+	srand(time(0));
 	/* Start Game Loop */
 	deltaTime = glutGet(GLUT_ELAPSED_TIME);
 	deltaTime /= 1000.0f;

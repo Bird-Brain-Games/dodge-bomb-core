@@ -1,11 +1,14 @@
 #include "MainGameState.h"
-#include "RigidBody.h"
-#include "IL\ilut.h"
-#include "InputManager.h"
-#include "gl\freeglut.h"
-#include "Texture.h"
-#include <fstream>
 #include <iostream>
+#include <fstream>
+
+#include "IL\ilut.h"
+#include "gl\freeglut.h"
+
+#include "RigidBody.h"
+#include "InputManager.h"
+#include "Texture.h"
+#include "aStar.h"
 
 
 void calculateCollisions();
@@ -78,6 +81,8 @@ void LUT::unbind(GLuint textureUnit)
 	glBindTexture(GL_TEXTURE_3D, 0);
 }
 
+float Game::maxFadeTime = 0.3f;
+
 Game::Game
 (
 	std::map<std::string, std::shared_ptr<GameObject>>* _scene,
@@ -112,8 +117,7 @@ Game::Game
 	_camera->update();
 	cameraDefaultForward = _camera->getForward();
 	initializeFrameBuffers();
-	currentGameState = MAIN;
-	changeState(READYUP);
+	
 	winScreen = std::make_shared<Menu>(textures->at("win"), 1, 1);
 	winScreen->setMaterial(materials->at("menu"));
 
@@ -124,16 +128,36 @@ Game::Game
 
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
-	colorCorrection = LUT_OFF;
+	colorCorrection = LUT_SEPIA;
+	currentLUT = &sepiaLUT;
 
-	defaultPlayerPositions.push_back(glm::vec3(-12.0f, 39.5f, 10.0f));
-	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.5f, -16.0f));
-	defaultPlayerPositions.push_back(glm::vec3(40.0f, 39.5f, -25.0f));
-	defaultPlayerPositions.push_back(glm::vec3(57.0f, 39.5f, 7.0f));
+	aStar.initializePathNodes();
+
+	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.0f, -16.0f));	// top left
+	defaultPlayerPositions.push_back(glm::vec3(45.0f, 39.5f, -25.0f));	// top right
+	defaultPlayerPositions.push_back(glm::vec3(-12.0f, 39.5f, 10.0f));	// bottom left
+	defaultPlayerPositions.push_back(glm::vec3(57.0f, 39.5f, 7.0f));	// bottom right
 
 	// Initialize sounds
-	m_gameMusic = Sound(soundTemplates->at("m_gameMusic"));
-	m_gameMusic.setPosition(glm::vec3(23.0f, 45.0f, 25.0f));
+	m_gameMusic = Sound(soundTemplates->at("m_readyMusic"));
+	m_gameMusic.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameMusic.setVolume(musicVolume);
+
+	m_gameTrack1 = Sound(soundTemplates->at("m_gameTrack1"));
+	m_gameTrack2 = Sound(soundTemplates->at("m_gameTrack2"));
+	m_gameTrack3 = Sound(soundTemplates->at("m_gameTrack3"));
+	m_gameTrack1.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameTrack2.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameTrack3.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	m_gameTrack1.setVolume(musicVolume);
+
+
+	s_countDown = Sound(soundTemplates->at("s_countdown"));
+	s_countDown.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
+	s_countDown.setVolume(0.4);
+	
+	currentGameState = MAIN;
+	changeState(READYUP);
 }
 
 void Game::setPaused(int a_paused)
@@ -141,9 +165,17 @@ void Game::setPaused(int a_paused)
 	if (a_paused == 0)
 	{
 		m_isPaused = false;
+		m_gameTrack1.resume();
+		m_gameTrack2.resume();
+		m_gameTrack3.resume();
 	}
 	else if (a_paused == 1)
+	{
 		m_isPaused = true;
+		m_gameTrack1.pause();
+		m_gameTrack2.pause();
+		m_gameTrack3.pause();
+	}
 	else if (a_paused == -1)
 	{
 		m_isPaused = false;
@@ -152,18 +184,25 @@ void Game::setPaused(int a_paused)
 		//resetPlayers();
 		makePlayersInactive();
 		bombManager->clearAllBombs();
-		currentGameState = READYUP;
+		changeState(READYUP);
 		menuDelay = 0.3f;
+
+		m_gameTrack1.stop();
+		m_gameTrack2.stop();
+		m_gameTrack3.stop();
+		//m_gameMusic.play();
 	}
 }
 
 void Game::resetPlayers()
 {
+	numActivePlayers = 0;
 	for (auto it : *players)
 	{
 		if (it.second->isActive())
 		{
 			it.second->reset(defaultPlayerPositions.at(it.second->getPlayerNum()));
+			numActivePlayers++;
 		}
 	}
 	/*players->at("bombot1")->reset(glm::vec3(-12.0f, 39.5f, 10.0f));
@@ -292,10 +331,9 @@ void Game::update(float dt)
 		int count = 0;
 		for (auto it : *players)
 		{
-
+			count++;
 			if (it.second->getController()->conButton(XINPUT_GAMEPAD_START) && currentGameState == MAIN)
 				pausing = count;
-			count++;
 		}
 
 		if (pausing > 0 && pauseTimer > 1.0)
@@ -329,12 +367,30 @@ void Game::update(float dt)
 				pauseTimer = 0;
 				break;
 			}
+			pausing = 0;
 		}
 		winner = deathCheck();
 		if (winner > 0)
 		{
 			winner--;
 			changeState(WIN);
+		}
+
+		int playerDeathCounter = 0;
+		for (auto it : *players)
+		{
+			if (it.second->isActive() && it.second->getHealth() == 0)
+				playerDeathCounter++;
+		}
+
+		if (numDeadPlayers != playerDeathCounter)
+		{
+			numDeadPlayers = playerDeathCounter;
+			if (playerDeathCounter > 1)
+				m_gameTrack3.setVolume(musicVolume - 0.05);
+			else if (playerDeathCounter > 0)
+				m_gameTrack2.setVolume(musicVolume - 0.05);
+				
 		}
 	}
 
@@ -353,22 +409,33 @@ void Game::update(float dt)
 		// Move the player to the space
 		if (playerMoveLerp >= 0.0f && playerMoveLerp != 1.0f)
 		{
-			playerMoveLerp += dt;
-			if (playerMoveLerp > 1.0f)
+			aStar.traversePath(winPlayer, dt * 2.0f);
+			if (!aStar.traverse)	// If done traversing
+			{
 				playerMoveLerp = 1.0f;
-			
-			winPlayer->setPosition(glm::mix(playerStartPosition, winPlayerPosition, playerMoveLerp));
-			
+				depthToggle = true;
+			}
 		}
 		// Move the camera once the player has moved to the space
 		else if (playerMoveLerp == 1.0f && cameraMoveLerp >= 0.0f && cameraMoveLerp != 1.0f)
 		{
-			cameraMoveLerp += dt / 2.0f;
+			cameraMoveLerp += dt;
 			if (cameraMoveLerp > 1.0f)
+			{
 				cameraMoveLerp = 1.0f;
+				winPlayer->playWin();
+				
+			}
+			
+			if (forwardLerp <= 1.0f) forwardLerp += dt / 2.0f;
+			if (forwardLerp > 1.0f)
+			{
+				forwardLerp = 1.0f;
+
+			}
 
 			camera->setPosition(glm::mix(cameraDefaultPosition, winCameraPosition, cameraMoveLerp));
-			camera->setForward(glm::mix(cameraDefaultForward, winCameraForward, cameraMoveLerp));
+			camera->setForward(glm::mix(cameraDefaultForward, winCameraForward, forwardLerp));
 			innerCutOff = glm::mix(innerDefault, innerWin, cameraMoveLerp);
 			outerCutOff = glm::mix(outerDefault, outerWin, cameraMoveLerp);
 		}
@@ -379,12 +446,13 @@ void Game::update(float dt)
 			{
 				this->m_isPaused = true;
 				changeState(READYUP);
+				//players->at("bombot" + std::to_string(winner))->setAnim("idle");
 				m_parent->getGameState("MainMenu")->setPaused(0);
-				//score->active = players->at("bombot1")->getController();
-				//m_parent->getGameState("score")->setPaused(winner);
 			}
 		}
 	}
+
+	Sound::sys.update();
 }
 
 
@@ -521,21 +589,42 @@ void Game::draw()
 	if (bloomToggle)
 	{
 		bloomPass(fboUnlit, fboBloomed);
+		if (depthToggle)
+		{
 		depthOfField(fboBloomed, fboWithBokeh);
-		bloomPass(fboParticle, bloomParticle); // sets up fbo's for particle pass
-		particlePass(bloomParticle, fboFinal);
-		fboToScreen(fboFinal);
+		fboToScreen(fboWithBokeh);
 
+
+		}
+		else
+		{
+		fboToScreen(fboBloomed);
+		particlePass(fboBloomed, fboFinal);
+		fboToScreen(fboFinal);
+		}
+	}
+	else if (depthToggle)
+	{
+		depthOfField(fboUnlit, fboWithBokeh);
+		fboToScreen(fboWithBokeh);
 	}
 	else
 	{
-		bloomPass(fboUnlit, fboBloomed);
-		bloomPass(fboParticle, bloomParticle);
-		particlePass(fboBloomed, fboFinal);
-		fboToScreen(fboFinal);
+		fboToScreen(fboUnlit);
 	}
 
-	
+	// Color correction
+	if (currentLUT)	// if pointing to a LUT
+	{
+		if (depthToggle)
+			colorCorrectionPass(fboWithBokeh, fboColorCorrection);
+		else if (bloomToggle)
+			colorCorrectionPass(fboBloomed, fboColorCorrection);
+		else
+			colorCorrectionPass(fboUnlit, fboColorCorrection);
+
+		fboToScreen(fboColorCorrection);
+	}
 
 }
 
@@ -923,17 +1012,18 @@ void Game::colorCorrectionPass(FrameBufferObject& fboIn, FrameBufferObject& fboO
 	static auto colorMaterial = materials->at("colorCorrection");
 
 	//// Bind the LUT
-	contrastLUT.bind(GL_TEXTURE6);
+	currentLUT->bind(GL_TEXTURE6);
 
 	colorMaterial->shader->bind();
 	colorMaterial->shader->sendUniformInt("u_tex", 0);
 	colorMaterial->shader->sendUniformInt("u_lookup", 6);
-	colorMaterial->shader->sendUniformFloat("u_mixAmount", 1.0f);
-	colorMaterial->shader->sendUniformFloat("u_lookupSize", contrastLUT.getSize());
+	colorMaterial->shader->sendUniformFloat("u_mixAmount", 0.5f);
+	colorMaterial->shader->sendUniformFloat("u_lookupSize", currentLUT->getSize());
 	colorMaterial->sendUniforms();
 
 	// Draw a full screen quad using the geometry shader
 	glDrawArrays(GL_POINTS, 0, 1);
+	FrameBufferObject::unbindFrameBuffer(windowWidth, windowHeight);
 
 	contrastLUT.unbind(GL_TEXTURE6);
 }
@@ -967,11 +1057,11 @@ void Game::handleKeyboardInputShaders()
 	{
 		if (colorCorrection == LUT_CONTRAST)
 		{
-			colorCorrection = LUT_OFF;
+			changeColorCorrection(LUT_OFF);
 		}
 		else
 		{
-			colorCorrection = LUT_CONTRAST;
+			changeColorCorrection(LUT_CONTRAST);
 		}
 	}
 	// Toggle LUT
@@ -979,11 +1069,11 @@ void Game::handleKeyboardInputShaders()
 	{
 		if (colorCorrection == LUT_SEPIA)
 		{
-			colorCorrection = LUT_OFF;
+			changeColorCorrection(LUT_OFF);
 		}
 		else
 		{
-			colorCorrection = LUT_SEPIA;
+			changeColorCorrection(LUT_SEPIA);
 		}
 	}
 
@@ -1143,6 +1233,16 @@ void Game::handleKeyboardInput()
 		players->at("bombot2")->setActive(true);
 		players->at("bombot2")->setPosition(glm::vec3(15.0f * players->at("bombot2")->getPlayerNum(), 35.0f, 0.0f));
 	}
+	if (KEYBOARD_INPUT->CheckPressEvent('k') || KEYBOARD_INPUT->CheckPressEvent('J'))
+	{
+		players->at("bombot3")->setActive(true);
+		players->at("bombot3")->setPosition(glm::vec3(15.0f * players->at("bombot3")->getPlayerNum(), 35.0f, 0.0f));
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('l') || KEYBOARD_INPUT->CheckPressEvent('J'))
+	{
+		players->at("bombot4")->setActive(true);
+		players->at("bombot4")->setPosition(glm::vec3(15.0f * players->at("bombot4")->getPlayerNum(), 35.0f, 0.0f));
+	}
 
 
 
@@ -1163,11 +1263,21 @@ void Game::changeState(Game::GAME_STATE newState)
 	switch (currentGameState)
 	{
 	case Game::READYUP:
+		depthToggle = false;
+
 		// reset the camera
 		camera->setPosition(cameraDefaultPosition);
 		camera->setAngle(cameraDefaultAngle.x, cameraDefaultAngle.y);
 		innerCutOff = innerDefault;
 		outerCutOff = outerDefault;
+
+		//players->at("bombot" + std::to_string(winner))->setAnim("")
+
+		// Reset the sounds
+		m_gameTrack1.stop();
+		m_gameTrack2.stop();
+		m_gameTrack3.stop();
+		if (!m_gameMusic.isPlaying()) m_gameMusic.play();
 
 		for (auto it : *obstacles)
 		{
@@ -1175,7 +1285,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		}
 		for (auto it : *readyUpRings)
 		{
-			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
 		}
 
 		// Set the tables texture
@@ -1183,6 +1293,9 @@ void Game::changeState(Game::GAME_STATE newState)
 		break;
 
 	case Game::COUNTDOWN:
+		s_countDown.play();
+		m_gameMusic.stop();
+
 		currentCountdown = 4.0f;
 		for (auto it : *obstacles)
 		{
@@ -1190,7 +1303,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		}
 		for (auto it : *readyUpRings)
 		{
-			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
 		}
 		bombManager->clearAllBombs();
 		resetPlayers();
@@ -1201,9 +1314,46 @@ void Game::changeState(Game::GAME_STATE newState)
 	case Game::WIN:
 		playerMoveLerp = 0.0f;
 		cameraMoveLerp = 0.0f;
+		forwardLerp = 0.0f;
 		playerStartPosition = players->at("bombot" + std::to_string(winner))->getWorldPosition();
+
+		aStar.traverse = true;
+		aStar.newTraverse = true;
+		aStar.findPath(players->at("bombot" + std::to_string(winner)));
 		break;
 
+	case Game::MAIN:
+		m_gameTrack1.play();
+		m_gameTrack2.play();
+		m_gameTrack3.play();
+
+		m_gameTrack2.setVolume(0.0f);
+		m_gameTrack3.setVolume(0.0f);
+		numTracksPlaying = 1;
+		numDeadPlayers = 0;
+		break;
+
+	default:
+		break;
+	}
+}
+
+void Game::changeColorCorrection(LUT_MODE mode)
+{
+	if (colorCorrection == mode) return;
+	colorCorrection = mode;
+
+	switch (colorCorrection)
+	{
+	case Game::LUT_OFF:
+		currentLUT = nullptr;
+		break;
+	case Game::LUT_CONTRAST:
+		currentLUT = &contrastLUT;
+		break;
+	case Game::LUT_SEPIA:
+		currentLUT = &sepiaLUT;
+		break;
 	default:
 		break;
 	}

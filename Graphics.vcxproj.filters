@@ -67,6 +67,7 @@
     <ClCompile Include="src\Texture2D.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\PathNode.cpp" />
     <ClCompile Include="src\particles.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
@@ -152,6 +153,8 @@
     <ClInclude Include="src\particles.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\PathNode.h" />
+    <ClInclude Include="src\aStar.h" />
     <ClInclude Include="src\MainGameState.h">
       <Filter>States</Filter>
     </ClInclude>
@@ -241,6 +244,12 @@
       <Filter>Graphics\Shaders</Filter>
     </None>
     <None Include="shaders\pls.glsl">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\node.geom">
+      <Filter>Graphics\Shaders</Filter>
+    </None>
+    <None Include="shaders\node.frag">
       <Filter>Graphics\Shaders</Filter>
     </None>
     <None Include="shaders\particles.geom">

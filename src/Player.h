@@ -4,6 +4,7 @@
 #include "Bomb.h"
 #include "controller.h"
 #include "particles.h"
+#include "PathNode.h"
 #include "sound engine.h"
 #include <map>
 
@@ -74,10 +75,18 @@ public:
 
 	inline bool isReady() { return ready; }
 	inline bool isActive() { return currentState != P_INACTIVE; }
-	inline void setActive(bool active) { currentState = (active) ? P_NORMAL : P_INACTIVE; }
+	void setActive(bool active);
 
 	void setAnim(std::string);
+	void overWrite(std::string);
+
 	int getHealth();
+
+	PathNode * checkNodes(std::map<std::string, PathNode *> * nodeContainer);
+	PathNode * closestNode = nullptr;
+	//PathNode * closestX = nullptr;
+
+	void playWin();
 
 	Controller* getController();
 
@@ -115,7 +124,10 @@ private:
 
 	// Sounds
 	Sound s_damage;
-
+	Sound s_footstep;
+	bool moving;
+	Sound s_ready1, s_ready2;
+	Sound s_win1, s_win2;
 
 private:
 	// Player stats
