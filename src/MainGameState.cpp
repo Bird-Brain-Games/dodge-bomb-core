@@ -442,6 +442,7 @@ void Game::update(float dt)
 				m_gameTrack2.setVolume(musicVolume - 0.05);
 
 			roomLight -= 0.1f;
+			deskLamp += 0.05f;
 		}
 	}
 
