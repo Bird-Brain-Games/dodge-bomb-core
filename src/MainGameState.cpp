@@ -422,6 +422,8 @@ void Game::update(float dt)
 		if (winner > 0)
 		{
 			winner--;
+			roomLight = roomMain + 0.1f;
+			deskLamp = lampMain;
 			changeState(WIN);
 		}
 
