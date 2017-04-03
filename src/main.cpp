@@ -29,7 +29,6 @@
 #include "MainGameState.h"
 
 // aStar Libs
-#include "PathNode.h"
 #include "aStar.h"
 
 // Defines and Core variables
@@ -239,7 +238,7 @@ void initializeShaders()
 
 void initializeScene()
 {
-	initializePathNodes();
+	//aStar.initializePathNodes();
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////////	MESHES		///////////////////////////////
@@ -557,24 +556,24 @@ void initializeScene()
 	t1 = std::chrono::high_resolution_clock::now();
 
 	gameobjects["readyBlue"] = std::make_shared<readyUpRing>(
-		glm::vec3(0.0f, 89.0f, -16.0f), readyBottomMesh, defaultMaterial, readyTexMap2, 0);
+		glm::vec3(0.0f, -11.0f, -16.0f), readyBottomMesh, defaultMaterial, readyTexMap2, 0);
 	gameobjects["readyBlue"]->setScale(glm::vec3(0.5f));
 	gameobjects["readyBlue"]->setRotationAngleY(90.0f * degToRad);
 	readyUpRings.push_back(gameobjects["readyBlue"]);
 
 	gameobjects["readyRed"] = std::make_shared<readyUpRing>(
-		glm::vec3(45.0f, 89.0f, -16.0f), readyTopMesh, defaultMaterial, readyTexMap1, 1);
+		glm::vec3(45.0f, -11.0f, -16.0f), readyTopMesh, defaultMaterial, readyTexMap1, 1);
 	gameobjects["readyRed"]->setRotationAngleY(90.0f * degToRad);
 	gameobjects["readyRed"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyRed"]);
 
 	gameobjects["readyGreen"] = std::make_shared<readyUpRing>(
-		glm::vec3(-7.0f, 89.0f, 13.0f), readyBottomMesh, defaultMaterial, readyTexMap1, 2);
+		glm::vec3(-7.0f, -11.0f, 13.0f), readyBottomMesh, defaultMaterial, readyTexMap1, 2);
 	gameobjects["readyGreen"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyGreen"]);
 
 	gameobjects["readyYellow"] = std::make_shared<readyUpRing>(
-		glm::vec3(53.0f, 89.0f, 13.0f), readyTopMesh, defaultMaterial, readyTexMap2, 3);
+		glm::vec3(53.0f, -11.0f, 13.0f), readyTopMesh, defaultMaterial, readyTexMap2, 3);
 	gameobjects["readyYellow"]->setRotationAngleY(180.0f * degToRad);
 	gameobjects["readyYellow"]->setScale(glm::vec3(0.5f));
 	readyUpRings.push_back(gameobjects["readyYellow"]);
@@ -1303,9 +1302,9 @@ void KeyboardUpCallbackFunction(unsigned char key, int x, int y)
 	switch (key) 
 	{
 	case 'g':
-		findPath(players["bombot1"]);
-		newTraverse = true;
-		traverse = true;
+		//aStar.findPath(players["bombot1"]);
+		//aStar.newTraverse = true;
+		//aStar.traverse = true;
 		
 		//players["bombot1"]->setPosition(players["bombot1"]->checkNodes(aStarPointer)->pos);
 		break;
@@ -1332,8 +1331,8 @@ void TimerCallbackFunction(int value)
 	elapsedTimeAtLastTick = totalElapsedTime;
 
 	// Handle all inputs 
-	if (traverse)
-		traversePath(players["bombot1"], deltaTime);
+	//if (aStar.traverse)
+		//aStar.traversePath(players["bombot1"], deltaTime);
 
 	// Update the camera's position
 	playerCamera.update();

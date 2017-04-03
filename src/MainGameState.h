@@ -10,6 +10,7 @@
 #include "FrameBufferObject.h"
 #include "particles.h"
 #include "sound engine.h"
+#include "aStar.h"
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////	Lighting Controls	//////////////////////////
@@ -166,6 +167,8 @@ private:
 	LUT sepiaLUT;
 	LUT* currentLUT;
 	LUT_MODE colorCorrection;
+
+	AStar aStar;
 
 	float outlineWidth = 4.0;
 	bool outlineToggle = true;

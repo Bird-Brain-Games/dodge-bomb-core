@@ -1,11 +1,14 @@
 #include "MainGameState.h"
-#include "RigidBody.h"
-#include "IL\ilut.h"
-#include "InputManager.h"
-#include "gl\freeglut.h"
-#include "Texture.h"
-#include <fstream>
 #include <iostream>
+#include <fstream>
+
+#include "IL\ilut.h"
+#include "gl\freeglut.h"
+
+#include "RigidBody.h"
+#include "InputManager.h"
+#include "Texture.h"
+#include "aStar.h"
 
 
 void calculateCollisions();
@@ -127,6 +130,8 @@ Game::Game
 	sepiaLUT.load("Assets/img/Test2.CUBE");
 	colorCorrection = LUT_SEPIA;
 	currentLUT = &sepiaLUT;
+
+	aStar.initializePathNodes();
 
 	defaultPlayerPositions.push_back(glm::vec3(0.0f, 39.0f, -16.0f));	// top left
 	defaultPlayerPositions.push_back(glm::vec3(45.0f, 39.5f, -25.0f));	// top right
@@ -404,14 +409,18 @@ void Game::update(float dt)
 		// Move the player to the space
 		if (playerMoveLerp >= 0.0f && playerMoveLerp != 1.0f)
 		{
-			playerMoveLerp += dt;
+			aStar.traversePath(winPlayer, dt);
+			if (!aStar.traverse)	// If done traversing
+				playerMoveLerp = 1.0f;
+
+			/*playerMoveLerp += dt;
 			if (playerMoveLerp > 1.0f)
 			{
 				playerMoveLerp = 1.0f;
 				depthToggle = true;
 			}
 			
-			winPlayer->setPosition(glm::mix(playerStartPosition, winPlayerPosition, playerMoveLerp));
+			winPlayer->setPosition(glm::mix(playerStartPosition, winPlayerPosition, playerMoveLerp));*/
 			
 		}
 		// Move the camera once the player has moved to the space
@@ -1183,7 +1192,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		}
 		for (auto it : *readyUpRings)
 		{
-			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
 		}
 
 		// Set the tables texture
@@ -1201,7 +1210,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		}
 		for (auto it : *readyUpRings)
 		{
-			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
+			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
 		}
 		bombManager->clearAllBombs();
 		resetPlayers();
@@ -1213,6 +1222,10 @@ void Game::changeState(Game::GAME_STATE newState)
 		playerMoveLerp = 0.0f;
 		cameraMoveLerp = 0.0f;
 		playerStartPosition = players->at("bombot" + std::to_string(winner))->getWorldPosition();
+
+		aStar.traverse = true;
+		aStar.newTraverse = true;
+		aStar.findPath(players->at("bombot" + std::to_string(winner)));
 		break;
 
 	case Game::MAIN:
