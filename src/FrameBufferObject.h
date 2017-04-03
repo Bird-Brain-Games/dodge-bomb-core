@@ -48,9 +48,12 @@ public:
 	void unbindTexture(GLenum textureUnit);
 	void bindDepthTextureForSampling(GLenum textureUnit);
 
+	//copy the depth buffer over.
+	void copyBuffer(unsigned int _width, unsigned int _height, GLbitfield mask, GLenum filter, GLuint FBO);
 
 	unsigned int getWidth() { return width; }
 	unsigned int getHeight() { return height; }
+	unsigned int getId() { return handle; }
 
 	void destroy();
 };
