@@ -115,7 +115,7 @@ public:
 	void traversePath(std::shared_ptr<Player> player, float dT)
 	{
 		static auto pathItr = pathToWalk.begin();
-
+		player->setAnim("walk");
 		if (newTraverse)
 		{
 			pathItr = pathToWalk.begin();
@@ -139,7 +139,14 @@ public:
 
 			// Player to start node
 			if (pathItr != pathToWalk.end())
-				player->setPosition(glm::vec3(lerp(x, pathItr->second->pos.x, lerptime), player->getWorldPosition().y, lerp(z, pathItr->second->pos.z, lerptime)));
+			{
+				float posX = glm::mix(x, pathItr->second->pos.x, lerptime);
+				float posZ = glm::mix(z, pathItr->second->pos.z, lerptime);
+
+				player->setPosition(glm::vec3(posX, player->getWorldPosition().y, posZ));
+				player->setRotationAngleY(glm::atan(posX / posZ));
+				//player->setRotationAngleY(0.5f);
+			}
 
 			lerptime += dT;
 		}
