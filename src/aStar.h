@@ -144,7 +144,7 @@ public:
 				float posZ = glm::mix(z, pathItr->second->pos.z, lerptime);
 
 				player->setPosition(glm::vec3(posX, player->getWorldPosition().y, posZ));
-				player->setRotationAngleY(glm::atan(posX / posZ));
+				//player->setRotationAngleY(glm::atan(posX / posZ));
 				//player->setRotationAngleY(0.5f);
 			}
 

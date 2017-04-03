@@ -449,11 +449,12 @@ void Player::checkCollisionWith(Bomb* other, bool inReadyUp)
 		if (other->getCurrentState() != BOMB_STATE::DONE)
 		{
 			other->explode();
-			takeDamage(1);
-			con.setVibration(32000, 16000);
 
 			// If in ready up, don't take damage
 			if (inReadyUp) health++;
+
+			takeDamage(1);
+			con.setVibration(32000, 16000);
 
 			//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 		}
