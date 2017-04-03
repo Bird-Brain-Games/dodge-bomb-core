@@ -540,7 +540,7 @@ void Player::reset(glm::vec3 newPos)
 	ready = false;
 	currentDashCooldown = 0.0f;
 	currentDashDuration = 0.0f;
-	setAnim("idle");
+	//setAnim("idle");
 }
 
 glm::vec3 Player::getCurrentVelocity()

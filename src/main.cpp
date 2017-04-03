@@ -505,6 +505,7 @@ void initializeScene()
 	soundTemplates["m_gameTrack3"] = Sound(soundPath + "Music Layers/layer_3.wav", true);
 
 	soundTemplates["s_countdown"] = Sound(soundPath + "3_2_1_DodgeBomb.wav", false);
+	soundTemplates["s_lightOn"] = Sound(soundPath + "light_on.wav", false);
 
 	// Battle SFX
 	soundTemplates["s_bombExplosion1"] = Sound(soundPath + "bomb sounds/bomb_1.wav", false);
