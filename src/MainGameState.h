@@ -261,6 +261,7 @@ private:
 
 	float aspectRatio = windowWidth / windowHeight;
 
+	float startA = 0.2562;
 	float A = 0.4062;
 	float f = 0.0453;
 	float S1 = 11.5;
