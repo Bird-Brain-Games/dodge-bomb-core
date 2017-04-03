@@ -21,6 +21,8 @@ private:
 		float* duration;	//The total duration it exists for
 		float* lives;		//controls how long the particle lives
 		float* masses;
+		float* size;
+		bool* active; // the current state of the particle.
 	} particles;
 
 public:
@@ -46,6 +48,10 @@ public:
 	glm::ivec2 dimensions;	// the dimension of our texture.
 	float max;				// the number of textures to cycle through
 	float size; // the size of the particles
+	glm::vec2 sizeDecay;
+	float mixer;
+
+	bool respawn; // controls whether the particles respwawn or not. true = respawn, false = no respawn
 
 	glm::vec3 colour;
 

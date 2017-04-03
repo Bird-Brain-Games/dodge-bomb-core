@@ -98,6 +98,62 @@ bool BombManager::init(
 	return true;
 }
 
+
+void BombManager::initParticles(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture)
+{
+	smoke.lifeRange = glm::vec3(0.35, 0.5, 0.0); // this should be a vec2, rands life from x to y.
+	smoke.initialForceMin = glm::vec3(-9.0, 0.0, -9.0);
+	smoke.initialForceMax = glm::vec3(9.0, 0.0, 9.0);
+	smoke.initialPosition = glm::vec3(0.0f, 5.0f, 0.0f);
+	
+	smoke.size = 1.0f;
+	smoke.initialGravity = glm::vec3(0.0f, 2.3f, 0.0f);
+	smoke.colour = glm::vec3(1.0, 1.0, 1.0);
+	
+	smoke.material = _material;
+	smoke.texture = _texture;
+	smoke.initialize(7);
+	smoke.play();
+	smoke.dimensions = glm::vec2(4.0f, 4.0f);
+	smoke.max = 5;
+	smoke.mixer = 0.2;
+	smoke.respawn = false;
+
+	ring.lifeRange = glm::vec3(0.35, 0.5, 0.0); // this should be a vec2, rands life from x to y.
+	ring.initialForceMin = glm::vec3(-9.0, 0.0, -9.0);
+	ring.initialForceMax = glm::vec3(9.0, 0.0, 9.0);
+	ring.initialPosition = glm::vec3(0.0f, 5.0f, 0.0f);
+	
+	ring.size = 1.0f;
+	ring.initialGravity = glm::vec3(0.0f, 2.3f, 0.0f);
+	ring.colour = glm::vec3(1.0, 1.0, 1.0);
+	
+	ring.material = _material;
+	ring.texture = _texture;
+	ring.initialize(7);
+	ring.play();
+	ring.dimensions = glm::vec2(4.0f, 4.0f);
+	ring.max = 5;
+	ring.mixer = 0.2;
+	ring.respawn = false;
+}
+
+void BombManager::updateParticles(float dt)
+{
+	for (int i = 0; i < emitters.size(); i++)
+	{
+		emitters.at(i)->update(dt);
+	}
+}
+
+void BombManager::drawParticles(Camera& _camera)
+{
+	for (int i = 0; i < emitters.size(); i++)
+	{
+		emitters.at(i)->draw(_camera);
+	}
+}
+
 void BombManager::setMaterialForAllBombs(std::shared_ptr<Material> mat)
 {
 	for (auto bomb : activeBombs)

@@ -554,17 +554,34 @@ void Game::draw()
 	break;
 	}
 
-
-	fboUnlit.bindFrameBufferForDrawing();
-	
-
 	// Draw the debug (if on)
 	if (RigidBody::isDrawingDebug())
 		RigidBody::drawDebug(camera->getView(), camera->getProj());
 
-	// Unbind scene FBO
+	//unbind the frame buffer
 	fboUnlit.unbindFrameBuffer(windowWidth, windowHeight);
-	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f));
+
+
+	//copy and enable the frame buffer
+	fboParticle.bindFrameBufferForDrawing();
+	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	fboUnlit.copyBuffer(fboUnlit.getWidth(), fboUnlit.getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST, fboParticle.getId());
+	fboParticle.bindFrameBufferForDrawing();
+	
+
+	//draw the particles
+	players->at("bombot1")->sparks;
+
+	drawSparks(camera);
+	drawSmoke(camera);
+
+	//unbind the frame buffer
+	fboParticle.unbindFrameBuffer(windowWidth, windowHeight);
+
+
+
+	// Unbind scene FBO
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Post Processing /////////////////////////////
@@ -574,12 +591,16 @@ void Game::draw()
 		bloomPass(fboUnlit, fboBloomed);
 		if (depthToggle)
 		{
-			depthOfField(fboBloomed, fboWithBokeh);
-			fboToScreen(fboWithBokeh);
+		depthOfField(fboBloomed, fboWithBokeh);
+		fboToScreen(fboWithBokeh);
+
+
 		}
 		else
 		{
-			fboToScreen(fboBloomed);
+		fboToScreen(fboBloomed);
+		particlePass(fboBloomed, fboFinal);
+		fboToScreen(fboFinal);
 		}
 	}
 	else if (depthToggle)
@@ -672,6 +693,9 @@ void Game::initializeFrameBuffers()
 	bokehBfbo.createFrameBuffer(windowWidth, windowHeight, 1, true);
 	fboWithBokeh.createFrameBuffer(windowWidth, windowHeight, 1, true);
 
+	fboParticle.createFrameBuffer(windowWidth, windowHeight, 1, true);
+	fboFinal.createFrameBuffer(windowWidth, windowHeight, 1, false);
+	bloomParticle.createFrameBuffer(windowWidth, windowHeight, 1, false);
 }
 
 void Game::drawScene(Camera* _camera, Camera* _shadow)
@@ -706,6 +730,49 @@ void Game::drawScene(Camera* _camera, Camera* _shadow)
 	{
 		winScreen->draw();
 	}
+}
+
+void Game::drawSmoke(Camera* _camera)
+{
+	materials->at("particles")->shader->bind();
+	materials->at("particles")->vec4Uniforms["u_lightPos"] = camera->getView() * lightPos;
+	materials->at("particles")->vec4Uniforms["u_lightTwo"] = camera->getView() * lightTwo;
+
+	materials->at("particles")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+	materials->at("particles")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
+	materials->at("particles")->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
+	materials->at("particles")->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		auto playersObject = itr->second;
+
+		if (playersObject->isRoot())
+			playersObject->drawSmoke(*_camera);
+	}
+
+	materials->at("particles")->shader->unbind();
+}
+void Game::drawSparks(Camera* _camera)
+{
+	materials->at("particles")->shader->bind();
+	materials->at("particles")->vec4Uniforms["u_lightPos"] = camera->getView() * lightPos;
+	materials->at("particles")->vec4Uniforms["u_lightTwo"] = camera->getView() * lightTwo;
+
+	materials->at("particles")->vec4Uniforms["u_controls"] = glm::vec4(ka, kd, ks, kr);
+	materials->at("particles")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
+	materials->at("particles")->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
+	materials->at("particles")->vec4Uniforms["u_shine"] = glm::vec4(shininess);
+
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		auto playersObject = itr->second;
+
+		if (playersObject->isRoot())
+			playersObject->drawSparks(*_camera);
+	}
+
+	materials->at("particles")->shader->unbind();
 }
 
 int Game::deathCheck()
@@ -878,6 +945,29 @@ void Game::bokehPass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDra
 
 	// Draw fullscreen quad
 	glDrawArrays(GL_POINTS, 0, 1);
+}
+
+void Game::particlePass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDrawTo)
+{
+	fboToDrawTo.bindFrameBufferForDrawing();
+	fboToDrawTo.clearFrameBuffer(clearColor);
+
+	fboToSample.bindTextureForSampling(0, GL_TEXTURE0);
+	bloomParticle.bindTextureForSampling(0, GL_TEXTURE1);
+	fboParticle.bindTextureForSampling(0, GL_TEXTURE2);
+
+	static auto combine = materials->at("combine");
+	combine->shader->bind();
+	combine->intUniforms["u_particle"] = 1;
+	combine->intUniforms["u_tex"] = 0;
+	combine->intUniforms["u_activater"] = 2;
+	combine->mat4Uniforms["u_mvp"] = glm::mat4();
+
+	combine->sendUniforms();
+
+	// Draw fullscreen quad
+	glDrawArrays(GL_POINTS, 0, 1);
+	fboToDrawTo.unbindFrameBuffer(windowWidth, windowHeight);
 }
 
 void Game::depthOfField(FrameBufferObject& input, FrameBufferObject& output)

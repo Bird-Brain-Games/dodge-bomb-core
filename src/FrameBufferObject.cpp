@@ -119,6 +119,16 @@ void FrameBufferObject::bindDepthTextureForSampling(GLenum textureUnit)
 		std::cout << "FBO does not have a depth texture!" << std::endl;
 }
 
+//copy the an FBO from this to the specified FBO
+void FrameBufferObject::copyBuffer(unsigned int _width, unsigned int _height, GLbitfield mask, GLenum filter, GLuint FBO)
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, handle);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO); // Write to default framebuffer
+	glBlitFramebuffer(0, 0, width, height, 0, 0, _width, _height, mask, filter);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// Now render light cubes as before
+}
+
 void FrameBufferObject::bindFrameBufferForDrawing()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, handle);

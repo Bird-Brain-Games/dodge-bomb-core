@@ -85,6 +85,9 @@ private:
 	void updateScene(float dt);
 	void updateReadyPass(float dt);
 	void drawScene(Camera* _camera, Camera* _shadow);
+	void drawSparks(Camera* _camera);
+	void drawSmoke(Camera* _camera);
+
 
 	void setMaterialForAllGameObjects(std::string materialName);
 	void setMaterialForAllPlayerObjects(std::string materialName);
@@ -94,12 +97,14 @@ private:
 	void bloomPass(FrameBufferObject& input, FrameBufferObject& fboToDrawTo);
 	void colorCorrectionPass(FrameBufferObject& fboIn, FrameBufferObject& fboOut);
 	void bokehPass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDrawTo, float filterAngleDeg);
+	void particlePass(FrameBufferObject& fboIn, FrameBufferObject& fboOut);
 
 	void initializeFrameBuffers();
 	void handleKeyboardInput();
 	void handleKeyboardInputShaders();
 
 	void changeColorCorrection(LUT_MODE);
+
 
 
 
@@ -114,8 +119,11 @@ private:
 	FrameBufferObject fboBloomed;
 	FrameBufferObject fboWithBokeh;
 	FrameBufferObject spunkMap;
+	FrameBufferObject fboParticle;
+	FrameBufferObject fboFinal;
+	FrameBufferObject bloomParticle;
 
-	glm::vec4 clearColor = glm::vec4(0.3, 0.0, 0.0, 0.0);
+	glm::vec4 clearColor = glm::vec4(0.0, 0.0, 0.0, 0.0);
 
 	std::shared_ptr<BombManager> bombManager;
 	std::map<std::string, std::shared_ptr<GameObject>>* scene;

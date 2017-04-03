@@ -95,11 +95,12 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru, v_null, v_skinning;
+	Shader v_default, v_passThru, v_null, v_skinning, v_particle;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
 	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
+	v_particle.loadShaderFromFile(shaderPath + "particles_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor,
@@ -211,7 +212,7 @@ void initializeShaders()
 
 	// Unlit texture material with point-to-quad geometry shader
 	materials["particles"] = std::make_shared<Material>("particles");
-	materials["particles"]->shader->attachShader(v_passThru);
+	materials["particles"]->shader->attachShader(v_particle);
 	materials["particles"]->shader->attachShader(g_particles); // Geometry Shader!
 	materials["particles"]->shader->attachShader(f_particles);
 	materials["particles"]->shader->linkProgram();
@@ -222,11 +223,11 @@ void initializeShaders()
 	materials["bokeh"]->shader->attachShader(f_bokeh);
 	materials["bokeh"]->shader->linkProgram();
 	
-	materials["particleCombination"] = std::make_shared<Material>("particles");
-	materials["particleCombination"]->shader->attachShader(v_passThru); // Geometry Shader!
-	materials["particleCombination"]->shader->attachShader(g_quad); // Geometry Shader!
-	materials["particleCombination"]->shader->attachShader(f_combination);
-	materials["particleCombination"]->shader->linkProgram();
+	materials["combine"] = std::make_shared<Material>("particleCombination");
+	materials["combine"]->shader->attachShader(v_passThru); 
+	materials["combine"]->shader->attachShader(g_quad); 
+	materials["combine"]->shader->attachShader(f_combination);
+	materials["combine"]->shader->linkProgram();
 
 	materials["bokehComp"] = std::make_shared<Material>("bokehComp");
 	materials["bokehComp"]->shader->attachShader(v_passThru);
@@ -433,8 +434,14 @@ void initializeScene()
 	std::string boatTex = "Assets/img/boat(diffuse).png";
 	std::shared_ptr<Texture> boatTexMap = std::make_shared<Texture>(boatTex, boatTex, 1.0f);
 
-	std::string particle = "Assets/img/smoke.png";
-	std::shared_ptr<Texture> particleTexMap = std::make_shared<Texture>(particle, particle, 1.0f);
+	std::string smoke = "Assets/img/smoke.png";
+	std::shared_ptr<Texture> smokeTexMap = std::make_shared<Texture>(smoke, smoke, 1.0f);
+
+	std::string spark = "Assets/img/sparks.png";
+	std::shared_ptr<Texture> sparkTexMap = std::make_shared<Texture>(spark, spark, 1.0f);
+
+	std::string explosion = "Assets/img/explosion.png";
+	std::shared_ptr<Texture> explosionTexMap = std::make_shared<Texture>(explosion, explosion, 1.0f);
 
 	// Report texture load times
 	t2 = std::chrono::high_resolution_clock::now();
@@ -471,8 +478,10 @@ void initializeScene()
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
 	textures["marker"] = markerTexMap;
-	textures["particles"] = particleTexMap;
+	textures["smoke"] = smokeTexMap;
+	textures["spark"] = sparkTexMap;
 	textures["win"] = winTexMap;
+	textures["explosion"] = explosionTexMap;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////		SOUNDS		///////////////////////////////
@@ -548,7 +557,7 @@ void initializeScene()
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////	GAME OBJECTS	///////////////////////////////
 	auto defaultMaterial = materials["default"];
-
+	
 	// Set the Scene
 
 	// Test gameobject load times
@@ -1100,10 +1109,17 @@ void initializeScene()
 	players["bombot3"]->setOutlineColour(glm::vec4(0.31f, 0.93f, 0.32f, 1.0f));
 	players["bombot4"]->setOutlineColour(glm::vec4(0.88f, 0.87f, 0.33f, 1.0f));
 
-	players["bombot1"]->initParticles(materials["particles"], particleTexMap);
-	players["bombot2"]->initParticles(materials["particles"], particleTexMap);
-	players["bombot3"]->initParticles(materials["particles"], particleTexMap);
-	players["bombot4"]->initParticles(materials["particles"], particleTexMap);
+	players["bombot1"]->initParticleSmoke(materials["particles"], smokeTexMap);
+	players["bombot2"]->initParticleSmoke(materials["particles"], smokeTexMap);
+	players["bombot3"]->initParticleSmoke(materials["particles"], smokeTexMap);
+	players["bombot4"]->initParticleSmoke(materials["particles"], smokeTexMap);
+
+	players["bombot1"]->initParticleSpark(materials["particles"], sparkTexMap);
+	players["bombot2"]->initParticleSpark(materials["particles"], sparkTexMap);
+	players["bombot3"]->initParticleSpark(materials["particles"], sparkTexMap);
+	players["bombot4"]->initParticleSpark(materials["particles"], sparkTexMap);
+
+	bombManager->initParticles(materials["particles"], explosionTexMap);
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);
