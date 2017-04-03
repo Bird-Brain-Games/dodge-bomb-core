@@ -137,8 +137,9 @@ void Player::update(float dt, bool canMove)
 {
 	// Update the bomb cooldown
 	float stupidShift = 2.1f;
-	float xPos = cos(currentAngle) * stupidShift;
-	float yPos = sin(currentAngle) * stupidShift;
+	float xPos = cos(currentAngle - 90) * stupidShift;
+	float yPos = sin(currentAngle - 90) * stupidShift;
+
 	smoke.initialPosition = getWorldPosition() + glm::vec3(xPos, 2.2, yPos);
 
 

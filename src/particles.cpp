@@ -61,7 +61,7 @@ void ParticleEmmiter::pause() { playing = false; }
 
 void ParticleEmmiter::update(float dt, glm::vec3 velocity)
 {
-	bool test = false;
+	bool test = true;
 	if (allocated && playing)
 	{
 		for (int i = 0; i < numParticles; i++)
@@ -77,22 +77,31 @@ void ParticleEmmiter::update(float dt, glm::vec3 velocity)
 			bool* act = particles.active + i;
 
 
-			if (*life <= 0 && *act == true)
+			if (*life <= 0)
 			{
-				*pos = initialPosition;
-				(*vel).x = glm::mix(initialForceMin.x, initialForceMax.x, glm::linearRand(0.0f, 1.0f));
-				(*vel).y = glm::mix(initialForceMin.y, initialForceMax.y, glm::linearRand(0.0f, 1.0f));
-				(*vel).z = glm::mix(initialForceMin.z, initialForceMax.z, glm::linearRand(0.0f, 1.0f));
-				*sizeS = size;
 
-				*life = glm::linearRand(lifeRange.x, lifeRange.y);
-				*dur = *life;
-				*mass = glm::linearRand(0.05f, 1.0f);
-				*accel = *vel / *mass;
-				*loc = glm::vec2(0, dimensions.y - 1);
-				*act = respawn;
+				if (*act == true)
+				{
+					*pos = initialPosition;
+					(*vel).x = glm::mix(initialForceMin.x, initialForceMax.x, glm::linearRand(0.0f, 1.0f));
+					(*vel).y = glm::mix(initialForceMin.y, initialForceMax.y, glm::linearRand(0.0f, 1.0f));
+					(*vel).z = glm::mix(initialForceMin.z, initialForceMax.z, glm::linearRand(0.0f, 1.0f));
+					*sizeS = size;
+
+					*life = glm::linearRand(lifeRange.x, lifeRange.y);
+					*dur = *life;
+					*mass = glm::linearRand(0.05f, 1.0f);
+					*accel = *vel / *mass;
+					*loc = glm::vec2(0, dimensions.y - 1);
+					*act = respawn;
+				}
 			}
-			else if (*act)
+
+			if (*act == true)
+			{
+				test = false;
+			}
+
 			if (*dur - *life > (*dur / max) * (loc->x+1))
 			{
 				loc->x++;
@@ -103,6 +112,12 @@ void ParticleEmmiter::update(float dt, glm::vec3 velocity)
 			*life -= dt;
 			
 		}
+	}
+
+	if (test == true)
+	{
+		pause();
+		std::fill(particles.active, particles.active + numParticles, true);
 	}
 }
 
