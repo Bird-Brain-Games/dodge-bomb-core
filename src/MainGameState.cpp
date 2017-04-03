@@ -409,19 +409,12 @@ void Game::update(float dt)
 		// Move the player to the space
 		if (playerMoveLerp >= 0.0f && playerMoveLerp != 1.0f)
 		{
-			aStar.traversePath(winPlayer, dt);
+			aStar.traversePath(winPlayer, dt * 2.0f);
 			if (!aStar.traverse)	// If done traversing
-				playerMoveLerp = 1.0f;
-
-			/*playerMoveLerp += dt;
-			if (playerMoveLerp > 1.0f)
 			{
 				playerMoveLerp = 1.0f;
 				depthToggle = true;
 			}
-			
-			winPlayer->setPosition(glm::mix(playerStartPosition, winPlayerPosition, playerMoveLerp));*/
-			
 		}
 		// Move the camera once the player has moved to the space
 		else if (playerMoveLerp == 1.0f && cameraMoveLerp >= 0.0f && cameraMoveLerp != 1.0f)
@@ -433,11 +426,11 @@ void Game::update(float dt)
 				winPlayer->playWin();
 				
 			}
-			forwardLerp += dt / 2.0f;
+			
+			if (forwardLerp <= 1.0f) forwardLerp += dt / 2.0f;
 			if (forwardLerp > 1.0f)
 			{
 				forwardLerp = 1.0f;
-				winPlayer->playWin();
 
 			}
 
@@ -453,6 +446,7 @@ void Game::update(float dt)
 			{
 				this->m_isPaused = true;
 				changeState(READYUP);
+				//players->at("bombot" + std::to_string(winner))->setAnim("idle");
 				m_parent->getGameState("MainMenu")->setPaused(0);
 			}
 		}
@@ -1187,6 +1181,8 @@ void Game::changeState(Game::GAME_STATE newState)
 		innerCutOff = innerDefault;
 		outerCutOff = outerDefault;
 
+		//players->at("bombot" + std::to_string(winner))->setAnim("")
+
 		// Reset the sounds
 		m_gameTrack1.stop();
 		m_gameTrack2.stop();
@@ -1228,6 +1224,7 @@ void Game::changeState(Game::GAME_STATE newState)
 	case Game::WIN:
 		playerMoveLerp = 0.0f;
 		cameraMoveLerp = 0.0f;
+		forwardLerp = 0.0f;
 		playerStartPosition = players->at("bombot" + std::to_string(winner))->getWorldPosition();
 
 		aStar.traverse = true;

@@ -214,7 +214,7 @@ public:
 		//dummy6
 		PathNode * sixthree = new PathNode(glm::vec3(5.0f, 40.0f, 20.0f), 2);
 		PathNode * sixfour = new PathNode(glm::vec3(15.0f, 40.0f, 20.0f), 1);
-		PathNode * sixfive = new PathNode(glm::vec3(25.0f, 40.0f, 20.0f), 0);
+		PathNode * sixfive = new PathNode(glm::vec3(20.0f, 43.0f, 26.0f), 0);
 		PathNode * sixsix = new PathNode(glm::vec3(35.0f, 40.0f, 20.0f), 1);
 		//dummy7
 		PathNode * sixeight = new PathNode(glm::vec3(55.0f, 40.0f, 20.0f), 4);
