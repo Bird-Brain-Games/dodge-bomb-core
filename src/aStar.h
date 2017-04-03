@@ -143,15 +143,17 @@ public:
 				float posX = glm::mix(x, pathItr->second->pos.x, lerptime);
 				float posZ = glm::mix(z, pathItr->second->pos.z, lerptime);
 
+				//glm::vec2 dirVector = glm::normalize(glm::vec2(posX, posZ) - glm::vec2(player->getWorldPosition().x, player->getWorldPosition().z));
+				//float angle = atan2(dirVector.y, dirVector.x) + 270 * degToRad;
+				player->setRotationAngleY(0.0f);
 				player->setPosition(glm::vec3(posX, player->getWorldPosition().y, posZ));
-				//player->setRotationAngleY(glm::atan(posX / posZ));
-				//player->setRotationAngleY(0.5f);
 			}
 
 			lerptime += dT;
 		}
 		else if (pathItr == pathToWalk.end())
 		{
+			player->setRotationAngleY(0.0f);
 			traverse = false;
 			newTraverse = true;
 		}
@@ -390,6 +392,8 @@ private:
 	
 	float x;
 	float z;
+
+	const float degToRad = 3.14159f / 180.0f;
 
 	// A* nodes
 	std::map<std::string, PathNode *> aStar;
