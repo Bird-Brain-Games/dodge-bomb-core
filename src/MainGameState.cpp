@@ -155,6 +155,9 @@ Game::Game
 	s_countDown = Sound(soundTemplates->at("s_countdown"));
 	s_countDown.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
 	s_countDown.setVolume(0.4);
+
+	s_lightOn = Sound(soundTemplates->at("s_lightOn"));
+	s_lightOn.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
 	
 	currentGameState = MAIN;
 	changeState(READYUP);
@@ -273,7 +276,7 @@ void Game::updateReadyPass(float dt)
 
 	// If everyone's ready, start the game!
 	if (allReady && startPressed && playerCounter > 1)
-		changeState(COUNTDOWN);
+		changeState(PRE_COUNTDOWN);
 
 
 }
@@ -302,6 +305,52 @@ void Game::update(float dt)
 			menuDelay -= dt;
 		else
 			updateReadyPass(dt);
+	}
+
+	if (currentGameState == PRE_COUNTDOWN)
+	{
+		if (fadeLerp < timeToFade)
+		{
+			fadeLerp += dt;
+			if (fadeLerp >= timeToFade)
+			{
+				fadeLerp = timeToFade;
+				m_gameMusic.stop();
+			}
+
+			deskLamp = glm::mix(lampReady, 0.0f, fadeLerp);
+			roomLight = glm::mix(roomReady, 0.0f, fadeLerp);
+			m_gameMusic.setVolume(glm::mix(musicVolume, 0.0f, fadeLerp));
+		}
+		else if (darkTime > 0.0f)
+		{
+			darkTime -= dt;
+			if (darkTime <= 0.0f)
+			{
+				darkTime = 0.0f;
+				s_lightOn.play();
+				deskLamp = lampMain;
+				roomLight = roomMain;
+
+				for (auto it : *obstacles)
+				{
+					it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
+				}
+				
+				resetPlayers();
+
+				scene->at("table")->setTexture(textures->at("table"));
+			}
+		}
+		else if (lightTime > 0.0f)
+		{
+			lightTime -= dt;
+			if (lightTime <= 0.0f)
+			{
+				lightTime = 0.0f;
+				changeState(COUNTDOWN);
+			}
+		}
 	}
 
 	// Update the countdown if in countdown
@@ -648,7 +697,10 @@ void Game::updateScene(float dt)
 		// So we need to make sure to only invoke update() for the root nodes.
 		// Otherwise some objects would get updated twice in a frame!
 		if (player->isRoot())
-			player->update(dt, currentGameState != COUNTDOWN && currentGameState != WIN);
+			player->update(dt, 
+				currentGameState != PRE_COUNTDOWN && 
+				currentGameState != COUNTDOWN && 
+				currentGameState != WIN);
 	}
 
 	bombManager->update(dt);
@@ -1136,7 +1188,7 @@ void Game::handleKeyboardInput()
 	//}
 	if (KEYBOARD_INPUT->CheckPressEvent('h') || KEYBOARD_INPUT->CheckPressEvent('H'))
 	{
-		changeState(COUNTDOWN);
+		changeState(PRE_COUNTDOWN);
 	}
 	if (KEYBOARD_INPUT->CheckPressEvent('j') || KEYBOARD_INPUT->CheckPressEvent('J'))
 	{
@@ -1181,13 +1233,15 @@ void Game::changeState(Game::GAME_STATE newState)
 		innerCutOff = innerDefault;
 		outerCutOff = outerDefault;
 
-		//players->at("bombot" + std::to_string(winner))->setAnim("")
+		deskLamp = lampReady;
+		roomLight = roomReady;
 
 		// Reset the sounds
 		m_gameTrack1.stop();
 		m_gameTrack2.stop();
 		m_gameTrack3.stop();
 		if (!m_gameMusic.isPlaying()) m_gameMusic.play();
+		m_gameMusic.setVolume(musicVolume);
 
 		for (auto it : *obstacles)
 		{
@@ -1202,23 +1256,24 @@ void Game::changeState(Game::GAME_STATE newState)
 		scene->at("table")->setTexture(textures->at("readyTable"));
 		break;
 
-	case Game::COUNTDOWN:
-		s_countDown.play();
-		m_gameMusic.stop();
+	case Game::PRE_COUNTDOWN:
+		fadeLerp = 0.0f;
+		darkTime = 2.0f;
+		lightTime = 1.0f;
+		bombManager->clearAllBombs();
 
-		currentCountdown = 4.0f;
-		for (auto it : *obstacles)
-		{
-			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
-		}
 		for (auto it : *readyUpRings)
 		{
 			it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, -50.0f, 0.0f));
 		}
-		bombManager->clearAllBombs();
-		resetPlayers();
 
-		scene->at("table")->setTexture(textures->at("table"));
+		break;
+
+	case Game::COUNTDOWN:
+		s_countDown.play();
+
+		currentCountdown = 4.0f;
+		
 		break;
 
 	case Game::WIN:

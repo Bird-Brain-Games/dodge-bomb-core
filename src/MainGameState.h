@@ -48,6 +48,7 @@ public:
 	enum GAME_STATE
 	{
 		READYUP,
+		PRE_COUNTDOWN,
 		COUNTDOWN,
 		MAIN,
 		WIN
@@ -139,6 +140,7 @@ private:
 	int numTracksPlaying;
 
 	Sound s_countDown;
+	Sound s_lightOn;
 
 	int pausing;
 	float pauseTimer;
@@ -163,6 +165,16 @@ private:
 	glm::vec3 playerStartPosition; // to be replaced with A*
 	float cameraMoveLerp;
 	float forwardLerp;
+
+	// Countdown lighting controls
+	float fadeLerp;
+	float timeToFade = 1.0f;
+	float darkTime;
+	float lightTime;
+	float lampReady = 0.3f;
+	float roomReady = 0.9f;
+	float lampMain = 0.6f;
+	float roomMain = 0.4f;
 
 	LUT contrastLUT;
 	LUT sepiaLUT;
