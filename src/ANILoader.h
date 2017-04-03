@@ -122,6 +122,7 @@ public:
 	bool winAnimation;
 	Holder() {};
 	Holder(std::shared_ptr<Holder>);
+	void reset();
 	void setAnim(std::string);
 	void overWrite(std::string);
 	bool baseLoad(std::string);

@@ -465,6 +465,12 @@ void Player::overWrite(std::string _name)
 	//std::cout << "Set animation: " << _name << std::endl;
 }
 
+void Player::resetAnimation()
+{
+	mesh->reset();
+	//std::cout << "Set animation: " << _name << std::endl;
+}
+
 void Player::takeDamage(int damage)
 {
 	invincibleTime = maxInvincibleTime;
@@ -502,7 +508,6 @@ void Player::reset(glm::vec3 newPos)
 	ready = false;
 	currentDashCooldown = 0.0f;
 	currentDashDuration = 0.0f;
-	setAnim("idle");
 }
 
 glm::vec3 Player::getCurrentVelocity()

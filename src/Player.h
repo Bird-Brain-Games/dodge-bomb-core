@@ -64,6 +64,8 @@ public:
 	void takeDamage(int damage);
 	void setHealth(int newHealth) { health = newHealth; }
 	void reset(glm::vec3 newPos);	// Reset values and positions
+	void resetAnimation();
+
 
 	void checkCollisionWith(GameObject* other);
 	void checkCollisionWith(Bomb* other, bool inReadyUp);
