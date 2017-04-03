@@ -1007,32 +1007,32 @@ void Game::handleKeyboardInputShaders()
 			roomLight -= 0.1;
 	}
 
-	// Bokeh Controls
-	if (KEYBOARD_INPUT->CheckPressEvent('n'))
-	{
-		A -= 0.05;
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('m'))
-	{
-		A += 0.05;
-	}
+	//// Bokeh Controls
+	//if (KEYBOARD_INPUT->CheckPressEvent('n'))
+	//{
+	//	A -= 0.05;
+	//}
+	//if (KEYBOARD_INPUT->CheckPressEvent('m'))
+	//{
+	//	A += 0.05;
+	//}
 
-	if (KEYBOARD_INPUT->CheckPressEvent(','))
-	{
-		f -= 0.005;
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('.'))
-	{
-		f += 0.005;
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent('l'))
-	{
-		S1 -= 0.5;
-	}
-	if (KEYBOARD_INPUT->CheckPressEvent(';'))
-	{
-		S1 += 0.5;
-	}
+	//if (KEYBOARD_INPUT->CheckPressEvent(','))
+	//{
+	//	f -= 0.005;
+	//}
+	//if (KEYBOARD_INPUT->CheckPressEvent('.'))
+	//{
+	//	f += 0.005;
+	//}
+	//if (KEYBOARD_INPUT->CheckPressEvent('l'))
+	//{
+	//	S1 -= 0.5;
+	//}
+	//if (KEYBOARD_INPUT->CheckPressEvent(';'))
+	//{
+	//	S1 += 0.5;
+	//}
 
 
 	// Toggles for each lighting component
