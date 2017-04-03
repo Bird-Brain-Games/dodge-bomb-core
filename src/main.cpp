@@ -674,12 +674,12 @@ void initializeScene()
 	obstacles.push_back(gameobjects["barrel1"]);
 
 	gameobjects["boulder2"] = std::make_shared<GameObject>(
-		glm::vec3(-5.f, 44.0f, 23.f), boulderMesh, defaultMaterial, boulderTexMap);
+		glm::vec3(-5.f, 42.0f, 23.f), boulderMesh, defaultMaterial, boulderTexMap);
 	gameobjects["boulder2"]->setScale(glm::vec3(1.3));
 	obstacles.push_back(gameobjects["boulder2"]);
 
 	gameobjects["boulder"] = std::make_shared<GameObject>(
-		glm::vec3(21.0f, 44.0f, -18.0f), boulderMesh, defaultMaterial, boulderTexMap);
+		glm::vec3(21.0f, 42.0f, -18.0f), boulderMesh, defaultMaterial, boulderTexMap);
 	gameobjects["boulder"]->setScale(glm::vec3(1.6));
 	obstacles.push_back(gameobjects["boulder"]);
 

@@ -702,6 +702,14 @@ void Game::draw()
 		}
 		fboToScreen(fboColorCorrection);
 	}
+	if (currentGameState == COUNTDOWN)
+	{
+		countdown->draw();
+	}
+	else if (currentGameState == WIN && cameraMoveLerp == 1.0f)
+	{
+		winScreen->draw();
+	}
 
 }
 
@@ -803,14 +811,7 @@ void Game::drawScene(Camera* _camera, Camera* _shadow)
 	bombManager->draw(*_camera, *_shadow);
 
 	// If in countdown, draw countdown
-	if (currentGameState == COUNTDOWN)
-	{
-		countdown->draw();
-	}
-	else if (currentGameState == WIN && cameraMoveLerp == 1.0f)
-	{
-		winScreen->draw();
-	}
+
 }
 
 void Game::drawSmoke(Camera* _camera)
