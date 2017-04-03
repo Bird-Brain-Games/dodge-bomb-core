@@ -417,16 +417,23 @@ void Game::update(float dt)
 		// Move the camera once the player has moved to the space
 		else if (playerMoveLerp == 1.0f && cameraMoveLerp >= 0.0f && cameraMoveLerp != 1.0f)
 		{
-			cameraMoveLerp += dt / 2.0f;
+			cameraMoveLerp += dt;
 			if (cameraMoveLerp > 1.0f)
 			{
 				cameraMoveLerp = 1.0f;
 				winPlayer->playWin();
 				
 			}
+			forwardLerp += dt / 2.0f;
+			if (forwardLerp > 1.0f)
+			{
+				forwardLerp = 1.0f;
+				winPlayer->playWin();
+
+			}
 
 			camera->setPosition(glm::mix(cameraDefaultPosition, winCameraPosition, cameraMoveLerp));
-			camera->setForward(glm::mix(cameraDefaultForward, winCameraForward, cameraMoveLerp));
+			camera->setForward(glm::mix(cameraDefaultForward, winCameraForward, forwardLerp));
 			innerCutOff = glm::mix(innerDefault, innerWin, cameraMoveLerp);
 			outerCutOff = glm::mix(outerDefault, outerWin, cameraMoveLerp);
 		}
