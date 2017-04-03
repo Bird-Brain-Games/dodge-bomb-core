@@ -541,6 +541,8 @@ void Player::reset(glm::vec3 newPos)
 	ready = false;
 	currentDashCooldown = 0.0f;
 	currentDashDuration = 0.0f;
+	smoke.pause();
+	sparks.pause();
 	//setAnim("idle");
 }
 
