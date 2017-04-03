@@ -91,11 +91,12 @@ void initializeShaders()
 	// Load shaders
 
 	// Vertex Shaders
-	Shader v_default, v_passThru, v_null, v_skinning;
+	Shader v_default, v_passThru, v_null, v_skinning, v_particle;
 	v_default.loadShaderFromFile(shaderPath + "default_v.glsl", GL_VERTEX_SHADER);
 	v_passThru.loadShaderFromFile(shaderPath + "passThru_v.glsl", GL_VERTEX_SHADER);
 	v_null.loadShaderFromFile(shaderPath + "null.vert", GL_VERTEX_SHADER);
 	v_skinning.loadShaderFromFile(shaderPath + "skinning.vert", GL_VERTEX_SHADER);
+	v_particle.loadShaderFromFile(shaderPath + "particles_v.glsl", GL_VERTEX_SHADER);
 
 	// Fragment Shaders
 	Shader f_default, f_unlitTex, f_bright, f_composite, f_blur, f_texColor,
@@ -197,7 +198,7 @@ void initializeShaders()
 
 	// Unlit texture material with point-to-quad geometry shader
 	materials["particles"] = std::make_shared<Material>("particles");
-	materials["particles"]->shader->attachShader(v_passThru);
+	materials["particles"]->shader->attachShader(v_particle);
 	materials["particles"]->shader->attachShader(g_particles); // Geometry Shader!
 	materials["particles"]->shader->attachShader(f_particles);
 	materials["particles"]->shader->linkProgram();
@@ -423,6 +424,9 @@ void initializeScene()
 	std::string spark = "Assets/img/sparks.png";
 	std::shared_ptr<Texture> sparkTexMap = std::make_shared<Texture>(spark, spark, 1.0f);
 
+	std::string explosion = "Assets/img/explosion.png";
+	std::shared_ptr<Texture> explosionTexMap = std::make_shared<Texture>(explosion, explosion, 1.0f);
+
 	// Report texture load times
 	t2 = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
@@ -461,6 +465,7 @@ void initializeScene()
 	textures["smoke"] = smokeTexMap;
 	textures["spark"] = sparkTexMap;
 	textures["win"] = winTexMap;
+	textures["explosion"] = explosionTexMap;
 
 	///////////////////////////////////////////////////////////////////////////
 	////////////////////////		SOUNDS		///////////////////////////////
@@ -867,6 +872,8 @@ void initializeScene()
 	players["bombot2"]->initParticleSpark(materials["particles"], sparkTexMap);
 	players["bombot3"]->initParticleSpark(materials["particles"], sparkTexMap);
 	players["bombot4"]->initParticleSpark(materials["particles"], sparkTexMap);
+
+	bombManager->initParticles(materials["particles"], explosionTexMap);
 
 	// Set up the bullet callbacks
 	RigidBody::getDispatcher()->setNearCallback((btNearCallback)bulletNearCallback);

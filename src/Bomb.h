@@ -4,7 +4,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <queue>
 #include "sound engine.h"
-
+#include "particles.h"
 // Bomb emitter class tracks active bombs
 // And assigns bomb properties upon creation
 
@@ -122,6 +122,10 @@ public:
 		std::string bodyPath,
 		std::map<std::string, Sound>* soundTemplates);
 
+	void initParticles(std::shared_ptr<Material> _material, std::shared_ptr<Texture> _texture);
+	void updateParticles(float dt);
+	void drawParticles(Camera& _camera);
+
 	void update(float dt);
 	void checkIfExploded(Camera& camera);
 	void draw(Camera& camera, Camera& shadow);
@@ -140,8 +144,11 @@ private:
 	std::vector <std::shared_ptr<Bomb>> bombTemplates;
 	std::vector<std::shared_ptr<Explosion>> explosionTemplates;
 	std::vector <std::shared_ptr<Bomb>> activeBombs;
+	std::vector<std::shared_ptr<ParticleEmmiter>> emitters;
 	std::queue<std::shared_ptr<Bomb>> bombQueue;
 
 	bool initialized;
 	float impulseY;
+	ParticleEmmiter smoke;
+	ParticleEmmiter ring;
 };

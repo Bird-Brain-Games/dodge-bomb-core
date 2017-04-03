@@ -8,15 +8,13 @@ layout(triangle_strip, max_vertices = 4) out;
 uniform mat4 u_mvp;
 uniform mat4 u_mv;
 uniform mat4 u_proj;
-uniform float u_size;
 
 // Input from Vertex shader
 in VertexData
 {
 	vec3 normal;
 	vec2 texCoord;
-	vec4 colour;
-	vec3 posEye;
+	float size;
 } vIn[]; // array size = num vertices in primitve
 
 out GeomData
@@ -78,5 +76,5 @@ void PointToQuadBillboarded(vec4 p, float size)
 
 void main()
 {
-	PointToQuadBillboarded(gl_in[0].gl_Position, u_size);
+	PointToQuadBillboarded(gl_in[0].gl_Position, vIn[0].size);
 }
