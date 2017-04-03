@@ -171,8 +171,8 @@ private:
 	float timeToFade = 1.0f;
 	float darkTime;
 	float lightTime;
-	float lampReady = 0.3f;
-	float roomReady = 0.9f;
+	float lampReady = 0.4f;
+	float roomReady = 0.7f;
 	float lampMain = 0.6f;
 	float roomMain = 0.4f;
 
