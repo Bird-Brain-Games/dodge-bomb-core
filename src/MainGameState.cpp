@@ -117,14 +117,14 @@ Game::Game
 	_camera->update();
 	cameraDefaultForward = _camera->getForward();
 	initializeFrameBuffers();
-	
+
 	winScreen = std::make_shared<Menu>(textures->at("win"), 1, 1);
 	winScreen->setMaterial(materials->at("menu"));
 
 	toonRamp = ilutGLLoadImage("Assets/img/toonRamp.png");
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, toonRamp);
-	
+
 
 	contrastLUT.load("Assets/img/Test1.CUBE");
 	sepiaLUT.load("Assets/img/Test2.CUBE");
@@ -155,7 +155,7 @@ Game::Game
 	s_countDown = Sound(soundTemplates->at("s_countdown"));
 	s_countDown.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
 	s_countDown.setVolume(0.4);
-	
+
 	currentGameState = MAIN;
 	changeState(READYUP);
 }
@@ -239,7 +239,7 @@ void Game::updateReadyPass(float dt)
 		}
 
 		// Set the player as active if A pressed and not active
-		if ((it.second->getController()->conButton(XINPUT_GAMEPAD_A) || 
+		if ((it.second->getController()->conButton(XINPUT_GAMEPAD_A) ||
 			(it.second->getController()->conButton(XINPUT_GAMEPAD_X))) &&
 			!it.second->isActive())
 		{
@@ -287,7 +287,7 @@ void Game::update(float dt)
 			((readyUpRing*)it.get())->setReady(false);
 		}
 	}
-	
+
 
 	// Step through world simulation with Bullet
 	RigidBody::systemUpdate(dt, 10);
@@ -390,7 +390,7 @@ void Game::update(float dt)
 				m_gameTrack3.setVolume(musicVolume - 0.05);
 			else if (playerDeathCounter > 0)
 				m_gameTrack2.setVolume(musicVolume - 0.05);
-				
+
 		}
 	}
 
@@ -424,9 +424,9 @@ void Game::update(float dt)
 			{
 				cameraMoveLerp = 1.0f;
 				winPlayer->playWin();
-				
+
 			}
-			
+
 			if (forwardLerp <= 1.0f) forwardLerp += dt / 2.0f;
 			if (forwardLerp > 1.0f)
 			{
@@ -503,7 +503,7 @@ void Game::draw()
 		// Our Default is Toon shading
 	case TOON:
 	{
-		
+
 
 		setMaterialForAllGameObjects("toon");
 		setMaterialForAllPlayerObjects("toon");
@@ -527,7 +527,7 @@ void Game::draw()
 		materials->at("toon")->vec4Uniforms["u_dimmers"] = glm::vec4(deskLamp, roomLight, innerCutOff, outerCutOff);
 		materials->at("toon")->vec4Uniforms["u_spotDir"] = glm::vec4(deskForward, 1.0);
 		materials->at("toon")->vec4Uniforms["u_shine"] = glm::vec4(shininess);
-		
+
 
 
 		materials->at("toon")->sendUniforms();
@@ -567,7 +567,7 @@ void Game::draw()
 	FrameBufferObject::clearFrameBuffer(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 	fboUnlit.copyBuffer(fboUnlit.getWidth(), fboUnlit.getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST, fboParticle.getId());
 	fboParticle.bindFrameBufferForDrawing();
-	
+
 
 	//draw the particles
 	players->at("bombot1")->sparks;
@@ -586,43 +586,66 @@ void Game::draw()
 	//////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////// Post Processing /////////////////////////////
 
+
+	FrameBufferObject* finalFBO;
 	if (bloomToggle)
 	{
 		bloomPass(fboUnlit, fboBloomed);
 		if (depthToggle)
 		{
-		depthOfField(fboBloomed, fboWithBokeh);
-		fboToScreen(fboWithBokeh);
-
-
+			depthOfField(fboBloomed, fboWithBokeh);
+			fboToScreen(fboWithBokeh);
+			finalFBO = &fboWithBokeh;
 		}
 		else
 		{
-		fboToScreen(fboBloomed);
-		particlePass(fboBloomed, fboFinal);
-		fboToScreen(fboFinal);
+			fboToScreen(fboBloomed);
+			finalFBO = &fboBloomed;
 		}
 	}
 	else if (depthToggle)
 	{
 		depthOfField(fboUnlit, fboWithBokeh);
 		fboToScreen(fboWithBokeh);
+		finalFBO = &fboWithBokeh;
 	}
 	else
 	{
 		fboToScreen(fboUnlit);
+		finalFBO = &fboUnlit;
+	}
+
+	if (particleToggle)
+	{
+		if (particleProcessing == true)
+		{
+			bloomPass(fboParticle, bloomParticle); // sets up fbo's for particle pass
+												   //first is the texture we want to add, second is the particle texture we are using.
+			particlePass(*finalFBO, bloomParticle, fboFinalParticle);
+		}
+		else
+		{
+			particlePass(*finalFBO, fboParticle, fboFinalParticle);
+		}
+		fboToScreen(fboFinalParticle);
 	}
 
 	// Color correction
 	if (currentLUT)	// if pointing to a LUT
 	{
-		if (depthToggle)
-			colorCorrectionPass(fboWithBokeh, fboColorCorrection);
-		else if (bloomToggle)
-			colorCorrectionPass(fboBloomed, fboColorCorrection);
+		if (particleToggle)
+		{
+			colorCorrectionPass(fboFinalParticle, fboColorCorrection);
+		}
 		else
-			colorCorrectionPass(fboUnlit, fboColorCorrection);
-
+		{
+			if (depthToggle)
+				colorCorrectionPass(fboWithBokeh, fboColorCorrection);
+			else if (bloomToggle)
+				colorCorrectionPass(fboBloomed, fboColorCorrection);
+			else
+				colorCorrectionPass(fboUnlit, fboColorCorrection);
+		}
 		fboToScreen(fboColorCorrection);
 	}
 
@@ -685,7 +708,7 @@ void Game::initializeFrameBuffers()
 	fboBlurB.createFrameBuffer(160, 120, 1, false);
 	shadowMap.createFrameBuffer(windowWidth * 2, windowHeight * 2, 1, true);
 	fboColorCorrection.createFrameBuffer(windowWidth, windowHeight, 1, false);
-	
+
 	fboBloomed.createFrameBuffer(windowWidth, windowHeight, 1, false);
 
 	bokehHorizontalfbo.createFrameBuffer(windowWidth, windowHeight, 1, true);
@@ -696,6 +719,7 @@ void Game::initializeFrameBuffers()
 	fboParticle.createFrameBuffer(windowWidth, windowHeight, 1, true);
 	fboFinal.createFrameBuffer(windowWidth, windowHeight, 1, false);
 	bloomParticle.createFrameBuffer(windowWidth, windowHeight, 1, false);
+	fboFinalParticle.createFrameBuffer(windowWidth, windowHeight, 1, false);
 }
 
 void Game::drawScene(Camera* _camera, Camera* _shadow)
@@ -947,13 +971,13 @@ void Game::bokehPass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDra
 	glDrawArrays(GL_POINTS, 0, 1);
 }
 
-void Game::particlePass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDrawTo)
+void Game::particlePass(FrameBufferObject& fboToSample, FrameBufferObject& fboBlend, FrameBufferObject& fboToDrawTo)
 {
 	fboToDrawTo.bindFrameBufferForDrawing();
 	fboToDrawTo.clearFrameBuffer(clearColor);
 
 	fboToSample.bindTextureForSampling(0, GL_TEXTURE0);
-	bloomParticle.bindTextureForSampling(0, GL_TEXTURE1);
+	fboBlend.bindTextureForSampling(0, GL_TEXTURE1);
 	fboParticle.bindTextureForSampling(0, GL_TEXTURE2);
 
 	static auto combine = materials->at("combine");
@@ -1041,19 +1065,50 @@ void Game::handleKeyboardInputShaders()
 		currentLightingMode = TOON;
 	}
 
+	//particle stuff
+	if (KEYBOARD_INPUT->CheckPressEvent('3'))
+	{
+		particleToggle = !particleToggle;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('4'))
+	{
+		particleProcessing = !particleProcessing;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('5'))
+	{
+		for (auto it : *players)
+		{
+			it.second->smoke.lightingToggle = 0.0f;
+			it.second->smoke.mixer = 1.0;
+
+			it.second->sparks.lightingToggle = 0.0f;
+			it.second->sparks.mixer = 1.0;
+		}
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('6'))
+	{
+		for (auto it : *players)
+		{
+			it.second->smoke.lightingToggle = 1.0f;
+			it.second->smoke.mixer = 0.5;
+
+			it.second->sparks.lightingToggle = 1.0f;
+			it.second->sparks.mixer = 0.2;
+		}
+	}
 
 	// Toggle Outlines
-	if (KEYBOARD_INPUT->CheckPressEvent('5'))
+	if (KEYBOARD_INPUT->CheckPressEvent('7'))
 	{
 		outlineToggle = !outlineToggle;
 	}
 	// Toggle Bloom
-	if (KEYBOARD_INPUT->CheckPressEvent('6'))
+	if (KEYBOARD_INPUT->CheckPressEvent('8'))
 	{
 		bloomToggle = !bloomToggle;
 	}
 	// Toggle LUT
-	if (KEYBOARD_INPUT->CheckPressEvent('7'))
+	if (KEYBOARD_INPUT->CheckPressEvent('9'))
 	{
 		if (colorCorrection == LUT_CONTRAST)
 		{
@@ -1065,7 +1120,7 @@ void Game::handleKeyboardInputShaders()
 		}
 	}
 	// Toggle LUT
-	if (KEYBOARD_INPUT->CheckPressEvent('8'))
+	if (KEYBOARD_INPUT->CheckPressEvent('0'))
 	{
 		if (colorCorrection == LUT_SEPIA)
 		{

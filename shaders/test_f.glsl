@@ -17,7 +17,7 @@ uniform vec4 u_controls;
 uniform vec4 u_dimmers;
 uniform vec4 u_shine;
 uniform vec4 u_emissiveLight;
-
+uniform float lightingToggle;
 uniform float mixer;
 
 layout(location = 0) out vec4 FragColor;
@@ -72,7 +72,7 @@ void main()
 		+ vec3(lights)
 		+ u_emissiveLight.xyz	   
 		);
-	
+	FragColor.rgb = FragColor.rgb * vec3(lightingToggle);
 	FragColor.rgb = mix(FragColor.xyz, colour, mixer);
 	
 	if (textureColour.w > 0.0)

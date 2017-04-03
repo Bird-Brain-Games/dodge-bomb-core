@@ -158,6 +158,7 @@ void ParticleEmmiter::draw(Camera _camera)
 	material->intUniforms["u_tex"] = 0;
 	material->floatUniforms["mixer"] = mixer;
 	material->vec3Uniforms["colour"] = colour;
+	material->floatUniforms["lightingToggle"] = lightingToggle;
 	material->sendUniforms();
 	//99, 183, 255
 	//0.38, 0.717, 1
