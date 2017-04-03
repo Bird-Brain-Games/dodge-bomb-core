@@ -500,7 +500,14 @@ void Game::update(float dt)
 		// Let the game be ended
 		else
 		{
-			if (winPlayer->getController()->conButton(XINPUT_GAMEPAD_A))
+			winWait -= dt;
+			if (winWait <= 0.0f)
+			{
+				winWait = 0.0f;
+			}
+
+			if (winWait == 0.0f &&
+				winPlayer->getController()->conButton(XINPUT_GAMEPAD_A))
 			{
 				this->m_isPaused = true;
 				changeState(READYUP);
@@ -706,11 +713,12 @@ void Game::draw()
 		}
 		fboToScreen(fboColorCorrection);
 	}
+
 	if (currentGameState == COUNTDOWN)
 	{
 		countdown->draw();
 	}
-	else if (currentGameState == WIN && cameraMoveLerp == 1.0f)
+	else if (currentGameState == WIN && cameraMoveLerp == 1.0f && !winWait)
 	{
 		winScreen->draw();
 	}
@@ -1435,6 +1443,7 @@ void Game::changeState(Game::GAME_STATE newState)
 		playerMoveLerp = 0.0f;
 		cameraMoveLerp = 0.0f;
 		forwardLerp = 0.0f;
+		winWait = 4.0f;
 		playerStartPosition = players->at("bombot" + std::to_string(winner))->getWorldPosition();
 
 		aStar.traverse = true;
