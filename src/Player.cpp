@@ -80,7 +80,7 @@ void Player::initParticleSmoke(std::shared_ptr<Material> _material, std::shared_
 	smoke.material = _material;
 	smoke.texture = _texture;
 	smoke.initialize(25);
-	smoke.play();
+	smoke.pause();
 	smoke.dimensions = glm::vec2(5.0f, 2.0f);
 	smoke.max = 5;
 	smoke.mixer = 0.5;
@@ -101,7 +101,7 @@ void Player::initParticleSpark(std::shared_ptr<Material> _material, std::shared_
 	sparks.material = _material;
 	sparks.texture = _texture;
 	sparks.initialize(7);
-	sparks.play();
+	sparks.pause();
 	sparks.dimensions = glm::vec2(4.0f, 4.0f);
 	sparks.max = 5;
 	sparks.mixer = 0.2;

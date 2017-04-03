@@ -97,7 +97,7 @@ private:
 	void bloomPass(FrameBufferObject& input, FrameBufferObject& fboToDrawTo);
 	void colorCorrectionPass(FrameBufferObject& fboIn, FrameBufferObject& fboOut);
 	void bokehPass(FrameBufferObject& fboToSample, FrameBufferObject& fboToDrawTo, float filterAngleDeg);
-	void particlePass(FrameBufferObject& fboIn, FrameBufferObject& fboOut);
+	void particlePass(FrameBufferObject& fboIn, FrameBufferObject& fboBlend, FrameBufferObject& fboOut);
 
 	void initializeFrameBuffers();
 	void handleKeyboardInput();
@@ -121,6 +121,7 @@ private:
 	FrameBufferObject spunkMap;
 	FrameBufferObject fboParticle;
 	FrameBufferObject fboFinal;
+	FrameBufferObject fboFinalParticle;
 	FrameBufferObject bloomParticle;
 
 	glm::vec4 clearColor = glm::vec4(0.0, 0.0, 0.0, 0.0);
@@ -219,6 +220,8 @@ private:
 	int numBlurPasses = 4;
 	bool bloomToggle = true;
 	bool depthToggle = false;
+	bool particleToggle = true;
+	bool particleProcessing = true;
 
 	// For Toggling
 	bool  ambientToggle = true;

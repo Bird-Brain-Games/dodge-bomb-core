@@ -50,6 +50,7 @@ public:
 	float size; // the size of the particles
 	glm::vec2 sizeDecay;
 	float mixer;
+	float lightingToggle = 1.0f;
 
 	bool respawn; // controls whether the particles respwawn or not. true = respawn, false = no respawn
 
