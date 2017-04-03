@@ -395,6 +395,7 @@ void Game::update(float dt)
 	}
 
 	// Update win state
+
 	if (currentGameState == WIN)
 	{
 		std::shared_ptr<Player> winPlayer = players->at("bombot" + std::to_string(winner));
@@ -444,6 +445,7 @@ void Game::update(float dt)
 		{
 			if (winPlayer->getController()->conButton(XINPUT_GAMEPAD_A))
 			{
+				winPlayer->resetAnimation();
 				this->m_isPaused = true;
 				changeState(READYUP);
 				//players->at("bombot" + std::to_string(winner))->setAnim("idle");

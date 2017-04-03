@@ -596,9 +596,14 @@ void Holder::update(float dt, float overRide, float counter)
 
 }
 
+void Holder::reset()
+{
+	overWrite("idle");
+	winAnimation = false;
+}
+
 void Holder::setAnim(std::string _name)
 {
-	winAnimation = false;
 	if (animations.find(_name) != animations.end())
 	{
 
