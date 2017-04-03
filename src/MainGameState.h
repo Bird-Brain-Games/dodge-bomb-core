@@ -148,7 +148,7 @@ private:
 	int winner;
 
 	glm::vec3 winPlayerPosition = glm::vec3(20.0f, 43.0f, 26.0f);
-	glm::vec3 winCameraPosition = glm::vec3(20.0f, 48.0f, 43.0f);
+	glm::vec3 winCameraPosition = glm::vec3(20.0f, 50.0f, 43.0f);
 	glm::vec3 winCameraForward = glm::vec3(0.01f, -2.0f, -5.0f);
 	glm::vec3 cameraDefaultPosition = glm::vec3(23.0f, 90.0f, 40.0f);
 	glm::vec2 cameraDefaultAngle = glm::vec2(3.14159012f, 5.3f);
@@ -162,6 +162,7 @@ private:
 	float playerMoveLerp;	// to be replaced with A*
 	glm::vec3 playerStartPosition; // to be replaced with A*
 	float cameraMoveLerp;
+	float forwardLerp;
 
 	LUT contrastLUT;
 	LUT sepiaLUT;
