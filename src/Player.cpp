@@ -270,8 +270,8 @@ void Player::update(float dt, bool canMove)
 	}
 
 	// Allow player to reset all stats (DEBUG)
-	if (con.conButton(XINPUT_GAMEPAD_BACK))
-		reset(glm::vec3(0.0f, 40.0f, 0.0f));
+	/*if (con.conButton(XINPUT_GAMEPAD_BACK))
+		reset(glm::vec3(0.0f, 40.0f, 0.0f));*/
 
 	GameObject::update(dt);
 	mesh->update(dt, bottomAngle, currentAngle);

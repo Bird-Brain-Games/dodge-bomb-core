@@ -169,6 +169,7 @@ private:
 	float innerWin = 0.1;
 	float outerWin = 0.2;
 	std::shared_ptr<Menu> winScreen;
+	float winWait;
 
 	float playerMoveLerp;	// to be replaced with A*
 	glm::vec3 playerStartPosition; // to be replaced with A*
