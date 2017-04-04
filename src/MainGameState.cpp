@@ -442,9 +442,9 @@ void Game::update(float dt)
 			numDeadPlayers = playerDeathCounter;
 
 			if (playerDeathCounter > 1)
-				m_gameTrack3.setVolume(musicVolume - 0.05);
+				m_gameTrack3.setVolume(musicVolume);
 			else if (playerDeathCounter > 0)
-				m_gameTrack2.setVolume(musicVolume - 0.05);
+				m_gameTrack2.setVolume(musicVolume);
 
 			roomLight -= 0.1f;
 			deskLamp += 0.05f;
@@ -735,6 +735,11 @@ void Game::draw()
 		winScreen->draw();
 	}
 
+	// Just so we win.
+	if (shadowMapToggle)
+	{
+		fboToScreen(shadowMap);
+	}
 }
 
 void Game::windowReshapeCallbackFunction(int w, int h)
@@ -1196,6 +1201,10 @@ void Game::handleKeyboardInputShaders()
 	if (KEYBOARD_INPUT->CheckPressEvent('8'))
 	{
 		bloomToggle = !bloomToggle;
+	}
+	if (KEYBOARD_INPUT->CheckPressEvent('y'))
+	{
+		shadowMapToggle = !shadowMapToggle;
 	}
 	// Toggle LUT
 	if (KEYBOARD_INPUT->CheckPressEvent('9'))
