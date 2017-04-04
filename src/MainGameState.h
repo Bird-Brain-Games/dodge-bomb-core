@@ -76,6 +76,7 @@ public:
 	void setPaused(int a_paused);
 	void windowReshapeCallbackFunction(int w, int h);
 	GAME_STATE getCurrentState() { return currentGameState; }
+	void resetPlayerParticles();
 
 private:
 	
