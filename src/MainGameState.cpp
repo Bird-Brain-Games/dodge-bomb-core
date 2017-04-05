@@ -158,7 +158,7 @@ Game::Game
 
 	s_lightOn = Sound(soundTemplates->at("s_lightOn"));
 	s_lightOn.setPosition(glm::vec3(23.0f, 55.0f, 10.0f));
-	
+
 	currentGameState = MAIN;
 	changeState(READYUP);
 }
@@ -183,6 +183,8 @@ void Game::setPaused(int a_paused)
 	{
 		m_isPaused = false;
 		// Reset all players
+
+
 
 		//resetPlayers();
 		makePlayersInactive();
@@ -216,6 +218,7 @@ void Game::resetPlayers()
 
 void Game::makePlayersInactive()
 {
+	resetPlayerParticles();
 	for (auto it : *players)
 	{
 		it.second->reset(glm::vec3(-1000.0f));
@@ -336,7 +339,7 @@ void Game::update(float dt)
 				{
 					it->setPosition(it->getWorldPosition() + glm::vec3(0.0f, 50.0f, 0.0f));
 				}
-				
+
 				resetPlayers();
 
 				scene->at("table")->setTexture(textures->at("table"));
@@ -439,9 +442,9 @@ void Game::update(float dt)
 			numDeadPlayers = playerDeathCounter;
 
 			if (playerDeathCounter > 1)
-				m_gameTrack3.setVolume(musicVolume - 0.05);
+				m_gameTrack3.setVolume(musicVolume);
 			else if (playerDeathCounter > 0)
-				m_gameTrack2.setVolume(musicVolume - 0.05);
+				m_gameTrack2.setVolume(musicVolume);
 
 			roomLight -= 0.1f;
 			deskLamp += 0.05f;
@@ -451,10 +454,17 @@ void Game::update(float dt)
 	// Update win state
 	if (currentGameState == WIN)
 	{
-		std::shared_ptr<Player> winPlayer = players->at("bombot" + std::to_string(winner));
+		std::shared_ptr<Player> winPlayer;
+		if (winner == 0)
+			winPlayer = players->at("bombot1");
+		else
+			winPlayer = players->at("bombot" + std::to_string(winner));
 		// If the player is going to die from a bomb, set their health to 1.
 		if (winPlayer->getHealth() == 0)
+		{
 			winPlayer->setHealth(1);
+			winPlayer->setState(Player::PLAYER_STATE::P_NORMAL);
+		}
 
 		if (!bombManager->isEmpty()) return;	// DANGER
 		// When all the bombs have finished exploding, 
@@ -491,7 +501,7 @@ void Game::update(float dt)
 
 			camera->setPosition(glm::mix(cameraDefaultPosition, winCameraPosition, cameraMoveLerp));
 			camera->setForward(glm::mix(cameraDefaultForward, winCameraForward, forwardLerp));
-		
+
 			A = glm::mix(0.5062f, 0.4062f, forwardLerp);
 
 			innerCutOff = glm::mix(innerDefault, innerWin, cameraMoveLerp);
@@ -509,10 +519,12 @@ void Game::update(float dt)
 			if (winWait == 0.0f &&
 				winPlayer->getController()->conButton(XINPUT_GAMEPAD_A))
 			{
-				this->m_isPaused = true;
-				changeState(READYUP);
+
+				setPaused(-1);
+				//this->m_isPaused = true;
+				//changeState(READYUP);
 				//players->at("bombot" + std::to_string(winner))->setAnim("idle");
-				m_parent->getGameState("MainMenu")->setPaused(0);
+				//m_parent->getGameState("MainMenu")->setPaused(0);
 			}
 		}
 	}
@@ -723,6 +735,11 @@ void Game::draw()
 		winScreen->draw();
 	}
 
+	// Just so we win.
+	if (shadowMapToggle)
+	{
+		fboToScreen(shadowMap);
+	}
 }
 
 void Game::windowReshapeCallbackFunction(int w, int h)
@@ -766,9 +783,9 @@ void Game::updateScene(float dt)
 		// So we need to make sure to only invoke update() for the root nodes.
 		// Otherwise some objects would get updated twice in a frame!
 		if (player->isRoot())
-			player->update(dt, 
-				currentGameState != PRE_COUNTDOWN && 
-				currentGameState != COUNTDOWN && 
+			player->update(dt,
+				currentGameState != PRE_COUNTDOWN &&
+				currentGameState != COUNTDOWN &&
 				currentGameState != WIN);
 	}
 
@@ -867,6 +884,14 @@ void Game::drawSparks(Camera* _camera)
 	}
 
 	materials->at("particles")->shader->unbind();
+}
+
+void Game::resetPlayerParticles()
+{
+	for (auto itr = players->begin(); itr != players->end(); ++itr)
+	{
+		itr->second->resetParticles();
+	}
 }
 
 int Game::deathCheck()
@@ -1177,6 +1202,10 @@ void Game::handleKeyboardInputShaders()
 	{
 		bloomToggle = !bloomToggle;
 	}
+	if (KEYBOARD_INPUT->CheckPressEvent('y'))
+	{
+		shadowMapToggle = !shadowMapToggle;
+	}
 	// Toggle LUT
 	if (KEYBOARD_INPUT->CheckPressEvent('9'))
 	{
@@ -1436,10 +1465,11 @@ void Game::changeState(Game::GAME_STATE newState)
 		s_countDown.play();
 
 		currentCountdown = 4.0f;
-		
+
 		break;
 
 	case Game::WIN:
+		if (winner == 0) break;
 		playerMoveLerp = 0.0f;
 		cameraMoveLerp = 0.0f;
 		forwardLerp = 0.0f;

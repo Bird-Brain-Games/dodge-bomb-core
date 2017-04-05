@@ -59,6 +59,18 @@ void ParticleEmmiter::initialize(unsigned int _numParticles)
 void ParticleEmmiter::play() { playing = true; }
 void ParticleEmmiter::pause() { playing = false; }
 
+void ParticleEmmiter::reset()
+{
+	for (int i = 0; i < numParticles; i++)
+	{
+		float* life = particles.lives + i;//
+		bool* act = particles.active + i;
+		*life = -0.01;
+		*act = true;
+
+	}
+}
+
 void ParticleEmmiter::update(float dt, glm::vec3 velocity)
 {
 	bool test = true;
