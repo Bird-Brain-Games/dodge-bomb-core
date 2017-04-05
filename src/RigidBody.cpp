@@ -8,6 +8,116 @@
 
 PhysicsEngine RigidBody::Sys;
 
+bulletCI::bulletCI()
+{
+	loaded = false;
+}
+
+bool bulletCI::load(std::string fileName)
+{
+	std::ifstream stream(fileName);
+	if (!stream)
+	{
+		std::cerr << "Error: file " << fileName << " does not exist." << std::endl;
+		return false;
+	}
+
+	// Parse through the file, gathering the necessary information
+	std::string line;
+	std::string key;
+	std::size_t pos;
+
+	while (std::getline(stream, line))
+	{
+		key = "";
+		pos = line.find(':');
+		if (pos != std::string::npos)
+		{
+			key = line.substr(0, pos);
+			line = line.substr(pos + 1);
+		}
+
+		if (key == "extents")
+		{
+			std::stringstream sstream(line);
+			for (unsigned int i = 0; i < 3; i++)
+			{
+				sstream >> extents[i];
+			}
+		}
+		else if (key == "length")
+			length = std::stof(line);
+		else if (key == "radius")
+			radius = std::stof(line);
+		else if (key == "collisionShape")
+			shapeType = std::stoi(line);
+		else if (key == "bodyType")
+			bodyType = std::stoi(line);
+		else if (key == "friction")
+			friction = std::stof(line);
+		else if (key == "restitution")
+			restitution = std::stof(line);
+		else if (key == "mass")
+			mass = std::stof(line);
+	}
+
+	loaded = true;
+	stream.close();
+	return true;
+}
+
+btRigidBody::btRigidBodyConstructionInfo* bulletCI::getCI()
+{
+	if (!loaded) return nullptr;
+
+	// Get the collision shape
+	btCollisionShape* shape;
+	btVector3 shapeExtents;
+	switch (shapeType)
+	{
+	case 1:
+		// Box model
+		shapeExtents = btVector3(extents[0], extents[1], extents[2]);
+		shape = new btBoxShape((shapeExtents / 2.0f));
+		break;
+	case 2:
+		// Sphere model
+		shape = new btSphereShape(radius);
+		break;
+	case 3:
+		// Capsule model
+		shape = new btCapsuleShape(radius, extents[1]);
+		break;
+	case 7:
+		// Cylinder model
+		shapeExtents = btVector3(extents[0], extents[1], extents[2]);
+		shape = new btCylinderShape((shapeExtents / 2.0f));
+		break;
+	default:
+		shape = nullptr;
+		break;
+	}
+
+	////////////////////////////////////////////////	Form the rigid body CI
+	// Calculate local inertia if dynamic
+	btVector3 inertia(0, 0, 0);
+	if (bodyType == 2)
+		shape->calculateLocalInertia(mass, inertia);
+	else
+		mass = 0.0f;
+
+	// construct the CI
+	btRigidBody::btRigidBodyConstructionInfo* CI = 
+		new btRigidBody::btRigidBodyConstructionInfo(mass, nullptr, shape, inertia);
+	CI->m_restitution = restitution;
+	CI->m_friction = friction;
+
+	return CI;
+}
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////	PhysicsEngine
 PhysicsEngine::PhysicsEngine()
@@ -82,11 +192,13 @@ void PhysicsEngine::drawDebug(glm::mat4x4 const& modelViewMatrix, glm::mat4x4 co
 
 btRigidBody::btRigidBodyConstructionInfo* PhysicsEngine::getRigidBodyCI(std::string fileName)
 {
-	std::map<std::string, btRigidBody::btRigidBodyConstructionInfo>::iterator it;
+	std::map<std::string, std::shared_ptr<bulletCI>>::iterator it;
 	it = CIMap.find(fileName);
 	if (it != CIMap.end())
 	{
-		return &(it->second);
+		btRigidBody::btRigidBodyConstructionInfo* CIreturn = CIMap.at(fileName)->getCI();
+		collisionShapes.push_back(CIreturn->m_collisionShape);
+		return it->second->getCI();
 	}
 	else
 	{
@@ -95,8 +207,9 @@ btRigidBody::btRigidBodyConstructionInfo* PhysicsEngine::getRigidBodyCI(std::str
 		{
 			return nullptr;
 		}
-
-		return &CIMap.at(fileName);
+		btRigidBody::btRigidBodyConstructionInfo* CIreturn = CIMap.at(fileName)->getCI();
+		collisionShapes.push_back(CIreturn->m_collisionShape);
+		return CIreturn;
 	}
 }
 
@@ -127,115 +240,16 @@ void PhysicsEngine::setDebugDraw(bool isDrawing)
 
 bool PhysicsEngine::createRigidBodyCI(std::string fileName)
 {
-	std::ifstream stream(fileName);
-	if (!stream)
+	std::shared_ptr<bulletCI> newCI = std::make_shared<bulletCI>();
+	bool result = newCI->load(fileName);
+
+	if (result)
 	{
-		std::cerr << "Error: file " << fileName << " does not exist." << std::endl;
-		return false;
+		// Add the CI to the map
+		CIMap.insert({ fileName, newCI });
+		return true;
 	}
-
-	// Collider properties
-	float length, radius;
-	btCollisionShape* shape = nullptr;
-	float extents[3];
-
-	// Rigidbody properties
-	int	bodyType;		// Static, dynamic, or kinematic
-	float friction;
-	float restitution;	// bounciness
-	float mass;
-	std::string tag;
-
-
-	// Parse through the file, gathering the necessary information
-	std::string line;
-	std::string key;
-	std::size_t pos;
-	
-	while (std::getline(stream, line))
-	{
-		key = "";
-		pos = line.find(':');
-		if (pos != std::string::npos)
-		{
-			key = line.substr(0, pos);
-			line = line.substr(pos + 1);
-		}
-
-		if (key == "tag")
-		{
-			tag = line;
-		}
-		else if (key == "extents")
-		{
-			std::stringstream sstream(line);
-			for (unsigned int i = 0; i < 3; i++)
-			{
-				sstream >> extents[i];
-			}
-		}
-		else if (key == "length")
-			length = std::stof(line);
-		else if (key == "radius")
-			radius = std::stof(line);
-		else if (key == "collisionShape")
-		{
-			int shapeType = std::stoi(line);
-			btVector3 shapeExtents;
-			switch (shapeType)
-			{
-			case 1:
-				// Box model
-				shapeExtents = btVector3(extents[0], extents[1], extents[2]);
-				shape = new btBoxShape((shapeExtents / 2.0f));
-				break;
-			case 2:
-				// Sphere model
-				shape = new btSphereShape(radius);
-				break;
-			case 3:
-				// Capsule model
-				shape = new btCapsuleShape(radius, extents[1]);
-				break;
-			case 7:
-				// Cylinder model
-				shapeExtents = btVector3(extents[0], extents[1], extents[2]);
-				shape = new btCylinderShape((shapeExtents / 2.0f));
-				break;
-			default:
-				shape = nullptr;
-				break;
-			}
-		}
-		else if (key == "bodyType")
-			bodyType = std::stoi(line);
-		else if (key == "friction")
-			friction = std::stof(line);
-		else if (key == "restitution")
-			restitution = std::stof(line);
-		else if (key == "mass")
-			mass = std::stof(line);
-	}
-
-	////////////////////////////////////////////////	Form the rigid body CI
-	// Calculate local inertia if dynamic
-	btVector3 inertia(0, 0, 0);
-	if (bodyType == 2)
-		shape->calculateLocalInertia(mass, inertia);
-	else
-		mass = 0.0f;
-
-	// construct the CI
-	btRigidBody::btRigidBodyConstructionInfo CI(mass, nullptr, shape, inertia);
-	CI.m_restitution = restitution;
-	CI.m_friction = friction;
-
-	// Add the CI to the map
-	CIMap.insert({ fileName, CI });
-	collisionShapes.push_back(shape);
-
-	stream.close();
-	return true;
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

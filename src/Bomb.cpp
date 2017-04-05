@@ -180,24 +180,24 @@ void BombManager::update(float dt)
 
 void BombManager::draw(Camera& camera, Camera& shadow)
 {
-	/*for (auto it : bombDeque)
+	for (auto it : bombDeque)
 	{
 		if (it->getCurrentState() != BOMB_STATE::OFF ||
 			it->getCurrentState() != BOMB_STATE::DONE)
 			it->draw(camera, shadow);
-	}*/
+	}
 }
 
 void BombManager::checkIfExploded(Camera& camera)
 {
-	/*for (auto it : bombDeque)
+	for (auto it : bombDeque)
 	{
 		if (it->justExploded)
 		{
 			camera.shakeScreen(1.0f);
 			it->justExploded = false;
 		}
-	}*/
+	}
 }
 
 void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playerVelocity, glm::vec3 force)
@@ -209,7 +209,6 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 	newBomb->attachPlayerPtr(player);
 	newBomb->getExplosion()->setExplosionSound(
 		explosionSounds.at((rand() % explosionSounds.size())));
-	//activeBombs.push_back(newBomb);
 	bombDeque.push_back(newBomb);
 
 	glm::vec2 playerForce;
