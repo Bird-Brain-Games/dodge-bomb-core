@@ -250,7 +250,6 @@ void initializeScene()
 	std::shared_ptr<LoadObject> barrelMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> cannonMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> sphereMesh = std::make_shared<LoadObject>();
-	std::shared_ptr<LoadObject> corkboardMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> roomMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> bombMesh = std::make_shared<LoadObject>();
 	std::shared_ptr<LoadObject> boatMesh = std::make_shared<LoadObject>();
@@ -294,7 +293,6 @@ void initializeScene()
 	barrelMesh->load(meshPath + "barrel.obj");
 	cannonMesh->load(meshPath + "scaledcannon.obj");
 	sphereMesh->load(meshPath + "sphere.obj");
-	corkboardMesh->load(meshPath + "scaledcorkboard.obj");
 	roomMesh->load(meshPath + "scaledroom.obj");
 	bombMesh->load(meshPath + "bomb.obj");
 	boatMesh->load(meshPath + "scaledboat.obj");
@@ -321,7 +319,6 @@ void initializeScene()
 	meshes["sphere"] = sphereMesh;
 	meshes["bombot"] = bombotMesh;
 	meshes["bombot2"] = bombotMesh2;
-	meshes["corkboard"] = corkboardMesh;
 	meshes["room"] = roomMesh;
 	meshes["bomb"] = bombMesh;
 	meshes["boat"] = boatMesh;
@@ -395,9 +392,6 @@ void initializeScene()
 	std::string deskReadyTex = "Assets/img/deskReady (diffuse).png";
 	std::shared_ptr<Texture> deskReadyTexMap = std::make_shared<Texture>(deskReadyTex, deskReadyTex, 1.0f);
 
-	std::string corkboardTex = "Assets/img/corkboard(diffuse).png";
-	std::shared_ptr<Texture> corkboardTexMap = std::make_shared<Texture>(corkboardTex, corkboardTex, 1.0f);
-
 	std::string organizerTex = "Assets/img/organizer(diffuse).png";
 	std::shared_ptr<Texture> organizerTexMap = std::make_shared<Texture>(organizerTex, organizerTex, 1.0f);
 
@@ -409,9 +403,6 @@ void initializeScene()
 
 	std::string mapTex = "Assets/img/map(diffuse).png";
 	std::shared_ptr<Texture> mapTexMap = std::make_shared<Texture>(mapTex, mapTex, 1.0f);
-
-	std::string markerTex = "Assets/img/blake.png";
-	std::shared_ptr<Texture> markerTexMap = std::make_shared<Texture>(markerTex, markerTex, 1.0f);
 
 	std::string boulderTex = "Assets/img/boulder(diffuse).png";
 	std::shared_ptr<Texture> boulderTexMap = std::make_shared<Texture>(boulderTex, boulderTex, 1.0f);
@@ -455,7 +446,6 @@ void initializeScene()
 	textures["bombot2"] = bombot2TexMap;
 	textures["bombot3"] = bombot3TexMap;
 	textures["bombot4"] = bombot4TexMap;
-	textures["corkboard"] = corkboardTexMap;
 	textures["room"] = roomTexMap;
 	textures["bomb1"] = bombTexMap1;
 	textures["bomb2"] = bombTexMap2;
@@ -477,7 +467,6 @@ void initializeScene()
 	textures["lampcup"] = lampcupTexMap;
 	textures["organizer"] = organizerTexMap;
 	textures["map"] = mapTexMap;
-	textures["marker"] = markerTexMap;
 	textures["smoke"] = smokeTexMap;
 	textures["spark"] = sparkTexMap;
 	textures["win"] = winTexMap;
@@ -593,9 +582,6 @@ void initializeScene()
 
 	gameobjects["sphere"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 5.0f, 0.0f), sphereMesh, defaultMaterial, nullptr);
-
-	gameobjects["corkboard"] = std::make_shared<GameObject>(
-		glm::vec3(-5000.0f, -5000.0f, 0.0f), corkboardMesh, defaultMaterial, corkboardTexMap);
 
 	gameobjects["organizer"] = std::make_shared<GameObject>(
 		glm::vec3(0.0f, 0.0f, 0.0f), organizerMesh, defaultMaterial, organizerTexMap);
