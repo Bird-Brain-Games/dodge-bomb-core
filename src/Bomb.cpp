@@ -156,7 +156,7 @@ void BombManager::drawParticles(Camera& _camera)
 
 void BombManager::setMaterialForAllBombs(std::shared_ptr<Material> mat)
 {
-	for (auto bomb : activeBombs)
+	for (auto bomb : bombDeque)
 	{
 		bomb->setMaterial(mat);
 	}
@@ -164,43 +164,40 @@ void BombManager::setMaterialForAllBombs(std::shared_ptr<Material> mat)
 
 void BombManager::update(float dt)
 {
-	for (auto it : activeBombs)
+	for (auto it : bombDeque)
 	{
 		it->update(dt);
 	}
 
-	// Keeps track of the bombs that are inactive
-	static std::vector<std::vector<std::shared_ptr<Bomb>>::iterator> inactiveBombs;
-	inactiveBombs.clear();
-
 	// Pop off inactive bombs
-	while (activeBombs.size() > 0 &&
-		activeBombs.back()->getCurrentState() == DONE)
+	while (bombDeque.size() > 0 &&
+		bombDeque.front()->getCurrentState() == DONE)
 	{
-		activeBombs.pop_back();
+		std::cout << bombDeque.front()->getExplosion()->getWorldPosition().x;
+		bombDeque.pop_front();
 	}
 }
 
 void BombManager::draw(Camera& camera, Camera& shadow)
 {
-	for (auto it : activeBombs)
+	/*for (auto it : bombDeque)
 	{
 		if (it->getCurrentState() != BOMB_STATE::OFF ||
 			it->getCurrentState() != BOMB_STATE::DONE)
 			it->draw(camera, shadow);
-	}
+	}*/
 }
 
 void BombManager::checkIfExploded(Camera& camera)
 {
-	for (auto it : activeBombs)
+	/*for (auto it : bombDeque)
 	{
 		if (it->justExploded)
 		{
 			camera.shakeScreen(1.0f);
 			it->justExploded = false;
 		}
-	}
+	}*/
 }
 
 void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playerVelocity, glm::vec3 force)
@@ -212,7 +209,8 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 	newBomb->attachPlayerPtr(player);
 	newBomb->getExplosion()->setExplosionSound(
 		explosionSounds.at((rand() % explosionSounds.size())));
-	activeBombs.push_back(newBomb);
+	//activeBombs.push_back(newBomb);
+	bombDeque.push_back(newBomb);
 
 	glm::vec2 playerForce;
 	if (playerVelocity != glm::vec2(0.0f))
@@ -234,7 +232,7 @@ void BombManager::throwBomb(Player* player, glm::vec2 direction, glm::vec2 playe
 
 void BombManager::clearAllBombs()
 {
-	activeBombs.clear();
+	bombDeque.clear();
 }
 
 
@@ -372,8 +370,8 @@ void Bomb::destroy()
 	currentExplodeTime = 0.0f;
 	currentState = DONE;
 	//std::cout << "Bomb " << playerNum << " destroyed" << std::endl;
-	explosion->setPosition(glm::vec3(-100.0f));
-	explosion->setBombParent(nullptr);
+	//explosion->setPosition(glm::vec3(-100.0f));
+	//explosion->setBombParent(nullptr);
 }
 
 void Bomb::setMaterial(std::shared_ptr<Material> _material)
@@ -396,9 +394,9 @@ Explosion::Explosion(glm::vec3 position,
 	Sound& _s_explosion)
 	: GameObject(position, _mesh, _material, _texture),
 	expandTimer(timeToExpand),
-	parent(_parent),
 	s_explosion(_s_explosion)
 {
+	setBombParent(_parent);
 	colliderType = COLLIDER_TYPE::BOMB_EXPLOSION;
 	//setScale(glm::vec3(maxScale));
 }
@@ -439,6 +437,7 @@ void Explosion::explode()
 {
 	expandTimer = 0.0f;
 	rigidBody->setDeactivationMode(ISLAND_SLEEPING);
+	std::cout << getWorldPosition().x;
 	s_explosion.setPosition(getWorldPosition());
 	s_explosion.play();
 }

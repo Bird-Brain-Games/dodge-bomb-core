@@ -2,7 +2,7 @@
 
 #include "GameObject.h"
 #include <btBulletDynamicsCommon.h>
-#include <queue>
+#include <deque>
 #include "sound engine.h"
 #include "particles.h"
 // Bomb emitter class tracks active bombs
@@ -51,7 +51,6 @@ public:
 
 private:
 	static float playerRadius;
-	float duration;
 	int playerNum;
 	Player* playerPtr;
 	std::shared_ptr<Explosion> explosion;
@@ -133,7 +132,7 @@ public:
 	void draw(Camera& camera, Camera& shadow);
 	void setMaterialForAllBombs(std::shared_ptr<Material> mat);
 	void clearAllBombs();
-	bool isEmpty() { return activeBombs.empty(); }
+	bool isEmpty() { return bombDeque.empty(); }
 
 	// Create the new bomb, add it to the active list,
 	// and tell it to throw in the given direction.
@@ -145,9 +144,9 @@ private:
 	std::vector <std::shared_ptr<Texture>> textures;
 	std::vector <std::shared_ptr<Bomb>> bombTemplates;
 	std::vector<std::shared_ptr<Explosion>> explosionTemplates;
-	std::vector <std::shared_ptr<Bomb>> activeBombs;
+	//std::vector <std::shared_ptr<Bomb>> activeBombs;
 	std::vector<std::shared_ptr<ParticleEmmiter>> emitters;
-	std::queue<std::shared_ptr<Bomb>> bombQueue;
+	std::deque<std::shared_ptr<Bomb>> bombDeque;
 	std::vector<Sound> explosionSounds;
 
 	bool initialized;

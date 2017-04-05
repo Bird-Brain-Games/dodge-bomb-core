@@ -1225,7 +1225,7 @@ void collideWithCorrectType(Player* player, GameObject* object)
 		player->checkCollisionWith((Player*)object);
 		break;
 	case GameObject::BOMB_BASE:
-		player->checkCollisionWith((Bomb*)object, game->getCurrentState() == Game::GAME_STATE::READYUP);
+		//player->checkCollisionWith((Bomb*)object, game->getCurrentState() == Game::GAME_STATE::READYUP);
 		break;
 	case GameObject::BOMB_EXPLOSION:
 		player->checkCollisionWith((Explosion*)object, game->getCurrentState() == Game::GAME_STATE::READYUP);
