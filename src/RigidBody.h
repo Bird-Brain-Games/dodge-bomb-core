@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <GLM\mat4x4.hpp>
 #include <GLM\gtx\transform.hpp>
@@ -11,6 +12,27 @@
 
 // Temp class
 class GameObject;
+
+class bulletCI
+{
+public:
+	bulletCI();
+
+	bool load(std::string fileName);
+	btRigidBody::btRigidBodyConstructionInfo* getCI();
+
+private:
+	bool loaded;
+
+	int shapeType;
+	int	bodyType;		// Static, dynamic, or kinematic
+	float friction;
+	float restitution;	// bounciness
+	float mass;
+
+	float length, radius;
+	float extents[3];
+};
 
 // Class to manage physics operations and memory
 class PhysicsEngine
@@ -51,7 +73,7 @@ private:
 
 private:
 	bool systemInit;
-	std::map<std::string, btRigidBody::btRigidBodyConstructionInfo> CIMap;
+	std::map<std::string, std::shared_ptr<bulletCI>> CIMap;
 	std::vector<btCollisionShape*> collisionShapes;
 };
 

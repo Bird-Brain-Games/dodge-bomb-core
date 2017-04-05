@@ -429,6 +429,7 @@ void Player::checkCollisionWith(Explosion* other, bool inReadyUp)
 	{
 		takeDamage(1);
 
+		// If in ready up, don't take damage
 		if (inReadyUp)
 		{
 			health++;
@@ -437,8 +438,6 @@ void Player::checkCollisionWith(Explosion* other, bool inReadyUp)
 		}
 		con.setVibration(32000, 16000);
 
-		// If in ready up, don't take damage
-		if (inReadyUp) health++;
 		//lookDirectlyAtExplosion(other->getWorldPosition() - getWorldPosition());
 	}
 }
