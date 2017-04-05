@@ -46,6 +46,7 @@ Player::Player(glm::vec3 position,
 	s_ready2 = Sound(soundTemplates->at("d_ready" + std::to_string(playerNum + 1) + "_2"));
 	s_win1 = Sound(soundTemplates->at("d_win" + std::to_string(playerNum + 1) + "_1"));
 	s_win2 = Sound(soundTemplates->at("d_win" + std::to_string(playerNum + 1) + "_2"));
+	particleShift = 2.1f;
 }
 
 Player::Player(Player& other)
@@ -124,6 +125,12 @@ void Player::draw(Camera &camera, Camera& shadow)
 	}
 }
 
+void Player::resetParticles()
+{
+	smoke.reset();
+	sparks.reset();
+}
+
 void Player::drawSmoke(Camera& camera)
 {
 	smoke.draw(camera);
@@ -178,13 +185,10 @@ Controller* Player::getController()
 void Player::update(float dt, bool canMove)
 {
 	// Update the bomb cooldown
-	float stupidShift = 2.1f;
-	float xPos = cos(currentAngle - 90) * stupidShift;
-	float yPos = sin(currentAngle - 90) * stupidShift;
+	float xPos = cos(currentAngle - 90) * particleShift;
+	float yPos = sin(currentAngle - 90) * particleShift;
 
 	smoke.initialPosition = getWorldPosition() + glm::vec3(xPos, 2.2, yPos);
-
-
 	sparks.initialPosition = getWorldPosition() + glm::vec3(0.0, 2.0, 0.0);
 
 	glm::vec3 velocity = rigidBody->getLinearVelocity() * glm::vec3(0.3);
@@ -535,6 +539,13 @@ void Player::takeDamage(int damage)
 	}
 	else if (health == 1)
 	{
+		float particleShift = 2.1f;
+		float xPos = cos(currentAngle - 90) * particleShift;
+		float yPos = sin(currentAngle - 90) * particleShift;
+
+		smoke.initialPosition = getWorldPosition() + glm::vec3(xPos, 2.2, yPos);
+		sparks.initialPosition = getWorldPosition() + glm::vec3(0.0, 2.0, 0.0);
+
 		smoke.play();
 		setAnim("stumble");
 		sparks.play();
@@ -544,6 +555,7 @@ void Player::takeDamage(int damage)
 void Player::reset(glm::vec3 newPos)
 {
 	setPosition(newPos);
+
 	health = maxHealth;
 	currentCooldown = 0.0f;
 	currentState = P_NORMAL;
@@ -574,6 +586,11 @@ void Player::setActive(bool active)
 		else
 			s_ready2.play();
 	}
+}
+
+void Player::setState(PLAYER_STATE _state)
+{
+	currentState = _state;
 }
 
 void Player::playWin()

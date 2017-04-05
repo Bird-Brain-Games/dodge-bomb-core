@@ -712,7 +712,6 @@ void initializeScene()
 
 	//gameobjects["palmtree"] = std::make_shared<GameObject>(
 	//	glm::vec3(0.0f, 45.0f, 0.0f), palmtreeMesh, defaultMaterial, palmtreeTexMap);
-
 	// A Star
 	/*
 	{

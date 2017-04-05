@@ -38,6 +38,7 @@ public:
 	void draw(Camera);
 
 	void freeMemory();
+	void reset();
 
 	glm::vec3 initialPosition;
 

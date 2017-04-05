@@ -59,6 +59,7 @@ public:
 	void draw(Camera &camera, Camera& shadow);
 	void drawSmoke(Camera& camera);
 	void drawSparks(Camera& camera);
+	void resetParticles();
 
 	void attachRigidBody(std::unique_ptr<RigidBody> &_rb);
 	void attachBombManager(std::shared_ptr<BombManager> _manager);
@@ -80,6 +81,7 @@ public:
 	void setAnim(std::string);
 	void overWrite(std::string);
 
+	void setState(PLAYER_STATE);
 	int getHealth();
 
 	PathNode * checkNodes(std::map<std::string, PathNode *> * nodeContainer);
@@ -128,6 +130,7 @@ private:
 	bool moving;
 	Sound s_ready1, s_ready2;
 	Sound s_win1, s_win2;
+	float particleShift;
 
 private:
 	// Player stats
