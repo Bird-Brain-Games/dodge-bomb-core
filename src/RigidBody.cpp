@@ -373,7 +373,8 @@ glm::mat4x4 RigidBody::getWorldTransform()
 {
 	btTransform t;
 	btScalar m[16];
-	body->getMotionState()->getWorldTransform(t);
+	//body->getMotionState()->getWorldTransform(t);
+	t = body->getWorldTransform();
 	t.getOpenGLMatrix(m);
 	return glm::make_mat4x4((float*)m);
 }

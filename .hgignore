@@ -19,3 +19,7 @@ Graphics.VC.db
 Dodge Bomb.VC.db
 Dodge Bomb.VC.VC.opendb
 .vs
+*.iobj
+*.ipdb
+*.orig
+*.cfg
