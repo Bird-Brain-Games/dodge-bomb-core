@@ -10,10 +10,10 @@ float Player::pauseTime = 0.5f;
 int Player::maxHealth = 2;
 float Player::maxBombCooldown = 1.0f;
 float Player::flashInterval = 0.15f;
-float Player::playerSpeed = 40.0f;
+float Player::playerSpeed = 35.0f;
 
 // Dash values
-float Player::dashImpulse = 40.0f;
+float Player::dashImpulse = 45.0f;
 float Player::dashMinSpeed = Player::playerSpeed - 20.0f;	// when the player reaches this, stop dashing
 float Player::maxDashCooldown = 2.0f;
 float Player::maxDashDuration = 0.35f;	// max length of dash in seconds
